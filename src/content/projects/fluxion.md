@@ -6,6 +6,7 @@ status: active
 start: '2026-09'
 tags: [C++, Performance, Simulation, raylib, Game dev]
 repo: https://github.com/donaldheddesheimer/fluxion
+# TODO: add a GIF of the current build here, e.g. ![Fluxion arena](/projects/fluxion.gif)
 ---
 
 ## Objective
@@ -20,4 +21,3 @@ Fluxion is written in C++ on [raylib](https://github.com/raysan5/raylib), with a
 
 A controllable player in a small arena. Next up: an entity layout built for data-oriented design, then scaling the agent count and profiling as it grows.
 
-<!-- TODO: add a GIF of the current build here, e.g. ![Fluxion arena](/projects/fluxion.gif) -->

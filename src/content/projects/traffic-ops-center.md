@@ -16,9 +16,8 @@ stats:
   - { label: Parallel workers, value: '4' }
   - { label: Signal transitions audited, value: '2,778' }
   - { label: Unsafe changes, value: '0' }
+# TODO: add who you built this with and what you owned.
 ---
-
-<!-- TODO: add who you built this with and what you owned. -->
 
 ## Objective
 

@@ -9,6 +9,7 @@ repo: https://github.com/donaldheddesheimer/nn
 stats:
   - { label: MNIST accuracy, value: '~97%' }
   - { label: Implementations, value: '3' }
+# TODO: add your GEMM vs cuBLAS numbers and a roofline plot image.
 ---
 
 ## Objective
@@ -25,4 +26,3 @@ Understand what actually happens between `model.fit()` and the GPU by writing th
 
 The custom GEMM is benchmarked against cuBLAS with a roofline and latency table, backed by Nsight profiles, so every claim about speed has a trace behind it.
 
-<!-- TODO: add your GEMM vs cuBLAS numbers and a roofline plot image. -->

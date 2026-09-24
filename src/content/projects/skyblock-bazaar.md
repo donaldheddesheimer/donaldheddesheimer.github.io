@@ -12,9 +12,8 @@ stats:
   - { label: Test rows, value: '~698K' }
   - { label: Tuned 3-class accuracy, value: '60.6%' }
   - { label: Event + perk flags, value: '53' }
+# TODO: confirm these numbers, and add what you owned vs. your teammate.
 ---
-
-<!-- TODO: confirm these numbers, and add what you owned vs. your teammate. -->
 
 ## Objective
 

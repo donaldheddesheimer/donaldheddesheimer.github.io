@@ -9,9 +9,8 @@ context: CS 3600 · Bytefight tournament
 team: Team 49, two people
 tags: [Python, Search, Bayesian inference, Game AI]
 repoNote: Course repository is private
+# TODO: add the final tournament placement, and the one-line rules of the game if you want them here.
 ---
-
-<!-- TODO: add the final tournament placement, and the one-line rules of the game if you want them here. -->
 
 ## Objective
 
