@@ -1,0 +1,173 @@
+---
+// Gantt-style activity timeline: roles as bars, projects as markers.
+import { getCollection } from 'astro:content';
+import { education, experience, orgs } from '../data/site';
+import { fmtMonth, monthIndex, nowYM } from '../lib/format';
+
+const START = '2023-01';
+const END = '2028-07';
+const t0 = monthIndex(START);
+const span = monthIndex(END) - t0;
+const pct = (ym: string) => ((monthIndex(ym) - t0) / span) * 100;
+const now = nowYM();
+const nowPct = pct(now);
+
+type Bar = { label: string; start: string; end?: string; tone: string; href: string };
+const orgName = (id: string) => orgs.find((o) => o.id === id)!.short;
+const lane = (kind: string) =>
+  experience
+    .filter((e) => e.kind === kind)
+    .map((e): Bar => ({ label: orgName(e.org), start: e.start, end: e.end, tone: kind, href: `#exp-${e.id}` }));
+
+const lanes: { label: string; bars: Bar[] }[] = [
+  { label: 'Education', bars: [{ label: 'Georgia Tech · B.S. CS', start: education.start, end: education.end, tone: 'education', href: '#exp-education' }] },
+  { label: 'Employment', bars: lane('work') },
+  { label: 'Research', bars: lane('research') },
+  { label: 'Teams', bars: lane('team') },
+];
+
+// Projects as markers, stacked into rows so labels don't collide (assumes ~1000px track).
+const projects = (await getCollection('projects')).sort((a, b) => monthIndex(a.data.start) - monthIndex(b.data.start));
+const rowEnds: number[] = [];
+const markers = projects.map((p) => {
+  const x = pct(p.data.start);
+  const w = (p.data.title.length * 6.3 + 26) / 10;
+  let row = rowEnds.findIndex((end) => end < x);
+  if (row === -1) row = rowEnds.length;
+  rowEnds[row] = x + w;
+  return { x, row, p };
+});
+const rows = rowEnds.length;
+
+const years: number[] = [];
+for (let y = Number(START.slice(0, 4)); y <= Number(END.slice(0, 4)); y++) years.push(y);
+
+function barStyle(b: Bar) {
+  const s = pct(b.start);
+  const e = b.end ? pct(b.end) : nowPct;
+  const future = b.end && monthIndex(b.end) > monthIndex(now) ? ((nowPct - s) / (e - s)) * 100 : null;
+  return { left: `${s}%`, width: `${Math.max(e - s, 0.8)}%`, future };
+}
+---
+
+<div class="overflow-x-auto" data-tl>
+  <div class="relative min-w-[880px] py-2">
+    <!-- gridlines + now marker, over the track column -->
+    <div class="pointer-events-none absolute inset-y-0 right-4 left-[124px]" aria-hidden="true">
+      {years.map((y) => <div class="absolute inset-y-0 border-l border-line/60" style={`left:${pct(`${y}-01`)}%`} />)}
+      <div class="absolute inset-y-0 border-l border-blue" style={`left:${nowPct}%`} data-now>
+        <span class="absolute top-0 left-1.5 readout text-[10px] font-semibold whitespace-nowrap text-blue-3">NOW · {fmtMonth(now).toUpperCase()}</span>
+      </div>
+    </div>
+
+    <div class="relative grid grid-cols-[124px_1fr] pr-4">
+      <!-- axis. Lane labels stick to the left edge when the chart scrolls sideways. -->
+      <div class="lane-label"></div>
+      <div class="relative h-7">
+        {years.map((y) => <span class="absolute top-1 ml-1.5 readout text-[10.5px] text-dim" style={`left:${pct(`${y}-01`)}%`}>{y}</span>)}
+      </div>
+
+      {
+        lanes.map((l) => (
+          <>
+            <div class="lane-label flex h-10 items-center border-t border-line pl-4 kicker">{l.label}</div>
+            <div class="relative h-10 border-t border-line">
+              {l.bars.map((b) => {
+                const st = barStyle(b);
+                return (
+                  <a
+                    href={b.href}
+                    class={`bar tone-${b.tone} absolute top-2 bottom-2 flex items-center rounded-[2px] px-2 text-[12px] whitespace-nowrap`}
+                    style={`left:${st.left};width:${st.width};${st.future !== null ? `--split:${st.future}%` : ''}`}
+                    data-future={st.future !== null ? '' : undefined}
+                    title={`${b.label}: ${fmtMonth(b.start)} – ${b.end ? fmtMonth(b.end) : 'Present'}`}
+                  >
+                    <span class="truncate">{b.label}</span>
+                    {!b.end && <span class="live-dot ml-2 shrink-0" />}
+                  </a>
+                );
+              })}
+            </div>
+          </>
+        ))
+      }
+
+      <div class="lane-label flex items-start border-t border-line pt-3 pl-4 kicker">Projects</div>
+      <div class="relative border-t border-line" style={`height:${rows * 24 + 16}px`}>
+        {
+          markers.map(({ x, row, p }) => (
+            <a
+              href={`/projects/${p.id}/`}
+              class="marker absolute flex items-center gap-1.5 text-[12px] whitespace-nowrap text-muted hover:text-text"
+              style={`left:${x}%;top:${row * 24 + 10}px`}
+              title={`${p.data.code} · ${p.data.title} · ${fmtMonth(p.data.start)}`}
+            >
+              <span class:list={['diamond', p.data.status === 'active' && 'is-active']} />
+              {p.data.title.replace(/:.*/, '')}
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // On narrow screens the chart scrolls sideways; start with the NOW line in view.
+  const tl = document.querySelector<HTMLElement>('[data-tl]');
+  const nowLine = tl?.querySelector<HTMLElement>('[data-now]');
+  if (tl && nowLine && tl.scrollWidth > tl.clientWidth) {
+    const x = nowLine.getBoundingClientRect().left - tl.getBoundingClientRect().left;
+    tl.scrollLeft = x - tl.clientWidth * 0.65;
+  }
+</script>
+
+<style>
+  .lane-label {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--panel);
+    box-shadow: 1px 0 0 var(--line);
+  }
+  .bar {
+    --tone: var(--blue);
+    color: var(--text);
+    background: color-mix(in srgb, var(--tone) 26%, var(--panel));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone) 60%, transparent);
+  }
+  .bar:hover {
+    background: color-mix(in srgb, var(--tone) 38%, var(--panel));
+  }
+  .bar[data-future] {
+    background:
+      linear-gradient(to right, color-mix(in srgb, var(--tone) 26%, var(--panel)) var(--split), transparent var(--split)),
+      repeating-linear-gradient(135deg, color-mix(in srgb, var(--tone) 14%, transparent) 0 5px, transparent 5px 10px);
+  }
+  .tone-education {
+    --tone: var(--blue);
+  }
+  .tone-work {
+    --tone: var(--green);
+  }
+  .tone-research {
+    --tone: var(--violet);
+  }
+  .tone-team {
+    --tone: var(--orange);
+  }
+  .marker {
+    translate: -4px 0;
+  }
+  .diamond {
+    width: 8px;
+    height: 8px;
+    rotate: 45deg;
+    background: var(--turquoise);
+    box-shadow: 0 0 0 2px var(--panel);
+    flex-shrink: 0;
+  }
+  .diamond.is-active {
+    background: var(--green);
+  }
+</style>

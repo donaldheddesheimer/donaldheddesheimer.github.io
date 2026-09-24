@@ -1,0 +1,28 @@
+---
+import Icon, { type IconName } from './Icon.astro';
+
+interface Props {
+  title: string;
+  code?: string;
+  icon?: IconName;
+  id?: string;
+  class?: string;
+  bodyClass?: string;
+  as?: 'section' | 'div' | 'aside';
+}
+const { title, code, icon, id, class: cls, bodyClass, as: Tag = 'section' } = Astro.props;
+---
+
+<Tag id={id} class:list={['panel flex min-w-0 flex-col', cls]}>
+  <header class="panel-head">
+    {icon && <Icon name={icon} class="size-4 text-dim" />}
+    <h2 class="panel-title">{title}</h2>
+    {code && <span class="code-chip">{code}</span>}
+    <div class="ml-auto flex items-center gap-2">
+      <slot name="actions" />
+    </div>
+  </header>
+  <div class:list={['min-h-0 flex-1', bodyClass]}>
+    <slot />
+  </div>
+</Tag>

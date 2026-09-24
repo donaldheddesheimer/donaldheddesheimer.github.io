@@ -1,19 +1,45 @@
 ---
 import '../styles/global.css';
-import Icon from '../components/Icon.astro';
-import { profile } from '../data/site';
+import { getCollection } from 'astro:content';
+import Icon, { type IconName } from '../components/Icon.astro';
+import { experience, orgs, profile, socials } from '../data/site';
 
 interface Props {
   title?: string;
   description?: string;
+  crumb?: { label: string; href?: string }[];
+  home?: boolean;
 }
-const { title = profile.name, description = profile.tagline } = Astro.props;
+const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false } = Astro.props;
 
-const nav = [
-  { href: '#about', label: 'About' },
-  { href: '#experience', label: 'Experience' },
-  { href: '#projects', label: 'Projects' },
-  { href: '#hobbies', label: 'Hobbies' },
+const base = home ? '' : '/';
+const nav: { id: string; label: string; icon: IconName; mobile?: boolean }[] = [
+  { id: 'overview', label: 'Overview', icon: 'graph', mobile: true },
+  { id: 'metrics', label: 'Key metrics', icon: 'gauge' },
+  { id: 'timeline', label: 'Timeline', icon: 'timeline' },
+  { id: 'experience', label: 'Experience', icon: 'briefcase', mobile: true },
+  { id: 'projects', label: 'Projects', icon: 'cube', mobile: true },
+  { id: 'capabilities', label: 'Capabilities', icon: 'layers' },
+  { id: 'off-duty', label: 'Off duty', icon: 'sun', mobile: true },
+  { id: 'contact', label: 'Contact', icon: 'radio', mobile: true },
+];
+
+// Everything the ⌘K search can jump to. `terms` is extra text that matches but isn't shown.
+const projects = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code));
+const search = [
+  ...projects.map((p) => ({ kind: 'Project', code: p.data.code, label: p.data.title, sub: p.data.tags.join(' · '), terms: `${p.data.summary} ${p.data.context ?? ''}`, href: `/projects/${p.id}/` })),
+  ...experience.map((e) => ({
+    kind: 'Experience',
+    code: e.id.toUpperCase().slice(0, 8),
+    label: orgs.find((o) => o.id === e.org)!.name,
+    sub: e.role,
+    terms: `${e.unit ?? ''} ${e.tags.join(' ')}`,
+    href: `/#exp-${e.id}`,
+  })),
+  { kind: 'Experience', code: 'EDU', label: 'Georgia Institute of Technology', sub: 'B.S. Computer Science', href: '/#exp-education' },
+  ...nav.map((n) => ({ kind: 'Section', code: 'NAV', label: n.label, sub: '', href: `/#${n.id}` })),
+  { kind: 'File', code: 'PDF', label: 'Resume', sub: 'Download PDF', href: profile.resume },
+  ...socials.map((s) => ({ kind: 'Link', code: 'EXT', label: s.label, sub: s.handle, href: s.href })),
 ];
 ---
 
@@ -24,6 +50,7 @@ const nav = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#111418" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -32,87 +59,263 @@ const nav = [
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap"
     />
-    <script is:inline>
-      // Set theme before paint to avoid a flash.
-      (() => {
-        let t = null;
-        try { t = localStorage.getItem('theme'); } catch {}
-        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        document.documentElement.dataset.theme = t;
-        document.documentElement.classList.add('js');
-      })();
-    </script>
   </head>
   <body class="min-h-dvh">
-    <header class="sticky top-3 z-50 px-4">
-      <nav
-        class="mx-auto flex max-w-6xl items-center justify-between gap-2 rounded-full border border-line bg-surface/80 px-2 py-2 pl-3 backdrop-blur-md"
-      >
-        <a href="#top" class="font-display text-lg font-extrabold tracking-tight">
-          <span class="inline-grid size-9 place-items-center rounded-full bg-accent text-sm text-accent-ink">DH</span>
-        </a>
-        <ul class="hidden items-center gap-1 text-sm sm:flex">
-          {nav.map((n) => (
-            <li>
-              <a href={n.href} class="rounded-full px-3 py-2 text-muted transition hover:bg-surface-2 hover:text-ink">
-                {n.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-        <div class="flex items-center gap-1">
-          <a
-            href={profile.resume}
-            class="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-bg transition hover:opacity-85"
-          >
-            Resume
-          </a>
-          <button
-            id="theme-toggle"
-            type="button"
-            class="grid size-9 place-items-center rounded-full text-muted transition hover:bg-surface-2 hover:text-ink"
-            aria-label="Toggle dark mode"
-          >
-            <span class="dark:hidden"><Icon name="moon" class="size-4" /></span>
-            <span class="hidden dark:inline"><Icon name="sun" class="size-4" /></span>
-          </button>
-        </div>
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 btn btn-primary">Skip to content</a>
+
+    <!-- Top bar -->
+    <header class="fixed inset-x-0 top-0 z-40 flex h-12 items-center border-b border-line bg-panel">
+      <a href="/" class="grid h-full w-12 shrink-0 place-items-center border-r border-line md:w-14" aria-label="Home">
+        <svg viewBox="0 0 32 32" class="size-7" aria-hidden="true">
+          <rect x="1" y="1" width="30" height="30" rx="3" fill="#111418" stroke="#404854" />
+          <path d="M6 9v14M6 9h3a7 7 0 0 1 0 14H6" fill="none" stroke="#f6f7f9" stroke-width="2.2" stroke-linecap="square" />
+          <path d="M19.5 9v14M26 9v14M19.5 16H26" fill="none" stroke="#4c90f0" stroke-width="2.2" stroke-linecap="square" />
+        </svg>
+      </a>
+      <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2 px-3 text-[13px]">
+        <a href="/" class="hidden font-semibold whitespace-nowrap sm:inline">{profile.name}</a>
+        {
+          crumb.map((c, i) => (
+            <>
+              <span class="hidden text-faint sm:inline">/</span>
+              {c.href ? (
+                <a href={c.href} class="truncate text-muted hover:text-text">
+                  {c.label}
+                </a>
+              ) : (
+                <span class:list={['truncate', i === crumb.length - 1 ? 'text-text sm:text-muted' : 'text-muted']}>{c.label}</span>
+              )}
+            </>
+          ))
+        }
       </nav>
+
+      <button
+        type="button"
+        data-cmdk-open
+        class="mx-auto hidden h-8 w-full max-w-sm items-center gap-2 rounded-[3px] bg-bg px-2.5 text-left text-[13px] text-dim shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[inset_0_0_0_1px_var(--line-2)] md:flex"
+      >
+        <Icon name="search" class="size-4" />
+        <span>Search objects…</span>
+        <kbd class="ml-auto code-chip">⌘K</kbd>
+      </button>
+
+      <div class="ml-auto flex items-center gap-1.5 pr-2 md:ml-0 md:gap-3 md:pr-3">
+        <div class="hidden items-center gap-3 readout text-[11px] lg:flex">
+          <span class="flex items-center gap-2"><span class="live-dot"></span> ONLINE</span>
+          <span class="text-faint">|</span>
+          <span>ATL <span data-clock>--:--:--</span></span>
+        </div>
+        <button type="button" data-cmdk-open class="btn btn-ghost btn-icon md:hidden" aria-label="Search">
+          <Icon name="search" class="size-4" />
+        </button>
+        <a href={profile.resume} class="btn btn-primary" target="_blank" rel="noopener">
+          <Icon name="file" class="size-4" />
+          <span>Resume</span>
+        </a>
+      </div>
     </header>
 
-    <main id="top" class="mx-auto max-w-6xl px-4 pt-8 pb-16 sm:pt-12">
+    <!-- Left rail (desktop) -->
+    <nav aria-label="Sections" class="fixed top-12 bottom-0 left-0 z-30 hidden w-14 flex-col items-center gap-1 border-r border-line bg-panel py-2 md:flex">
+      {
+        nav.map((n) => (
+          <a href={`${base}#${n.id}`} data-spy={n.id} class="rail-btn group relative grid size-10 place-items-center rounded-[3px] text-dim hover:bg-panel-3 hover:text-text" aria-label={n.label}>
+            <Icon name={n.icon} class="size-[18px]" />
+            <span class="pointer-events-none absolute left-full ml-2 hidden rounded-[3px] bg-panel-3 px-2 py-1 text-xs whitespace-nowrap text-text shadow-lg group-hover:block group-focus-visible:block">
+              {n.label}
+            </span>
+          </a>
+        ))
+      }
+      <div class="mt-auto flex flex-col items-center gap-1">
+        {
+          socials.map((s) => (
+            <a href={s.href} class="grid size-10 place-items-center rounded-[3px] text-faint hover:bg-panel-3 hover:text-text" aria-label={s.label} target={s.id === 'email' ? undefined : '_blank'} rel="noopener">
+              <Icon name={s.icon} class="size-4" />
+            </a>
+          ))
+        }
+      </div>
+    </nav>
+
+    <!-- Bottom bar (mobile) -->
+    <nav aria-label="Sections" class="fixed inset-x-0 bottom-0 z-40 grid h-14 grid-cols-5 border-t border-line bg-panel pb-[env(safe-area-inset-bottom)] md:hidden">
+      {
+        nav
+          .filter((n) => n.mobile)
+          .map((n) => (
+            <a href={`${base}#${n.id}`} data-spy={n.id} class="rail-btn flex flex-col items-center justify-center gap-1 text-[10px] text-dim">
+              <Icon name={n.icon} class="size-[18px]" />
+              {n.label}
+            </a>
+          ))
+      }
+    </nav>
+
+    <main id="main" class="pt-12 pb-20 md:pb-10 md:pl-14">
       <slot />
     </main>
 
-    <footer class="mx-auto max-w-6xl px-4 pb-10 text-sm text-muted">
-      <div class="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-6">
-        <p>© {new Date().getFullYear()} {profile.name}</p>
-        <p class="font-mono text-xs">Built with Astro + Tailwind</p>
-      </div>
+    <!-- Status bar (desktop) -->
+    <footer class="fixed right-0 bottom-0 left-14 z-30 hidden h-7 items-center gap-4 border-t border-line bg-panel px-3 readout text-[10.5px] text-faint md:flex">
+      <span class="flex items-center gap-1.5 text-green-2"><span class="size-1.5 rounded-full bg-green"></span>All systems nominal</span>
+      <span>{projects.length} projects</span>
+      <span>{experience.length} roles</span>
+      <span class="ml-auto hidden lg:inline">{profile.coords}</span>
+      <span>© {new Date().getFullYear()} {profile.name}</span>
+      <a href="https://github.com/donaldheddesheimer/donaldheddesheimer.github.io" class="hover:text-text" target="_blank" rel="noopener">Source</a>
     </footer>
 
-    <script>
-      document.getElementById('theme-toggle')?.addEventListener('click', () => {
-        const root = document.documentElement;
-        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-        root.dataset.theme = next;
-        try { localStorage.setItem('theme', next); } catch {}
-      });
+    <!-- ⌘K search -->
+    <dialog id="cmdk" class="m-auto mt-[12vh] w-[min(640px,calc(100%-2rem))] rounded-[3px] border border-line-2 bg-panel p-0 text-text shadow-2xl backdrop:bg-black/60">
+      <div class="flex items-center gap-2 border-b border-line px-3">
+        <Icon name="search" class="size-4 text-dim" />
+        <input id="cmdk-input" type="text" placeholder="Search projects, roles, sections…" autocomplete="off" spellcheck="false" class="h-12 flex-1 bg-transparent text-[15px] outline-none placeholder:text-faint" aria-controls="cmdk-list" />
+        <kbd class="code-chip">ESC</kbd>
+      </div>
+      <ul id="cmdk-list" role="listbox" class="max-h-[55vh] overflow-y-auto py-1"></ul>
+      <div class="flex gap-4 border-t border-line px-3 py-2 readout text-[10.5px] text-faint">
+        <span>↑↓ navigate</span><span>↵ open</span><span class="ml-auto" id="cmdk-count"></span>
+      </div>
+    </dialog>
+    <script type="application/json" id="cmdk-data" set:html={JSON.stringify(search).replace(/</g, '\\u003c')} />
 
-      const io = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) {
-            if (e.isIntersecting) {
-              e.target.classList.add('in');
-              io.unobserve(e.target);
-            }
-          }
-        },
-        { rootMargin: '0px 0px -8% 0px' },
-      );
-      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+    <script>
+      // Scroll-spy for the rail and bottom bar.
+      const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-spy]')];
+      const sections = [...new Set(links.map((a) => a.dataset.spy!))]
+        .map((id) => document.getElementById(id))
+        .filter((el): el is HTMLElement => !!el);
+      if (sections.length) {
+        // The last section is too short to cross the middle band, so it wins at the bottom of the page.
+        let current = sections[0].id;
+        const mark = () => {
+          const atBottom = innerHeight + scrollY >= document.documentElement.scrollHeight - 4;
+          const id = atBottom ? sections[sections.length - 1].id : current;
+          links.forEach((a) => a.toggleAttribute('aria-current', a.dataset.spy === id));
+        };
+        const spy = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) if (e.isIntersecting) current = e.target.id;
+            mark();
+          },
+          { rootMargin: '-40% 0px -55% 0px' },
+        );
+        sections.forEach((s) => spy.observe(s));
+        addEventListener('scroll', mark, { passive: true });
+      }
+
+      // Atlanta clock.
+      const clocks = document.querySelectorAll('[data-clock]');
+      const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZoneName: 'short' });
+      const tick = () => clocks.forEach((c) => (c.textContent = fmt.format(new Date())));
+      if (clocks.length) {
+        tick();
+        setInterval(tick, 1000);
+      }
+
+      // ⌘K search.
+      type Item = { kind: string; code: string; label: string; sub: string; terms?: string; href: string };
+      const dialog = document.getElementById('cmdk') as HTMLDialogElement;
+      const input = document.getElementById('cmdk-input') as HTMLInputElement;
+      const list = document.getElementById('cmdk-list')!;
+      const count = document.getElementById('cmdk-count')!;
+      const items: Item[] = JSON.parse(document.getElementById('cmdk-data')!.textContent!);
+      let shown: Item[] = [];
+      let active = 0;
+      const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+
+      function render() {
+        const q = input.value.trim().toLowerCase();
+        shown = items.filter((i) => !q || `${i.label} ${i.sub} ${i.kind} ${i.code} ${i.terms ?? ''}`.toLowerCase().includes(q));
+        active = Math.min(active, Math.max(shown.length - 1, 0));
+        list.innerHTML = shown.length
+          ? shown
+              .map(
+                (i, n) => `<li role="option" aria-selected="${n === active}" data-n="${n}">
+                  <a href="${esc(i.href)}" class="flex items-center gap-3 px-3 py-2 ${n === active ? 'bg-blue-2/25' : ''}">
+                    <span class="code-chip w-20 justify-center">${esc(i.code)}</span>
+                    <span class="min-w-0 flex-1 truncate"><span class="text-text">${esc(i.label)}</span> <span class="text-dim">${esc(i.sub)}</span></span>
+                    <span class="kicker">${esc(i.kind)}</span>
+                  </a></li>`,
+              )
+              .join('')
+          : '<li class="px-3 py-6 text-center text-dim">No objects match that query.</li>';
+        count.textContent = `${shown.length} result${shown.length === 1 ? '' : 's'}`;
+        list.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
+      }
+      function open() {
+        input.value = '';
+        active = 0;
+        render();
+        dialog.showModal();
+        input.focus();
+      }
+      document.querySelectorAll('[data-cmdk-open]').forEach((b) => b.addEventListener('click', open));
+      document.addEventListener('keydown', (e) => {
+        const typing = e.target instanceof Element && e.target.closest('input, textarea');
+        if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !typing && !dialog.open)) {
+          e.preventDefault();
+          dialog.open ? dialog.close() : open();
+        }
+      });
+      input.addEventListener('input', () => {
+        active = 0;
+        render();
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          active = (active + (e.key === 'ArrowDown' ? 1 : -1) + shown.length) % Math.max(shown.length, 1);
+          render();
+        } else if (e.key === 'Enter' && shown[active]) {
+          e.preventDefault();
+          dialog.close();
+          location.href = shown[active].href;
+        }
+      });
+      list.addEventListener('click', (e) => {
+        if ((e.target as HTMLElement).closest('a')) dialog.close();
+      });
+      dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) dialog.close();
+      });
     </script>
+
+    <style>
+      .rail-btn[aria-current] {
+        color: var(--text);
+        background: color-mix(in srgb, var(--blue) 18%, transparent);
+      }
+      .rail-btn[aria-current]::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 8px;
+        bottom: 8px;
+        width: 2px;
+        background: var(--blue);
+      }
+      @media (max-width: 767px) {
+        .rail-btn {
+          position: relative;
+        }
+        .rail-btn[aria-current] {
+          background: transparent;
+          color: var(--blue-3);
+        }
+        .rail-btn[aria-current]::before {
+          left: 30%;
+          right: 30%;
+          top: 0;
+          bottom: auto;
+          width: auto;
+          height: 2px;
+        }
+      }
+    </style>
   </body>
 </html>

@@ -1,300 +1,467 @@
 ---
+import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import Icon from '../components/Icon.astro';
-import { profile, socials, skills, experience, projects, hobbies } from '../data/site';
+import Icon, { type IconName } from '../components/Icon.astro';
+import Panel from '../components/Panel.astro';
+import EntityGraph from '../components/EntityGraph.astro';
+import Timeline from '../components/Timeline.astro';
+import { education, experience, metrics, offDuty, orgs, profile, skills, socials } from '../data/site';
+import { duration, fmtDot, fmtMonth, statusLabel } from '../lib/format';
 
-const featured = projects.find((p) => p.featured) ?? projects[0];
-const rest = projects.filter((p) => p !== featured);
-const tagCounts = new Map<string, number>();
-for (const p of projects) for (const t of p.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
-const filters = [...tagCounts.entries()]
-  .filter(([, n]) => n > 1)
-  .sort((a, b) => b[1] - a[1])
-  .map(([t]) => t);
-const languageCount = skills.find((s) => s.group === 'Languages')?.items.length ?? 0;
+const projects = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code));
+const projectIds = new Set(projects.map((p) => p.id));
+const counts = {
+  all: projects.length,
+  active: projects.filter((p) => p.data.status === 'active').length,
+  shipped: projects.filter((p) => p.data.status === 'shipped').length,
+  archived: projects.filter((p) => p.data.status === 'archived').length,
+};
+
+const org = (id: string) => orgs.find((o) => o.id === id)!;
+const kindMeta: Record<string, { label: string; icon: IconName; tone: string }> = {
+  work: { label: 'Work', icon: 'building', tone: 'text-green-2' },
+  research: { label: 'Research', icon: 'flask', tone: 'text-violet' },
+  team: { label: 'Team', icon: 'bot', tone: 'text-orange' },
+  education: { label: 'Edu', icon: 'cap', tone: 'text-blue-3' },
+};
+const hobbyIcon: Record<string, IconName> = { volleyball: 'ball', robotics: 'bot', reading: 'book', hiking: 'mountain' };
+const [primaryHobby, ...otherHobbies] = offDuty;
 ---
 
-<Base>
-  <!-- ─── Hero bento ─────────────────────────────────────────── -->
-  <section class="grid grid-flow-row-dense auto-rows-[minmax(9.5rem,auto)] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Intro">
-    <div class="tile reveal flex flex-col justify-between gap-6 sm:col-span-2 lg:row-span-2 lg:p-8">
-      <div>
-        <p class="eyebrow">Hi, I'm <span class="wave not-italic">👋</span></p>
-        <h1 class="font-display mt-3 text-5xl leading-[0.9] font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
-          {profile.firstName}<span class="text-accent">.</span>
-        </h1>
-        <p class="mt-4 max-w-md text-lg text-muted">{profile.tagline}</p>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <a href="#projects" class="rounded-full bg-accent px-5 py-2.5 font-semibold text-accent-ink transition hover:brightness-110">
-          See my work
-        </a>
-        <a href="#contact" class="rounded-full border border-line px-5 py-2.5 font-semibold transition hover:bg-surface-2">
-          Say hi
-        </a>
-      </div>
-    </div>
-
-    <div class="tile tile-hover reveal flex flex-col justify-between">
-      <p class="eyebrow flex items-center gap-1.5"><Icon name="pin" class="size-3.5" /> Based in</p>
-      <div>
-        <p class="font-display text-2xl font-bold">{profile.location}</p>
-        <p class="mt-1 font-mono text-sm text-muted">
-          <span id="local-time" data-tz={profile.timezone}>--:--</span> local time
-        </p>
-      </div>
-    </div>
-
-    <div class="tile reveal overflow-hidden p-0 sm:row-span-2">
-      {profile.photo ? (
-        <img src={profile.photo} alt={`Photo of ${profile.name}`} class="size-full min-h-72 object-cover" />
-      ) : (
-        <div
-          class="relative grid size-full min-h-72 place-items-center"
-          style="background: radial-gradient(circle at 30% 20%, var(--lime), transparent 55%), radial-gradient(circle at 80% 90%, var(--accent), transparent 55%), var(--blue)"
-        >
-          <span class="font-display text-7xl font-extrabold text-white/90 mix-blend-overlay">DH</span>
-          <span class="chip absolute bottom-4 left-4 bg-surface/90">photo goes here</span>
-        </div>
-      )}
-    </div>
-
-    <a
-      href={profile.now.href}
-      class="tile tile-hover reveal group flex flex-col justify-between bg-lime text-lime-ink"
-      style="border-color: transparent"
-    >
-      <p class="flex items-center gap-2 font-mono text-xs tracking-[0.12em] uppercase">
-        <span class="relative flex size-2">
-          <span class="absolute inline-flex size-full animate-ping rounded-full bg-lime-ink/60"></span>
-          <span class="relative inline-flex size-2 rounded-full bg-lime-ink"></span>
-        </span>
-        {profile.now.label}
-      </p>
-      <p class="font-display text-lg leading-snug font-bold">{profile.now.text}</p>
-    </a>
-
-    <div class="tile reveal grid grid-cols-2 gap-2 p-3">
-      {socials.map((s) => (
-        <a
-          href={s.href}
-          target={s.icon === 'mail' ? undefined : '_blank'}
-          rel="noopener"
-          class="flex flex-col items-start justify-between gap-3 rounded-2xl bg-surface-2 p-3 text-sm font-medium transition hover:-translate-y-0.5 hover:bg-ink hover:text-bg"
-          aria-label={s.label}
-        >
-          <Icon name={s.icon} />
-          {s.label}
-        </a>
-      ))}
-    </div>
-
-    <a
-      href={featured.href}
-      target="_blank"
-      rel="noopener"
-      class="tile tile-hover reveal group flex flex-col justify-between gap-4 bg-ink text-bg sm:col-span-2"
-      style="border-color: transparent"
-    >
-      <div class="flex items-start justify-between gap-4">
-        <p class="font-mono text-xs tracking-[0.12em] text-bg/60 uppercase">Featured project · {featured.year}</p>
-        <span class="grid size-10 shrink-0 place-items-center rounded-full bg-accent text-accent-ink transition group-hover:rotate-45">
-          <Icon name="arrow" />
-        </span>
-      </div>
-      <div>
-        <h2 class="font-display text-3xl font-extrabold tracking-tight">{featured.name}</h2>
-        <p class="mt-2 max-w-xl text-bg/70">{featured.blurb}</p>
-      </div>
-    </a>
-
-    <div class="tile reveal flex flex-col justify-between">
-      <p class="eyebrow">By the numbers</p>
-      <dl class="grid grid-cols-2 gap-3">
-        <div>
-          <dt class="text-xs text-muted">Projects</dt>
-          <dd class="font-display text-3xl font-extrabold">{projects.length}</dd>
-        </div>
-        <div>
-          <dt class="text-xs text-muted">Languages</dt>
-          <dd class="font-display text-3xl font-extrabold">{languageCount}</dd>
-        </div>
-        <div class="col-span-2">
-          <dt class="text-xs text-muted">Side quests</dt>
-          <dd class="font-display text-3xl font-extrabold text-accent">∞</dd>
-        </div>
-      </dl>
-    </div>
-  </section>
-
-  <!-- ─── About + skills ─────────────────────────────────────── -->
-  <section id="about" class="mt-24 grid gap-4 lg:grid-cols-5">
-    <div class="tile reveal lg:col-span-3 lg:p-8">
-      <p class="eyebrow">01 · About</p>
-      <h2 class="section-title mt-3">A bit about me</h2>
-      <div class="mt-5 space-y-4 text-lg leading-relaxed text-muted">
-        {profile.about.map((para) => <p>{para}</p>)}
-      </div>
-      <a href={profile.resume} class="mt-6 inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-semibold transition hover:bg-surface-2">
-        <Icon name="download" class="size-4" /> Download resume
-      </a>
-    </div>
-    <div class="tile reveal lg:col-span-2 lg:p-8">
-      <p class="eyebrow">Toolbox</p>
-      <h2 class="section-title mt-3">Skills</h2>
-      <div class="mt-5 space-y-5">
-        {skills.map((g) => (
-          <div>
-            <h3 class="mb-2 text-sm font-semibold">{g.group}</h3>
-            <ul class="flex flex-wrap gap-1.5">
-              {g.items.map((s) => <li class="chip">{s}</li>)}
-            </ul>
+<Base home>
+  <div class="mx-auto flex max-w-[1680px] flex-col gap-3 p-3 md:gap-4 md:p-4">
+    <!-- OVERVIEW -->
+    <section id="overview" class="grid gap-3 md:gap-4 lg:grid-cols-[264px_minmax(0,1fr)_288px] xl:grid-cols-[300px_minmax(0,1fr)_320px]">
+      <Panel title="Subject" code="OBJ-000" icon="file">
+        <div class="p-4">
+          <div class="flex items-center gap-3.5">
+            {
+              profile.photo ? (
+                <img src={profile.photo} alt={profile.name} class="size-16 rounded-[3px] border border-line object-cover" />
+              ) : (
+                <div class="hatch grid size-16 shrink-0 place-items-center rounded-[3px] border border-line font-mono text-lg font-semibold text-dim">{profile.initials}</div>
+              )
+            }
+            <div class="min-w-0">
+              <h1 class="text-[21px] leading-tight font-semibold tracking-tight">{profile.name}</h1>
+              <p class="mt-0.5 text-[13px] text-muted">{profile.headline}</p>
+            </div>
           </div>
-        ))}
-      </div>
-    </div>
-  </section>
 
-  <!-- ─── Experience ─────────────────────────────────────────── -->
-  <section id="experience" class="mt-24">
-    <p class="eyebrow">02 · Experience</p>
-    <h2 class="section-title mt-3">Where I've been</h2>
-    <ol class="mt-8 space-y-4">
-      {experience.map((e, i) => (
-        <li class="tile tile-hover reveal grid gap-3 sm:grid-cols-[10rem_1fr] sm:gap-8">
-          <p class="font-mono text-sm text-muted">{e.when}</p>
-          <div>
-            <h3 class="font-display text-xl font-bold">
-              {e.role} <span class="text-muted">@ {e.org}</span>
-            </h3>
-            <ul class="mt-2 list-disc space-y-1 pl-5 text-muted marker:text-accent">
-              {e.points.map((p) => <li>{p}</li>)}
-            </ul>
+          <dl class="kv mt-4 border-t border-line pt-3.5 text-[13px]">
+            <dt>Status</dt>
+            <dd class="flex items-center gap-2"><span class="live-dot shrink-0"></span>{profile.status}</dd>
+            <dt>Education</dt>
+            <dd>{profile.school}</dd>
+            <dt>Thread</dt>
+            <dd>{education.thread}</dd>
+            <dt>GPA</dt>
+            <dd class="font-mono text-[12.5px]">{education.gpa}</dd>
+            <dt>Location</dt>
+            <dd>{profile.location}</dd>
+          </dl>
+
+          <div class="mt-4 space-y-2.5 border-t border-line pt-3.5 text-[13px] leading-relaxed text-muted">
+            {profile.about.map((p) => <p>{p}</p>)}
           </div>
-          {i === 0 && <span class="chip absolute top-4 right-4 hidden border-transparent bg-lime text-lime-ink sm:inline-flex">now</span>}
-        </li>
-      ))}
-    </ol>
-  </section>
 
-  <!-- ─── Projects ───────────────────────────────────────────── -->
-  <section id="projects" class="mt-24">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <p class="eyebrow">03 · Projects</p>
-        <h2 class="section-title mt-3">Things I've built</h2>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <a href={profile.resume} class="btn btn-primary" target="_blank" rel="noopener"><Icon name="download" class="size-4" />Resume</a>
+            {
+              socials.map((s) => (
+                <a href={s.href} class="btn btn-icon" aria-label={s.label} title={s.label} target={s.id === 'email' ? undefined : '_blank'} rel="noopener">
+                  <Icon name={s.icon} class="size-4" />
+                </a>
+              ))
+            }
+          </div>
+        </div>
+      </Panel>
+
+      <EntityGraph inspectorClass="lg:h-0 lg:min-h-full" />
+    </section>
+
+    <!-- METRICS -->
+    <Panel id="metrics" title="Key metrics" code="SRC · RESUME" icon="gauge">
+      <div class="grid grid-cols-2 gap-px bg-line lg:grid-cols-4">
+        {
+          metrics.map((m) => (
+            <a href={projectIds.has(m.ref) ? `/projects/${m.ref}/` : `#exp-${m.ref}`} class="group bg-panel p-4 hover:bg-panel-2 md:p-5">
+              <div class="font-mono text-[22px] font-semibold tracking-tight text-text md:text-[28px]">{m.value}</div>
+              <div class="mt-1 text-[12.5px] leading-snug text-muted">{m.label}</div>
+              <div class="mt-3 kicker group-hover:text-blue-3">↳ {m.source}</div>
+            </a>
+          ))
+        }
       </div>
-      <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filter projects">
-        {['All', ...filters].map((f, i) => (
-          <button
-            type="button"
-            data-filter={f}
-            aria-pressed={i === 0 ? 'true' : 'false'}
-            class="chip cursor-pointer transition hover:border-ink aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-bg"
-          >
-            {f}
-          </button>
-        ))}
+    </Panel>
+
+    <!-- TIMELINE -->
+    <Panel id="timeline" title="Activity timeline" code="2023 → 2028" icon="timeline">
+      <div slot="actions" class="hidden items-center gap-3 readout text-[11px] lg:flex">
+        <span class="flex items-center gap-1.5"><span class="size-2 rounded-[1px] bg-blue"></span>Education</span>
+        <span class="flex items-center gap-1.5"><span class="size-2 rounded-[1px] bg-green"></span>Employment</span>
+        <span class="flex items-center gap-1.5"><span class="size-2 rounded-[1px] bg-violet"></span>Research</span>
+        <span class="flex items-center gap-1.5"><span class="size-2 rounded-[1px] bg-orange"></span>Team</span>
+        <span class="flex items-center gap-1.5"><span class="size-2 rotate-45 bg-turquoise"></span>Project</span>
       </div>
-    </div>
-    <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {rest.map((p) => (
-        <li class="project reveal" data-tags={p.tags.join('|')}>
-          <article class="tile tile-hover flex h-full flex-col gap-4">
-            <div class="flex items-start justify-between gap-3">
-              <h3 class="font-display text-xl font-bold">{p.name}</h3>
-              <div class="flex shrink-0 gap-1">
-                {p.demo && (
-                  <a href={p.demo} target="_blank" rel="noopener" class="grid size-8 place-items-center rounded-full bg-surface-2 transition hover:bg-accent hover:text-accent-ink" aria-label={`${p.name} live demo`}>
-                    <Icon name="external" class="size-4" />
-                  </a>
+      <Timeline />
+    </Panel>
+
+    <!-- EXPERIENCE -->
+    <Panel id="experience" title="Experience" code={`${experience.length + 1} RECORDS`} icon="briefcase">
+      <div class="hidden grid-cols-[2.25rem_minmax(0,1.6fr)_minmax(0,1fr)_10rem_6rem_1rem] gap-3 border-b border-line bg-panel-2/50 px-4 py-2 kicker md:grid">
+        <span></span><span>Organization / role</span><span>Location</span><span>Period</span><span>Duration</span><span></span>
+      </div>
+      {
+        experience.map((e, i) => {
+          const k = kindMeta[e.kind];
+          return (
+            <details id={`exp-${e.id}`} class="group border-b border-line last:border-b-0" open={i === 0}>
+              <summary class="grid cursor-pointer list-none grid-cols-[2.25rem_minmax(0,1fr)_1rem] items-center gap-x-3 gap-y-1 px-4 py-3 hover:bg-panel-2/60 md:grid-cols-[2.25rem_minmax(0,1.6fr)_minmax(0,1fr)_10rem_6rem_1rem] [&::-webkit-details-marker]:hidden">
+                <span class={`grid size-9 place-items-center rounded-[3px] bg-panel-3 ${k.tone}`}>
+                  <Icon name={k.icon} class="size-[18px]" />
+                </span>
+                <span class="min-w-0">
+                  <span class="flex items-center gap-2">
+                    <span class="truncate font-semibold">{org(e.org).name}</span>
+                    <span class="code-chip hidden sm:inline-flex">{k.label}</span>
+                  </span>
+                  <span class="block truncate text-[13px] text-muted">{e.role}</span>
+                </span>
+                <span class="hidden truncate text-[13px] text-muted md:block">{e.location}</span>
+                <span class="hidden readout md:flex md:items-center md:gap-2">
+                  {fmtDot(e.start)} → {e.end ? fmtDot(e.end) : <span class="text-green-2">NOW</span>}
+                </span>
+                <span class="hidden readout text-dim md:block">{duration(e.start, e.end)}</span>
+                <Icon name="chevron" class="size-4 text-dim transition-transform group-open:rotate-90" />
+                <span class="col-start-2 readout text-[11px] md:hidden">
+                  {fmtMonth(e.start)} – {fmtMonth(e.end)} · {duration(e.start, e.end)}
+                </span>
+              </summary>
+              <div class="px-4 pb-5 md:pr-8 md:pl-[4.25rem]">
+                {e.unit && <p class="mb-2.5 kicker">{e.unit}</p>}
+                <ul class="max-w-[95ch] space-y-2 text-[13.5px] leading-relaxed text-[#d3d8de]">
+                  {e.points.map((pt) => (
+                    <li class="flex gap-2.5">
+                      <span class="mt-[0.55em] size-1.5 shrink-0 bg-faint" />
+                      <span>{pt}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div class="mt-3.5 flex flex-wrap gap-1.5">
+                  {e.tags.map((t) => (
+                    <span class="tag">{t}</span>
+                  ))}
+                </div>
+              </div>
+            </details>
+          );
+        })
+      }
+      <details id="exp-education" class="group">
+        <summary class="grid cursor-pointer list-none grid-cols-[2.25rem_minmax(0,1fr)_1rem] items-center gap-x-3 gap-y-1 px-4 py-3 hover:bg-panel-2/60 md:grid-cols-[2.25rem_minmax(0,1.6fr)_minmax(0,1fr)_10rem_6rem_1rem] [&::-webkit-details-marker]:hidden">
+          <span class="grid size-9 place-items-center rounded-[3px] bg-panel-3 text-blue-3"><Icon name="cap" class="size-[18px]" /></span>
+          <span class="min-w-0">
+            <span class="flex items-center gap-2">
+              <span class="truncate font-semibold">{education.school}</span>
+              <span class="code-chip hidden sm:inline-flex">Edu</span>
+            </span>
+            <span class="block truncate text-[13px] text-muted">{education.degree} · {education.program}</span>
+          </span>
+          <span class="hidden truncate text-[13px] text-muted md:block">Atlanta, GA</span>
+          <span class="hidden readout md:block">{fmtDot(education.start)} → {fmtDot(education.end)}</span>
+          <span class="hidden readout text-dim md:block">Expected</span>
+          <Icon name="chevron" class="size-4 text-dim transition-transform group-open:rotate-90" />
+          <span class="col-start-2 readout text-[11px] md:hidden">Expected {fmtMonth(education.end)}</span>
+        </summary>
+        <div class="px-4 pb-5 md:pl-[4.25rem]">
+          <dl class="kv max-w-2xl text-[13px]">
+            <dt>Thread</dt>
+            <dd>{education.thread}</dd>
+            <dt>GPA</dt>
+            <dd class="font-mono text-[12.5px]">{education.gpa}</dd>
+            <dt>Coursework</dt>
+            <dd class="flex flex-wrap gap-1.5">{education.coursework.map((c) => <span class="tag">{c}</span>)}</dd>
+          </dl>
+        </div>
+      </details>
+    </Panel>
+
+    <!-- PROJECTS -->
+    <Panel id="projects" title="Projects" code={`${projects.length} OBJECTS`} icon="cube">
+      <div slot="actions" class="flex items-center gap-2">
+        <div class="seg hidden sm:inline-flex" role="group" aria-label="Filter by status">
+          {
+            (['all', 'active', 'shipped', 'archived'] as const).map((s) => (
+              <button type="button" data-filter={s} aria-pressed={s === 'all' ? 'true' : 'false'}>
+                {s === 'all' ? 'All' : statusLabel[s]} <span class="ml-1 font-mono text-[10.5px] text-faint">{counts[s]}</span>
+              </button>
+            ))
+          }
+        </div>
+        <div class="seg" role="group" aria-label="View">
+          <button type="button" data-view-btn="grid" aria-pressed="true" aria-label="Card view" title="Cards"><Icon name="grid" class="size-3.5" /></button>
+          <button type="button" data-view-btn="table" aria-pressed="false" aria-label="Table view" title="Table"><Icon name="list" class="size-3.5" /></button>
+        </div>
+      </div>
+
+      <div data-view="grid" class="grid gap-3 p-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        {
+          projects.map((p) => {
+            const d = p.data;
+            return (
+              <a href={`/projects/${p.id}/`} data-status={d.status} class="group flex flex-col overflow-hidden rounded-[3px] border border-line bg-bg/40 transition-colors hover:border-blue/70 hover:bg-panel-2/40">
+                <div class="relative aspect-[16/9] overflow-hidden border-b border-line bg-bg">
+                  {d.cover ? (
+                    <img src={d.cover} alt={d.coverAlt ?? ''} loading="lazy" decoding="async" class="size-full object-cover object-top opacity-85 transition duration-300 group-hover:scale-[1.02] group-hover:opacity-100" />
+                  ) : (
+                    <div class="hatch grid size-full place-items-center">
+                      <div class="flex flex-col items-center gap-2 text-faint">
+                        <Icon name="cube" class="size-7" strokeWidth={1.25} />
+                        <span class="kicker text-faint">No imagery</span>
+                      </div>
+                    </div>
+                  )}
+                  <span class="code-chip absolute top-2 left-2 bg-bg/90">{d.code}</span>
+                  <span class="absolute top-2 right-2 rounded-[2px] bg-bg/90">
+                    <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
+                  </span>
+                </div>
+                <div class="flex flex-1 flex-col p-3.5">
+                  <h3 class="flex items-center gap-1.5 text-[15px] font-semibold">
+                    {d.title}
+                    {d.featured && <Icon name="star" class="size-3.5 text-orange" />}
+                  </h3>
+                  <p class="mt-1 line-clamp-2 text-[13px] leading-relaxed text-muted">{d.summary}</p>
+                  <div class="mt-3 flex flex-wrap gap-1">
+                    {d.tags.slice(0, 4).map((t) => (
+                      <span class="tag">{t}</span>
+                    ))}
+                  </div>
+                  <div class="mt-auto flex items-center justify-between gap-3 pt-3.5">
+                    <span class="truncate readout text-[11px] text-dim">
+                      {fmtMonth(d.start)}
+                      {d.context && ` · ${d.context}`}
+                    </span>
+                    <span class="flex shrink-0 items-center gap-1 text-[12px] text-dim group-hover:text-blue-3">
+                      Open <Icon name="arrow-right" class="size-3.5" />
+                    </span>
+                  </div>
+                </div>
+              </a>
+            );
+          })
+        }
+      </div>
+
+      <div data-view="table" hidden class="overflow-x-auto">
+        <table class="w-full min-w-[760px] text-left text-[13px]">
+          <thead class="border-b border-line bg-panel-2/50">
+            <tr class="kicker">
+              <th class="px-4 py-2 font-normal">ID</th>
+              <th class="px-4 py-2 font-normal">Name</th>
+              <th class="px-4 py-2 font-normal">Status</th>
+              <th class="px-4 py-2 font-normal">Started</th>
+              <th class="px-4 py-2 font-normal">Context</th>
+              <th class="px-4 py-2 font-normal">Stack</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-line">
+            {
+              projects.map((p) => (
+                <tr data-status={p.data.status} class="hover:bg-panel-2/60">
+                  <td class="px-4 py-2.5 readout text-dim">{p.data.code}</td>
+                  <td class="px-4 py-2.5">
+                    <a href={`/projects/${p.id}/`} class="font-medium text-text hover:text-blue-3">
+                      {p.data.title}
+                    </a>
+                  </td>
+                  <td class="px-4 py-2.5">
+                    <span class={`pill pill-${p.data.status}`}>{statusLabel[p.data.status]}</span>
+                  </td>
+                  <td class="px-4 py-2.5 readout">{fmtDot(p.data.start)}</td>
+                  <td class="px-4 py-2.5 text-muted">{p.data.context ?? 'Personal'}</td>
+                  <td class="px-4 py-2.5 text-muted">{p.data.tags.slice(0, 3).join(', ')}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p data-empty hidden class="px-4 py-10 text-center text-dim">No projects with that status.</p>
+    </Panel>
+
+    <!-- CAPABILITIES -->
+    <Panel id="capabilities" title="Capabilities" code={`${skills.length} GROUPS`} icon="layers">
+      <div class="divide-y divide-line">
+        {
+          skills.map((s) => (
+            <div class="grid gap-2 px-4 py-3 md:grid-cols-[13rem_1fr] md:gap-4">
+              <div class="pt-1 kicker">{s.group}</div>
+              <div class="flex flex-wrap gap-1.5">
+                {s.items.map((i) => (
+                  <span class="tag">{i}</span>
+                ))}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </Panel>
+
+    <!-- OFF DUTY -->
+    <Panel id="off-duty" title="Off duty" code={`${offDuty.length} RECORDS`} icon="sun">
+      <div class="grid gap-3 p-3 md:grid-cols-3">
+        <article class="grid overflow-hidden rounded-[3px] border border-line bg-bg/40 md:col-span-3 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+          <div class="relative aspect-[4/3] border-b border-line md:aspect-auto md:min-h-[340px] md:border-r md:border-b-0">
+            {
+              primaryHobby.image ? (
+                <img src={primaryHobby.image} alt={primaryHobby.imageAlt ?? primaryHobby.name} loading="lazy" class="absolute inset-0 size-full object-cover object-[50%_22%]" />
+              ) : (
+                <div class="hatch absolute inset-0" />
+              )
+            }
+            <span class="code-chip absolute top-2 left-2 bg-bg/90">OD-01</span>
+          </div>
+          <div class="flex flex-col p-5">
+            <div class="flex items-center gap-2">
+              <Icon name={hobbyIcon[primaryHobby.id]} class="size-5 text-orange" />
+              <span class="kicker text-orange">Primary interest</span>
+            </div>
+            <h3 class="mt-3 text-2xl font-semibold tracking-tight">{primaryHobby.name}</h3>
+            <p class="mt-2 max-w-md text-[14px] leading-relaxed text-muted">{primaryHobby.note}</p>
+            <dl class="kv mt-auto border-t border-line pt-4 text-[13px]">
+              <dt>Priority</dt>
+              <dd>Highest</dd>
+              <dt>Where</dt>
+              <dd>{profile.location}</dd>
+            </dl>
+          </div>
+        </article>
+        {
+          otherHobbies.map((h, i) => (
+            <article class="flex flex-col overflow-hidden rounded-[3px] border border-line bg-bg/40">
+              <div class="relative aspect-[16/9] border-b border-line">
+                {h.image ? (
+                  <img src={h.image} alt={h.imageAlt ?? h.name} loading="lazy" class="absolute inset-0 size-full object-cover" />
+                ) : (
+                  <div class="hatch absolute inset-0 grid place-items-center">
+                    <div class="flex flex-col items-center gap-2 text-faint">
+                      <Icon name="image" class="size-6" strokeWidth={1.25} />
+                      <span class="kicker text-faint">No imagery · awaiting upload</span>
+                    </div>
+                  </div>
                 )}
-                {p.href && (
-                  <a href={p.href} target="_blank" rel="noopener" class="grid size-8 place-items-center rounded-full bg-surface-2 transition hover:bg-ink hover:text-bg" aria-label={`${p.name} source on GitHub`}>
-                    <Icon name="github" class="size-4" />
+                <span class="code-chip absolute top-2 left-2 bg-bg/90">OD-0{i + 2}</span>
+              </div>
+              <div class="flex flex-1 flex-col p-4">
+                <div class="flex items-center gap-2">
+                  <Icon name={hobbyIcon[h.id]} class="size-4 text-dim" />
+                  <h3 class="font-semibold">{h.name}</h3>
+                </div>
+                <p class="mt-1.5 text-[13px] leading-relaxed text-muted">{h.note}</p>
+                {h.link && (
+                  <a href={h.link.href} class="mt-3 inline-flex items-center gap-1 text-[13px] text-blue-3 hover:underline" target="_blank" rel="noopener">
+                    {h.link.label} <Icon name="external" class="size-3.5" />
                   </a>
                 )}
               </div>
-            </div>
-            <p class="flex-1 text-muted">{p.blurb}</p>
-            <ul class="flex flex-wrap gap-1.5">
-              {p.tags.map((t) => <li class="chip">{t}</li>)}
-            </ul>
-          </article>
-        </li>
-      ))}
-    </ul>
-  </section>
-
-  <!-- ─── Hobbies ────────────────────────────────────────────── -->
-  <section id="hobbies" class="mt-24">
-    <p class="eyebrow">04 · Off the clock</p>
-    <h2 class="section-title mt-3">Hobbies & interests</h2>
-    <ul class="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-3">
-      {hobbies.map((h, i) => (
-        <li
-          class:list={[
-            'tile tile-hover reveal flex min-h-44 flex-col justify-between',
-            i % 2 === 0 ? 'rotate-[-0.6deg]' : 'rotate-[0.5deg]',
-          ]}
-        >
-          {h.image ? (
-            <img src={h.image} alt={h.name} class="-mx-6 -mt-6 mb-2 h-36 w-[calc(100%+3rem)] max-w-none object-cover" />
-          ) : (
-            <span class="text-4xl" aria-hidden="true">{h.emoji}</span>
-          )}
-          <div>
-            <h3 class="font-display text-lg font-bold">{h.name}</h3>
-            <p class="mt-1 text-sm text-muted">{h.note}</p>
-          </div>
-        </li>
-      ))}
-    </ul>
-  </section>
-
-  <!-- ─── Contact ────────────────────────────────────────────── -->
-  <section id="contact" class="mt-24">
-    <div class="tile reveal flex flex-col items-start gap-6 bg-accent p-8 text-accent-ink sm:p-12" style="border-color: transparent">
-      <p class="font-mono text-xs tracking-[0.12em] uppercase opacity-80">05 · Contact</p>
-      <h2 class="font-display max-w-2xl text-4xl leading-[0.95] font-extrabold tracking-tight sm:text-6xl">
-        Let's build something fun.
-      </h2>
-      <div class="flex flex-wrap gap-2">
-        <a href={`mailto:${profile.email}`} class="inline-flex items-center gap-2 rounded-full bg-accent-ink px-5 py-3 font-semibold text-accent transition hover:opacity-90">
-          <Icon name="mail" class="size-4" /> {profile.email}
-        </a>
-        {socials.filter((s) => s.icon !== 'mail').map((s) => (
-          <a href={s.href} target="_blank" rel="noopener" class="grid size-12 place-items-center rounded-full border border-current/30 transition hover:bg-accent-ink hover:text-accent" aria-label={s.label}>
-            <Icon name={s.icon} />
-          </a>
-        ))}
+            </article>
+          ))
+        }
       </div>
-    </div>
-  </section>
+    </Panel>
+
+    <!-- CONTACT -->
+    <Panel id="contact" title="Contact" code="CHANNEL OPEN" icon="radio">
+      <div class="grid items-center gap-6 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:p-6">
+        <div>
+          <h2 class="text-2xl font-semibold tracking-tight">Let's talk.</h2>
+          <p class="mt-1.5 max-w-xl text-muted">
+            Internships, research, or anything GPU- or robot-shaped. Email is the fastest way to reach me.
+          </p>
+          <div class="mt-5 flex flex-wrap gap-2">
+            <a href={`mailto:${profile.email}`} class="btn btn-primary"><Icon name="mail" class="size-4" />Email me</a>
+            <button type="button" class="btn" data-copy={profile.email}><Icon name="copy" class="size-4" /><span>Copy address</span></button>
+            {
+              socials
+                .filter((s) => s.id !== 'email')
+                .map((s) => (
+                  <a href={s.href} class="btn" target="_blank" rel="noopener">
+                    <Icon name={s.icon} class="size-4" />
+                    {s.label}
+                  </a>
+                ))
+            }
+          </div>
+        </div>
+        <dl class="kv min-w-[17rem] rounded-[3px] border border-line bg-bg/50 p-4 text-[13px]">
+          <dt>Email</dt>
+          <dd class="font-mono text-[12px]">{profile.email}</dd>
+          <dt>Location</dt>
+          <dd>{profile.location}</dd>
+          <dt>Local time</dt>
+          <dd class="font-mono text-[12px]" data-clock>--:--:--</dd>
+          <dt>Resume</dt>
+          <dd><a href={profile.resume} class="text-blue-3 hover:underline" target="_blank" rel="noopener">PDF ↗</a></dd>
+        </dl>
+      </div>
+    </Panel>
+
+    <p class="pb-2 text-center readout text-[10.5px] text-faint md:hidden">© {new Date().getFullYear()} {profile.name}</p>
+  </div>
 </Base>
 
 <script>
-  // Live local time in the location tile
-  const el = document.getElementById('local-time');
-  if (el) {
-    const fmt = new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit', timeZone: el.dataset.tz });
-    const tick = () => (el.textContent = fmt.format(new Date()));
-    tick();
-    setInterval(tick, 30_000);
-  }
+  // Open an experience row when it's linked to.
+  const openHash = () => {
+    const el = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (el instanceof HTMLDetailsElement) el.open = true;
+  };
+  addEventListener('hashchange', openHash);
+  openHash();
+  document.addEventListener('click', (e) => {
+    const a = (e.target as Element).closest<HTMLAnchorElement>('a[href^="#exp-"]');
+    if (a) (document.getElementById(a.hash.slice(1)) as HTMLDetailsElement | null)?.setAttribute('open', '');
+  });
 
-  // Project tag filter
-  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
-  const cards = document.querySelectorAll<HTMLElement>('.project');
-  buttons.forEach((btn) =>
-    btn.addEventListener('click', () => {
-      const f = btn.dataset.filter!;
-      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
-      cards.forEach((c) => {
-        const show = f === 'All' || c.dataset.tags!.split('|').includes(f);
-        c.hidden = !show;
-        if (show) c.classList.add('in');
+  // Project filters and view toggle.
+  const filterBtns = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const viewBtns = document.querySelectorAll<HTMLButtonElement>('[data-view-btn]');
+  const items = document.querySelectorAll<HTMLElement>('#projects [data-status]');
+  const empty = document.querySelector<HTMLElement>('[data-empty]');
+  filterBtns.forEach((b) =>
+    b.addEventListener('click', () => {
+      const f = b.dataset.filter!;
+      filterBtns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      let n = 0;
+      items.forEach((it) => {
+        const show = f === 'all' || it.dataset.status === f;
+        it.hidden = !show;
+        if (show && it.tagName === 'A') n++;
       });
+      if (empty) empty.hidden = n > 0;
+    }),
+  );
+  viewBtns.forEach((b) =>
+    b.addEventListener('click', () => {
+      viewBtns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      document.querySelectorAll<HTMLElement>('[data-view]').forEach((v) => (v.hidden = v.dataset.view !== b.dataset.viewBtn));
+    }),
+  );
+
+  // Copy email.
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((b) =>
+    b.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(b.dataset.copy!);
+        const label = b.querySelector('span')!;
+        label.textContent = 'Copied';
+        setTimeout(() => (label.textContent = 'Copy address'), 1600);
+      } catch {
+        location.href = `mailto:${b.dataset.copy}`;
+      }
     }),
   );
 </script>
