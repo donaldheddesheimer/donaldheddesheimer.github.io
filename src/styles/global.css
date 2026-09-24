@@ -1,0 +1,149 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+:root {
+  --bg: #f3efe7;
+  --surface: #fffdf8;
+  --surface-2: #ece6da;
+  --ink: #17140f;
+  --muted: #6b6457;
+  --line: #e2dacb;
+  --accent: #ff5a36;
+  --accent-ink: #ffffff;
+  --blue: #2f6bff;
+  --lime: #c7f25a;
+  --lime-ink: #1d2606;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: #11100e;
+  --surface: #1b1916;
+  --surface-2: #26231f;
+  --ink: #f3efe7;
+  --muted: #a39c8f;
+  --line: #2e2a25;
+  --accent: #ff6b4a;
+  --accent-ink: #1a0c07;
+  --blue: #6f97ff;
+  --lime: #c7f25a;
+  --lime-ink: #1d2606;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-blue: var(--blue);
+  --color-lime: var(--lime);
+  --color-lime-ink: var(--lime-ink);
+  --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+/* Bento tile */
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+.tile-hover:hover {
+  transform: translateY(-4px) rotate(-0.4deg);
+  box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.35);
+  border-color: color-mix(in srgb, var(--ink) 25%, var(--line));
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  line-height: 1;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+}
+
+/* Scroll reveal (only when JS + motion are available) */
+@media (prefers-reduced-motion: no-preference) {
+  .js .reveal {
+    opacity: 0;
+    translate: 0 16px;
+    transition:
+      opacity 0.6s ease,
+      translate 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+      transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.25s ease,
+      border-color 0.25s ease;
+  }
+  .js .reveal.in {
+    opacity: 1;
+    translate: none;
+  }
+  .wave {
+    display: inline-block;
+    transform-origin: 70% 70%;
+    animation: wave 2.4s ease-in-out 0.6s 2;
+  }
+}
+
+@keyframes wave {
+  0%, 60%, 100% { transform: rotate(0); }
+  10%, 30% { transform: rotate(14deg); }
+  20% { transform: rotate(-8deg); }
+  40% { transform: rotate(-4deg); }
+  50% { transform: rotate(10deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .tile-hover:hover { transform: none; }
+}

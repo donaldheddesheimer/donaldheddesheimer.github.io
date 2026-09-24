@@ -1,0 +1,300 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { profile, socials, skills, experience, projects, hobbies } from '../data/site';
+
+const featured = projects.find((p) => p.featured) ?? projects[0];
+const rest = projects.filter((p) => p !== featured);
+const tagCounts = new Map<string, number>();
+for (const p of projects) for (const t of p.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+const filters = [...tagCounts.entries()]
+  .filter(([, n]) => n > 1)
+  .sort((a, b) => b[1] - a[1])
+  .map(([t]) => t);
+const languageCount = skills.find((s) => s.group === 'Languages')?.items.length ?? 0;
+---
+
+<Base>
+  <!-- ─── Hero bento ─────────────────────────────────────────── -->
+  <section class="grid grid-flow-row-dense auto-rows-[minmax(9.5rem,auto)] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Intro">
+    <div class="tile reveal flex flex-col justify-between gap-6 sm:col-span-2 lg:row-span-2 lg:p-8">
+      <div>
+        <p class="eyebrow">Hi, I'm <span class="wave not-italic">👋</span></p>
+        <h1 class="font-display mt-3 text-5xl leading-[0.9] font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
+          {profile.firstName}<span class="text-accent">.</span>
+        </h1>
+        <p class="mt-4 max-w-md text-lg text-muted">{profile.tagline}</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a href="#projects" class="rounded-full bg-accent px-5 py-2.5 font-semibold text-accent-ink transition hover:brightness-110">
+          See my work
+        </a>
+        <a href="#contact" class="rounded-full border border-line px-5 py-2.5 font-semibold transition hover:bg-surface-2">
+          Say hi
+        </a>
+      </div>
+    </div>
+
+    <div class="tile tile-hover reveal flex flex-col justify-between">
+      <p class="eyebrow flex items-center gap-1.5"><Icon name="pin" class="size-3.5" /> Based in</p>
+      <div>
+        <p class="font-display text-2xl font-bold">{profile.location}</p>
+        <p class="mt-1 font-mono text-sm text-muted">
+          <span id="local-time" data-tz={profile.timezone}>--:--</span> local time
+        </p>
+      </div>
+    </div>
+
+    <div class="tile reveal overflow-hidden p-0 sm:row-span-2">
+      {profile.photo ? (
+        <img src={profile.photo} alt={`Photo of ${profile.name}`} class="size-full min-h-72 object-cover" />
+      ) : (
+        <div
+          class="relative grid size-full min-h-72 place-items-center"
+          style="background: radial-gradient(circle at 30% 20%, var(--lime), transparent 55%), radial-gradient(circle at 80% 90%, var(--accent), transparent 55%), var(--blue)"
+        >
+          <span class="font-display text-7xl font-extrabold text-white/90 mix-blend-overlay">DH</span>
+          <span class="chip absolute bottom-4 left-4 bg-surface/90">photo goes here</span>
+        </div>
+      )}
+    </div>
+
+    <a
+      href={profile.now.href}
+      class="tile tile-hover reveal group flex flex-col justify-between bg-lime text-lime-ink"
+      style="border-color: transparent"
+    >
+      <p class="flex items-center gap-2 font-mono text-xs tracking-[0.12em] uppercase">
+        <span class="relative flex size-2">
+          <span class="absolute inline-flex size-full animate-ping rounded-full bg-lime-ink/60"></span>
+          <span class="relative inline-flex size-2 rounded-full bg-lime-ink"></span>
+        </span>
+        {profile.now.label}
+      </p>
+      <p class="font-display text-lg leading-snug font-bold">{profile.now.text}</p>
+    </a>
+
+    <div class="tile reveal grid grid-cols-2 gap-2 p-3">
+      {socials.map((s) => (
+        <a
+          href={s.href}
+          target={s.icon === 'mail' ? undefined : '_blank'}
+          rel="noopener"
+          class="flex flex-col items-start justify-between gap-3 rounded-2xl bg-surface-2 p-3 text-sm font-medium transition hover:-translate-y-0.5 hover:bg-ink hover:text-bg"
+          aria-label={s.label}
+        >
+          <Icon name={s.icon} />
+          {s.label}
+        </a>
+      ))}
+    </div>
+
+    <a
+      href={featured.href}
+      target="_blank"
+      rel="noopener"
+      class="tile tile-hover reveal group flex flex-col justify-between gap-4 bg-ink text-bg sm:col-span-2"
+      style="border-color: transparent"
+    >
+      <div class="flex items-start justify-between gap-4">
+        <p class="font-mono text-xs tracking-[0.12em] text-bg/60 uppercase">Featured project · {featured.year}</p>
+        <span class="grid size-10 shrink-0 place-items-center rounded-full bg-accent text-accent-ink transition group-hover:rotate-45">
+          <Icon name="arrow" />
+        </span>
+      </div>
+      <div>
+        <h2 class="font-display text-3xl font-extrabold tracking-tight">{featured.name}</h2>
+        <p class="mt-2 max-w-xl text-bg/70">{featured.blurb}</p>
+      </div>
+    </a>
+
+    <div class="tile reveal flex flex-col justify-between">
+      <p class="eyebrow">By the numbers</p>
+      <dl class="grid grid-cols-2 gap-3">
+        <div>
+          <dt class="text-xs text-muted">Projects</dt>
+          <dd class="font-display text-3xl font-extrabold">{projects.length}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-muted">Languages</dt>
+          <dd class="font-display text-3xl font-extrabold">{languageCount}</dd>
+        </div>
+        <div class="col-span-2">
+          <dt class="text-xs text-muted">Side quests</dt>
+          <dd class="font-display text-3xl font-extrabold text-accent">∞</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ─── About + skills ─────────────────────────────────────── -->
+  <section id="about" class="mt-24 grid gap-4 lg:grid-cols-5">
+    <div class="tile reveal lg:col-span-3 lg:p-8">
+      <p class="eyebrow">01 · About</p>
+      <h2 class="section-title mt-3">A bit about me</h2>
+      <div class="mt-5 space-y-4 text-lg leading-relaxed text-muted">
+        {profile.about.map((para) => <p>{para}</p>)}
+      </div>
+      <a href={profile.resume} class="mt-6 inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-semibold transition hover:bg-surface-2">
+        <Icon name="download" class="size-4" /> Download resume
+      </a>
+    </div>
+    <div class="tile reveal lg:col-span-2 lg:p-8">
+      <p class="eyebrow">Toolbox</p>
+      <h2 class="section-title mt-3">Skills</h2>
+      <div class="mt-5 space-y-5">
+        {skills.map((g) => (
+          <div>
+            <h3 class="mb-2 text-sm font-semibold">{g.group}</h3>
+            <ul class="flex flex-wrap gap-1.5">
+              {g.items.map((s) => <li class="chip">{s}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Experience ─────────────────────────────────────────── -->
+  <section id="experience" class="mt-24">
+    <p class="eyebrow">02 · Experience</p>
+    <h2 class="section-title mt-3">Where I've been</h2>
+    <ol class="mt-8 space-y-4">
+      {experience.map((e, i) => (
+        <li class="tile tile-hover reveal grid gap-3 sm:grid-cols-[10rem_1fr] sm:gap-8">
+          <p class="font-mono text-sm text-muted">{e.when}</p>
+          <div>
+            <h3 class="font-display text-xl font-bold">
+              {e.role} <span class="text-muted">@ {e.org}</span>
+            </h3>
+            <ul class="mt-2 list-disc space-y-1 pl-5 text-muted marker:text-accent">
+              {e.points.map((p) => <li>{p}</li>)}
+            </ul>
+          </div>
+          {i === 0 && <span class="chip absolute top-4 right-4 hidden border-transparent bg-lime text-lime-ink sm:inline-flex">now</span>}
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- ─── Projects ───────────────────────────────────────────── -->
+  <section id="projects" class="mt-24">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p class="eyebrow">03 · Projects</p>
+        <h2 class="section-title mt-3">Things I've built</h2>
+      </div>
+      <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filter projects">
+        {['All', ...filters].map((f, i) => (
+          <button
+            type="button"
+            data-filter={f}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+            class="chip cursor-pointer transition hover:border-ink aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-bg"
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+    </div>
+    <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {rest.map((p) => (
+        <li class="project reveal" data-tags={p.tags.join('|')}>
+          <article class="tile tile-hover flex h-full flex-col gap-4">
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="font-display text-xl font-bold">{p.name}</h3>
+              <div class="flex shrink-0 gap-1">
+                {p.demo && (
+                  <a href={p.demo} target="_blank" rel="noopener" class="grid size-8 place-items-center rounded-full bg-surface-2 transition hover:bg-accent hover:text-accent-ink" aria-label={`${p.name} live demo`}>
+                    <Icon name="external" class="size-4" />
+                  </a>
+                )}
+                {p.href && (
+                  <a href={p.href} target="_blank" rel="noopener" class="grid size-8 place-items-center rounded-full bg-surface-2 transition hover:bg-ink hover:text-bg" aria-label={`${p.name} source on GitHub`}>
+                    <Icon name="github" class="size-4" />
+                  </a>
+                )}
+              </div>
+            </div>
+            <p class="flex-1 text-muted">{p.blurb}</p>
+            <ul class="flex flex-wrap gap-1.5">
+              {p.tags.map((t) => <li class="chip">{t}</li>)}
+            </ul>
+          </article>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- ─── Hobbies ────────────────────────────────────────────── -->
+  <section id="hobbies" class="mt-24">
+    <p class="eyebrow">04 · Off the clock</p>
+    <h2 class="section-title mt-3">Hobbies & interests</h2>
+    <ul class="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-3">
+      {hobbies.map((h, i) => (
+        <li
+          class:list={[
+            'tile tile-hover reveal flex min-h-44 flex-col justify-between',
+            i % 2 === 0 ? 'rotate-[-0.6deg]' : 'rotate-[0.5deg]',
+          ]}
+        >
+          {h.image ? (
+            <img src={h.image} alt={h.name} class="-mx-6 -mt-6 mb-2 h-36 w-[calc(100%+3rem)] max-w-none object-cover" />
+          ) : (
+            <span class="text-4xl" aria-hidden="true">{h.emoji}</span>
+          )}
+          <div>
+            <h3 class="font-display text-lg font-bold">{h.name}</h3>
+            <p class="mt-1 text-sm text-muted">{h.note}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- ─── Contact ────────────────────────────────────────────── -->
+  <section id="contact" class="mt-24">
+    <div class="tile reveal flex flex-col items-start gap-6 bg-accent p-8 text-accent-ink sm:p-12" style="border-color: transparent">
+      <p class="font-mono text-xs tracking-[0.12em] uppercase opacity-80">05 · Contact</p>
+      <h2 class="font-display max-w-2xl text-4xl leading-[0.95] font-extrabold tracking-tight sm:text-6xl">
+        Let's build something fun.
+      </h2>
+      <div class="flex flex-wrap gap-2">
+        <a href={`mailto:${profile.email}`} class="inline-flex items-center gap-2 rounded-full bg-accent-ink px-5 py-3 font-semibold text-accent transition hover:opacity-90">
+          <Icon name="mail" class="size-4" /> {profile.email}
+        </a>
+        {socials.filter((s) => s.icon !== 'mail').map((s) => (
+          <a href={s.href} target="_blank" rel="noopener" class="grid size-12 place-items-center rounded-full border border-current/30 transition hover:bg-accent-ink hover:text-accent" aria-label={s.label}>
+            <Icon name={s.icon} />
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // Live local time in the location tile
+  const el = document.getElementById('local-time');
+  if (el) {
+    const fmt = new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit', timeZone: el.dataset.tz });
+    const tick = () => (el.textContent = fmt.format(new Date()));
+    tick();
+    setInterval(tick, 30_000);
+  }
+
+  // Project tag filter
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const cards = document.querySelectorAll<HTMLElement>('.project');
+  buttons.forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const f = btn.dataset.filter!;
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      cards.forEach((c) => {
+        const show = f === 'All' || c.dataset.tags!.split('|').includes(f);
+        c.hidden = !show;
+        if (show) c.classList.add('in');
+      });
+    }),
+  );
+</script>
