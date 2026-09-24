@@ -1,0 +1,152 @@
+---
+// The inspector: one pre-rendered record per entity, showing whichever is selected. Linked objects
+// are grouped by how they relate to the selection and select that object when chosen.
+import Icon from './Icon.astro';
+import EntityShape from './EntityShape.astro';
+import { getModel, MISSION, typeName } from '../lib/model';
+
+const model = await getModel();
+const hid = (id: string) => `d-${id.replace(':', '-')}`;
+---
+
+<aside class="pane pane-insp panel" data-pane="details" id="pane-insp" aria-labelledby="insp-title">
+  <header class="panel-head">
+    <Icon name="search" class="size-4 text-dim" />
+    <h2 class="panel-title" id="insp-title">Inspector</h2>
+  </header>
+  <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain" data-insp-scroll>
+    {
+      model.list().map((e) => {
+        const groups = model.links(e.id);
+        const count = groups.reduce((n, g) => n + g.items.length, 0);
+        return (
+          <article data-detail={e.id} hidden={e.id !== MISSION} class="p-4" aria-labelledby={hid(e.id)}>
+            <div class="flex items-center gap-2">
+              <EntityShape type={e.type} class="size-3 shrink-0" />
+              <span class="kicker">
+                {typeName[e.type]}
+                {e.type === 'org' && ` · ${e.kind}`}
+              </span>
+              {e.code && <span class="code-chip ml-auto">{e.code}</span>}
+            </div>
+            <h3 id={hid(e.id)} tabindex="-1" class="mt-2 text-[17px] leading-snug font-semibold outline-none">
+              {e.title}
+            </h3>
+            {e.type === 'outcome' && <p class="mt-0.5 text-[13px] leading-relaxed text-muted">{e.summary}</p>}
+            {(e.status || e.period) && (
+              <p class="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                {e.status && <span class={`pill pill-${e.status.tone}`}>{e.status.label}</span>}
+                {e.period && <span class="readout text-[12px]">{e.period}</span>}
+              </p>
+            )}
+            {e.type !== 'outcome' && !e.exp && e.summary && <p class="mt-2.5 text-[13px] leading-relaxed text-muted">{e.summary}</p>}
+
+            {e.props.length > 0 && (
+              <dl class="kv mt-3.5 border-t border-line pt-3 text-[12.5px]">
+                {e.props.map(([k, v]) => (
+                  <>
+                    <dt>{k}</dt>
+                    <dd>{v}</dd>
+                  </>
+                ))}
+              </dl>
+            )}
+
+            {e.outcomes.length > 0 && (
+              <div class="mt-3.5 border-t border-line pt-3">
+                <p class="kicker">Measured outcomes</p>
+                <ul class="mt-2 space-y-2">
+                  {e.outcomes.map((oid) => {
+                    const o = model.get(oid);
+                    return (
+                      <li class="flex items-baseline gap-2.5">
+                        <span class="shrink-0 font-mono text-[14px] font-semibold text-orange">
+                          {o.metric!.qualifier && <span class="mr-1 text-[11px] font-normal text-muted">{o.metric!.qualifier}</span>}
+                          {o.metric!.value}
+                        </span>
+                        <span class="text-[12.5px] leading-snug text-muted">{o.metric!.label}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
+            {e.media[0] && e.media[0].kind !== 'video' && (
+              <figure class="mt-3.5 overflow-hidden rounded-[3px] border border-line bg-[#0d1014]">
+                <img src={e.media[0].src} alt={e.media[0].alt} loading="lazy" decoding="async" class="aspect-[16/9] w-full object-contain" />
+              </figure>
+            )}
+
+            {e.actions.length > 0 && (
+              <div class="mt-3.5 flex flex-wrap gap-2">
+                {e.actions.map((a, i) =>
+                  a.href ? (
+                    <a href={a.href} class:list={['btn', i === 0 ? 'btn-primary' : '']} target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>
+                      {a.label}
+                      <Icon name={a.icon} class="size-4" />
+                    </a>
+                  ) : (
+                    <span class="btn cursor-default text-dim">
+                      <Icon name={a.icon} class="size-4" />
+                      {a.label}
+                    </span>
+                  ),
+                )}
+              </div>
+            )}
+
+            <div class="mt-5 flex items-center justify-between">
+              <span class="kicker">Linked objects</span>
+              <span class="readout text-[11px]">{count}</span>
+            </div>
+            {groups.map((g) => (
+              <div class="mt-2.5">
+                <p class="text-[11.5px] text-dim">{g.label}</p>
+                <ul class="mt-1 divide-y divide-line border-y border-line">
+                  {g.items.map((l) => (
+                    <li>
+                      <button type="button" data-map-select={l.id} class="link-row">
+                        <EntityShape type={l.type} class="size-2.5 shrink-0" />
+                        <span class="min-w-0 flex-1 truncate">
+                          {l.label}
+                          {l.note && <span class="text-dim"> · {l.note}</span>}
+                        </span>
+                        <span class="kicker shrink-0">{typeName[l.type]}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </article>
+        );
+      })
+    }
+  </div>
+  <p class="sr-only" aria-live="polite" data-sel-announce></p>
+</aside>
+
+<script>
+  import { onSelect } from '../scripts/selection';
+
+  const scroller = document.querySelector<HTMLElement>('[data-insp-scroll]');
+  const announce = document.querySelector<HTMLElement>('[data-sel-announce]');
+  if (scroller) {
+    const details = [...scroller.querySelectorAll<HTMLElement>('[data-detail]')];
+    onSelect(({ id, source }) => {
+      let shown: HTMLElement | undefined;
+      for (const d of details) {
+        d.hidden = d.dataset.detail !== id;
+        if (!d.hidden) shown = d;
+      }
+      scroller.scrollTop = 0;
+      if (!shown || source === 'init') return;
+      const h = shown.querySelector<HTMLElement>('h3');
+      const kind = shown.querySelector('.kicker')?.textContent?.trim();
+      if (announce) announce.textContent = `Selected: ${h?.textContent?.trim()}${kind ? `, ${kind}` : ''}`;
+      // Choosing a linked object from the inspector moves focus to the record it opened.
+      if (source === 'inspector') h?.focus({ preventScroll: true });
+    });
+  }
+</script>

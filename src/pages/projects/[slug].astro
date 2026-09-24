@@ -3,7 +3,8 @@ import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
 import Panel from '../../components/Panel.astro';
-import { buildGraph, type NodeType } from '../../lib/graph';
+import EntityShape from '../../components/EntityShape.astro';
+import { getModel, typeName } from '../../lib/model';
 import { fmtMonth, statusLabel } from '../../lib/format';
 
 export async function getStaticPaths() {
@@ -24,8 +25,11 @@ const d = project.data;
 const { Content } = await render(project);
 
 const all = await getCollection('projects');
-const graph = buildGraph(all);
-const links = graph.details[`project:${project.id}`].links.filter((l) => l.type !== 'person');
+const model = await getModel();
+// What this project connects to on the homepage systems map; each opens there with it selected.
+const groups = model.links(`project:${project.id}`).filter((g) => g.items.every((l) => l.type !== 'person'));
+const linkCount = groups.reduce((n, g) => n + g.items.length, 0);
+const mapHref = (id: string) => `/?sel=${encodeURIComponent(id)}#overview`;
 
 // Related projects: most shared tags.
 const related = all
@@ -35,8 +39,6 @@ const related = all
   .sort((a, b) => b.shared - a.shared || b.p.data.code.localeCompare(a.p.data.code))
   .slice(0, 3);
 
-const typeName: Record<NodeType, string> = { person: 'Person', org: 'Organization', project: 'Project', skill: 'Capability' };
-const dotColor: Record<NodeType, string> = { person: 'bg-blue', org: 'bg-orange', project: 'bg-turquoise', skill: 'bg-violet' };
 ---
 
 <Base title={`${d.title} · ${d.code} · Donald Heddesheimer`} description={d.summary} crumb={[{ label: 'Projects', href: '/#projects' }, { label: d.title }]}>
@@ -47,7 +49,7 @@ const dotColor: Record<NodeType, string> = { person: 'bg-blue', org: 'bg-orange'
         <a href="/#projects" class="flex items-center gap-1.5 text-[12.5px] text-dim hover:text-text">
           <Icon name="arrow-left" class="size-3.5" /> All projects
         </a>
-        <span class="text-faint">/</span>
+        <span class="text-dim" aria-hidden="true">/</span>
         <span class="code-chip">{d.code}</span>
         <span class="kicker">Project object</span>
       </div>
@@ -99,7 +101,7 @@ const dotColor: Record<NodeType, string> = { person: 'bg-blue', org: 'bg-orange'
       }
     </section>
 
-    <div class="grid gap-3 md:gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+    <div class="grid grid-cols-[minmax(0,1fr)] gap-3 md:gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
       <!-- Body -->
       <Panel title="Write-up" icon="file" as="section" bodyClass="p-5 md:p-8">
         {
@@ -155,29 +157,51 @@ const dotColor: Record<NodeType, string> = { person: 'bg-blue', org: 'bg-orange'
         </Panel>
 
         <Panel title="Linked objects" icon="graph" as="aside">
-          <span slot="actions" class="readout text-[11px]">{links.length}</span>
-          <ul class="divide-y divide-line">
+          <a slot="actions" href={mapHref(`project:${project.id}`)} class="inline-flex items-center gap-1 text-[12px] text-blue-3 hover:underline">
+            Show on map <Icon name="arrow-right" class="size-3.5" />
+          </a>
+          <div class="divide-y divide-line">
             {
-              links.map((l) => (
-                <li class="flex items-center gap-2.5 px-4 py-2 text-[13px]">
-                  <span class={`size-2 shrink-0 rounded-full ${dotColor[l.type]}`} />
-                  <span class="min-w-0 flex-1 truncate">{l.label}</span>
-                  <span class="kicker text-[9.5px]">{typeName[l.type]}</span>
-                </li>
+              groups.map((g) => (
+                <div>
+                  <p class="px-4 pt-2.5 text-[11.5px] text-dim">{g.label}</p>
+                  <ul class="pb-1">
+                    {g.items.map((l) => (
+                      <li>
+                        <a href={mapHref(l.id)} class="flex items-center gap-2.5 px-4 py-1.5 text-[13px] hover:bg-panel-2">
+                          <EntityShape type={l.type} class="size-2.5 shrink-0" />
+                          <span class="min-w-0 flex-1 truncate">
+                            {l.label}
+                            {l.note && <span class="text-dim"> · {l.note}</span>}
+                          </span>
+                          <span class="kicker">{typeName[l.type]}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))
             }
             {
-              related.map(({ p }) => (
-                <li>
-                  <a href={`/projects/${p.id}/`} class="flex items-center gap-2.5 px-4 py-2 text-[13px] hover:bg-panel-2">
-                    <span class={`size-2 shrink-0 rounded-full ${dotColor.project}`} />
-                    <span class="min-w-0 flex-1 truncate">{p.data.title}</span>
-                    <span class="kicker text-[9.5px]">Related</span>
-                  </a>
-                </li>
-              ))
+              related.length > 0 && (
+                <div>
+                  <p class="px-4 pt-2.5 text-[11.5px] text-dim">Shares the most tags with</p>
+                  <ul class="pb-1">
+                    {related.map(({ p }) => (
+                      <li>
+                        <a href={`/projects/${p.id}/`} class="flex items-center gap-2.5 px-4 py-1.5 text-[13px] hover:bg-panel-2">
+                          <EntityShape type="project" class="size-2.5 shrink-0" />
+                          <span class="min-w-0 flex-1 truncate">{p.data.title}</span>
+                          <span class="kicker">{p.data.code}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
             }
-          </ul>
+          </div>
+          <p class="sr-only">{linkCount} linked objects</p>
         </Panel>
 
         <nav class="grid grid-cols-2 gap-3" aria-label="More projects">

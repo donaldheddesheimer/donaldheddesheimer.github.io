@@ -8,6 +8,10 @@ tags: [Developer tools, LLMs, Swift, macOS]
 repo: https://github.com/donald-heddesheimer/claude-status
 cover: /projects/claude-status-pet.gif
 coverAlt: The pet working, then blocked on a permission prompt, then idle again
+poster: /projects/claude-status-states.png
+evidence:
+  - { kind: screenshot, src: /projects/claude-status-states.png, alt: 'The four states: nothing running, idle, working, and needs you' }
+  - { kind: screenshot, src: /projects/claude-status-sessions.png, alt: 'Three sessions, each with its own bubble color, and the hover panel naming them' }
 ---
 
 ## Objective

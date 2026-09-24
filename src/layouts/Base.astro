@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { getCollection } from 'astro:content';
 import Icon, { type IconName } from '../components/Icon.astro';
 import { experience, orgs, profile, socials } from '../data/site';
+import { getModel, typeName } from '../lib/model';
 
 interface Props {
   title?: string;
@@ -37,6 +38,11 @@ const search = [
     href: `/#exp-${e.id}`,
   })),
   { kind: 'Experience', code: 'EDU', label: 'Georgia Institute of Technology', sub: 'B.S. Computer Science', href: '/#exp-education' },
+  // Orgs and capabilities open on the homepage console with that object selected.
+  ...(await getModel())
+    .list()
+    .filter((e) => e.type === 'org' || e.type === 'skill')
+    .map((e) => ({ kind: 'Map', code: typeName[e.type].slice(0, 3).toUpperCase(), label: e.title, sub: e.kind, sel: e.id, href: `/?sel=${encodeURIComponent(e.id)}#overview` })),
   ...nav.map((n) => ({ kind: 'Section', code: 'NAV', label: n.label, sub: '', href: `/#${n.id}` })),
   { kind: 'File', code: 'PDF', label: 'Resume', sub: 'Download PDF', href: profile.resume },
   ...socials.map((s) => ({ kind: 'Link', code: 'EXT', label: s.label, sub: s.handle, href: s.href })),
@@ -55,6 +61,19 @@ const search = [
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      // Before first paint: note that JS runs, and apply the saved Motion setting (off by default
+      // for people who've asked their OS for reduced motion).
+      (function () {
+        var h = document.documentElement;
+        h.classList.add('js');
+        var saved = null;
+        try {
+          saved = localStorage.getItem('motion');
+        } catch (e) {}
+        h.dataset.motion = saved || (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'off' : 'on');
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -75,11 +94,11 @@ const search = [
         </svg>
       </a>
       <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2 px-3 text-[13px]">
-        <a href="/" class="hidden font-semibold whitespace-nowrap sm:inline">{profile.name}</a>
+        <a href="/" class="hidden py-1 font-semibold whitespace-nowrap sm:inline-block">{profile.name}</a>
         {
           crumb.map((c, i) => (
             <>
-              <span class="hidden text-faint sm:inline">/</span>
+              <span class="hidden text-dim sm:inline" aria-hidden="true">/</span>
               {c.href ? (
                 <a href={c.href} class="truncate text-muted hover:text-text">
                   {c.label}
@@ -105,7 +124,7 @@ const search = [
       <div class="ml-auto flex items-center gap-1.5 pr-2 md:ml-0 md:gap-3 md:pr-3">
         <div class="hidden items-center gap-3 readout text-[11px] lg:flex">
           <span class="flex items-center gap-2"><span class="live-dot"></span> ONLINE</span>
-          <span class="text-faint">|</span>
+          <span class="text-dim" aria-hidden="true">|</span>
           <span>ATL <span data-clock>--:--:--</span></span>
         </div>
         <button type="button" data-cmdk-open class="btn btn-ghost btn-icon md:hidden" aria-label="Search">
@@ -133,7 +152,7 @@ const search = [
       <div class="mt-auto flex flex-col items-center gap-1">
         {
           socials.map((s) => (
-            <a href={s.href} class="grid size-10 place-items-center rounded-[3px] text-faint hover:bg-panel-3 hover:text-text" aria-label={s.label} target={s.id === 'email' ? undefined : '_blank'} rel="noopener">
+            <a href={s.href} class="grid size-10 place-items-center rounded-[3px] text-dim hover:bg-panel-3 hover:text-text" aria-label={s.label} target={s.id === 'email' ? undefined : '_blank'} rel="noopener">
               <Icon name={s.icon} class="size-4" />
             </a>
           ))
@@ -160,24 +179,27 @@ const search = [
     </main>
 
     <!-- Status bar (desktop) -->
-    <footer class="fixed right-0 bottom-0 left-14 z-30 hidden h-7 items-center gap-4 border-t border-line bg-panel px-3 readout text-[10.5px] text-faint md:flex">
+    <footer class="fixed right-0 bottom-0 left-14 z-30 hidden h-7 items-center gap-4 border-t border-line bg-panel px-3 readout text-[10.5px] text-dim md:flex">
       <span class="flex items-center gap-1.5 text-green-2"><span class="size-1.5 rounded-full bg-green"></span>All systems nominal</span>
+      <button type="button" class="motion-toggle flex h-full items-center gap-1.5 px-1 hover:text-text" data-motion-toggle aria-pressed="true" title="Turn animation on or off">
+        Motion <span class="text-text" data-motion-state>ON</span>
+      </button>
       <span>{projects.length} projects</span>
       <span>{experience.length} roles</span>
       <span class="ml-auto hidden lg:inline">{profile.coords}</span>
       <span>© {new Date().getFullYear()} {profile.name}</span>
-      <a href="https://github.com/donaldheddesheimer/donaldheddesheimer.github.io" class="hover:text-text" target="_blank" rel="noopener">Source</a>
+      <a href="https://github.com/donaldheddesheimer/donaldheddesheimer.github.io" class="-my-1 inline-block py-1 hover:text-text" target="_blank" rel="noopener">Source</a>
     </footer>
 
     <!-- ⌘K search -->
     <dialog id="cmdk" class="m-auto mt-[12vh] w-[min(640px,calc(100%-2rem))] rounded-[3px] border border-line-2 bg-panel p-0 text-text shadow-2xl backdrop:bg-black/60">
       <div class="flex items-center gap-2 border-b border-line px-3">
         <Icon name="search" class="size-4 text-dim" />
-        <input id="cmdk-input" type="text" placeholder="Search projects, roles, sections…" autocomplete="off" spellcheck="false" class="h-12 flex-1 bg-transparent text-[15px] outline-none placeholder:text-faint" aria-controls="cmdk-list" />
+        <input id="cmdk-input" type="text" placeholder="Search projects, roles, sections…" autocomplete="off" spellcheck="false" class="h-12 flex-1 bg-transparent text-[15px] outline-none placeholder:text-dim" aria-controls="cmdk-list" aria-label="Search" />
         <kbd class="code-chip">ESC</kbd>
       </div>
       <ul id="cmdk-list" role="listbox" class="max-h-[55vh] overflow-y-auto py-1"></ul>
-      <div class="flex gap-4 border-t border-line px-3 py-2 readout text-[10.5px] text-faint">
+      <div class="flex gap-4 border-t border-line px-3 py-2 readout text-[10.5px] text-dim">
         <span>↑↓ navigate</span><span>↵ open</span><span class="ml-auto" id="cmdk-count"></span>
       </div>
     </dialog>
@@ -218,7 +240,7 @@ const search = [
       }
 
       // ⌘K search.
-      type Item = { kind: string; code: string; label: string; sub: string; terms?: string; href: string };
+      type Item = { kind: string; code: string; label: string; sub: string; terms?: string; href: string; sel?: string };
       const dialog = document.getElementById('cmdk') as HTMLDialogElement;
       const input = document.getElementById('cmdk-input') as HTMLInputElement;
       const list = document.getElementById('cmdk-list')!;
@@ -274,11 +296,42 @@ const search = [
         } else if (e.key === 'Enter' && shown[active]) {
           e.preventDefault();
           dialog.close();
-          location.href = shown[active].href;
+          go(shown[active]);
         }
       });
       list.addEventListener('click', (e) => {
-        if ((e.target as HTMLElement).closest('a')) dialog.close();
+        const a = (e.target as HTMLElement).closest('a');
+        if (!a) return;
+        dialog.close();
+        const item = shown[Number(a.closest('li')?.dataset.n)];
+        if (item?.sel && onConsole()) {
+          e.preventDefault();
+          go(item);
+        }
+      });
+      // On the homepage, map objects are selected in place instead of reloading the page.
+      const onConsole = () => !!document.getElementById('entity-data');
+      function go(i: Item) {
+        if (i.sel && onConsole()) document.dispatchEvent(new CustomEvent('entity:reveal', { detail: i.sel }));
+        else location.href = i.href;
+      }
+
+      // Motion switch (status bar).
+      const motionBtn = document.querySelector<HTMLButtonElement>('[data-motion-toggle]');
+      const motionState = document.querySelector('[data-motion-state]');
+      const showMotion = () => {
+        const on = document.documentElement.dataset.motion !== 'off';
+        motionBtn?.setAttribute('aria-pressed', String(on));
+        if (motionState) motionState.textContent = on ? 'ON' : 'OFF';
+      };
+      showMotion();
+      motionBtn?.addEventListener('click', () => {
+        const next = document.documentElement.dataset.motion === 'off' ? 'on' : 'off';
+        document.documentElement.dataset.motion = next;
+        try {
+          localStorage.setItem('motion', next);
+        } catch {}
+        showMotion();
       });
       dialog.addEventListener('click', (e) => {
         if (e.target === dialog) dialog.close();

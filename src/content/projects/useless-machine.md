@@ -8,6 +8,9 @@ tags: [Hardware, Circuits, Woodworking]
 repo: https://github.com/donaldheddesheimer/Useless-Machine
 cover: /projects/useless-machine.jpg
 coverAlt: The useless machine partly assembled, with the servo and switch mounted inside the box
+evidence:
+  - { kind: video, src: /projects/useless-machine.mp4, poster: /projects/useless-machine.jpg, alt: 'Video of the useless machine' }
+  - { kind: photo, src: /projects/useless-machine-circuit.jpg, alt: 'The circuit' }
 ---
 
 ## Objective

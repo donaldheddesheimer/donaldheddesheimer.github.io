@@ -1,0 +1,362 @@
+---
+// The systems map: every entity as a real <button> over an aria-hidden layer of typed edges. Node
+// positions are percentages, so the no-JS view is the build-time layout; with JS the layout reruns
+// for the panel's actual size. A list view gives the same objects without the graph.
+import Icon from './Icon.astro';
+import EntityShape from './EntityShape.astro';
+import { getModel, MISSION, typeName, typeOrder, typePlural, type Entity } from '../lib/model';
+import { layout, type EntityType } from '../lib/layout';
+
+const model = await getModel();
+const entities = model.list();
+const W = 1000;
+const H = 620;
+const pos = layout(
+  entities.map((e) => ({ id: e.id, type: e.type, label: e.label })),
+  model.relations,
+  { width: W, height: H, pad: 34, labelScale: 1.05 },
+);
+const at = new Map(entities.map((e, i) => [e.id, { x: (pos[i].x / W) * 100, y: (pos[i].y / H) * 100 }]));
+const pct = (n: number) => `${n.toFixed(2)}%`;
+
+const nodeName = (e: Entity) => {
+  const bits = [`${typeName[e.type]}: ${e.type === 'outcome' ? `${e.title}, ${e.summary}` : e.title}`];
+  if (e.status) bits.push(e.status.label.toLowerCase());
+  bits.push(`${model.degree(e.id)} links`);
+  return bits.join(', ');
+};
+const filters: EntityType[] = ['org', 'project', 'skill', 'outcome'];
+---
+
+<section class="pane pane-map panel" data-pane="map" data-map id="pane-map" aria-labelledby="map-title">
+  <header class="panel-head">
+    <Icon name="graph" class="size-4 shrink-0 text-dim" />
+    <h2 class="panel-title truncate" id="map-title">Systems map</h2>
+    <span class="map-count code-chip">{entities.length} OBJ · {model.relations.length} LNK</span>
+    <div class="ml-auto flex shrink-0 items-center gap-1">
+      <div class="seg" role="group" aria-label="Map layout">
+        <button type="button" data-map-view="graph" aria-pressed="true" aria-label="Graph" title="Graph"><Icon name="graph" class="size-3.5" /></button>
+        <button type="button" data-map-view="list" aria-pressed="false" aria-label="List" title="List"><Icon name="list" class="size-3.5" /></button>
+      </div>
+      <button type="button" class="map-expand btn btn-ghost btn-icon" data-map-expand aria-pressed="false" aria-label="Expand systems map" title="Expand map">
+        <Icon name="expand" class="ico-expand size-4" />
+        <Icon name="collapse" class="ico-collapse size-4" />
+      </button>
+    </div>
+  </header>
+
+  <div class="map-tools" role="group" aria-label="Show on map">
+    {
+      filters.map((t) => (
+        <button type="button" class="chip" data-map-filter={t} aria-pressed="true" title={`${typePlural[t]}: shown`}>
+          <EntityShape type={t} class="size-3 shrink-0" />
+          <span class="chip-text">{typePlural[t]}</span>
+        </button>
+      ))
+    }
+    <button type="button" class="chip ml-auto" data-map-reset title="Show everything and return to the mission">
+      <Icon name="reset" class="size-3.5 shrink-0" />
+      <span class="chip-text">Reset</span>
+    </button>
+  </div>
+
+  <div class="map-body">
+    <div class="map-stage gridfield" data-map-stage>
+      <svg class="edges" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        {
+          model.relations.map((r) => {
+            const a = at.get(r.source)!;
+            const b = at.get(r.target)!;
+            return (
+              <line
+                class={`ge r-${r.kind}`}
+                data-s={r.source}
+                data-t={r.target}
+                data-types={`${r.source.split(':')[0]} ${r.target.split(':')[0]}`}
+                x1={a.x.toFixed(2)}
+                y1={a.y.toFixed(2)}
+                x2={b.x.toFixed(2)}
+                y2={b.y.toFixed(2)}
+              />
+            );
+          })
+        }
+      </svg>
+      <div class="nodes" role="group" aria-label="Systems map. Arrow keys move between objects, Enter selects." data-map-nodes>
+        {
+          entities.map((e) => {
+            const p = at.get(e.id)!;
+            return (
+              <button
+                type="button"
+                class={`gn t-${e.type}`}
+                data-id={e.id}
+                data-type={e.type}
+                data-label={e.label}
+                data-href={e.type === 'project' ? e.href : undefined}
+                tabindex={e.id === MISSION ? 0 : -1}
+                aria-label={nodeName(e)}
+                aria-current={e.id === MISSION ? 'true' : undefined}
+                style={`left:${pct(p.x)};top:${pct(p.y)}`}
+              >
+                <span class="shape">
+                  {e.type === 'person' && <span class="initials">DH</span>}
+                  {e.type === 'org' && <Icon name="building" class="glyph" strokeWidth={2} />}
+                  {e.type === 'project' && <Icon name="cube" class="glyph" strokeWidth={2} />}
+                  {e.status?.tone === 'active' || e.status?.tone === 'current' ? <span class="live" /> : null}
+                </span>
+                <span class="lbl" aria-hidden="true">
+                  {e.label}
+                </span>
+              </button>
+            );
+          })
+        }
+      </div>
+      <p class="map-hint readout" aria-hidden="true">Hover to trace · Select to inspect · Select a project again to open it</p>
+    </div>
+
+    <div class="map-list" data-map-list hidden>
+      {
+        typeOrder.map((t) => (
+          <section>
+            <h3 class="kicker sticky top-0 z-[1] flex items-center gap-2 border-b border-line bg-panel px-3 py-1.5">
+              <EntityShape type={t} class="size-2.5" />
+              {t === 'person' ? 'Person' : typePlural[t]}
+            </h3>
+            <ul>
+              {model.list(t).map((e) => (
+                <li>
+                  <button type="button" class="list-row" data-map-select={e.id} aria-current={e.id === MISSION ? 'true' : undefined}>
+                    <span class="min-w-0 flex-1 truncate">{e.type === 'outcome' ? `${e.title} · ${e.summary}` : e.title}</span>
+                    {e.status && <span class="kicker">{e.status.label}</span>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+
+  <footer class="map-legend readout" aria-label="Edge legend">
+    <span class="flex items-center gap-1.5"><svg class="h-2 w-5" aria-hidden="true"><line x1="0" y1="4" x2="20" y2="4" class="lg-solid" /></svg>Affiliation, built at</span>
+    <span class="flex items-center gap-1.5"><svg class="h-2 w-5" aria-hidden="true"><line x1="0" y1="4" x2="20" y2="4" class="lg-dash" /></svg>Part of, related</span>
+    <span class="flex items-center gap-1.5"><svg class="h-2 w-5" aria-hidden="true"><line x1="0" y1="4" x2="20" y2="4" class="lg-dot" /></svg>Uses capability</span>
+  </footer>
+
+  <div class="map-selbar" data-map-selbar>
+    <span class="min-w-0 flex-1 truncate text-[13px]"><span class="kicker mr-1.5">Selected</span><span data-selbar-label></span></span>
+    <button type="button" class="btn" data-goto-tab="details">Details</button>
+  </div>
+</section>
+
+<script>
+  import { layout, type EntityType, type LNode, type LEdge } from '../lib/layout';
+  import { DEFAULT_SEL, getSel, onPreview, onSelect, preview, select } from '../scripts/selection';
+
+  const pane = document.querySelector<HTMLElement>('[data-map]');
+  if (pane) {
+    const stage = pane.querySelector<HTMLElement>('[data-map-stage]')!;
+    const list = pane.querySelector<HTMLElement>('[data-map-list]')!;
+    const nodes = [...pane.querySelectorAll<HTMLButtonElement>('.gn')];
+    const lines = [...pane.querySelectorAll<SVGLineElement>('.ge')];
+    const byId = new Map(nodes.map((n) => [n.dataset.id!, n]));
+    const adj = new Map<string, Set<string>>();
+    for (const l of lines) {
+      const { s, t } = l.dataset as { s: string; t: string };
+      if (!adj.has(s)) adj.set(s, new Set());
+      if (!adj.has(t)) adj.set(t, new Set());
+      adj.get(s)!.add(t);
+      adj.get(t)!.add(s);
+    }
+    const lnodes: LNode[] = nodes.map((n) => ({ id: n.dataset.id!, type: n.dataset.type as EntityType, label: n.dataset.label! }));
+    const ledges: LEdge[] = lines.map((l) => ({ source: l.dataset.s!, target: l.dataset.t! }));
+
+    // Re-run the layout for the panel's real size (compact panels reserve less room for labels).
+    let lastW = 0;
+    let lastH = 0;
+    const relayout = () => {
+      const { width, height } = stage.getBoundingClientRect();
+      if (width < 60 || height < 60 || (Math.abs(width - lastW) < 2 && Math.abs(height - lastH) < 2)) return;
+      lastW = width;
+      lastH = height;
+      const compact = width < 480;
+      const pos = layout(lnodes, ledges, { width, height, pad: compact ? 20 : 34, labels: !compact, labelScale: 1.05 });
+      const pct = new Map(lnodes.map((n, i) => [n.id, [(pos[i].x / width) * 100, (pos[i].y / height) * 100]]));
+      for (const n of nodes) {
+        const [x, y] = pct.get(n.dataset.id!)!;
+        n.style.left = `${x.toFixed(2)}%`;
+        n.style.top = `${y.toFixed(2)}%`;
+      }
+      for (const l of lines) {
+        const [x1, y1] = pct.get(l.dataset.s!)!;
+        const [x2, y2] = pct.get(l.dataset.t!)!;
+        l.setAttribute('x1', x1.toFixed(2));
+        l.setAttribute('y1', y1.toFixed(2));
+        l.setAttribute('x2', x2.toFixed(2));
+        l.setAttribute('y2', y2.toFixed(2));
+      }
+    };
+    let queued = 0;
+    new ResizeObserver(() => {
+      cancelAnimationFrame(queued);
+      queued = requestAnimationFrame(relayout);
+    }).observe(stage);
+
+    // Highlight the selected (or hovered / focused) entity and its direct relationships only.
+    let traced: string | null = null;
+    const paint = () => {
+      const sel = getSel();
+      const focus = traced ?? sel;
+      const near = adj.get(focus) ?? new Set<string>();
+      stage.classList.add('focus');
+      for (const n of nodes) {
+        const id = n.dataset.id!;
+        n.classList.toggle('on', id === focus || near.has(id));
+        n.classList.toggle('sel', id === sel);
+        n.classList.toggle('traced', id === traced && id !== sel);
+        if (id === sel) n.setAttribute('aria-current', 'true');
+        else n.removeAttribute('aria-current');
+      }
+      for (const l of lines) l.classList.toggle('on', l.dataset.s === focus || l.dataset.t === focus);
+      list.querySelectorAll<HTMLElement>('[data-map-select]').forEach((b) => b.toggleAttribute('aria-current', b.dataset.mapSelect === sel));
+    };
+
+    // One tab stop for the whole graph; arrow keys move between visible nodes.
+    let rove = byId.get(getSel()) ?? nodes[0];
+    const setRove = (n: HTMLButtonElement) => {
+      if (n === rove) return;
+      rove.tabIndex = -1;
+      rove = n;
+      rove.tabIndex = 0;
+    };
+    nodes.forEach((n) => (n.tabIndex = n === rove ? 0 : -1));
+    const visible = (n: HTMLElement) => n.offsetParent !== null;
+    const center = (n: HTMLElement) => {
+      const r = n.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    };
+    const DIRS: Record<string, [number, number]> = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] };
+
+    stage.addEventListener('keydown', (e) => {
+      const n = (e.target as Element).closest<HTMLButtonElement>('.gn');
+      if (!n) return;
+      let next: HTMLButtonElement | undefined;
+      if (e.key in DIRS) {
+        const [dx, dy] = DIRS[e.key];
+        const a = center(n);
+        let best = Infinity;
+        for (const m of nodes) {
+          if (m === n || !visible(m)) continue;
+          const b = center(m);
+          const along = (b.x - a.x) * dx + (b.y - a.y) * dy;
+          if (along < 4) continue;
+          const across = Math.abs((b.x - a.x) * dy - (b.y - a.y) * dx);
+          const score = along + across * 2.2;
+          if (score < best) {
+            best = score;
+            next = m;
+          }
+        }
+      } else if (e.key === 'Home') next = byId.get('person:me');
+      else if (e.key === 'End') next = byId.get(getSel());
+      else return;
+      e.preventDefault();
+      if (next && visible(next)) {
+        setRove(next);
+        next.focus();
+      }
+    });
+
+    stage.addEventListener('click', (e) => {
+      const n = (e.target as Element).closest<HTMLButtonElement>('.gn');
+      if (!n) return;
+      const id = n.dataset.id!;
+      setRove(n);
+      if (id === getSel() && n.dataset.href) {
+        location.href = n.dataset.href;
+        return;
+      }
+      select(id, 'map');
+    });
+
+    // Hover and keyboard focus both trace a node's relationships.
+    stage.addEventListener('pointerover', (e) => {
+      const n = (e.target as Element).closest<HTMLElement>('.gn');
+      if (n && e.pointerType === 'mouse') preview(n.dataset.id!);
+    });
+    stage.addEventListener('pointerout', (e) => {
+      const n = (e.target as Element).closest<HTMLElement>('.gn');
+      if (n && e.pointerType === 'mouse' && !n.contains(e.relatedTarget as Node)) preview(null);
+    });
+    stage.addEventListener('focusin', (e) => {
+      const n = (e.target as Element).closest<HTMLButtonElement>('.gn');
+      if (n) {
+        setRove(n);
+        if (n.matches(':focus-visible')) preview(n.dataset.id!);
+      }
+    });
+    stage.addEventListener('focusout', () => preview(null));
+
+    onPreview((id) => {
+      traced = id;
+      paint();
+    });
+    onSelect(({ id }) => {
+      const n = byId.get(id);
+      if (n && document.activeElement?.closest('[data-map-stage]') == null) setRove(n);
+      paint();
+    });
+
+    // Type filters.
+    const filterBtns = [...pane.querySelectorAll<HTMLButtonElement>('[data-map-filter]')];
+    const setFilter = (b: HTMLButtonElement, on: boolean) => {
+      b.setAttribute('aria-pressed', String(on));
+      b.title = `${b.textContent!.trim()}: ${on ? 'shown' : 'hidden'}`;
+      stage.classList.toggle(`hide-${b.dataset.mapFilter}`, !on);
+    };
+    filterBtns.forEach((b) =>
+      b.addEventListener('click', () => {
+        setFilter(b, b.getAttribute('aria-pressed') !== 'true');
+        if (!visible(rove)) setRove(byId.get('person:me')!);
+      }),
+    );
+    // Makes sure a type is showing before something of that type is revealed.
+    document.addEventListener('map:show-type', (e) => {
+      const b = filterBtns.find((x) => x.dataset.mapFilter === (e as CustomEvent<string>).detail);
+      if (b && b.getAttribute('aria-pressed') !== 'true') setFilter(b, true);
+    });
+    pane.querySelector('[data-map-reset]')!.addEventListener('click', () => {
+      filterBtns.forEach((b) => setFilter(b, true));
+      select(DEFAULT_SEL, 'reset');
+    });
+
+    // Graph / list.
+    const viewBtns = [...pane.querySelectorAll<HTMLButtonElement>('[data-map-view]')];
+    viewBtns.forEach((b) =>
+      b.addEventListener('click', () => {
+        const asList = b.dataset.mapView === 'list';
+        viewBtns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        list.hidden = !asList;
+        stage.hidden = asList;
+        pane.dataset.view = asList ? 'list' : 'graph';
+        if (!asList) requestAnimationFrame(relayout);
+      }),
+    );
+
+    pane.addEventListener('map:focus-node', (e) => {
+      const id = (e as CustomEvent<string>).detail;
+      if (pane.dataset.view === 'list') {
+        list.querySelector<HTMLElement>(`[data-map-select="${CSS.escape(id)}"]`)?.focus({ preventScroll: true });
+        return;
+      }
+      const n = byId.get(id);
+      if (n && visible(n)) {
+        setRove(n);
+        n.focus({ preventScroll: true });
+      }
+    });
+  }
+</script>

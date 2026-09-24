@@ -23,6 +23,20 @@ const projects = defineCollection({
     featured: z.boolean().default(false),
     cover: z.string().optional(), // path under public/, e.g. "/projects/traffic-ops.jpg"
     coverAlt: z.string().optional(),
+    // A still frame for places that shouldn't animate (cards, the homepage console). Use it when the cover is a GIF.
+    poster: z.string().optional(),
+    // Real screenshots, diagrams, traces, photos, or video from the project, shown as evidence on the homepage.
+    evidence: z
+      .array(
+        z.object({
+          src: z.string(),
+          alt: z.string(),
+          kind: z.enum(['screenshot', 'diagram', 'trace', 'video', 'photo']),
+          caption: z.string().optional(),
+          poster: z.string().optional(), // video only
+        }),
+      )
+      .default([]),
     stats: z.array(z.object({ label: z.string(), value: z.string() })).default([]),
   }),
 });

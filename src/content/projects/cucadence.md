@@ -10,6 +10,8 @@ repo: https://github.com/donald-heddesheimer/cadence
 featured: true
 cover: /projects/cadence-report.svg
 coverAlt: cuCadence report showing per-stage latency distributions, a deadline verdict, and the three slowest iterations broken down by stage
+evidence:
+  - { kind: trace, src: /projects/cadence-timeline.png, alt: 'One iteration on the Perfetto timeline: host launches return within 10 µs while the device lane shows the gap before the second kernel starts' }
 stats:
   - { label: Cost per GPU scope, value: '3.4 μs' }
   - { label: Overhead vs. blocking timing, value: '−48%' }

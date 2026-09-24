@@ -1,0 +1,223 @@
+---
+// The top of the homepage: who this is, then the console (systems map, mission / evidence stage,
+// inspector). Wide screens show all three panes; narrower ones get Mission / Map / Details tabs.
+import Icon from './Icon.astro';
+import SystemsMap from './SystemsMap.astro';
+import Stage from './Stage.astro';
+import Inspector from './Inspector.astro';
+import { getModel, MISSION } from '../lib/model';
+import { education, profile, socials } from '../data/site';
+
+const model = await getModel();
+const entityData = JSON.stringify({ ids: model.list().map((e) => e.id), fallback: MISSION });
+const tabs = [
+  { id: 'mission', label: 'Mission', pane: 'pane-stage' },
+  { id: 'map', label: 'Map', pane: 'pane-map' },
+  { id: 'details', label: 'Details', pane: 'pane-insp' },
+];
+---
+
+<section id="overview" class="ov" aria-label="Overview">
+  <header class="ov-id panel">
+    <div class="id-main">
+      {
+        profile.photo ? (
+          <img src={profile.photo} alt={profile.name} class="size-14 shrink-0 rounded-[3px] border border-line object-cover" />
+        ) : (
+          <div class="hatch grid size-14 shrink-0 place-items-center rounded-[3px] border border-line font-mono text-base font-semibold text-dim" aria-hidden="true">
+            {profile.initials}
+          </div>
+        )
+      }
+      <div class="min-w-0">
+        <h1 class="text-[21px] leading-tight font-semibold tracking-tight">{profile.name}</h1>
+        <p class="mt-0.5 text-[13.5px] text-muted">{profile.headline}</p>
+      </div>
+    </div>
+
+    <div class="id-actions">
+      <a href={profile.resume} class="btn btn-primary" target="_blank" rel="noopener"><Icon name="download" class="size-4" />Resume</a>
+      {
+        socials.map((s) => (
+          <a href={s.href} class="btn btn-icon" aria-label={s.label} title={s.label} target={s.id === 'email' ? undefined : '_blank'} rel="noopener">
+            <Icon name={s.icon} class="size-4" />
+          </a>
+        ))
+      }
+    </div>
+
+    <dl class="id-facts">
+      <div>
+        <dt>Status</dt>
+        <dd class="flex items-center gap-2"><span class="live-dot shrink-0"></span>{profile.status}</dd>
+      </div>
+      <div>
+        <dt>Education</dt>
+        <dd>{profile.school}</dd>
+      </div>
+      <div>
+        <dt>Thread</dt>
+        <dd>{education.thread}</dd>
+      </div>
+      <div>
+        <dt>GPA</dt>
+        <dd class="font-mono text-[12.5px]">{education.gpa}</dd>
+      </div>
+      <div>
+        <dt>Location</dt>
+        <dd>{profile.location}</dd>
+      </div>
+    </dl>
+
+    <div class="id-about">
+      {profile.about.map((p) => <p>{p}</p>)}
+    </div>
+  </header>
+
+  <div class="ov-tabs" data-ov-tabs aria-label="Console panes">
+    {
+      tabs.map((t) => (
+        <button type="button" id={`tab-${t.id}`} data-tab-btn={t.id} aria-controls={t.pane}>
+          {t.label}
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="ov-console" data-console data-tab="mission" data-expanded="false">
+    <SystemsMap />
+    <Stage />
+    <Inspector />
+  </div>
+  <div class="ov-about panel">
+    {profile.about.map((p) => <p>{p}</p>)}
+  </div>
+</section>
+
+<script type="application/json" id="entity-data" set:html={entityData.replace(/</g, '\\u003c')} />
+
+<script>
+  import { isEntity, onSelect, preview, select } from '../scripts/selection';
+
+  const ov = document.getElementById('overview');
+  const con = document.querySelector<HTMLElement>('[data-console]');
+  if (ov && con) {
+    const narrow = matchMedia('(max-width: 1023.98px)');
+    const tablist = ov.querySelector<HTMLElement>('[data-ov-tabs]')!;
+    const tabBtns = [...tablist.querySelectorAll<HTMLButtonElement>('[data-tab-btn]')];
+    const panes = [...con.querySelectorAll<HTMLElement>('[data-pane]')];
+    const mapPane = con.querySelector<HTMLElement>('[data-map]')!;
+    const expandBtn = con.querySelector<HTMLButtonElement>('[data-map-expand]')!;
+
+    // --- Tabs (below lg only) -----------------------------------------------------------------
+    const setTab = (name: string, focusTab = false) => {
+      con.dataset.tab = name;
+      tabBtns.forEach((b) => {
+        const on = b.dataset.tabBtn === name;
+        b.setAttribute('aria-selected', String(on));
+        if (narrow.matches) b.tabIndex = on ? 0 : -1;
+        if (on && focusTab) b.focus();
+      });
+    };
+    const applyRoles = () => {
+      const on = narrow.matches;
+      if (on) tablist.setAttribute('role', 'tablist');
+      else tablist.removeAttribute('role');
+      tabBtns.forEach((b) => {
+        if (on) {
+          b.setAttribute('role', 'tab');
+          b.setAttribute('aria-selected', String(b.dataset.tabBtn === con.dataset.tab));
+          b.tabIndex = b.dataset.tabBtn === con.dataset.tab ? 0 : -1;
+        } else {
+          b.removeAttribute('role');
+          b.removeAttribute('aria-selected');
+          b.removeAttribute('tabindex');
+        }
+      });
+      panes.forEach((p) => {
+        p.dataset.label ??= p.getAttribute('aria-labelledby') ?? '';
+        if (on) {
+          p.setAttribute('role', 'tabpanel');
+          p.setAttribute('aria-labelledby', `tab-${p.dataset.pane}`);
+        } else {
+          p.removeAttribute('role');
+          p.setAttribute('aria-labelledby', p.dataset.label);
+        }
+      });
+    };
+    applyRoles();
+    narrow.addEventListener('change', applyRoles);
+    tabBtns.forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tabBtn!)));
+    tablist.addEventListener('keydown', (e) => {
+      const i = tabBtns.indexOf(e.target as HTMLButtonElement);
+      if (i < 0 || !narrow.matches) return;
+      const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabBtns.length - 1 }[e.key];
+      if (next === undefined) return;
+      e.preventDefault();
+      setTab(tabBtns[(next + tabBtns.length) % tabBtns.length].dataset.tabBtn!, true);
+    });
+    document.addEventListener('click', (e) => {
+      const b = (e.target as Element).closest<HTMLElement>('[data-goto-tab]');
+      if (!b) return;
+      setTab(b.dataset.gotoTab!);
+      if (b.dataset.gotoTab === 'details') con.querySelector<HTMLElement>('[data-detail]:not([hidden]) h3')?.focus({ preventScroll: true });
+    });
+    // The Mission tab is named for what the stage is showing.
+    document.addEventListener('stage:title', (e) => {
+      tabBtns[0].textContent = (e as CustomEvent<string>).detail;
+    });
+    tabBtns[0].textContent = con.querySelector('[data-stage-title]')?.textContent ?? 'Mission';
+
+    // --- Expanded map (lg and up) ---------------------------------------------------------------
+    const setExpanded = (on: boolean) => {
+      con.dataset.expanded = String(on);
+      expandBtn.setAttribute('aria-pressed', String(on));
+      expandBtn.setAttribute('aria-label', on ? 'Collapse systems map' : 'Expand systems map');
+      expandBtn.title = on ? 'Collapse map (Esc)' : 'Expand map';
+    };
+    expandBtn.addEventListener('click', () => setExpanded(con.dataset.expanded !== 'true'));
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || con.dataset.expanded !== 'true' || document.querySelector('dialog[open]')) return;
+      setExpanded(false);
+      expandBtn.focus();
+    });
+
+    // --- Selecting from anywhere ----------------------------------------------------------------
+    // Rows and cards carry data-map-select. With data-reveal they also bring the map into view.
+    const reveal = (id: string) => {
+      document.dispatchEvent(new CustomEvent('map:show-type', { detail: id.split(':')[0] }));
+      select(id, 'reveal');
+      if (narrow.matches) setTab('map');
+      ov.scrollIntoView({ block: 'start' });
+      requestAnimationFrame(() => mapPane.dispatchEvent(new CustomEvent('map:focus-node', { detail: id })));
+    };
+    document.addEventListener('click', (e) => {
+      const b = (e.target as Element).closest<HTMLElement>('[data-map-select]');
+      if (!b) return;
+      const id = b.dataset.mapSelect!;
+      if (b.hasAttribute('data-reveal')) return reveal(id);
+      select(id, b.closest('[data-pane="details"]') ? 'inspector' : b.closest('[data-map-list]') ? 'list' : 'stage');
+    });
+    document.addEventListener('entity:reveal', (e) => {
+      const id = (e as CustomEvent<string>).detail;
+      if (isEntity(id)) reveal(id);
+    });
+    document.addEventListener('pointerover', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      const b = (e.target as Element).closest<HTMLElement>('[data-map-select]');
+      if (b) preview(b.dataset.mapSelect!);
+    });
+    document.addEventListener('pointerout', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      const b = (e.target as Element).closest<HTMLElement>('[data-map-select]');
+      if (b && !b.contains(e.relatedTarget as Node)) preview(null);
+    });
+
+    // Everything below the fold that stands for an entity shows when it's the selection.
+    const selbar = con.querySelector<HTMLElement>('[data-selbar-label]');
+    onSelect(({ id }) => {
+      document.querySelectorAll<HTMLElement>('[data-entity]').forEach((el) => el.classList.toggle('is-sel', el.dataset.entity === id));
+      if (selbar) selbar.textContent = con.querySelector(`[data-detail="${CSS.escape(id)}"] h3`)?.textContent?.trim() ?? '';
+    });
+  }
+</script>

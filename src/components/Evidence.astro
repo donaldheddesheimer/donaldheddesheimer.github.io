@@ -1,0 +1,284 @@
+---
+// Evidence for one entity, shown in the console's center when it's selected: real screenshots,
+// traces, and photos for projects; the verbatim resume record for roles; what uses a capability.
+// Rendered inside a <template>, so its images only load once it's cloned into the page.
+import Icon from './Icon.astro';
+import EntityShape from './EntityShape.astro';
+import { getModel, typeName, type Entity } from '../lib/model';
+import { education } from '../data/site';
+import { fmtMonth } from '../lib/format';
+
+interface Props {
+  entity: Entity;
+}
+const { entity: e } = Astro.props;
+const model = await getModel();
+const groups = model.links(e.id);
+const linked = (label: string) => groups.find((g) => g.label === label)?.items.map((i) => model.get(i.id)) ?? [];
+const kindLabel: Record<string, string> = { screenshot: 'Screenshot', diagram: 'Diagram', trace: 'Trace', video: 'Video', photo: 'Photo' };
+
+// Projects and roles that make up this entity's evidence, depending on what it is.
+const projectSets: { label: string; items: Entity[] }[] = [];
+let roles: Entity[] = [];
+if (e.type === 'org') projectSets.push({ label: 'Projects built here', items: linked('Projects built here') }, { label: 'Related projects', items: linked('Related projects') });
+if (e.type === 'skill') {
+  projectSets.push({ label: 'Projects', items: linked('Used by').filter((x) => x.type === 'project') });
+  roles = linked('Used by').filter((x) => x.type === 'org');
+}
+if (e.type === 'person') projectSets.push({ label: 'Personal projects', items: linked('Personal projects') });
+const includes = e.type === 'org' ? linked('Includes') : [];
+const outcomes = e.type === 'person' ? model.list('outcome') : e.outcomes.map((id) => model.get(id));
+const source = e.type === 'outcome' ? model.get(groups[0].items[0].id) : undefined;
+const d = e.project?.data;
+const isEdu = e.id === `org:${education.org}`;
+---
+
+<article class="ev">
+  <header class="ev-head">
+    <p class="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+      <EntityShape type={e.type} class="size-3 shrink-0" />
+      <span class="kicker">{typeName[e.type]}{e.type === 'org' && ` · ${e.kind}`}</span>
+      {e.code && <span class="code-chip">{e.code}</span>}
+      {e.status && <span class={`pill pill-${e.status.tone}`}>{e.status.label}</span>}
+      {e.period && <span class="readout text-[12px]">{e.period}</span>}
+      {d?.context && <span class="readout text-[12px] text-dim">{d.context}</span>}
+    </p>
+    {
+      e.type === 'outcome' ? (
+        <h3 class="mt-2 font-mono text-[34px] leading-none font-semibold tracking-tight text-orange">
+          {e.metric!.qualifier && <span class="mr-2 font-sans text-[15px] font-normal text-muted">{e.metric!.qualifier}</span>}
+          {e.metric!.value}
+        </h3>
+      ) : (
+        <h3 class="mt-2 text-[20px] leading-snug font-semibold tracking-tight">{e.title}</h3>
+      )
+    }
+    {e.summary && <p class="mt-1.5 max-w-[72ch] text-[13.5px] leading-relaxed text-muted">{e.summary}</p>}
+    {e.type === 'outcome' && <p class="mt-1 readout text-[12px] text-dim">Source: {source!.title}</p>}
+  </header>
+
+  {/* Projects: media first, then the numbers. */}
+  {
+    e.type === 'project' &&
+      (e.media.length ? (
+        <div class:list={['ev-media', e.media.length > 1 && 'has-more']}>
+          {e.media.map((m, i) => (
+            <figure class:list={['ev-fig', i === 0 && 'is-lead']}>
+              {m.kind === 'video' ? (
+                <video src={m.src} poster={m.poster} controls muted playsinline preload="none" aria-label={m.alt} />
+              ) : (
+                <img src={m.src} alt={m.alt} loading="lazy" decoding="async" />
+              )}
+              {kindLabel[m.kind] && <figcaption class="kicker">{kindLabel[m.kind]}</figcaption>}
+            </figure>
+          ))}
+        </div>
+      ) : (
+        <div class="ev-pending hatch">
+          <Icon name="image" class="size-5 text-dim" strokeWidth={1.5} />
+          <p class="text-[13px] text-muted">No screenshots or diagrams for this project yet.</p>
+          <p class="text-[12.5px] text-dim">The case study has the full write-up.</p>
+        </div>
+      ))
+  }
+  {
+    d && d.stats.length > 0 && (
+      <dl class="ev-stats">
+        {d.stats.map((s) => (
+          <div>
+            <dt class="text-[12px] leading-snug text-muted">{s.label}</dt>
+            <dd class="font-mono text-[19px] font-semibold tracking-tight">{s.value}</dd>
+          </div>
+        ))}
+      </dl>
+    )
+  }
+
+  {/* Roles: the resume record, verbatim. */}
+  {
+    (e.exp || source?.exp) && (
+      <section class="ev-sec">
+        <h4 class="kicker">Record{source ? ` · ${source.title}` : ''}</h4>
+        <ul class="mt-2 max-w-[80ch] space-y-2 text-[13.5px] leading-relaxed text-[#d3d8de]">
+          {(e.exp ?? source!.exp)!.points.map((pt) => (
+            <li class="flex gap-2.5">
+              <span class="mt-[0.6em] size-1.5 shrink-0 bg-dim" />
+              <span>{pt}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+  {
+    source?.project && (
+      <section class="ev-sec">
+        <h4 class="kicker">Source · {source.title}</h4>
+        <p class="mt-2 max-w-[72ch] text-[13.5px] leading-relaxed text-muted">{source.summary}</p>
+        {source.project.data.stats.length > 0 && (
+          <dl class="ev-stats mt-3">
+            {source.project.data.stats.map((s) => (
+              <div>
+                <dt class="text-[12px] leading-snug text-muted">{s.label}</dt>
+                <dd class="font-mono text-[19px] font-semibold tracking-tight">{s.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </section>
+    )
+  }
+  {
+    isEdu && (
+      <section class="ev-sec">
+        <h4 class="kicker">Record</h4>
+        <dl class="kv mt-2 max-w-2xl text-[13px]">
+          <dt>Degree</dt>
+          <dd>{education.degree}</dd>
+          <dt>Program</dt>
+          <dd>{education.program}</dd>
+          <dt>Thread</dt>
+          <dd>{education.thread}</dd>
+          <dt>GPA</dt>
+          <dd class="font-mono text-[12.5px]">{education.gpa}</dd>
+          <dt>Coursework</dt>
+          <dd class="flex flex-wrap gap-1.5">{education.coursework.map((c) => <span class="tag">{c}</span>)}</dd>
+        </dl>
+      </section>
+    )
+  }
+
+  {
+    outcomes.length > 0 && (
+      <section class="ev-sec">
+        <h4 class="kicker">{e.type === 'person' ? 'Key metrics · from the resume' : 'Measured outcomes'}</h4>
+        <ul class="ev-outcomes">
+          {outcomes.map((o) => (
+            <li>
+              <button type="button" data-map-select={o.id} class="ev-outcome">
+                <span class="font-mono text-[18px] font-semibold tracking-tight text-orange">
+                  {o.metric!.qualifier && <span class="mr-1 font-sans text-[11.5px] font-normal text-muted">{o.metric!.qualifier}</span>}
+                  {o.metric!.value}
+                </span>
+                <span class="text-[12.5px] leading-snug text-muted">{o.metric!.label}</span>
+                {e.type === 'person' && <span class="kicker">{o.metric!.source}</span>}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    includes.length > 0 && (
+      <section class="ev-sec">
+        <h4 class="kicker">Includes</h4>
+        <ul class="ev-list">
+          {includes.map((x) => (
+            <li>
+              <button type="button" data-map-select={x.id} class="ev-row">
+                <EntityShape type={x.type} class="size-3 shrink-0" />
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate font-medium">{x.title}</span>
+                  <span class="block truncate text-[12.5px] text-muted">{x.summary}</span>
+                </span>
+                {x.period && <span class="hidden readout text-[11.5px] sm:block">{x.period.split(' · ')[0]}</span>}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    roles.length > 0 && (
+      <section class="ev-sec">
+        <h4 class="kicker">Roles</h4>
+        <ul class="ev-list">
+          {roles.map((x) => (
+            <li>
+              <button type="button" data-map-select={x.id} class="ev-row">
+                <EntityShape type="org" class="size-3 shrink-0" />
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate font-medium">{x.title}</span>
+                  <span class="block truncate text-[12.5px] text-muted">{x.exp?.role}</span>
+                </span>
+                {x.period && <span class="hidden readout text-[11.5px] sm:block">{x.period.split(' · ')[0]}</span>}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    projectSets
+      .filter((set) => set.items.length > 0)
+      .map((set) => (
+        <section class="ev-sec">
+          <h4 class="kicker">{set.label}</h4>
+          <ul class="ev-projects">
+            {set.items.map((p) => (
+              <li class="ev-proj">
+                <div class="ev-thumb">
+                  {p.media[0] && p.media[0].kind !== 'video' ? (
+                    <img src={p.media[0].src} alt="" loading="lazy" decoding="async" />
+                  ) : (
+                    <span class="hatch grid size-full place-items-center">
+                      <EntityShape type="project" class="size-3.5 opacity-60" />
+                    </span>
+                  )}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <button type="button" data-map-select={p.id} class="ev-proj-title">
+                    {p.title}
+                  </button>
+                  <p class="mt-0.5 line-clamp-2 text-[12.5px] leading-snug text-muted">{p.summary}</p>
+                  <p class="mt-1.5 flex flex-wrap items-center gap-2">
+                    <span class={`pill pill-${p.status!.tone}`}>{p.status!.label}</span>
+                    <span class="readout text-[11.5px] text-dim">{fmtMonth(p.project!.data.start)}</span>
+                    <a href={p.href} class="-my-1 ml-auto inline-flex items-center gap-1 py-1 text-[12.5px] text-blue-3 hover:underline">
+                      Case study <Icon name="arrow-right" class="size-3.5" />
+                    </a>
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+  }
+
+  {
+    e.tags.length > 0 && e.type !== 'skill' && (
+      <div class="ev-sec flex flex-wrap gap-1.5">
+        {e.tags.map((t) => (
+          <span class="tag">{t}</span>
+        ))}
+      </div>
+    )
+  }
+
+  {
+    e.actions.length > 0 && (
+      <div class="ev-sec flex flex-wrap gap-2">
+        {e.actions.map((a, i) =>
+          a.href ? (
+            <a href={a.href} class:list={['btn', i === 0 && 'btn-primary']} target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>
+              {a.label}
+              <Icon name={a.icon} class="size-4" />
+            </a>
+          ) : (
+            <span class="btn cursor-default text-dim">
+              <Icon name={a.icon} class="size-4" />
+              {a.label}
+            </span>
+          ),
+        )}
+      </div>
+    )
+  }
+</article>

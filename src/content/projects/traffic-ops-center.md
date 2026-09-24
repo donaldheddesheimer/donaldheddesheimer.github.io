@@ -11,6 +11,8 @@ repo: https://github.com/donaldheddesheimer/traffic-sim
 featured: true
 cover: /projects/traffic-ops.jpg
 coverAlt: Traffic Operations Center console tracking a collision and EMS response in Oakland, Pittsburgh
+evidence:
+  - { kind: diagram, src: /projects/traffic-ops-flow.svg, alt: 'Incident response workflow' }
 stats:
   - { label: Candidate plans, value: '8' }
   - { label: Parallel workers, value: '4' }

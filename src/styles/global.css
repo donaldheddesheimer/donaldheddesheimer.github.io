@@ -21,6 +21,11 @@
   --red: #e76a6e;
   --turquoise: #13c9ba;
   --violet: #bd6bbd;
+  /* Neutral type colors for the systems map: orgs are slate, projects are light ink. Hue is kept for
+     meaning: blue = selection, green = active, amber = key metrics and warnings. */
+  --slate: #a7b6c2;
+  --ink: #d3d8de;
+  --edge: #5d6674;
   color-scheme: dark;
 }
 
@@ -44,6 +49,8 @@
   --color-red: var(--red);
   --color-turquoise: var(--turquoise);
   --color-violet: var(--violet);
+  --color-slate: var(--slate);
+  --color-ink: var(--ink);
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
 }
@@ -74,7 +81,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--blue) 70%, transparent);
+  outline: 2px solid var(--blue-3);
   outline-offset: 2px;
 }
 
@@ -171,13 +178,19 @@ body {
     color: var(--green-2);
     background: color-mix(in srgb, var(--green) 16%, transparent);
   }
-  .pill-shipped {
-    color: var(--blue-3);
-    background: color-mix(in srgb, var(--blue) 16%, transparent);
+  .pill-current {
+    color: var(--green-2);
+    background: color-mix(in srgb, var(--green) 16%, transparent);
   }
-  .pill-archived {
-    color: var(--dim);
-    background: color-mix(in srgb, var(--dim) 14%, transparent);
+  .pill-shipped,
+  .pill-enrolled {
+    color: var(--slate);
+    background: color-mix(in srgb, var(--slate) 14%, transparent);
+  }
+  .pill-archived,
+  .pill-concluded {
+    color: var(--muted);
+    background: color-mix(in srgb, var(--dim) 12%, transparent);
   }
 
   .btn {
@@ -200,6 +213,7 @@ body {
     background: var(--line);
   }
   .btn-primary {
+    color: #fff;
     background: var(--blue-2);
     box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12), 0 1px 1px rgb(0 0 0 / 0.4);
   }
@@ -422,5 +436,898 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+}
+
+/* The status bar's Motion switch. Off stops decorative animation and smooth scrolling. */
+html[data-motion='off'] {
+  scroll-behavior: auto;
+}
+html[data-motion='off'] *,
+html[data-motion='off'] *::before,
+html[data-motion='off'] *::after {
+  animation: none !important;
+  transition-duration: 0s !important;
+}
+
+/* ------------------------------------------------------------------------------------------------
+   Entity types. Shape carries the type (see EntityShape.astro); color only reinforces it. */
+.t-person {
+  --c: var(--text);
+}
+.t-org {
+  --c: var(--slate);
+}
+.t-project {
+  --c: var(--ink);
+}
+.t-skill {
+  --c: var(--dim);
+}
+.t-outcome {
+  --c: var(--orange);
+}
+.shape-ico .fill {
+  fill: var(--c);
+}
+.shape-ico .stroke {
+  fill: none;
+  stroke: var(--c);
+  stroke-width: 1.6;
+}
+
+/* ------------------------------------------------------------------------------------------------
+   Homepage console: identity strip, then map / stage / inspector. */
+.ov {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.ov-id {
+  display: grid;
+  gap: 0.875rem 1.5rem;
+  padding: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'main' 'facts' 'actions' 'about';
+}
+.id-main {
+  grid-area: main;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.id-actions {
+  grid-area: actions;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.id-facts {
+  grid-area: facts;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.25rem;
+  font-size: 13px;
+}
+.id-facts > div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.id-facts dt {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding-top: 0.15rem;
+}
+.id-about {
+  grid-area: about;
+  display: none;
+  gap: 0.6rem;
+  max-width: 76ch;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+/* Below md the about text follows the console instead (.ov-about), so the mission stays near the top. */
+.ov-about {
+  padding: 1rem;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.ov-about p + p {
+  margin-top: 0.6rem;
+}
+@media (min-width: 768px) {
+  .ov-about {
+    display: none;
+  }
+  .id-about {
+    display: grid;
+  }
+  .ov-id {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'main actions' 'about about' 'facts facts';
+  }
+  .id-facts {
+    gap: 0.4rem 1.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line);
+  }
+}
+@media (min-width: 1024px) {
+  .id-about {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    max-width: none;
+  }
+}
+@media (min-width: 1280px) {
+  .ov-id {
+    grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr) auto;
+    grid-template-areas: 'main about actions' 'facts facts facts';
+    padding: 0.875rem 1.25rem 0.75rem;
+    gap: 0.75rem 1.75rem;
+  }
+  .id-facts {
+    padding-top: 0.625rem;
+  }
+}
+
+/* Tabs stand in for the three-pane layout below lg. */
+.ov-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  background: var(--panel);
+  overflow: hidden;
+}
+.ov-tabs > button {
+  min-height: 44px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  touch-action: manipulation;
+}
+.ov-tabs > button + button {
+  box-shadow: inset 1px 0 0 var(--line);
+}
+.ov-tabs > button[aria-selected='true'] {
+  color: var(--text);
+  background: var(--panel-3);
+  box-shadow: inset 0 -2px 0 var(--blue-3);
+}
+.ov-tabs > button:focus-visible {
+  outline-offset: -3px;
+}
+html:not(.js) .ov-tabs {
+  display: none;
+}
+
+.ov-console {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+/* No JS (or before it runs): the panes simply stack. */
+.pane-map .map-body {
+  min-height: 460px;
+}
+.pane-stage {
+  min-height: 620px;
+}
+@media (max-width: 1023.98px) {
+  html.js .ov-console {
+    height: clamp(440px, 72svh, 680px);
+  }
+  html.js .ov-console > .pane {
+    flex: 1;
+    min-height: 0;
+  }
+  html.js .ov-console .map-body {
+    min-height: 0;
+  }
+  /* The mission / evidence tab takes its natural height so the page scrolls, not a pane inside it. */
+  html.js .ov-console[data-tab='mission'] {
+    height: auto;
+  }
+  html.js .ov-console[data-tab='mission'] .stage-view {
+    position: static;
+    overflow: visible;
+  }
+  html.js .ov-console[data-tab='mission'] .mission-canvas {
+    flex: none;
+    height: clamp(460px, 130vw, 620px);
+  }
+  html.js .ov-console[data-tab='mission'] > :not([data-pane='mission']),
+  html.js .ov-console[data-tab='map'] > :not([data-pane='map']),
+  html.js .ov-console[data-tab='details'] > :not([data-pane='details']) {
+    display: none;
+  }
+  .map-expand {
+    display: none !important;
+  }
+}
+@media (min-width: 1024px) {
+  .ov-tabs {
+    display: none;
+  }
+  /* Identity strip on top; the console takes the rest of the first screen (never under 540px). */
+  .ov {
+    display: grid;
+    grid-template-rows: auto minmax(540px, 1fr);
+    min-height: min(calc(100dvh - 6.75rem), 1080px);
+    gap: 1rem;
+  }
+  /* Size containment keeps the panes' content from growing the row; they scroll inside instead. */
+  .ov-console {
+    display: grid;
+    gap: 1rem;
+    contain: size;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-rows: 250px minmax(0, 1fr);
+    grid-template-areas: 'stage map' 'stage insp';
+  }
+  .pane-map {
+    grid-area: map;
+  }
+  .pane-stage {
+    grid-area: stage;
+    min-height: 0;
+  }
+  .pane-insp {
+    grid-area: insp;
+  }
+  .pane-map .map-body {
+    min-height: 0;
+  }
+  .ov-console[data-expanded='true'] {
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: 'map insp';
+  }
+  .ov-console[data-expanded='true'] .pane-stage {
+    display: none;
+  }
+  .map-selbar {
+    display: none !important;
+  }
+}
+@media (min-width: 1280px) {
+  .ov-console {
+    grid-template-columns: 300px minmax(0, 1fr) 320px;
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: 'map stage insp';
+  }
+  .ov-console[data-expanded='true'] {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+}
+
+/* --- Systems map ------------------------------------------------------------------------------ */
+.pane-map {
+  container: map / inline-size;
+}
+.map-count {
+  display: none;
+}
+.map-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.5rem;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.4rem;
+  height: 1.75rem;
+  padding: 0 0.55rem;
+  border-radius: 3px;
+  font-size: 12px;
+  color: var(--muted);
+  touch-action: manipulation;
+}
+.chip:hover {
+  background: var(--panel-3);
+  color: var(--text);
+}
+.chip[aria-pressed='false'] {
+  color: var(--dim);
+  text-decoration: line-through;
+}
+.chip[aria-pressed='false'] .shape-ico {
+  opacity: 0.4;
+}
+.map-body {
+  position: relative;
+  flex: 1;
+}
+.map-stage,
+.map-list {
+  position: absolute;
+  inset: 0;
+}
+.map-stage {
+  overflow: hidden;
+}
+.map-list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.ge {
+  stroke: var(--edge);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  transition: opacity 0.15s;
+}
+.ge.r-partOf,
+.ge.r-related {
+  stroke-dasharray: 5 4;
+}
+.ge.r-uses {
+  stroke-dasharray: 1 3.5;
+  stroke-linecap: round;
+}
+.ge.r-measures {
+  stroke: color-mix(in srgb, var(--orange) 45%, var(--edge));
+}
+.focus .ge:not(.on) {
+  opacity: 0.28;
+}
+.focus .ge.on {
+  stroke: var(--blue-3);
+  stroke-width: 1.5;
+}
+.nodes {
+  position: absolute;
+  inset: 0;
+}
+.gn {
+  --d: 22px;
+  --hit: 28px;
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: var(--hit);
+  height: var(--hit);
+  translate: -50% -50%;
+  border-radius: 4px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+.gn.t-person {
+  --d: 44px;
+  --hit: 48px;
+  z-index: 2;
+}
+.gn.t-org {
+  --d: 26px;
+  --hit: 32px;
+}
+.gn.t-skill {
+  --d: 10px;
+  --hit: 24px;
+}
+.gn.t-outcome {
+  --d: 10px;
+  --hit: 24px;
+}
+.gn .shape {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--d);
+  height: var(--d);
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1.5px var(--c);
+  color: var(--c);
+  transition: box-shadow 0.15s;
+}
+.gn.t-person .shape {
+  background: #dfe3e8;
+  box-shadow: none;
+}
+.gn .initials {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #1c2127;
+}
+.gn.t-org .shape {
+  border-radius: 5px;
+}
+.gn.t-skill .shape {
+  background: var(--c);
+  box-shadow: none;
+}
+.gn.t-outcome .shape {
+  width: 9px;
+  height: 9px;
+  border-radius: 1px;
+  rotate: 45deg;
+  background: var(--c);
+  box-shadow: none;
+}
+.gn .glyph {
+  width: 58%;
+  height: 58%;
+}
+.gn .live {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--green);
+  box-shadow: 0 0 0 1.5px var(--panel);
+}
+.gn .lbl {
+  position: absolute;
+  top: calc(50% + var(--d) / 2 + 3px);
+  left: 50%;
+  translate: -50% 0;
+  padding: 0 3px;
+  border-radius: 2px;
+  background: rgb(19 23 28 / 0.84);
+  font-size: 11.5px;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: #c5cbd3;
+  pointer-events: none;
+}
+.gn.t-person .lbl {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+.gn.t-skill .lbl {
+  font-size: 10.5px;
+  color: var(--dim);
+}
+.gn.t-outcome .lbl {
+  top: calc(50% + 9px);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--orange);
+}
+.gn:hover .shape {
+  box-shadow: inset 0 0 0 1.5px var(--c), 0 0 0 4px color-mix(in srgb, var(--c) 20%, transparent);
+}
+.focus .gn:not(.on) {
+  opacity: 0.5;
+}
+.gn.on .lbl {
+  color: var(--text);
+}
+.gn.t-outcome.on .lbl {
+  color: var(--orange);
+}
+.gn.sel {
+  z-index: 3;
+}
+.gn.sel .shape {
+  outline: 2px solid var(--blue-3);
+  outline-offset: 3px;
+}
+.gn.sel .lbl {
+  background: color-mix(in srgb, var(--blue-2) 50%, #13171c);
+  color: #fff;
+}
+.gn.traced .shape {
+  outline: 1.5px dashed var(--blue-3);
+  outline-offset: 3px;
+}
+.gn:focus-visible {
+  outline: 2px solid var(--blue-3);
+  outline-offset: 1px;
+  z-index: 4;
+}
+.hide-org :is(.gn.t-org, .ge[data-types~='org']),
+.hide-project :is(.gn.t-project, .ge[data-types~='project']),
+.hide-skill :is(.gn.t-skill, .ge[data-types~='skill']),
+.hide-outcome :is(.gn.t-outcome, .ge[data-types~='outcome']) {
+  display: none;
+}
+.map-hint {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.5rem;
+  font-size: 10.5px;
+  color: var(--dim);
+  pointer-events: none;
+}
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  padding: 0.4rem 0.75rem;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  color: var(--muted);
+}
+.map-legend line {
+  stroke: var(--slate);
+  stroke-width: 1.5;
+}
+.map-legend .lg-dash {
+  stroke-dasharray: 5 3;
+}
+.map-legend .lg-dot {
+  stroke-dasharray: 1 3;
+  stroke-linecap: round;
+}
+.map-selbar {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.375rem 0.5rem 0.375rem 0.75rem;
+  border-top: 1px solid var(--line);
+}
+html.js .map-selbar {
+  display: flex;
+}
+.list-row,
+.link-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  text-align: left;
+  font-size: 13px;
+  touch-action: manipulation;
+}
+.list-row {
+  padding: 0.45rem 0.75rem;
+}
+.link-row {
+  padding: 0.375rem 0.25rem;
+}
+.list-row:hover,
+.link-row:hover {
+  background: var(--panel-2);
+}
+.list-row[aria-current] {
+  background: color-mix(in srgb, var(--blue-2) 22%, transparent);
+  box-shadow: inset 2px 0 0 var(--blue-3);
+}
+.list-row:focus-visible,
+.link-row:focus-visible {
+  outline-offset: -2px;
+}
+.map-expand .ico-collapse,
+.map-expand[aria-pressed='true'] .ico-expand {
+  display: none;
+}
+.map-expand[aria-pressed='true'] .ico-collapse {
+  display: block;
+}
+
+/* Small map (docked): fewer words. Labels show for the person, orgs, and the traced neighborhood. */
+@container map (width < 480px) {
+  .chip-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .chip {
+    padding: 0 0.45rem;
+  }
+  .map-legend,
+  .map-hint {
+    display: none;
+  }
+  .gn .lbl {
+    display: none;
+  }
+  .gn:is(.sel, .traced, :hover, :focus-visible) .lbl {
+    display: block;
+  }
+}
+@container map (width >= 560px) {
+  .map-count {
+    display: inline-flex;
+  }
+}
+
+/* --- Stage: mission and evidence ---------------------------------------------------------------- */
+.stage-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.stage-view {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.stage-view:focus {
+  outline: none;
+}
+.mission-view {
+  display: flex;
+  flex-direction: column;
+}
+.mission-head {
+  padding: 0.625rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+/* The simulation runs edge to edge; it fills whatever height the record strip leaves. */
+.mission-canvas {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 320px;
+  min-height: 0;
+}
+.mission-canvas > figure {
+  flex: 1;
+}
+.mission-record {
+  border-top: 1px solid var(--line);
+}
+.record-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+  gap: 0.25rem 1rem;
+  padding: 0.5rem 1rem 0.875rem;
+}
+.record-grid > div,
+.ev-stats > div {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 0.125rem;
+}
+.ev {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+  padding: 1rem 1rem 1.5rem;
+}
+@media (min-width: 768px) {
+  .ev {
+    padding: 1.125rem 1.25rem 1.75rem;
+  }
+}
+.ev-sec {
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--line);
+}
+.ev-media {
+  display: grid;
+  gap: 0.75rem;
+}
+@media (min-width: 640px) {
+  .ev-media.has-more {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ev-media.has-more .is-lead {
+    grid-column: 1 / -1;
+  }
+}
+.ev-fig {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #0d1014;
+}
+.ev-fig img,
+.ev-fig video {
+  display: block;
+  width: 100%;
+  max-height: 340px;
+  object-fit: contain;
+}
+.ev-fig.is-lead img,
+.ev-fig.is-lead video {
+  max-height: 380px;
+}
+.ev-fig figcaption {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.4rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 2px;
+  background: rgb(17 20 24 / 0.9);
+}
+.ev-pending {
+  display: grid;
+  justify-items: start;
+  gap: 0.35rem;
+  padding: 1.25rem;
+  border: 1px dashed var(--line-2);
+  border-radius: 3px;
+}
+.ev-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.75rem 1rem;
+}
+.ev-outcomes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.ev-outcome,
+.ev-row {
+  display: flex;
+  width: 100%;
+  text-align: left;
+  border-radius: 3px;
+  touch-action: manipulation;
+}
+.ev-outcome {
+  flex-direction: column;
+  gap: 0.2rem;
+  height: 100%;
+  padding: 0.6rem 0.75rem;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.ev-outcome:hover,
+.ev-row:hover {
+  background: var(--panel-2);
+}
+.ev-list {
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--line);
+}
+.ev-list > li {
+  border-bottom: 1px solid var(--line);
+}
+.ev-row {
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.25rem;
+  font-size: 13.5px;
+}
+.ev-projects {
+  display: grid;
+  gap: 0.625rem;
+  margin-top: 0.5rem;
+}
+.ev-proj {
+  display: flex;
+  gap: 0.875rem;
+  padding: 0.625rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: rgb(17 20 24 / 0.4);
+}
+.ev-thumb {
+  width: 7.5rem;
+  aspect-ratio: 16 / 9;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: #0d1014;
+}
+.ev-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+.ev-proj-title {
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  touch-action: manipulation;
+}
+.ev-proj-title:hover {
+  color: var(--blue-3);
+}
+@media (max-width: 479.98px) {
+  .ev-thumb {
+    width: 5.5rem;
+  }
+}
+
+/* --- Below the fold: things that stand for the selected entity -------------------------------- */
+.stretched::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.pcard .card-map {
+  position: relative;
+  z-index: 2;
+  height: 1.75rem;
+  padding: 0 0.5rem;
+  font-size: 12px;
+}
+.pcard.is-sel,
+.exp-row.is-sel > summary,
+.metric-tile.is-sel {
+  box-shadow: inset 2px 0 0 var(--blue-3);
+}
+.pcard.is-sel {
+  border-color: color-mix(in srgb, var(--blue-3) 60%, var(--line));
+}
+.plate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  text-align: center;
+}
+.plate-title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #3d4550;
+}
+.tl-key-bar {
+  width: 14px;
+  height: 8px;
+  border-radius: 1px;
+  background: var(--panel-3);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.tl-key-bar.is-future {
+  background: repeating-linear-gradient(135deg, rgb(167 182 194 / 0.3) 0 2px, transparent 2px 4px);
+}
+.tl-key-ring {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+
+/* Comfortable touch targets on coarse pointers. */
+@media (pointer: coarse) {
+  .btn,
+  .seg > button,
+  .chip,
+  .pcard .card-map {
+    min-height: 44px;
+  }
+  .btn-icon,
+  .seg > button {
+    min-width: 44px;
+  }
+  .list-row,
+  .link-row,
+  .ev-row {
+    min-height: 44px;
+  }
+  .seg > button:focus-visible {
+    outline-offset: -2px;
   }
 }

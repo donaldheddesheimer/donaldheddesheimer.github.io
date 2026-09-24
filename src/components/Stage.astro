@@ -1,0 +1,112 @@
+---
+// The console's center: the featured mission by default, or the evidence for whatever is selected.
+// Each entity's evidence waits in a <template> and is cloned in when it's selected.
+import Icon from './Icon.astro';
+import MissionCanvas from './MissionCanvas.astro';
+import Evidence from './Evidence.astro';
+import { getModel, MISSION } from '../lib/model';
+import { mission, orgs } from '../data/site';
+import { fmtMonth } from '../lib/format';
+
+const model = await getModel();
+const m = model.get(MISSION);
+const exp = m.exp!;
+const org = orgs.find((o) => o.id === exp.org)!;
+---
+
+<section class="pane pane-stage panel" data-pane="mission" id="pane-stage" aria-labelledby="stage-title" data-stage>
+  <header class="panel-head">
+    <Icon name="target" class="size-4 shrink-0 text-dim" />
+    <h2 class="panel-title" id="stage-title" data-stage-title>Mission</h2>
+    <span class="stage-sub code-chip min-w-0 truncate max-sm:hidden" data-stage-sub hidden></span>
+    <button type="button" class="btn btn-ghost ml-auto shrink-0" data-stage-back hidden>
+      <Icon name="arrow-left" class="size-4" />
+      <span>Back to mission</span>
+    </button>
+  </header>
+
+  <div class="stage-body">
+    <div class="stage-view mission-view" data-stage-view="mission">
+      <div class="mission-head">
+        <div class="flex items-center gap-3">
+          <h3 class="text-[15px] font-semibold">{mission.title}</h3>
+          <span class={`pill pill-${m.status!.tone} ml-auto`}>{m.status!.label}</span>
+        </div>
+        <p class="mt-0.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 text-[13px] text-muted">
+          <span>{org.name} · {exp.unit}</span>
+          <span class="readout text-[12px]">{fmtMonth(exp.start)} – {fmtMonth(exp.end)}</span>
+        </p>
+      </div>
+      <div class="mission-canvas">
+        <MissionCanvas />
+      </div>
+      <div class="mission-record">
+        <div class="flex items-center gap-3 px-4 pt-2.5">
+          <h4 class="kicker">Record · from the resume</h4>
+          <a href={m.href} class="-my-1 ml-auto inline-flex items-center gap-1 py-1 text-[12.5px] text-blue-3 hover:underline">
+            Open record <Icon name="arrow-right" class="size-3.5" />
+          </a>
+        </div>
+        <dl class="record-grid">
+          {
+            mission.record.map((r) => (
+              <div>
+                <dt class="text-[12px] leading-snug text-muted">{r.label}</dt>
+                <dd class="font-mono text-[19px] font-semibold tracking-tight text-orange">
+                  {r.qualifier && <span class="mr-1 font-sans text-[11.5px] font-normal text-muted">{r.qualifier}</span>}
+                  {r.value}
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </div>
+    <div class="stage-view evidence-view" data-stage-view="evidence" tabindex="-1" hidden></div>
+  </div>
+
+  {
+    model
+      .list()
+      .filter((e) => e.id !== MISSION)
+      .map((e) => (
+        <template data-evidence={e.id}>
+          <Evidence entity={e} />
+        </template>
+      ))
+  }
+</section>
+
+<script>
+  import { DEFAULT_SEL, onSelect, select } from '../scripts/selection';
+
+  const stage = document.querySelector<HTMLElement>('[data-stage]');
+  if (stage) {
+    const missionView = stage.querySelector<HTMLElement>('[data-stage-view="mission"]')!;
+    const evidenceView = stage.querySelector<HTMLElement>('[data-stage-view="evidence"]')!;
+    const title = stage.querySelector<HTMLElement>('[data-stage-title]')!;
+    const sub = stage.querySelector<HTMLElement>('[data-stage-sub]')!;
+    const back = stage.querySelector<HTMLButtonElement>('[data-stage-back]')!;
+    const missionRoot = missionView.querySelector<HTMLElement>('[data-mission-root]');
+
+    onSelect(({ id }) => {
+      const isMission = id === DEFAULT_SEL;
+      missionView.hidden = !isMission;
+      evidenceView.hidden = isMission;
+      back.hidden = isMission;
+      missionRoot?.toggleAttribute('data-suspended', !isMission);
+      title.textContent = isMission ? 'Mission' : 'Evidence';
+      document.dispatchEvent(new CustomEvent('stage:title', { detail: title.textContent }));
+      sub.hidden = isMission;
+      if (isMission) {
+        evidenceView.replaceChildren();
+        return;
+      }
+      const tpl = stage.querySelector<HTMLTemplateElement>(`template[data-evidence="${CSS.escape(id)}"]`);
+      evidenceView.replaceChildren(tpl ? tpl.content.cloneNode(true) : '');
+      evidenceView.scrollTop = 0;
+      sub.textContent = evidenceView.querySelector('h3')?.textContent?.trim() ?? '';
+    });
+    back.addEventListener('click', () => select(DEFAULT_SEL, 'stage'));
+  }
+</script>
