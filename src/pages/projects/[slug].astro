@@ -42,7 +42,7 @@ const related = all
 
 ---
 
-<Base title={`${d.title} · ${d.code} · Donald Heddesheimer`} description={d.summary} crumb={[{ label: 'Projects', href: '/#projects' }, { label: d.title }]}>
+<Base title={`${d.title} · ${d.code} · Donald Heddesheimer`} description={d.summary} crumb={[{ label: 'Projects', href: '/#projects' }, { label: d.title }]} section="projects">
   <div class="mx-auto flex max-w-[1400px] flex-col gap-3 p-3 md:gap-4 md:p-4">
     <!-- Header -->
     <section class="panel overflow-hidden">
@@ -59,7 +59,7 @@ const related = all
           <div class="flex flex-wrap items-center gap-2">
             <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
             {d.context && <span class="readout text-xs">{d.context}</span>}
-            {d.featured && <span class="flex items-center gap-1 readout text-2xs text-orange"><Icon name="star" class="size-3.5" />FEATURED</span>}
+            {d.featured && <span class="flex items-center gap-1 readout text-2xs text-ink"><Icon name="star" class="size-3.5" />FEATURED</span>}
           </div>
           <h1 class="mt-2.5 text-2xl leading-tight font-semibold tracking-tight md:text-3xl">{d.title}</h1>
           <p class="mt-2 max-w-(--measure) text-md leading-relaxed text-muted">{d.summary}</p>
@@ -81,10 +81,10 @@ const related = all
                 <NewTab />
               </a>
             ) : (
-              <span class="btn cursor-default text-dim">
+              <p class="inline-flex min-h-(--h-md) items-center gap-1.5 text-dim">
                 <Icon name="lock" class="size-4" />
                 {d.repoNote ?? 'Private repository'}
-              </span>
+              </p>
             )
           }
         </div>
@@ -208,7 +208,7 @@ const related = all
           {
             prev ? (
               <a href={`/projects/${prev.id}/`} class="panel group p-3 hover:border-line-2">
-                <span class="flex items-center gap-1 kicker group-hover:text-blue-3">
+                <span class="flex items-center gap-1 kicker group-hover:text-text">
                   <Icon name="arrow-left" class="size-3" /> {prev.data.code}
                 </span>
                 <span class="mt-1 block truncate text-sm font-medium">{prev.data.title}</span>
@@ -220,7 +220,7 @@ const related = all
           {
             next && (
               <a href={`/projects/${next.id}/`} class="panel group p-3 text-right hover:border-line-2">
-                <span class="flex items-center justify-end gap-1 kicker group-hover:text-blue-3">
+                <span class="flex items-center justify-end gap-1 kicker group-hover:text-text">
                   {next.data.code} <Icon name="arrow-right" class="size-3" />
                 </span>
                 <span class="mt-1 block truncate text-sm font-medium">{next.data.title}</span>

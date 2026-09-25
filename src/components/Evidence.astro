@@ -214,17 +214,17 @@ const isEdu = e.id === `org:${education.org}`;
   {
     e.actions.length > 0 && (
       <div class="ev-sec flex flex-wrap gap-2">
-        {e.actions.map((a, i) =>
+        {e.actions.map((a) =>
           a.href ? (
-            <a href={a.href} class:list={['btn', i === 0 && 'btn-primary']} target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>
+            <a href={a.href} class="btn" target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>
               {a.label}
               {a.external ? <NewTab class="size-4" /> : a.icon && <Icon name={a.icon} class="size-4" />}
             </a>
           ) : (
-            <span class="btn cursor-default text-dim">
+            <p class="inline-flex min-h-(--h-md) items-center gap-1.5 text-dim">
               {a.icon && <Icon name={a.icon} class="size-4" />}
               {a.label}
-            </span>
+            </p>
           ),
         )}
       </div>

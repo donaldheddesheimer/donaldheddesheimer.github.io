@@ -6,12 +6,12 @@ import Icon from '../components/Icon.astro';
 const projects = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code)).slice(0, 5);
 ---
 
-<Base title="Signal lost · Donald Heddesheimer" crumb={[{ label: 'Error' }]}>
+<Base title="Not found · Donald Heddesheimer" crumb={[{ label: 'Error' }]} status="1 route unresolved">
   <div class="grid min-h-[calc(100dvh-8rem)] place-items-center p-4">
     <section class="panel w-full max-w-xl overflow-hidden">
       <header class="panel-head">
         <span class="size-2 rounded-full bg-red"></span>
-        <h1 class="panel-title">Signal lost</h1>
+        <h1 class="panel-title">Not found</h1>
         <span class="code-chip ml-auto">ERR 404</span>
       </header>
       <div class="gridfield relative px-6 py-10 text-center">

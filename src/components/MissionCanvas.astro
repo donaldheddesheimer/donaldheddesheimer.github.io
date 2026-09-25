@@ -1,6 +1,7 @@
 ---
 // Illustrative rover-autonomy simulation for the Mission panel (not recorded rover data).
-// The host sizes this figure's parent; the stage takes whatever height is left after the legend and caption.
+// The host sizes this figure's parent; the stage takes whatever height is left after the telemetry bar
+// and the legend row, which folds the caption into an "About" disclosure.
 // The core runs once here at build time to draw a light SVG poster (the no-JS view); the canvas replaces it.
 import Icon from './Icon.astro';
 import { CUTOFF, DEFAULT_SEED, DIMS, FOV, RANGE, ROBOT_R, Sim, makeWorld, toFirstReplan, type Pt } from '../scripts/rover-sim';
@@ -26,7 +27,7 @@ const route = s.path.length ? [xy(rover), ...turns(s.path.slice(s.pi + 1)).map(x
 const ray = (a: number) => xy({ x: s.x + RANGE * Math.cos(s.h + a), y: s.y + RANGE * Math.sin(s.h + a) });
 const wedge = `M${xy(rover)}L${ray(-FOV)}A${RANGE * K} ${RANGE * K} 0 0 1 ${ray(FOV)}Z`;
 const seen = s.w.rocks.filter((k) => k.seen);
-const halos = seen.flatMap((k) => [CUTOFF, 2, 0].map((e) => `<circle cx="${f(k.x)}" cy="${f(k.y)}" r="${f(k.r + ROBOT_R + e)}"/>`)).join('');
+const rings = seen.map((k) => `<circle cx="${f(k.x)}" cy="${f(k.y)}" r="${f(k.r + ROBOT_R + CUTOFF)}"/>`).join('');
 const bodies = seen.map((k) => `<circle cx="${f(k.x)}" cy="${f(k.y)}" r="${f(k.r)}"/>`).join('');
 // 45-degree hatch chords inside each rock, computed directly so the poster needs no pattern ids.
 const hatch = seen
@@ -51,7 +52,7 @@ const RX = f(s.x);
 const RY = f(s.y);
 const poster = [
   `<rect class="pb" width="${cols * K}" height="${rows * K}"/><path class="pg" d="${grid}"/>`,
-  `<path class="pf" d="${wedge}"/><g class="ph">${halos}</g><g class="pk">${bodies}</g><path class="px" d="${hatch}"/>`,
+  `<path class="pf" d="${wedge}"/><g class="ph">${rings}</g><g class="pk">${bodies}</g><path class="px" d="${hatch}"/>`,
   `<polyline class="pt" points="${track}"/>`,
   route && `<polyline class="pr" points="${route}"/>`,
   `<g class="pl">${wps}</g>`,
@@ -69,12 +70,28 @@ const legend = [
   { key: 'fog', label: 'Unexplored' },
   { key: 'wp', label: 'GNSS waypoint' },
 ];
+const capId = `sim-cap-${seed}`;
 ---
 
-<figure data-mission-root data-seed={seed} data-running="false" class:list={['mission flex h-full min-h-0 flex-col', cls]}>
+<figure data-mission-root data-seed={seed} data-running="false" aria-labelledby={capId} class:list={['mission flex h-full min-h-0 flex-col', cls]}>
   <div class="stage relative min-h-0 flex-1 overflow-hidden" data-mission-stage>
     <svg class="poster" viewBox={`0 0 ${cols * K} ${rows * K}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true" set:html={poster} />
     <canvas aria-hidden="true"></canvas>
+    <p class="badge">Simulation · illustrative · not recorded rover data</p>
+  </div>
+  <!-- Telemetry: the readouts and playback controls sit under the map, so nothing but the badge covers it. -->
+  <div class="telemetry">
+    <dl class="hud" data-sim-readouts>
+      <div class="hud-state"><dt>State</dt><dd data-sim-readout="state">{s.state}</dd></div>
+      <div>
+        <dt><span class="lbl-long">Waypoint</span><span class="lbl-short" aria-hidden="true">WP</span></dt>
+        <dd data-sim-readout="waypoint">{Math.min(s.target + 1, n)} of {n}</dd>
+      </div>
+      <div>
+        <dt><span class="lbl-long">Obstacles seen</span><span class="lbl-short" aria-hidden="true">OBS</span></dt>
+        <dd data-sim-readout="obstacles">{s.seenRocks}</dd>
+      </div>
+    </dl>
     <div class="ctl-bar">
       <button type="button" class="btn btn-icon ctl" data-mission-toggle aria-pressed="false" aria-label="Pause simulation" title="Pause / play">
         <Icon name="pause" class="i-pause size-4" />
@@ -84,44 +101,43 @@ const legend = [
         <Icon name="reset" class="size-4" />
       </button>
     </div>
-    <dl class="hud" data-sim-readouts>
-      <div><dt>State</dt><dd data-sim-readout="state">{s.state}</dd></div>
-      <div><dt>Waypoint</dt><dd data-sim-readout="waypoint">{Math.min(s.target + 1, n)} of {n}</dd></div>
-      <div><dt>Obstacles seen</dt><dd data-sim-readout="obstacles">{s.seenRocks}</dd></div>
-    </dl>
-    <p class="badge">Simulation · illustrative · not recorded rover data</p>
   </div>
-  <ul class="legend" aria-label="Legend">
-    {
-      legend.map((l) => (
-        <li>
-          <svg class={`sw sw-${l.key}`} viewBox="0 0 22 14" aria-hidden="true">
-            {l.key === 'route' && <path d="M1 7h20" />}
-            {l.key === 'track' && <path d="M1 7h20" />}
-            {l.key === 'fov' && <path d="M2 7 20 1.5a9 9 0 0 1 0 11z" />}
-            {l.key === 'hazard' && (
-              <>
-                <circle class="h" cx="11" cy="7" r="6.5" />
-                <circle cx="11" cy="7" r="4" />
-                <path class="x" d="M8.5 9.5l5-5M8 7.5l3-3M10.5 10l3-3" />
-              </>
-            )}
-            {l.key === 'fog' && (
-              <>
-                <rect x="4.5" y="1.5" width="13" height="11" />
-                <path class="x" d="M4.5 7.5l6-6M4.5 12.5l11-11M10 12.5l7.5-7.5" />
-              </>
-            )}
-            {l.key === 'wp' && <path d="M11 1.5 16.5 7 11 12.5 5.5 7z" />}
-          </svg>
-          {l.label}
-        </li>
-      ))
-    }
-  </ul>
-  <figcaption>
-    Illustrative simulation of the planning approach: a grid A* planner replans around obstacles as the LiDAR reveals them. Not recorded rover
-    data.
+  <figcaption class="key">
+    <ul class="legend" aria-label="Legend">
+      {
+        legend.map((l) => (
+          <li>
+            <svg class={`sw sw-${l.key}`} viewBox="0 0 22 14" aria-hidden="true">
+              {l.key === 'route' && <path d="M1 7h20" />}
+              {l.key === 'track' && <path d="M1 7h20" />}
+              {l.key === 'fov' && <path d="M2 7 20 1.5a9 9 0 0 1 0 11z" />}
+              {l.key === 'hazard' && (
+                <>
+                  <circle class="h" cx="11" cy="7" r="6.25" />
+                  <circle cx="11" cy="7" r="3.75" />
+                  <path class="x" d="M8.8 9.2l4.4-4.4M9 7l2-2M11 9l2-2" />
+                </>
+              )}
+              {l.key === 'fog' && (
+                <>
+                  <rect x="4.5" y="1.5" width="13" height="11" />
+                  <path class="x" d="M4.5 7.5l6-6M4.5 12.5l11-11M10 12.5l7.5-7.5" />
+                </>
+              )}
+              {l.key === 'wp' && <path d="M11 1.5 16.5 7 11 12.5 5.5 7z" />}
+            </svg>
+            {l.label}
+          </li>
+        ))
+      }
+    </ul>
+    <details class="about">
+      <summary>About<Icon name="chevron" class="size-3.5" /></summary>
+      <p id={capId}>
+        Illustrative simulation of the planning approach: a grid A* planner replans around obstacles as the LiDAR reveals them. Not recorded
+        rover data.
+      </p>
+    </details>
   </figcaption>
 </figure>
 
@@ -131,8 +147,11 @@ const legend = [
 </script>
 
 <style>
-  .stage {
+  /* The figure is the size container, so the telemetry bar and the legend row can shorten their labels. */
+  .mission {
     container-type: inline-size;
+  }
+  .stage {
     background: var(--panel);
   }
   .poster,
@@ -147,7 +166,8 @@ const legend = [
     display: none;
   }
 
-  /* Poster (no-JS still). */
+  /* Poster (no-JS still), in the canvas's colors: turquoise = the planner (route, field of view,
+     replan), ink = what the rover has done, slate = obstacles. */
   .poster :global(.pb) {
     fill: var(--panel-2);
     stroke: var(--line);
@@ -157,20 +177,21 @@ const legend = [
     stroke-opacity: 0.6;
   }
   .poster :global(.pf) {
-    fill: color-mix(in srgb, var(--blue-3) 8%, transparent);
-    stroke: color-mix(in srgb, var(--blue-3) 60%, transparent);
+    fill: color-mix(in srgb, var(--turquoise) 8%, transparent);
+    stroke: color-mix(in srgb, var(--turquoise) 60%, transparent);
   }
   .poster :global(.ph) {
-    fill: var(--orange);
-    fill-opacity: 0.08;
+    fill: none;
+    stroke: var(--line-2);
+    stroke-dasharray: 4 4;
   }
   .poster :global(.pk) {
     fill: var(--panel);
-    stroke: var(--orange);
-    stroke-width: 1.5;
+    stroke: var(--slate);
+    stroke-width: 1.25;
   }
   .poster :global(.px) {
-    stroke: var(--orange);
+    stroke: var(--slate);
     stroke-opacity: 0.7;
   }
   .poster :global(.pt),
@@ -180,22 +201,22 @@ const legend = [
     stroke-linecap: round;
   }
   .poster :global(.pt) {
-    stroke: var(--green);
-    stroke-width: 2.5;
+    stroke: var(--ink);
+    stroke-width: 2;
   }
   .poster :global(.pr) {
-    stroke: var(--blue-3);
-    stroke-width: 1.75;
-    stroke-dasharray: 6 5;
+    stroke: var(--turquoise);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
   }
   .poster :global(.pw) {
     fill: none;
     stroke: var(--text);
-    stroke-width: 1.75;
+    stroke-width: 1.5;
   }
   .poster :global(.pd) {
-    fill: var(--green);
-    stroke: var(--green-2);
+    fill: var(--ink);
+    stroke: var(--ink);
   }
   .poster :global(text) {
     font: 500 12px var(--font-mono);
@@ -207,19 +228,77 @@ const legend = [
   }
   .poster :global(.pm rect) {
     fill: var(--panel);
-    stroke: var(--blue-3);
+    stroke: var(--turquoise);
   }
   .poster :global(.pm text) {
-    fill: var(--blue-3);
+    fill: var(--turquoise);
   }
 
-  /* Overlays: solid surfaces so they read over any part of the map. */
-  .ctl-bar {
+  /* The one overlay: the sim's disclaimer, in its exact wording, on a solid surface. */
+  .badge {
     position: absolute;
-    top: 8px;
-    right: 8px;
+    left: 8px;
+    bottom: 8px;
+    max-width: calc(100% - 16px);
+    padding: 2px 6px;
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-1);
+    background: var(--panel);
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    font-weight: 500;
+    line-height: 1rem;
+    color: var(--muted);
+  }
+
+  /* Telemetry bar: readouts on the left, playback on the right. */
+  .telemetry {
     display: flex;
-    gap: 4px;
+    align-items: center;
+    gap: 1rem;
+    min-height: 2.25rem;
+    padding: 0 0.25rem 0 0.75rem;
+    border-top: 1px solid var(--line);
+    background: var(--panel);
+  }
+  .hud {
+    display: flex;
+    align-items: baseline;
+    gap: 1.25rem;
+    min-width: 0;
+  }
+  .hud > div {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+  .hud dt {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .hud dd {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .hud [data-sim-readout='state'] {
+    min-width: 16ch; /* the longest state, so the readouts never shift */
+  }
+  .lbl-short {
+    display: none;
+  }
+  .ctl-bar {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.25rem;
+    margin-left: auto;
   }
   .mission:not([data-mounted]) .ctl-bar {
     display: none;
@@ -228,103 +307,112 @@ const legend = [
   .ctl[aria-pressed='false'] :global(.i-play) {
     display: none;
   }
-  .ctl[aria-pressed='true'] {
-    background: color-mix(in srgb, var(--blue) 20%, var(--panel-3));
-    color: var(--blue-3);
-  }
   @media (pointer: coarse) {
     .ctl {
       width: var(--h-touch);
       height: var(--h-touch);
     }
   }
-  /* Narrow stages: one "label value" row per readout, as slim as possible. Wider: an aligned two-column table. */
-  .hud {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    display: grid;
-    column-gap: 12px;
-    padding: 4px 8px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-1);
-    background: var(--panel);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
-  }
-  .hud > div {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-  }
-  .hud dt,
-  .badge {
-    font-family: var(--font-mono);
-    font-size: var(--text-2xs);
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-  .hud dt {
-    line-height: 1.125rem;
-    color: var(--dim);
-  }
-  .hud [data-sim-readout='state'] {
-    min-width: 16ch; /* longest state, so the block never changes width */
-  }
-  .hud dd {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    font-variant-numeric: tabular-nums;
-    line-height: 1.125rem;
-    color: var(--text);
-    white-space: nowrap;
-  }
-  @container (min-width: 560px) {
+  /* Narrow: the state speaks for itself, the other labels shorten (screen readers still hear the
+     full ones), and a long state gives way before anything overflows. */
+  @container (width < 560px) {
+    .telemetry {
+      gap: 0.5rem;
+    }
     .hud {
-      grid-template-columns: auto auto;
+      flex: 1 1 auto;
+      gap: 0.875rem;
+      overflow: hidden;
     }
-    .hud > div {
-      display: contents;
+    .hud > .hud-state {
+      min-width: 0;
+      flex-shrink: 1;
     }
-  }
-  .badge {
-    position: absolute;
-    left: 8px;
-    bottom: 8px;
-    max-width: calc(100% - 16px);
-    padding: 2px 6px;
-    /* The sim's disclaimer reads as a sentence, in its exact wording. */
-    letter-spacing: normal;
-    text-transform: none;
-    border: 1px solid var(--line-2);
-    border-radius: var(--radius-1);
-    background: var(--panel);
-    line-height: 1rem;
-    color: var(--muted);
+    .hud-state dt,
+    .lbl-long {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .lbl-short {
+      display: inline;
+    }
+    .hud [data-sim-readout='state'] {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
-  /* Legend and caption. The legend's labels are phrases, so they are set like the map legend. */
-  .legend {
-    padding: 8px 12px 0;
-    font-size: var(--text-2xs);
-    border-top: 1px solid var(--line);
+  /* Legend row. The labels are phrases, so they are set like the map legend; the caption folds into
+     an "About" disclosure at the row's end. */
+  .key {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px 16px;
+    align-items: flex-end;
+    gap: 0.25rem 1rem;
+    padding: 0.5rem 0.75rem;
+    border-top: 1px solid var(--line);
+  }
+  .legend {
+    display: flex;
+    flex: 1 1 0;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    min-width: min(100%, 16rem);
+    font-size: var(--text-2xs);
     color: var(--dim);
   }
   .legend li {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 0.375rem;
     line-height: 1rem;
   }
-  figcaption {
+  .about {
+    margin-left: auto;
+    font-size: var(--text-2xs);
+  }
+  .about[open] {
+    flex-basis: 100%;
+  }
+  .about summary {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    width: max-content;
+    margin-left: auto;
+    line-height: 1rem;
+    color: var(--muted);
+    cursor: pointer;
+    list-style: none;
+  }
+  .about summary::-webkit-details-marker {
+    display: none;
+  }
+  .about summary:hover {
+    color: var(--text);
+  }
+  .about summary :global(svg) {
+    transition: rotate var(--dur-1) var(--ease);
+  }
+  .about[open] summary :global(svg) {
+    rotate: 90deg;
+  }
+  .about p {
     max-width: var(--measure);
-    padding: 6px 12px 10px;
+    margin-top: 0.375rem;
     font-size: var(--text-xs);
     line-height: 1.5;
     color: var(--muted);
+  }
+  @media (pointer: coarse) {
+    .about summary {
+      min-height: var(--h-touch);
+    }
   }
   .sw {
     width: 22px;
@@ -334,25 +422,26 @@ const legend = [
     stroke-width: 1.5;
   }
   .sw-route {
-    stroke: var(--blue-3);
+    stroke: var(--turquoise);
     stroke-dasharray: 4 3;
   }
   .sw-track {
-    stroke: var(--green);
+    stroke: var(--ink);
     stroke-width: 2;
   }
   .sw-fov {
-    stroke: var(--blue-3);
+    stroke: var(--turquoise);
     stroke-width: 1;
-    fill: color-mix(in srgb, var(--blue-3) 8%, transparent);
+    fill: color-mix(in srgb, var(--turquoise) 8%, transparent);
   }
   .sw-hazard {
-    stroke: var(--orange);
+    stroke: var(--slate);
     stroke-width: 1.25;
   }
   .sw-hazard .h {
-    stroke: none;
-    fill: color-mix(in srgb, var(--orange) 16%, transparent);
+    stroke: var(--edge);
+    stroke-width: 1;
+    stroke-dasharray: 2 2;
   }
   .sw-hazard .x,
   .sw-fog .x {

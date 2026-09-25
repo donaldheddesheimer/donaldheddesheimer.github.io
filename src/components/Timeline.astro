@@ -55,8 +55,8 @@ function barStyle(b: Bar) {
     <!-- gridlines + now marker, over the track column -->
     <div class="pointer-events-none absolute inset-y-0 right-4 left-[124px]" aria-hidden="true">
       {years.map((y) => <div class="absolute inset-y-0 border-l border-line/60" style={`left:${pct(`${y}-01`)}%`} />)}
-      <div class="absolute inset-y-0 border-l border-blue" style={`left:${nowPct}%`} data-now>
-        <span class="absolute top-0 left-1.5 readout text-2xs font-semibold whitespace-nowrap text-blue-3">NOW · {fmtMonth(now).toUpperCase()}</span>
+      <div class="absolute inset-y-0 border-l border-muted" style={`left:${nowPct}%`} data-now>
+        <span class="absolute top-0 left-1.5 readout text-2xs font-semibold whitespace-nowrap text-text">NOW · {fmtMonth(now).toUpperCase()}</span>
       </div>
     </div>
 
@@ -160,8 +160,8 @@ function barStyle(b: Bar) {
       repeating-linear-gradient(135deg, rgb(167 182 194 / 0.12) 0 5px, transparent 5px 10px);
   }
   .bar:global(.is-sel) {
-    box-shadow: inset 0 0 0 1.5px var(--blue-3);
-    background-color: color-mix(in srgb, var(--blue-2) 22%, var(--panel));
+    box-shadow: inset 0 0 0 1.5px var(--sel-bar);
+    background-color: var(--sel-bg);
   }
   .marker {
     translate: -5px 0;
@@ -182,7 +182,7 @@ function barStyle(b: Bar) {
     box-shadow: inset 0 0 0 1.5px var(--green), 0 0 0 2px var(--panel);
   }
   .marker:global(.is-sel) .ring {
-    outline: 2px solid var(--blue-3);
+    outline: 2px solid var(--sel-bar);
     outline-offset: 1px;
   }
 </style>

@@ -5,7 +5,9 @@ import { CUTOFF, DEFAULT_SEED, DIMS, DT, FOV, RANGE, ROBOT_R, Sim, makeWorld, ru
 
 type RGB = number[];
 // Design tokens read from :root at mount. A missing or non-hex token falls back to a neutral gray.
-const TOKENS = ['bg', 'panel', 'panel-2', 'line', 'line-2', 'text', 'muted', 'blue-3', 'green', 'green-2', 'orange'] as const;
+// Turquoise is the planner (route, field of view, replan), ink is what the rover has done, slate is
+// an obstacle. Blue (selection) and green (active) stay out of the sim.
+const TOKENS = ['bg', 'panel', 'panel-2', 'line', 'line-2', 'text', 'muted', 'turquoise', 'ink', 'slate'] as const;
 type Tok = (typeof TOKENS)[number];
 const TAU = Math.PI * 2;
 const MONO = '500 12px "JetBrains Mono",ui-monospace,monospace';
@@ -133,21 +135,16 @@ export function mount(root: HTMLElement) {
     c.save();
     clip(c);
     const rocks = s.w.rocks.filter((k) => k.seen);
+    // Inflated cost: one flat dashed ring where the planner's halo ends.
+    c.setLineDash([4, 4]);
+    c.strokeStyle = rgba(C['line-2']);
+    c.lineWidth = 1;
     for (const k of rocks) {
-      const X = ox + k.x * cell;
-      const Y = oy + k.y * cell;
-      const r = k.r * cell;
-      const core = (k.r + ROBOT_R) * cell;
-      const R = core + CUTOFF * cell;
-      const g = c.createRadialGradient(X, Y, r, X, Y, R);
-      g.addColorStop(0, rgba(C.orange, 0.3));
-      g.addColorStop((core - r) / (R - r), rgba(C.orange, 0.18));
-      g.addColorStop(1, rgba(C.orange, 0));
-      c.fillStyle = g;
       c.beginPath();
-      c.arc(X, Y, R, 0, TAU);
-      c.fill();
+      c.arc(ox + k.x * cell, oy + k.y * cell, (k.r + ROBOT_R + CUTOFF) * cell, 0, TAU);
+      c.stroke();
     }
+    c.setLineDash([]);
     for (const k of rocks) {
       const X = ox + k.x * cell;
       const Y = oy + k.y * cell;
@@ -163,13 +160,13 @@ export function mount(root: HTMLElement) {
         c.moveTo(X + d - r, Y + r);
         c.lineTo(X + d + r, Y - r);
       }
-      c.strokeStyle = rgba(C.orange, 0.7);
+      c.strokeStyle = rgba(C.slate, 0.7);
       c.lineWidth = 1;
       c.stroke();
       c.restore();
       c.beginPath();
       c.arc(X, Y, r, 0, TAU);
-      c.strokeStyle = rgba(C.orange);
+      c.strokeStyle = rgba(C.slate);
       c.lineWidth = 1.25;
       c.stroke();
     }
@@ -202,16 +199,16 @@ export function mount(root: HTMLElement) {
     c.moveTo(RX, RY);
     c.arc(RX, RY, RANGE * cell, RH - FOV, RH + FOV);
     c.closePath();
-    c.fillStyle = rgba(C['blue-3'], 0.08);
+    c.fillStyle = rgba(C.turquoise, 0.08);
     c.fill();
-    c.strokeStyle = rgba(C['blue-3'], 0.6);
+    c.strokeStyle = rgba(C.turquoise, 0.6);
     c.lineWidth = 1;
     c.stroke();
     // Driven track: solid.
     c.beginPath();
     s.track.forEach((p, i) => (i ? c.lineTo(X(p.x), Y(p.y)) : c.moveTo(X(p.x), Y(p.y))));
     c.lineTo(RX, RY);
-    c.strokeStyle = rgba(C.green);
+    c.strokeStyle = rgba(C.ink);
     c.lineWidth = 2;
     c.stroke();
     // Planned route: dashed.
@@ -220,7 +217,7 @@ export function mount(root: HTMLElement) {
       c.moveTo(RX, RY);
       for (let k = s.pi + 1; k < s.path.length; k++) c.lineTo(X(s.path[k].x), Y(s.path[k].y));
       c.setLineDash([5, 4]);
-      c.strokeStyle = rgba(C['blue-3']);
+      c.strokeStyle = rgba(C.turquoise);
       c.lineWidth = 1.5;
       c.stroke();
       c.setLineDash([]);
@@ -240,10 +237,10 @@ export function mount(root: HTMLElement) {
       c.lineTo(x - d, y);
       c.closePath();
       if (p.status === 1) {
-        c.fillStyle = rgba(C.green);
+        c.fillStyle = rgba(C.ink);
         c.fill();
       }
-      c.strokeStyle = rgba(p.status === 1 ? C['green-2'] : p.status === 2 ? C.muted : C.text);
+      c.strokeStyle = rgba(p.status === 1 ? C.ink : p.status === 2 ? C.muted : C.text);
       c.lineWidth = 1.5;
       c.stroke();
       c.lineWidth = 3;
@@ -282,9 +279,9 @@ export function mount(root: HTMLElement) {
       const by = Math.max(RY - 28, oy + 2);
       c.fillStyle = rgba(C.panel);
       c.fillRect(bx, by, tw, 18);
-      c.strokeStyle = rgba(C['blue-3']);
+      c.strokeStyle = rgba(C.turquoise);
       c.strokeRect(bx + 0.5, by + 0.5, tw - 1, 17);
-      c.fillStyle = rgba(C['blue-3']);
+      c.fillStyle = rgba(C.turquoise);
       c.fillText('REPLAN', bx + 5, by + 9);
       c.globalAlpha = 1;
     }

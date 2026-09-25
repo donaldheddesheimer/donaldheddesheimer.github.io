@@ -13,7 +13,7 @@ export type Pos = { x: number; y: number };
 export type LayoutOpts = { width: number; height: number; pad?: number; labelScale?: number; labels?: boolean };
 
 // Visual radius of each node type, in px. The map's CSS uses the same numbers.
-export const RADIUS: Record<EntityType, number> = { person: 22, org: 13, project: 11, skill: 5 };
+export const RADIUS: Record<EntityType, number> = { person: 18, org: 11, project: 9, skill: 3.5 };
 
 // Ring radius for each type, as a fraction of the half-width / half-height ellipse.
 const RING: Record<EntityType, number> = { person: 0, org: 0.34, skill: 0.62, project: 0.9 };

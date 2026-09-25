@@ -68,8 +68,9 @@ const org = orgs.find((o) => o.id === exp.org)!;
     const back = stage.querySelector<HTMLButtonElement>('[data-stage-back]')!;
     const missionRoot = missionView.querySelector<HTMLElement>('[data-mission-root]');
 
-    onSelect(({ id }) => {
+    onSelect(({ id, source }) => {
       const isMission = id === DEFAULT_SEL;
+      if (source !== 'init') stage.dataset.swapped = '';
       missionView.hidden = !isMission;
       evidenceView.hidden = isMission;
       back.hidden = isMission;
@@ -84,6 +85,8 @@ const org = orgs.find((o) => o.id === exp.org)!;
       const tpl = stage.querySelector<HTMLTemplateElement>(`template[data-evidence="${CSS.escape(id)}"]`);
       evidenceView.replaceChildren(tpl ? tpl.content.cloneNode(true) : '');
       evidenceView.scrollTop = 0;
+      // Evidence to evidence keeps the view shown, so replay its fade by hand.
+      evidenceView.getAnimations().forEach((a) => (a.cancel(), a.play()));
       sub.textContent = evidenceView.querySelector('h3')?.textContent?.trim() ?? '';
     });
     back.addEventListener('click', () => select(DEFAULT_SEL, 'stage'));

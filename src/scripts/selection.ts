@@ -25,6 +25,13 @@ if (data && fromUrl && !isEntity(fromUrl)) {
 
 export const getSel = () => current;
 
+// The status bar names the selection, kept current by the same code that keeps ?sel= current.
+const statusSel = document.querySelector('[data-status-sel]');
+const showSel = () => {
+  if (statusSel) statusSel.textContent = current === DEFAULT_SEL ? 'mission (illustrative)' : current;
+};
+showSel();
+
 export function select(id: string, source = 'api') {
   if (!isEntity(id)) return;
   current = id;
@@ -33,6 +40,7 @@ export function select(id: string, source = 'api') {
   if (id === DEFAULT_SEL) url.searchParams.delete('sel');
   else url.searchParams.set('sel', id);
   if (url.href !== location.href) history.replaceState(history.state, '', url);
+  showSel();
   document.dispatchEvent(new CustomEvent<SelDetail>('entity:select', { detail: { id, source } }));
 }
 
