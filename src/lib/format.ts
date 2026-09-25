@@ -33,3 +33,16 @@ export function duration(start: string, end?: string): string {
 }
 
 export const statusLabel = { active: 'Active', shipped: 'Shipped', archived: 'Archived' } as const;
+
+/** Figure kinds as captions name them ("Fig 2 · Trace"). */
+export const mediaKindLabel: Record<string, string> = {
+  cover: 'Cover',
+  screenshot: 'Screenshot',
+  diagram: 'Diagram',
+  trace: 'Trace',
+  video: 'Video',
+  photo: 'Photo',
+};
+
+/** A stat value that reads as a figure (starts with a digit, ~ or a sign), not words like "none measurable". */
+export const isFigure = (value: string) => /^[~+\-−±]?\d/.test(value);

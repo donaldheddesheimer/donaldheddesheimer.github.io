@@ -5,6 +5,7 @@ import Icon from './Icon.astro';
 import NewTab from './NewTab.astro';
 import EntityShape from './EntityShape.astro';
 import { getModel, MISSION, typeName } from '../lib/model';
+import { mediaKindLabel } from '../lib/format';
 
 const model = await getModel();
 const hid = (id: string) => `d-${id.replace(':', '-')}`;
@@ -53,8 +54,12 @@ const hid = (id: string) => `d-${id.replace(':', '-')}`;
             )}
 
             {e.media[0] && e.media[0].kind !== 'video' && (
-              <figure class="mt-3.5 overflow-hidden rounded-2 border border-line bg-[#0d1014]">
-                <img src={e.media[0].src} alt={e.media[0].alt} loading="lazy" decoding="async" class="aspect-[16/9] w-full object-contain" />
+              <figure class="mt-3.5">
+                <img src={e.media[0].src} alt={e.media[0].alt} loading="lazy" decoding="async" class="aspect-[16/9] w-full rounded-2 border border-line bg-well object-contain" />
+                <figcaption class="fig-cap">
+                  <span class="kicker">{mediaKindLabel[e.media[0].kind]}</span>
+                  {e.media[0].caption ?? e.media[0].alt}
+                </figcaption>
               </figure>
             )}
 

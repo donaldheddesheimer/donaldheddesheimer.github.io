@@ -6,12 +6,17 @@ import Panel from '../components/Panel.astro';
 import NewTab from '../components/NewTab.astro';
 import Overview from '../components/Overview.astro';
 import Timeline from '../components/Timeline.astro';
+import Stat from '../components/Stat.astro';
 import { education, experience, offDuty, orgs, profile, skills, socials } from '../data/site';
 import { duration, fmtDot, fmtMonth, statusLabel } from '../lib/format';
 import { getModel } from '../lib/model';
 
 const projects = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code));
 const model = await getModel();
+// Cards lead with the featured projects, then those with a capture, so text-only cards share rows
+// and none stretches beside an image. Newest first within each; the table keeps plain newest-first.
+const rank = (p: (typeof projects)[number]) => (p.data.featured ? 0 : model.get(`project:${p.id}`).media.length ? 1 : 2);
+const cards = [...projects].sort((a, b) => rank(a) - rank(b));
 const counts = {
   all: projects.length,
   active: projects.filter((p) => p.data.status === 'active').length,
@@ -35,6 +40,8 @@ const [primaryHobby, ...otherHobbies] = offDuty;
   <div class="mx-auto flex max-w-[1680px] flex-col gap-(--gap-section) p-3 md:p-4">
     <!-- OVERVIEW: identity, systems map, mission / evidence, inspector -->
     <Overview />
+
+    <p class="group-label">Record</p>
 
     <!-- TIMELINE -->
     <Panel id="timeline" title="Activity timeline" code="2023 → 2028" icon="timeline">
@@ -64,7 +71,7 @@ const [primaryHobby, ...otherHobbies] = offDuty;
                 <span class="min-w-0">
                   <span class="flex items-center gap-2">
                     <span class="font-semibold">{org(e.org).name}</span>
-                    <span class="code-chip hidden sm:inline-flex">{k.label}</span>
+                    <span class="hidden kicker sm:inline">{k.label}</span>
                   </span>
                   <span class="block text-sm text-muted">{e.role}</span>
                 </span>
@@ -78,7 +85,7 @@ const [primaryHobby, ...otherHobbies] = offDuty;
                   {fmtMonth(e.start)} – {fmtMonth(e.end)} · {duration(e.start, e.end)}
                 </span>
               </summary>
-              <div class="px-(--pad-panel) pb-5 md:pr-8 md:pl-[4.25rem]">
+              <div class="exp-detail">
                 {e.unit && <p class="mb-2.5 kicker kicker--sentence">{e.unit}</p>}
                 <ul class="max-w-(--measure) space-y-2 text-base text-[#d3d8de]">
                   {e.points.map((pt) => (
@@ -92,7 +99,7 @@ const [primaryHobby, ...otherHobbies] = offDuty;
                   {e.tags.map((t) => (
                     <span class="tag">{t}</span>
                   ))}
-                  <button type="button" class="btn btn-ghost ml-auto" data-map-select={`org:${e.org}`} data-reveal>
+                  <button type="button" class="btn btn-ghost" data-map-select={`org:${e.org}`} data-reveal>
                     <Icon name="graph" class="size-4" />
                     Show on map
                   </button>
@@ -108,7 +115,7 @@ const [primaryHobby, ...otherHobbies] = offDuty;
           <span class="min-w-0">
             <span class="flex items-center gap-2">
               <span class="font-semibold">{education.school}</span>
-              <span class="code-chip hidden sm:inline-flex">Edu</span>
+              <span class="hidden kicker sm:inline">Edu</span>
             </span>
             <span class="block text-sm text-muted">{education.degree} · {education.program}</span>
           </span>
@@ -118,7 +125,7 @@ const [primaryHobby, ...otherHobbies] = offDuty;
           <Icon name="chevron" class="size-4 text-dim transition-transform duration-(--dur-2) ease-(--ease) group-open:rotate-90" />
           <span class="col-start-2 readout text-2xs md:hidden">Expected {fmtMonth(education.end)}</span>
         </summary>
-        <div class="px-(--pad-panel) pb-5 md:pl-[4.25rem]">
+        <div class="exp-detail">
           <dl class="kv max-w-2xl">
             <dt>Thread</dt>
             <dd>{education.thread}</dd>
@@ -134,6 +141,8 @@ const [primaryHobby, ...otherHobbies] = offDuty;
         </div>
       </details>
     </Panel>
+
+    <p class="group-label">Work</p>
 
     <!-- PROJECTS -->
     <Panel id="projects" title="Projects" icon="cube">
@@ -153,28 +162,33 @@ const [primaryHobby, ...otherHobbies] = offDuty;
         </div>
       </div>
 
-      <div data-view="grid" class="grid gap-3 p-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      <div data-view="grid" class="grid gap-3 p-3 sm:grid-cols-2 xl:grid-cols-6">
         {
-          projects.map((p) => {
+          cards.map((p) => {
             const d = p.data;
             const still = model.get(`project:${p.id}`).media[0];
+            const stat = d.stats[0];
             return (
-              <article data-status={d.status} data-entity={`project:${p.id}`} class="pcard group relative flex flex-col overflow-hidden rounded-2 border border-line bg-bg/40 hover:border-edge hover:bg-panel-2/40">
-                <div class="relative aspect-[16/9] overflow-hidden border-b border-line bg-bg">
-                  {still ? (
-                    <img src={still.src} alt={still.alt} loading="lazy" decoding="async" class="size-full object-cover object-top opacity-85 transition-opacity duration-(--dur-2) ease-(--ease) group-hover:opacity-100" />
-                  ) : (
-                    <div class="plate hatch">
-                      <span class="plate-title" aria-hidden="true">{d.title.replace(/:.*/, '')}</span>
-                      <span class="kicker">No screenshots yet</span>
-                    </div>
-                  )}
-                  <span class="absolute top-2 right-2 rounded-1 bg-bg/90">
+              <article data-status={d.status} data-entity={`project:${p.id}`} class:list={['pcard group relative flex flex-col overflow-hidden rounded-2 border border-line bg-bg/40 hover:border-edge hover:bg-panel-2/40', d.featured ? 'xl:col-span-3' : 'xl:col-span-2']}>
+                {still ? (
+                  <div class:list={['relative aspect-[16/9] overflow-hidden border-b border-line', d.cardFit === 'contain' ? 'bg-well' : 'bg-bg']}>
+                    <img src={still.src} alt={still.alt} loading="lazy" decoding="async" class:list={['size-full opacity-85 transition-opacity duration-(--dur-2) ease-(--ease) group-hover:opacity-100', d.cardFit === 'contain' ? 'object-contain p-3' : 'object-cover object-top']} />
+                    <span class="absolute top-2 right-2 rounded-1 bg-bg/90">
+                      <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
+                    </span>
+                  </div>
+                ) : (
+                  <div class="flex min-h-10 items-center gap-3 border-b border-line bg-panel px-4 py-1.5">
                     <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
-                  </span>
-                </div>
+                    {stat && (
+                      <dl class="ml-auto min-w-0">
+                        <Stat label={stat.label} value={stat.value} inline />
+                      </dl>
+                    )}
+                  </div>
+                )}
                 <div class="flex flex-1 flex-col p-4">
-                  <h3 class="flex items-center gap-1.5 text-md font-semibold">
+                  <h3 class:list={['flex items-center gap-1.5 font-semibold', d.featured ? 'text-lg' : 'text-md']}>
                     <a href={`/projects/${p.id}/`} class="stretched">{d.title}</a>
                     {d.featured && <Icon name="star" class="size-3.5 text-ink" />}
                   </h3>
@@ -189,10 +203,16 @@ const [primaryHobby, ...otherHobbies] = offDuty;
                       {fmtMonth(d.start)}
                       {d.context && ` · ${d.context}`}
                     </span>
-                    <button type="button" class="card-map btn btn-ghost shrink-0" data-map-select={`project:${p.id}`} data-reveal>
-                      <Icon name="graph" class="size-3.5" />
-                      Show on map
-                    </button>
+                    {d.featured ? (
+                      <button type="button" class="card-map btn btn-ghost shrink-0" data-map-select={`project:${p.id}`} data-reveal>
+                        <Icon name="graph" class="size-3.5" />
+                        Show on map
+                      </button>
+                    ) : (
+                      <button type="button" class="card-map btn btn-ghost btn-icon shrink-0" data-map-select={`project:${p.id}`} data-reveal aria-label={`Show ${d.title} on map`} title="Show on map">
+                        <Icon name="graph" class="size-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
               </article>
@@ -256,19 +276,19 @@ const [primaryHobby, ...otherHobbies] = offDuty;
       </div>
     </Panel>
 
+    <p class="group-label">Personal</p>
+
     <!-- OFF DUTY -->
     <Panel id="off-duty" title="Off duty" icon="sun">
       <div class="grid gap-3 p-3 md:grid-cols-3">
-        <article class="grid overflow-hidden rounded-2 border border-line bg-bg/40 md:col-span-3 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-          <div class="relative aspect-[4/3] border-b border-line md:aspect-auto md:min-h-[340px] md:border-r md:border-b-0">
-            {
-              primaryHobby.image ? (
-                <img src={primaryHobby.image} alt={primaryHobby.imageAlt ?? primaryHobby.name} loading="lazy" class="absolute inset-0 size-full object-cover object-[50%_22%]" />
-              ) : (
-                <div class="hatch absolute inset-0" />
-              )
-            }
-          </div>
+        <article class:list={['grid overflow-hidden rounded-2 border border-line bg-bg/40 md:col-span-3', primaryHobby.image && 'md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]']}>
+          {
+            primaryHobby.image && (
+              <div class="relative aspect-[4/5] border-b border-line md:aspect-square md:border-r md:border-b-0">
+                <img src={primaryHobby.image} alt={primaryHobby.imageAlt ?? primaryHobby.name} loading="lazy" class="absolute inset-0 size-full object-cover object-[50%_55%]" />
+              </div>
+            )
+          }
           <div class="flex flex-col p-5">
             <div class="flex items-center gap-2">
               <Icon name={hobbyIcon[primaryHobby.id]} class="size-5 text-muted" />
@@ -287,18 +307,11 @@ const [primaryHobby, ...otherHobbies] = offDuty;
         {
           otherHobbies.map((h) => (
             <article class="flex flex-col overflow-hidden rounded-2 border border-line bg-bg/40">
-              <div class="relative aspect-[16/9] border-b border-line">
-                {h.image ? (
+              {h.image && (
+                <div class="relative aspect-[16/9] border-b border-line">
                   <img src={h.image} alt={h.imageAlt ?? h.name} loading="lazy" class="absolute inset-0 size-full object-cover" />
-                ) : (
-                  <div class="hatch absolute inset-0 grid place-items-center">
-                    <div class="flex flex-col items-center gap-2 text-dim">
-                      <Icon name="image" class="size-6" />
-                      <span class="kicker">No photo yet</span>
-                    </div>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
               <div class="flex flex-1 flex-col p-4">
                 <div class="flex items-center gap-2">
                   <Icon name={hobbyIcon[h.id]} class="size-4 text-dim" />

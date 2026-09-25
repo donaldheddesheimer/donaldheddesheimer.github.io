@@ -10,6 +10,7 @@ repo: https://github.com/donald-heddesheimer/cadence
 featured: true
 cover: /projects/cadence-report.svg
 coverAlt: cuCadence report showing per-stage latency distributions, a deadline verdict, and the three slowest iterations broken down by stage
+cardFit: contain
 evidence:
   - { kind: trace, src: /projects/cadence-timeline.png, alt: 'One iteration on the Perfetto timeline: host launches return within 10 µs while the device lane shows the gap before the second kernel starts' }
 stats:
@@ -54,8 +55,6 @@ The result is **3.4 μs per GPU scope**, about 48% less than a blocking CUDA-eve
 The slowest iterations keep their stage breakdowns and can be exported as Chrome Trace JSON for [Perfetto](https://ui.perfetto.dev). Every scope also emits an NVTX range, so the same instrumentation shows up in Nsight.
 
 [![One iteration on the Perfetto timeline: host launches return within 10 µs while the device lane shows the gap before the second kernel starts](/projects/cadence-timeline.png)](/projects/cadence-timeline.png)
-
-*The trace is wide. Select it to open it at full size.*
 
 ## Validation
 

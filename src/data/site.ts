@@ -1,6 +1,8 @@
 // Site-wide content. Projects live in src/content/projects/ (one Markdown file each).
 // Items marked TODO are placeholders. Confirm or replace them before sharing the link.
 
+// public/og.png (the link-preview card) is a one-time render of the name, headline, status, school,
+// location, coords, and the first sentence of `about` below. Re-render it when any of those change.
 export const profile = {
   name: 'Donald Heddesheimer',
   initials: 'DH',
@@ -153,7 +155,7 @@ export const skills: { group: string; items: string[] }[] = [
   { group: 'Dev & infrastructure', items: ['CMake', 'GoogleTest', 'Git', 'GitHub Actions', 'Docker', 'Slurm'] },
 ];
 
-// Hobby photos go in public/images/. Leave `image` out to show a "no imagery" placeholder.
+// Hobby photos go in public/images/. Leave `image` out for a text-only tile.
 export const offDuty: { id: string; name: string; note: string; image?: string; imageAlt?: string; primary?: boolean; link?: { label: string; href: string } }[] = [
   {
     id: 'volleyball',

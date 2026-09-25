@@ -3,6 +3,7 @@
 // inspector). Wide screens show all three panes; narrower ones get Mission / Map / Details tabs.
 import Icon from './Icon.astro';
 import NewTab from './NewTab.astro';
+import Mark from './Mark.astro';
 import SystemsMap from './SystemsMap.astro';
 import Stage from './Stage.astro';
 import Inspector from './Inspector.astro';
@@ -25,9 +26,7 @@ const tabs = [
         profile.photo ? (
           <img src={profile.photo} alt={profile.name} class="size-14 shrink-0 rounded-2 border border-line object-cover" />
         ) : (
-          <div class="hatch grid size-14 shrink-0 place-items-center rounded-2 border border-line font-mono text-md font-semibold text-dim" aria-hidden="true">
-            {profile.initials}
-          </div>
+          <Mark class="size-14 shrink-0" />
         )
       }
       <div class="min-w-0">

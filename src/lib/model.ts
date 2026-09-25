@@ -17,7 +17,7 @@ export type RelKind = 'affiliation' | 'partOf' | 'builtAt' | 'personal' | 'relat
 export type Relation = { source: string; target: string; kind: RelKind };
 
 export type Tone = 'active' | 'shipped' | 'archived' | 'current' | 'concluded' | 'enrolled';
-export type Media = { src: string; alt: string; kind: string; poster?: string };
+export type Media = { src: string; alt: string; kind: string; poster?: string; caption?: string };
 // External actions open in a new tab and show the external glyph (NewTab) in place of an icon.
 export type Action = { label: string; href?: string; icon?: 'arrow-right' | 'lock'; external?: boolean };
 

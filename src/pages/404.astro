@@ -6,7 +6,7 @@ import Icon from '../components/Icon.astro';
 const projects = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code)).slice(0, 5);
 ---
 
-<Base title="Not found · Donald Heddesheimer" crumb={[{ label: 'Error' }]} status="1 route unresolved">
+<Base title="Not found · Donald Heddesheimer" crumb={[{ label: 'Error' }]} status="1 route unresolved" canonical={false}>
   <div class="grid min-h-[calc(100dvh-8rem)] place-items-center p-4">
     <section class="panel w-full max-w-xl overflow-hidden">
       <header class="panel-head">

@@ -25,6 +25,9 @@ const projects = defineCollection({
     coverAlt: z.string().optional(),
     // A still frame for places that shouldn't animate (cards, the homepage console). Use it when the cover is a GIF.
     poster: z.string().optional(),
+    // How the card frames the still: photos and UI crop to fill; reports, diagrams, and pixel art are
+    // shown whole ("contain") so nothing is cut off.
+    cardFit: z.enum(['cover', 'contain']).default('cover'),
     // Real screenshots, diagrams, traces, photos, or video from the project, shown as evidence on the homepage.
     evidence: z
       .array(

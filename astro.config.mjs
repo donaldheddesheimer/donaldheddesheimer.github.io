@@ -1,10 +1,10 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
+import { figures } from './src/lib/figures';
 
 export default defineConfig({
   site: 'https://donaldheddesheimer.github.io',
-  vite: {
-    plugins: [tailwindcss()],
-  },
+  integrations: [figures()],
+  vite: { plugins: [tailwindcss()] },
 });

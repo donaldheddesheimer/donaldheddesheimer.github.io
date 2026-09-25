@@ -87,7 +87,8 @@ const org = orgs.find((o) => o.id === exp.org)!;
       evidenceView.scrollTop = 0;
       // Evidence to evidence keeps the view shown, so replay its fade by hand.
       evidenceView.getAnimations().forEach((a) => (a.cancel(), a.play()));
-      sub.textContent = evidenceView.querySelector('h3')?.textContent?.trim() ?? '';
+      // The header chip names the object by its short map label; the full title is the h3 below it.
+      sub.textContent = evidenceView.querySelector<HTMLElement>('.ev')?.dataset.label ?? '';
     });
     back.addEventListener('click', () => select(DEFAULT_SEL, 'stage'));
   }

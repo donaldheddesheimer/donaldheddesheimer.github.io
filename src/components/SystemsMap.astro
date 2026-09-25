@@ -7,6 +7,7 @@ import Icon from './Icon.astro';
 import EntityShape from './EntityShape.astro';
 import { getModel, MISSION, typeName, typeOrder, typePlural, type Entity } from '../lib/model';
 import { layout, type EntityType } from '../lib/layout';
+import { profile } from '../data/site';
 
 const model = await getModel();
 const entities = model.list();
@@ -129,7 +130,7 @@ const legend = [
                 style={`left:${pct(p.x)};top:${pct(p.y)}`}
               >
                 <span class="shape">
-                  {e.type === 'person' && <span class="initials">DH</span>}
+                  {e.type === 'person' && <span class="initials">{profile.initials}</span>}
                   {e.status?.tone === 'active' || e.status?.tone === 'current' ? <span class="live" /> : null}
                 </span>
                 <span class="lbl" aria-hidden="true">

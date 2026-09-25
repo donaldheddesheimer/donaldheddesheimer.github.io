@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { getCollection } from 'astro:content';
 import Icon, { type IconName } from '../components/Icon.astro';
 import NewTab from '../components/NewTab.astro';
+import Mark from '../components/Mark.astro';
 import { experience, orgs, profile, socials } from '../data/site';
 import { getModel, typeName } from '../lib/model';
 import { build } from '../lib/build';
@@ -16,8 +17,13 @@ interface Props {
   section?: string;
   /** A short readout for the left of the status bar on pages without a selection (e.g. the 404). */
   status?: string;
+  /** False for a page with no address of its own (the 404), which gets no canonical link. */
+  canonical?: boolean;
 }
-const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false, section, status } = Astro.props;
+const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false, section, status, canonical = true } = Astro.props;
+// Absolute URLs for link previews. public/og.png is rendered from the profile (see src/data/site.ts).
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/og.png', Astro.site).href;
 
 const base = home ? '' : '/';
 const nav: { id: string; label: string; icon: IconName; mobile?: boolean }[] = [
@@ -65,7 +71,16 @@ const search = [
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={profile.name} />
+    {canonical && <meta property="og:url" content={pageUrl} />}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${profile.name}: ${profile.headline}. A console-style card with an abstract systems map.`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {canonical && <link rel="canonical" href={pageUrl} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <script is:inline>
       // Before first paint: note that JS runs, and apply the saved Motion setting (off by default
       // for people who've asked their OS for reduced motion).
@@ -92,11 +107,7 @@ const search = [
     <!-- Top bar -->
     <header class="fixed inset-x-0 top-0 z-40 flex h-12 items-center border-b border-line bg-panel">
       <a href="/" class="grid h-full w-12 shrink-0 place-items-center border-r border-line md:w-14" aria-label="Home">
-        <svg viewBox="0 0 32 32" class="size-7" aria-hidden="true">
-          <rect x="1" y="1" width="30" height="30" rx="3" fill="#111418" stroke="#404854" />
-          <path d="M6 9v14M6 9h3a7 7 0 0 1 0 14H6" fill="none" stroke="#f6f7f9" stroke-width="2.2" stroke-linecap="square" />
-          <path d="M19.5 9v14M26 9v14M19.5 16H26" fill="none" stroke="#4c90f0" stroke-width="2.2" stroke-linecap="square" />
-        </svg>
+        <Mark class="size-7" />
       </a>
       <!-- Phones show only the current page, so its title has the room. Each page links back to its parent in its own header. -->
       <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2 px-3 text-sm">

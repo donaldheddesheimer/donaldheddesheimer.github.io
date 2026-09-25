@@ -26,6 +26,8 @@
   --slate: #a7b6c2;
   --ink: #d3d8de;
   --edge: #5d6674;
+  /* The recessed surface behind media and code: figures, card stills, the trace well. */
+  --well: #0d1014;
   /* State colors, one meaning each: hover is neutral, selection is blue, active is green. */
   --hover-bg: var(--panel-2);
   --sel-bg: color-mix(in srgb, var(--blue-2) 22%, transparent);
@@ -123,6 +125,7 @@
   --color-slate: var(--slate);
   --color-ink: var(--ink);
   --color-edge: var(--edge);
+  --color-well: var(--well);
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
 }
@@ -424,13 +427,6 @@ body > header a:focus-visible,
     outline-offset: -2px;
   }
 
-  /* Striped "no imagery" placeholder */
-  .hatch {
-    background:
-      repeating-linear-gradient(135deg, transparent 0 7px, rgb(255 255 255 / 0.028) 7px 14px),
-      var(--bg);
-  }
-
   /* Faint dot grid behind canvases (fainter still under the map's edges: --grid-a). */
   .gridfield {
     background:
@@ -457,11 +453,72 @@ body > header a:focus-visible,
     min-width: 0;
     font-variant-numeric: tabular-nums;
   }
+
+  /* One project stat (Stat.astro): the value over its label, in neutral text, with numerals that
+     line up. A value in words is set in the sans at a smaller size so it doesn't read as a figure. */
+  .stat {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+  }
+  .stat-value.is-text {
+    font-family: var(--font-sans);
+    font-size: var(--text-md);
+    font-weight: 500;
+    line-height: 1.8;
+    letter-spacing: normal;
+    color: var(--muted);
+  }
+  .stat-label {
+    font-size: var(--text-xs);
+    line-height: 1.4;
+    color: var(--muted);
+  }
+  .stat-inline {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .stat-inline .stat-value {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+  .stat-inline .stat-label {
+    font-size: var(--text-2xs);
+    white-space: nowrap;
+  }
+
+  /* Figure captions everywhere (write-ups, covers, evidence): a mono kicker naming the figure,
+     then what it shows. */
+  .fig-cap {
+    margin-top: 0.5rem;
+    max-width: var(--measure);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+    color: var(--dim);
+  }
+  .fig-cap .kicker {
+    margin-right: 0.5rem;
+    color: var(--muted);
+  }
 }
 
 /* Long-form project write-ups. Text runs at most --measure wide; figures, tables and code use the
-   whole panel. */
+   whole panel. Sections are numbered 01, 02... in mono above each heading. */
 .prose {
+  counter-reset: sec;
   color: #d3d8de;
   font-size: var(--text-md);
   line-height: 1.7;
@@ -473,14 +530,26 @@ body > header a:focus-visible,
   margin-top: 1.1em;
 }
 .prose h2 {
-  margin-top: 2.25em;
-  padding-top: 0.9em;
+  counter-increment: sec;
+  margin-top: 2.4em;
+  padding-top: 1.1em;
   border-top: 1px solid var(--line);
-  font-size: var(--text-2xs);
+  font-size: var(--text-lg);
   font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+/* The index is decoration for the eye; screen readers get the heading text alone. */
+.prose h2::before {
+  content: counter(sec, decimal-leading-zero) / '';
+  display: block;
+  margin-bottom: 0.4em;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 500;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+  color: var(--dim);
 }
 .prose h2:first-child {
   margin-top: 0;
@@ -491,7 +560,7 @@ body > header a:focus-visible,
   margin-top: 0.6em;
 }
 .prose h3 {
-  font-size: var(--text-lg);
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--text);
 }
@@ -538,7 +607,7 @@ body > header a:focus-visible,
   padding: 1rem 1.125rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-2);
-  background: #0d1014 !important;
+  background: var(--well) !important;
   overflow-x: auto;
   font-size: var(--text-xs);
   line-height: 1.6;
@@ -557,6 +626,27 @@ body > header a:focus-visible,
 }
 .prose video {
   background: #000;
+}
+/* Wide media (traces) keep a readable height and scroll sideways in a well, in write-ups and in the
+   console's evidence. After .prose img, which it overrides. */
+.fig-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-2);
+  background: var(--well);
+}
+.fig-scroll > a {
+  display: block;
+  width: max-content;
+}
+.fig-scroll img {
+  display: block;
+  width: auto;
+  max-width: none;
+  height: 10.5rem;
+  border: 0;
+  border-radius: 0;
 }
 .prose table {
   width: 100%;
@@ -1317,15 +1407,6 @@ html.js .map-selbar {
 .mission-canvas > figure {
   flex: 1;
 }
-.ev-stats {
-  font-variant-numeric: tabular-nums;
-}
-.ev-stats > div {
-  display: flex;
-  flex-direction: column-reverse;
-  justify-content: flex-end;
-  gap: 0.125rem;
-}
 .ev {
   display: flex;
   flex-direction: column;
@@ -1349,43 +1430,21 @@ html.js .map-selbar {
   .ev-media.has-more {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .ev-media.has-more .is-lead {
+  .ev-media.has-more :is(.is-lead, .is-wide) {
     grid-column: 1 / -1;
   }
 }
-.ev-fig {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-2);
-  background: #0d1014;
-}
-.ev-fig img,
-.ev-fig video {
+.ev-fig > :is(img, video) {
   display: block;
   width: 100%;
   max-height: 340px;
   object-fit: contain;
-}
-.ev-fig.is-lead img,
-.ev-fig.is-lead video {
-  max-height: 380px;
-}
-.ev-fig figcaption {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  padding: 0 0.375rem;
-  border-radius: var(--radius-1);
-  background: rgb(17 20 24 / 0.9);
-}
-.ev-pending {
-  display: grid;
-  justify-items: start;
-  gap: 0.375rem;
-  padding: 1.25rem;
-  border: 1px dashed var(--line-2);
+  border: 1px solid var(--line);
   border-radius: var(--radius-2);
+  background: var(--well);
+}
+.ev-fig.is-lead > :is(img, video) {
+  max-height: 380px;
 }
 .ev-stats {
   display: grid;
@@ -1433,13 +1492,17 @@ html.js .map-selbar {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-1);
-  background: #0d1014;
+  background: var(--well);
 }
 .ev-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: top;
+}
+.ev-thumb.is-contain img {
+  padding: 0.25rem;
+  object-fit: contain;
 }
 .ev-proj-title {
   text-align: left;
@@ -1471,6 +1534,15 @@ html.js .map-selbar {
   padding: 0 0.5rem;
   font-size: var(--text-xs);
 }
+/* The icon-only version stays quiet until its card is hovered or holds focus. */
+.pcard .card-map.btn-icon {
+  width: var(--h-sm);
+  padding: 0;
+  color: var(--dim);
+}
+.pcard:is(:hover, :focus-within) .card-map.btn-icon {
+  color: var(--text);
+}
 /* Selected: the selection tint plus a 2px bar on the leading edge, as in the map list and rail. */
 .pcard.is-sel,
 .exp-row.is-sel > summary {
@@ -1484,22 +1556,37 @@ html.js .map-selbar {
 :is(.list-row[aria-current], .pcard.is-sel, .exp-row.is-sel > summary) :is(.text-dim, .kicker) {
   color: var(--muted);
 }
-.plate {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  height: 100%;
-  padding: 1rem;
-  text-align: center;
+/* An open experience row: the detail sits in its own inset well under the role text, so it doesn't
+   run into the next row. */
+.exp-detail {
+  margin: 0 var(--pad-panel) 1rem;
+  padding: 0.875rem 1rem 1rem;
+  border-left: 1px solid var(--line-2);
+  background: color-mix(in srgb, var(--panel-2) 30%, transparent);
 }
-.plate-title {
-  font-size: var(--text-xl);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: #3d4550;
+@media (min-width: 640px) {
+  .exp-detail {
+    margin-left: calc(var(--pad-panel) + 3rem);
+  }
+}
+/* Faint labels that group the long homepage (Record, Work, Personal), sitting close to the panels
+   they head. */
+.group-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: calc(0.5rem - var(--gap-section));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.group-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
 }
 .tl-key-bar {
   width: 14px;

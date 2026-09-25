@@ -10,6 +10,7 @@ tags: [Python, Machine learning, Computer vision, TensorFlow]
 repo: https://github.com/donaldheddesheimer/Smart-Bin
 cover: /projects/smart-bin.png
 coverAlt: Smart Bin pipeline diagram from the project repository
+cardFit: contain
 stats:
   - { label: Validation accuracy, value: '94.8%' }
   - { label: Validation F1, value: '0.943' }
