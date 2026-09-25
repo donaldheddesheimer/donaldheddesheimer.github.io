@@ -22,7 +22,7 @@
   --turquoise: #13c9ba;
   --violet: #bd6bbd;
   /* Neutral type colors for the systems map: orgs are slate, projects are light ink. Hue is kept for
-     meaning: blue = selection, green = active, amber = key metrics and warnings. */
+     meaning: blue = selection, green = active, amber = warnings. */
   --slate: #a7b6c2;
   --ink: #d3d8de;
   --edge: #5d6674;
@@ -464,9 +464,6 @@ html[data-motion='off'] *::after {
 .t-skill {
   --c: var(--dim);
 }
-.t-outcome {
-  --c: var(--orange);
-}
 .shape-ico .fill {
   fill: var(--c);
 }
@@ -790,9 +787,6 @@ html:not(.js) .ov-tabs {
   stroke-dasharray: 1 3.5;
   stroke-linecap: round;
 }
-.ge.r-measures {
-  stroke: color-mix(in srgb, var(--orange) 45%, var(--edge));
-}
 .focus .ge:not(.on) {
   opacity: 0.28;
 }
@@ -832,10 +826,6 @@ html:not(.js) .ov-tabs {
   --d: 10px;
   --hit: 24px;
 }
-.gn.t-outcome {
-  --d: 10px;
-  --hit: 24px;
-}
 .gn .shape {
   position: relative;
   display: grid;
@@ -862,14 +852,6 @@ html:not(.js) .ov-tabs {
   border-radius: 5px;
 }
 .gn.t-skill .shape {
-  background: var(--c);
-  box-shadow: none;
-}
-.gn.t-outcome .shape {
-  width: 9px;
-  height: 9px;
-  border-radius: 1px;
-  rotate: 45deg;
   background: var(--c);
   box-shadow: none;
 }
@@ -910,12 +892,6 @@ html:not(.js) .ov-tabs {
   font-size: 10.5px;
   color: var(--dim);
 }
-.gn.t-outcome .lbl {
-  top: calc(50% + 9px);
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  color: var(--orange);
-}
 .gn:hover .shape {
   box-shadow: inset 0 0 0 1.5px var(--c), 0 0 0 4px color-mix(in srgb, var(--c) 20%, transparent);
 }
@@ -924,9 +900,6 @@ html:not(.js) .ov-tabs {
 }
 .gn.on .lbl {
   color: var(--text);
-}
-.gn.t-outcome.on .lbl {
-  color: var(--orange);
 }
 .gn.sel {
   z-index: 3;
@@ -950,8 +923,7 @@ html:not(.js) .ov-tabs {
 }
 .hide-org :is(.gn.t-org, .ge[data-types~='org']),
 .hide-project :is(.gn.t-project, .ge[data-types~='project']),
-.hide-skill :is(.gn.t-skill, .ge[data-types~='skill']),
-.hide-outcome :is(.gn.t-outcome, .ge[data-types~='outcome']) {
+.hide-skill :is(.gn.t-skill, .ge[data-types~='skill']) {
   display: none;
 }
 .map-hint {
@@ -1081,7 +1053,7 @@ html.js .map-selbar {
   padding: 0.625rem 1rem;
   border-bottom: 1px solid var(--line);
 }
-/* The simulation runs edge to edge; it fills whatever height the record strip leaves. */
+/* The simulation runs edge to edge and fills the rest of the mission view. */
 .mission-canvas {
   display: flex;
   flex-direction: column;
@@ -1091,16 +1063,6 @@ html.js .map-selbar {
 .mission-canvas > figure {
   flex: 1;
 }
-.mission-record {
-  border-top: 1px solid var(--line);
-}
-.record-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
-  gap: 0.25rem 1rem;
-  padding: 0.5rem 1rem 0.875rem;
-}
-.record-grid > div,
 .ev-stats > div {
   display: flex;
   flex-direction: column-reverse;
@@ -1173,31 +1135,6 @@ html.js .map-selbar {
   grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
   gap: 0.75rem 1rem;
 }
-.ev-outcomes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-.ev-outcome,
-.ev-row {
-  display: flex;
-  width: 100%;
-  text-align: left;
-  border-radius: 3px;
-  touch-action: manipulation;
-}
-.ev-outcome {
-  flex-direction: column;
-  gap: 0.2rem;
-  height: 100%;
-  padding: 0.6rem 0.75rem;
-  box-shadow: inset 0 0 0 1px var(--line);
-}
-.ev-outcome:hover,
-.ev-row:hover {
-  background: var(--panel-2);
-}
 .ev-list {
   margin-top: 0.5rem;
   border-top: 1px solid var(--line);
@@ -1206,10 +1143,18 @@ html.js .map-selbar {
   border-bottom: 1px solid var(--line);
 }
 .ev-row {
+  display: flex;
   align-items: center;
   gap: 0.75rem;
+  width: 100%;
   padding: 0.5rem 0.25rem;
+  border-radius: 3px;
+  text-align: left;
   font-size: 13.5px;
+  touch-action: manipulation;
+}
+.ev-row:hover {
+  background: var(--panel-2);
 }
 .ev-projects {
   display: grid;
@@ -1269,8 +1214,7 @@ html.js .map-selbar {
   font-size: 12px;
 }
 .pcard.is-sel,
-.exp-row.is-sel > summary,
-.metric-tile.is-sel {
+.exp-row.is-sel > summary {
   box-shadow: inset 2px 0 0 var(--blue-3);
 }
 .pcard.is-sel {

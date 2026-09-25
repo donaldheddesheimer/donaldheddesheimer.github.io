@@ -16,6 +16,12 @@ export const isEntity = (id: string | null | undefined): id is string => !!id &&
 const fromUrl = new URLSearchParams(location.search).get('sel');
 let current = isEntity(fromUrl) ? fromUrl : DEFAULT_SEL;
 if (current) html.dataset.sel = current;
+// An old link to an object that no longer exists opens on the default, and drops its stale ?sel=.
+if (data && fromUrl && !isEntity(fromUrl)) {
+  const url = new URL(location.href);
+  url.searchParams.delete('sel');
+  history.replaceState(history.state, '', url);
+}
 
 export const getSel = () => current;
 

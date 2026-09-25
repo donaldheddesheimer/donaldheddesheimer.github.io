@@ -1,10 +1,10 @@
 // The homepage console's single source of truth: every entity (the person, organizations, projects,
-// capabilities, measured outcomes), the typed relations between them, and where each one leads.
+// capabilities), the typed relations between them, and where each one leads.
 // The systems map, inspector, evidence views, timeline, project pages, and ⌘K search all read it.
 // Build time only (it reads the content collection). Everything it says comes from src/data/site.ts
 // and the project files; nothing here is new content.
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { education, experience, metrics, mission, orgs, profile, type Experience, type Metric, type OrgKind } from '../data/site';
+import { education, experience, mission, orgs, profile, type Experience, type OrgKind } from '../data/site';
 import { duration, fmtMonth, statusLabel } from './format';
 import type { EntityType } from './layout';
 
@@ -13,8 +13,7 @@ type Project = CollectionEntry<'projects'>;
 
 // source -> target. affiliation: person -> org. partOf: child org -> parent org. builtAt: project -> org.
 // personal: project -> person. related: project -> org. uses: project/org -> capability.
-// measures: outcome -> org/project.
-export type RelKind = 'affiliation' | 'partOf' | 'builtAt' | 'personal' | 'related' | 'uses' | 'measures';
+export type RelKind = 'affiliation' | 'partOf' | 'builtAt' | 'personal' | 'related' | 'uses';
 export type Relation = { source: string; target: string; kind: RelKind };
 
 export type Tone = 'active' | 'shipped' | 'archived' | 'current' | 'concluded' | 'enrolled';
@@ -33,17 +32,15 @@ export type Entity = {
   period?: string;
   props: [string, string][];
   tags: string[];
-  outcomes: string[]; // outcome entity ids measured here
   actions: Action[];
   media: Media[]; // stills first; never a GIF
   href?: string; // where a second click on the map goes
   exp?: Experience;
   project?: Project;
-  metric?: Metric;
   isMission?: boolean;
 };
 
-export type LinkItem = { id: string; label: string; type: EntityType; note?: string };
+export type LinkItem = { id: string; label: string; type: EntityType };
 export type LinkGroup = { label: string; items: LinkItem[] };
 
 export const ME = 'person:me';
@@ -54,16 +51,14 @@ export const typeName: Record<EntityType, string> = {
   org: 'Organization',
   project: 'Project',
   skill: 'Capability',
-  outcome: 'Outcome',
 };
 export const typePlural: Record<EntityType, string> = {
   person: 'Person',
   org: 'Orgs',
   project: 'Projects',
   skill: 'Capabilities',
-  outcome: 'Outcomes',
 };
-export const typeOrder: EntityType[] = ['person', 'org', 'project', 'skill', 'outcome'];
+export const typeOrder: EntityType[] = ['person', 'org', 'project', 'skill'];
 
 const orgKindLabel: Record<OrgKind, string> = {
   education: 'University',
@@ -91,15 +86,12 @@ export const slug = (s: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 
-export const recordHref = (ref: string, projectIds: Set<string>) => (projectIds.has(ref) ? `/projects/${ref}/` : `#exp-${ref}`);
-
 function buildModel(projects: Project[]) {
   const entities = new Map<string, Entity>();
   const relations: Relation[] = [];
-  const add = (e: Omit<Entity, 'props' | 'tags' | 'outcomes' | 'actions' | 'media'> & Partial<Entity>) =>
-    entities.set(e.id, { props: [], tags: [], outcomes: [], actions: [], media: [], ...e });
+  const add = (e: Omit<Entity, 'props' | 'tags' | 'actions' | 'media'> & Partial<Entity>) =>
+    entities.set(e.id, { props: [], tags: [], actions: [], media: [], ...e });
   const rel = (source: string, target: string, kind: RelKind) => relations.push({ source, target, kind });
-  const projectIds = new Set(projects.map((p) => p.id));
 
   add({
     id: ME,
@@ -132,7 +124,6 @@ function buildModel(projects: Project[]) {
       kind: orgKindLabel[o.kind],
       props: [],
       tags: exp?.tags ?? [],
-      outcomes: [],
       actions: [],
       media: [],
       exp,
@@ -219,30 +210,6 @@ function buildModel(projects: Project[]) {
     users.forEach((u) => rel(u, id, 'uses'));
   }
 
-  // Resume metrics become outcome nodes attached to the role or project they measure.
-  for (const m of metrics) {
-    const id = `outcome:${m.id}`;
-    const exp = experience.find((e) => e.id === m.ref);
-    const target = exp ? `org:${exp.org}` : `project:${m.ref}`;
-    const parent = entities.get(target);
-    if (!parent) throw new Error(`metric ${m.id} points at unknown ${target}`);
-    const href = recordHref(m.ref, projectIds);
-    add({
-      id,
-      type: 'outcome',
-      label: m.value,
-      title: `${m.qualifier ? `${m.qualifier} ` : ''}${m.value}`,
-      kind: 'Measured outcome',
-      summary: m.label,
-      props: [['Source', parent.title]],
-      metric: m,
-      href,
-      actions: [{ label: projectIds.has(m.ref) ? 'View case study' : 'Open record', href, icon: 'arrow-right' }],
-    });
-    parent.outcomes.push(id);
-    rel(id, target, 'measures');
-  }
-
   return { entities, relations };
 }
 
@@ -261,8 +228,6 @@ function groupLabel(r: Relation, selfIsSource: boolean, other: Entity): string {
       return selfIsSource ? 'Related to' : 'Related projects';
     case 'uses':
       return selfIsSource ? 'Capabilities' : 'Used by';
-    case 'measures':
-      return selfIsSource ? 'Measured at' : 'Measured outcomes';
   }
 }
 
@@ -279,8 +244,6 @@ const GROUP_ORDER = [
   'Built at',
   'Personal project of',
   'Related to',
-  'Measured outcomes',
-  'Measured at',
   'Projects built here',
   'Related projects',
   'Personal projects',
@@ -312,8 +275,7 @@ export async function getModel(): Promise<Model> {
       if (r.source !== id && r.target !== id) continue;
       const other = get(r.source === id ? r.target : r.source);
       const label = groupLabel(r, r.source === id, other);
-      const note = other.type === 'outcome' ? other.metric!.label : undefined;
-      groups.set(label, [...(groups.get(label) ?? []), { id: other.id, label: other.type === 'outcome' ? other.title : other.label, type: other.type, note }]);
+      groups.set(label, [...(groups.get(label) ?? []), { id: other.id, label: other.label, type: other.type }]);
     }
     return [...groups]
       .sort(([a], [b]) => GROUP_ORDER.indexOf(a) - GROUP_ORDER.indexOf(b))

@@ -27,8 +27,6 @@ if (e.type === 'skill') {
 }
 if (e.type === 'person') projectSets.push({ label: 'Personal projects', items: linked('Personal projects') });
 const includes = e.type === 'org' ? linked('Includes') : [];
-const outcomes = e.type === 'person' ? model.list('outcome') : e.outcomes.map((id) => model.get(id));
-const source = e.type === 'outcome' ? model.get(groups[0].items[0].id) : undefined;
 const d = e.project?.data;
 const isEdu = e.id === `org:${education.org}`;
 ---
@@ -43,18 +41,8 @@ const isEdu = e.id === `org:${education.org}`;
       {e.period && <span class="readout text-[12px]">{e.period}</span>}
       {d?.context && <span class="readout text-[12px] text-dim">{d.context}</span>}
     </p>
-    {
-      e.type === 'outcome' ? (
-        <h3 class="mt-2 font-mono text-[34px] leading-none font-semibold tracking-tight text-orange">
-          {e.metric!.qualifier && <span class="mr-2 font-sans text-[15px] font-normal text-muted">{e.metric!.qualifier}</span>}
-          {e.metric!.value}
-        </h3>
-      ) : (
-        <h3 class="mt-2 text-[20px] leading-snug font-semibold tracking-tight">{e.title}</h3>
-      )
-    }
+    <h3 class="mt-2 text-[20px] leading-snug font-semibold tracking-tight">{e.title}</h3>
     {e.summary && <p class="mt-1.5 max-w-[72ch] text-[13.5px] leading-relaxed text-muted">{e.summary}</p>}
-    {e.type === 'outcome' && <p class="mt-1 readout text-[12px] text-dim">Source: {source!.title}</p>}
   </header>
 
   {/* Projects: media first, then the numbers. */}
@@ -96,35 +84,17 @@ const isEdu = e.id === `org:${education.org}`;
 
   {/* Roles: the resume record, verbatim. */}
   {
-    (e.exp || source?.exp) && (
+    e.exp && (
       <section class="ev-sec">
-        <h4 class="kicker">Record{source ? ` · ${source.title}` : ''}</h4>
+        <h4 class="kicker">Record</h4>
         <ul class="mt-2 max-w-[80ch] space-y-2 text-[13.5px] leading-relaxed text-[#d3d8de]">
-          {(e.exp ?? source!.exp)!.points.map((pt) => (
+          {e.exp.points.map((pt) => (
             <li class="flex gap-2.5">
               <span class="mt-[0.6em] size-1.5 shrink-0 bg-dim" />
               <span>{pt}</span>
             </li>
           ))}
         </ul>
-      </section>
-    )
-  }
-  {
-    source?.project && (
-      <section class="ev-sec">
-        <h4 class="kicker">Source · {source.title}</h4>
-        <p class="mt-2 max-w-[72ch] text-[13.5px] leading-relaxed text-muted">{source.summary}</p>
-        {source.project.data.stats.length > 0 && (
-          <dl class="ev-stats mt-3">
-            {source.project.data.stats.map((s) => (
-              <div>
-                <dt class="text-[12px] leading-snug text-muted">{s.label}</dt>
-                <dd class="font-mono text-[19px] font-semibold tracking-tight">{s.value}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
       </section>
     )
   }
@@ -144,28 +114,6 @@ const isEdu = e.id === `org:${education.org}`;
           <dt>Coursework</dt>
           <dd class="flex flex-wrap gap-1.5">{education.coursework.map((c) => <span class="tag">{c}</span>)}</dd>
         </dl>
-      </section>
-    )
-  }
-
-  {
-    outcomes.length > 0 && (
-      <section class="ev-sec">
-        <h4 class="kicker">{e.type === 'person' ? 'Key metrics · from the resume' : 'Measured outcomes'}</h4>
-        <ul class="ev-outcomes">
-          {outcomes.map((o) => (
-            <li>
-              <button type="button" data-map-select={o.id} class="ev-outcome">
-                <span class="font-mono text-[18px] font-semibold tracking-tight text-orange">
-                  {o.metric!.qualifier && <span class="mr-1 font-sans text-[11.5px] font-normal text-muted">{o.metric!.qualifier}</span>}
-                  {o.metric!.value}
-                </span>
-                <span class="text-[12.5px] leading-snug text-muted">{o.metric!.label}</span>
-                {e.type === 'person' && <span class="kicker">{o.metric!.source}</span>}
-              </button>
-            </li>
-          ))}
-        </ul>
       </section>
     )
   }

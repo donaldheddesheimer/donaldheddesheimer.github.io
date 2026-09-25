@@ -40,27 +40,6 @@ const org = orgs.find((o) => o.id === exp.org)!;
       <div class="mission-canvas">
         <MissionCanvas />
       </div>
-      <div class="mission-record">
-        <div class="flex items-center gap-3 px-4 pt-2.5">
-          <h4 class="kicker">Record · from the resume</h4>
-          <a href={m.href} class="-my-1 ml-auto inline-flex items-center gap-1 py-1 text-[12.5px] text-blue-3 hover:underline">
-            Open record <Icon name="arrow-right" class="size-3.5" />
-          </a>
-        </div>
-        <dl class="record-grid">
-          {
-            mission.record.map((r) => (
-              <div>
-                <dt class="text-[12px] leading-snug text-muted">{r.label}</dt>
-                <dd class="font-mono text-[19px] font-semibold tracking-tight text-orange">
-                  {r.qualifier && <span class="mr-1 font-sans text-[11.5px] font-normal text-muted">{r.qualifier}</span>}
-                  {r.value}
-                </dd>
-              </div>
-            ))
-          }
-        </dl>
-      </div>
     </div>
     <div class="stage-view evidence-view" data-stage-view="evidence" tabindex="-1" hidden></div>
   </div>

@@ -132,30 +132,10 @@ export const education = {
   coursework: ['Operating Systems', 'Processor Design', 'Computer Architecture', 'Computer Networks', 'Algorithms'],
 };
 
-// Headline numbers from the resume. `ref` is an experience id or a project slug. `qualifier` is shown
-// in front of the value ("up to 2.5 cm") so the figure reads exactly as the resume states it.
-export type Metric = { id: string; value: string; qualifier?: string; label: string; ref: string; source: string };
-export const metrics: Metric[] = [
-  { id: 'radar-directions', value: '131K+', label: 'candidate directions scanned per radar frame', ref: 'solopulse', source: 'Solopulse' },
-  { id: 'packet-latency', value: '~8×', label: 'lower per-packet signal-processing latency', ref: 'solopulse', source: 'Solopulse' },
-  { id: 'mpc-solve', value: '~50×', label: 'faster MPC solve across 4,096 parallel envs', ref: 'lidar', source: 'LIDAR Lab' },
-  { id: 'stair-success', value: '86%', label: 'stair success for RL-augmented MPC, vs 1% baseline', ref: 'lidar', source: 'LIDAR Lab' },
-  { id: 'rover-position', value: '2.5 cm', qualifier: 'up to', label: 'rover global position accuracy (RTK-fixed)', ref: 'robonav', source: 'RoboNav' },
-  { id: 'replans', value: '−45%', label: 'median replans on the obstacle-course suite', ref: 'robonav', source: 'RoboNav' },
-  { id: 'sat-preprocessing', value: '100×', qualifier: 'up to', label: 'faster multi-terabyte satellite preprocessing', ref: 'bdbi', source: 'Big Data Big Impact' },
-  { id: 'scope-overhead', value: '3.4 μs', label: 'overhead per GPU scope in cuCadence', ref: 'cucadence', source: 'cuCadence' },
-];
-
-// The homepage opens on this record. Its simulation is illustrative, not recorded data; the record
-// figures are quoted from the RoboNav bullets above.
+// The homepage opens on this record. Its simulation is illustrative, not recorded data.
 export const mission = {
   exp: 'robonav',
   title: 'Rover autonomy',
-  record: [
-    { qualifier: 'up to', value: '2.5 cm', label: 'global position accuracy under RTK-fixed conditions' },
-    { value: '−45%', label: 'median replans on a fixed obstacle-course suite' },
-    { value: '10×', label: 'faster full Gazebo navigation regression suite' },
-  ],
 };
 
 // From the resume's skills section.

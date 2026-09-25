@@ -32,14 +32,13 @@ const hid = (id: string) => `d-${id.replace(':', '-')}`;
             <h3 id={hid(e.id)} tabindex="-1" class="mt-2 text-[17px] leading-snug font-semibold outline-none">
               {e.title}
             </h3>
-            {e.type === 'outcome' && <p class="mt-0.5 text-[13px] leading-relaxed text-muted">{e.summary}</p>}
             {(e.status || e.period) && (
               <p class="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1">
                 {e.status && <span class={`pill pill-${e.status.tone}`}>{e.status.label}</span>}
                 {e.period && <span class="readout text-[12px]">{e.period}</span>}
               </p>
             )}
-            {e.type !== 'outcome' && !e.exp && e.summary && <p class="mt-2.5 text-[13px] leading-relaxed text-muted">{e.summary}</p>}
+            {!e.exp && e.summary && <p class="mt-2.5 text-[13px] leading-relaxed text-muted">{e.summary}</p>}
 
             {e.props.length > 0 && (
               <dl class="kv mt-3.5 border-t border-line pt-3 text-[12.5px]">
@@ -50,26 +49,6 @@ const hid = (id: string) => `d-${id.replace(':', '-')}`;
                   </>
                 ))}
               </dl>
-            )}
-
-            {e.outcomes.length > 0 && (
-              <div class="mt-3.5 border-t border-line pt-3">
-                <p class="kicker">Measured outcomes</p>
-                <ul class="mt-2 space-y-2">
-                  {e.outcomes.map((oid) => {
-                    const o = model.get(oid);
-                    return (
-                      <li class="flex items-baseline gap-2.5">
-                        <span class="shrink-0 font-mono text-[14px] font-semibold text-orange">
-                          {o.metric!.qualifier && <span class="mr-1 text-[11px] font-normal text-muted">{o.metric!.qualifier}</span>}
-                          {o.metric!.value}
-                        </span>
-                        <span class="text-[12.5px] leading-snug text-muted">{o.metric!.label}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
             )}
 
             {e.media[0] && e.media[0].kind !== 'video' && (
@@ -108,10 +87,7 @@ const hid = (id: string) => `d-${id.replace(':', '-')}`;
                     <li>
                       <button type="button" data-map-select={l.id} class="link-row">
                         <EntityShape type={l.type} class="size-2.5 shrink-0" />
-                        <span class="min-w-0 flex-1 truncate">
-                          {l.label}
-                          {l.note && <span class="text-dim"> · {l.note}</span>}
-                        </span>
+                        <span class="min-w-0 flex-1 truncate">{l.label}</span>
                         <span class="kicker shrink-0">{typeName[l.type]}</span>
                       </button>
                     </li>

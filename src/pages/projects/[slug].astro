@@ -170,10 +170,7 @@ const related = all
                       <li>
                         <a href={mapHref(l.id)} class="flex items-center gap-2.5 px-4 py-1.5 text-[13px] hover:bg-panel-2">
                           <EntityShape type={l.type} class="size-2.5 shrink-0" />
-                          <span class="min-w-0 flex-1 truncate">
-                            {l.label}
-                            {l.note && <span class="text-dim"> · {l.note}</span>}
-                          </span>
+                          <span class="min-w-0 flex-1 truncate">{l.label}</span>
                           <span class="kicker">{typeName[l.type]}</span>
                         </a>
                       </li>

@@ -20,12 +20,12 @@ const at = new Map(entities.map((e, i) => [e.id, { x: (pos[i].x / W) * 100, y: (
 const pct = (n: number) => `${n.toFixed(2)}%`;
 
 const nodeName = (e: Entity) => {
-  const bits = [`${typeName[e.type]}: ${e.type === 'outcome' ? `${e.title}, ${e.summary}` : e.title}`];
+  const bits = [`${typeName[e.type]}: ${e.title}`];
   if (e.status) bits.push(e.status.label.toLowerCase());
   bits.push(`${model.degree(e.id)} links`);
   return bits.join(', ');
 };
-const filters: EntityType[] = ['org', 'project', 'skill', 'outcome'];
+const filters: EntityType[] = ['org', 'project', 'skill'];
 ---
 
 <section class="pane pane-map panel" data-pane="map" data-map id="pane-map" aria-labelledby="map-title">
@@ -128,7 +128,7 @@ const filters: EntityType[] = ['org', 'project', 'skill', 'outcome'];
               {model.list(t).map((e) => (
                 <li>
                   <button type="button" class="list-row" data-map-select={e.id} aria-current={e.id === MISSION ? 'true' : undefined}>
-                    <span class="min-w-0 flex-1 truncate">{e.type === 'outcome' ? `${e.title} · ${e.summary}` : e.title}</span>
+                    <span class="min-w-0 flex-1 truncate">{e.title}</span>
                     {e.status && <span class="kicker">{e.status.label}</span>}
                   </button>
                 </li>
