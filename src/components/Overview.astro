@@ -2,6 +2,7 @@
 // The top of the homepage: who this is, then the console (systems map, mission / evidence stage,
 // inspector). Wide screens show all three panes; narrower ones get Mission / Map / Details tabs.
 import Icon from './Icon.astro';
+import NewTab from './NewTab.astro';
 import SystemsMap from './SystemsMap.astro';
 import Stage from './Stage.astro';
 import Inspector from './Inspector.astro';
@@ -22,27 +23,37 @@ const tabs = [
     <div class="id-main">
       {
         profile.photo ? (
-          <img src={profile.photo} alt={profile.name} class="size-14 shrink-0 rounded-[3px] border border-line object-cover" />
+          <img src={profile.photo} alt={profile.name} class="size-14 shrink-0 rounded-2 border border-line object-cover" />
         ) : (
-          <div class="hatch grid size-14 shrink-0 place-items-center rounded-[3px] border border-line font-mono text-base font-semibold text-dim" aria-hidden="true">
+          <div class="hatch grid size-14 shrink-0 place-items-center rounded-2 border border-line font-mono text-md font-semibold text-dim" aria-hidden="true">
             {profile.initials}
           </div>
         )
       }
       <div class="min-w-0">
-        <h1 class="text-[21px] leading-tight font-semibold tracking-tight">{profile.name}</h1>
-        <p class="mt-0.5 text-[13.5px] text-muted">{profile.headline}</p>
+        <h1 class="text-xl leading-tight font-semibold tracking-tight">{profile.name}</h1>
+        <p class="mt-0.5 text-base text-muted">{profile.headline}</p>
       </div>
     </div>
 
     <div class="id-actions">
-      <a href={profile.resume} class="btn btn-primary" target="_blank" rel="noopener"><Icon name="download" class="size-4" />Resume</a>
+      <a href={profile.resume} class="btn btn-primary" target="_blank" rel="noopener"><Icon name="download" class="size-4" />Resume<NewTab /></a>
       {
-        socials.map((s) => (
-          <a href={s.href} class="btn btn-icon" aria-label={s.label} title={s.label} target={s.id === 'email' ? undefined : '_blank'} rel="noopener">
-            <Icon name={s.icon} class="size-4" />
-          </a>
-        ))
+        socials.map((s) => {
+          const newTab = s.id !== 'email';
+          return (
+            <a
+              href={s.href}
+              class="btn btn-icon"
+              aria-label={newTab ? `${s.label} (opens in new tab)` : s.label}
+              title={newTab ? `${s.label} ↗` : s.label}
+              target={newTab ? '_blank' : undefined}
+              rel="noopener"
+            >
+              <Icon name={s.icon} class="size-4" />
+            </a>
+          );
+        })
       }
     </div>
 
@@ -61,7 +72,7 @@ const tabs = [
       </div>
       <div>
         <dt>GPA</dt>
-        <dd class="font-mono text-[12.5px]">{education.gpa}</dd>
+        <dd class="font-mono text-xs">{education.gpa}</dd>
       </div>
       <div>
         <dt>Location</dt>

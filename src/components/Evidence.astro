@@ -3,6 +3,7 @@
 // traces, and photos for projects; the verbatim resume record for roles; what uses a capability.
 // Rendered inside a <template>, so its images only load once it's cloned into the page.
 import Icon from './Icon.astro';
+import NewTab from './NewTab.astro';
 import EntityShape from './EntityShape.astro';
 import { getModel, typeName, type Entity } from '../lib/model';
 import { education } from '../data/site';
@@ -38,11 +39,11 @@ const isEdu = e.id === `org:${education.org}`;
       <span class="kicker">{typeName[e.type]}{e.type === 'org' && ` · ${e.kind}`}</span>
       {e.code && <span class="code-chip">{e.code}</span>}
       {e.status && <span class={`pill pill-${e.status.tone}`}>{e.status.label}</span>}
-      {e.period && <span class="readout text-[12px]">{e.period}</span>}
-      {d?.context && <span class="readout text-[12px] text-dim">{d.context}</span>}
+      {e.period && <span class="readout text-xs">{e.period}</span>}
+      {d?.context && <span class="readout text-xs text-dim">{d.context}</span>}
     </p>
-    <h3 class="mt-2 text-[20px] leading-snug font-semibold tracking-tight">{e.title}</h3>
-    {e.summary && <p class="mt-1.5 max-w-[72ch] text-[13.5px] leading-relaxed text-muted">{e.summary}</p>}
+    <h3 class="mt-2 text-xl leading-snug font-semibold tracking-tight">{e.title}</h3>
+    {e.summary && <p class="mt-1.5 max-w-(--measure) text-base text-muted">{e.summary}</p>}
   </header>
 
   {/* Projects: media first, then the numbers. */}
@@ -63,9 +64,9 @@ const isEdu = e.id === `org:${education.org}`;
         </div>
       ) : (
         <div class="ev-pending hatch">
-          <Icon name="image" class="size-5 text-dim" strokeWidth={1.5} />
-          <p class="text-[13px] text-muted">No screenshots or diagrams for this project yet.</p>
-          <p class="text-[12.5px] text-dim">The case study has the full write-up.</p>
+          <Icon name="image" class="size-5 text-dim" />
+          <p class="text-sm text-muted">No screenshots or diagrams for this project yet.</p>
+          <p class="text-xs text-dim">The case study has the full write-up.</p>
         </div>
       ))
   }
@@ -74,8 +75,8 @@ const isEdu = e.id === `org:${education.org}`;
       <dl class="ev-stats">
         {d.stats.map((s) => (
           <div>
-            <dt class="text-[12px] leading-snug text-muted">{s.label}</dt>
-            <dd class="font-mono text-[19px] font-semibold tracking-tight">{s.value}</dd>
+            <dt class="text-xs leading-snug text-muted">{s.label}</dt>
+            <dd class="font-mono text-xl font-semibold tracking-tight">{s.value}</dd>
           </div>
         ))}
       </dl>
@@ -87,7 +88,7 @@ const isEdu = e.id === `org:${education.org}`;
     e.exp && (
       <section class="ev-sec">
         <h4 class="kicker">Record</h4>
-        <ul class="mt-2 max-w-[80ch] space-y-2 text-[13.5px] leading-relaxed text-[#d3d8de]">
+        <ul class="mt-2 max-w-(--measure) space-y-2 text-base text-[#d3d8de]">
           {e.exp.points.map((pt) => (
             <li class="flex gap-2.5">
               <span class="mt-[0.6em] size-1.5 shrink-0 bg-dim" />
@@ -102,7 +103,7 @@ const isEdu = e.id === `org:${education.org}`;
     isEdu && (
       <section class="ev-sec">
         <h4 class="kicker">Record</h4>
-        <dl class="kv mt-2 max-w-2xl text-[13px]">
+        <dl class="kv mt-2 max-w-2xl">
           <dt>Degree</dt>
           <dd>{education.degree}</dd>
           <dt>Program</dt>
@@ -110,7 +111,7 @@ const isEdu = e.id === `org:${education.org}`;
           <dt>Thread</dt>
           <dd>{education.thread}</dd>
           <dt>GPA</dt>
-          <dd class="font-mono text-[12.5px]">{education.gpa}</dd>
+          <dd class="font-mono text-xs">{education.gpa}</dd>
           <dt>Coursework</dt>
           <dd class="flex flex-wrap gap-1.5">{education.coursework.map((c) => <span class="tag">{c}</span>)}</dd>
         </dl>
@@ -129,9 +130,9 @@ const isEdu = e.id === `org:${education.org}`;
                 <EntityShape type={x.type} class="size-3 shrink-0" />
                 <span class="min-w-0 flex-1">
                   <span class="block truncate font-medium">{x.title}</span>
-                  <span class="block truncate text-[12.5px] text-muted">{x.summary}</span>
+                  <span class="block truncate text-xs text-muted">{x.summary}</span>
                 </span>
-                {x.period && <span class="hidden readout text-[11.5px] sm:block">{x.period.split(' · ')[0]}</span>}
+                {x.period && <span class="hidden readout text-xs sm:block">{x.period.split(' · ')[0]}</span>}
               </button>
             </li>
           ))}
@@ -151,9 +152,9 @@ const isEdu = e.id === `org:${education.org}`;
                 <EntityShape type="org" class="size-3 shrink-0" />
                 <span class="min-w-0 flex-1">
                   <span class="block truncate font-medium">{x.title}</span>
-                  <span class="block truncate text-[12.5px] text-muted">{x.exp?.role}</span>
+                  <span class="block truncate text-xs text-muted">{x.exp?.role}</span>
                 </span>
-                {x.period && <span class="hidden readout text-[11.5px] sm:block">{x.period.split(' · ')[0]}</span>}
+                {x.period && <span class="hidden readout text-xs sm:block">{x.period.split(' · ')[0]}</span>}
               </button>
             </li>
           ))}
@@ -184,11 +185,11 @@ const isEdu = e.id === `org:${education.org}`;
                   <button type="button" data-map-select={p.id} class="ev-proj-title">
                     {p.title}
                   </button>
-                  <p class="mt-0.5 line-clamp-2 text-[12.5px] leading-snug text-muted">{p.summary}</p>
+                  <p class="mt-0.5 line-clamp-3 text-sm text-muted">{p.summary}</p>
                   <p class="mt-1.5 flex flex-wrap items-center gap-2">
                     <span class={`pill pill-${p.status!.tone}`}>{p.status!.label}</span>
-                    <span class="readout text-[11.5px] text-dim">{fmtMonth(p.project!.data.start)}</span>
-                    <a href={p.href} class="-my-1 ml-auto inline-flex items-center gap-1 py-1 text-[12.5px] text-blue-3 hover:underline">
+                    <span class="readout text-xs text-dim">{fmtMonth(p.project!.data.start)}</span>
+                    <a href={p.href} class="-my-1 ml-auto inline-flex items-center gap-1 py-1 text-xs text-blue-3 hover:underline pointer-coarse:-my-3 pointer-coarse:min-h-11">
                       Case study <Icon name="arrow-right" class="size-3.5" />
                     </a>
                   </p>
@@ -217,11 +218,11 @@ const isEdu = e.id === `org:${education.org}`;
           a.href ? (
             <a href={a.href} class:list={['btn', i === 0 && 'btn-primary']} target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>
               {a.label}
-              <Icon name={a.icon} class="size-4" />
+              {a.external ? <NewTab class="size-4" /> : a.icon && <Icon name={a.icon} class="size-4" />}
             </a>
           ) : (
             <span class="btn cursor-default text-dim">
-              <Icon name={a.icon} class="size-4" />
+              {a.icon && <Icon name={a.icon} class="size-4" />}
               {a.label}
             </span>
           ),

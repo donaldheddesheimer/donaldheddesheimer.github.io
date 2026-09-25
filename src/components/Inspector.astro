@@ -2,6 +2,7 @@
 // The inspector: one pre-rendered record per entity, showing whichever is selected. Linked objects
 // are grouped by how they relate to the selection and select that object when chosen.
 import Icon from './Icon.astro';
+import NewTab from './NewTab.astro';
 import EntityShape from './EntityShape.astro';
 import { getModel, MISSION, typeName } from '../lib/model';
 
@@ -20,7 +21,7 @@ const hid = (id: string) => `d-${id.replace(':', '-')}`;
         const groups = model.links(e.id);
         const count = groups.reduce((n, g) => n + g.items.length, 0);
         return (
-          <article data-detail={e.id} hidden={e.id !== MISSION} class="p-4" aria-labelledby={hid(e.id)}>
+          <article data-detail={e.id} hidden={e.id !== MISSION} class="p-(--pad-panel)" aria-labelledby={hid(e.id)}>
             <div class="flex items-center gap-2">
               <EntityShape type={e.type} class="size-3 shrink-0" />
               <span class="kicker">
@@ -29,19 +30,19 @@ const hid = (id: string) => `d-${id.replace(':', '-')}`;
               </span>
               {e.code && <span class="code-chip ml-auto">{e.code}</span>}
             </div>
-            <h3 id={hid(e.id)} tabindex="-1" class="mt-2 text-[17px] leading-snug font-semibold outline-none">
+            <h3 id={hid(e.id)} tabindex="-1" class="mt-2 text-lg leading-snug font-semibold outline-none">
               {e.title}
             </h3>
             {(e.status || e.period) && (
               <p class="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1">
                 {e.status && <span class={`pill pill-${e.status.tone}`}>{e.status.label}</span>}
-                {e.period && <span class="readout text-[12px]">{e.period}</span>}
+                {e.period && <span class="readout text-xs">{e.period}</span>}
               </p>
             )}
-            {!e.exp && e.summary && <p class="mt-2.5 text-[13px] leading-relaxed text-muted">{e.summary}</p>}
+            {!e.exp && e.summary && <p class="mt-2.5 text-base text-muted">{e.summary}</p>}
 
             {e.props.length > 0 && (
-              <dl class="kv mt-3.5 border-t border-line pt-3 text-[12.5px]">
+              <dl class="kv mt-3.5 border-t border-line pt-3">
                 {e.props.map(([k, v]) => (
                   <>
                     <dt>{k}</dt>
@@ -52,7 +53,7 @@ const hid = (id: string) => `d-${id.replace(':', '-')}`;
             )}
 
             {e.media[0] && e.media[0].kind !== 'video' && (
-              <figure class="mt-3.5 overflow-hidden rounded-[3px] border border-line bg-[#0d1014]">
+              <figure class="mt-3.5 overflow-hidden rounded-2 border border-line bg-[#0d1014]">
                 <img src={e.media[0].src} alt={e.media[0].alt} loading="lazy" decoding="async" class="aspect-[16/9] w-full object-contain" />
               </figure>
             )}
@@ -63,11 +64,11 @@ const hid = (id: string) => `d-${id.replace(':', '-')}`;
                   a.href ? (
                     <a href={a.href} class:list={['btn', i === 0 ? 'btn-primary' : '']} target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener' : undefined}>
                       {a.label}
-                      <Icon name={a.icon} class="size-4" />
+                      {a.external ? <NewTab class="size-4" /> : a.icon && <Icon name={a.icon} class="size-4" />}
                     </a>
                   ) : (
                     <span class="btn cursor-default text-dim">
-                      <Icon name={a.icon} class="size-4" />
+                      {a.icon && <Icon name={a.icon} class="size-4" />}
                       {a.label}
                     </span>
                   ),
@@ -77,11 +78,11 @@ const hid = (id: string) => `d-${id.replace(':', '-')}`;
 
             <div class="mt-5 flex items-center justify-between">
               <span class="kicker">Linked objects</span>
-              <span class="readout text-[11px]">{count}</span>
+              <span class="readout text-2xs">{count}</span>
             </div>
             {groups.map((g) => (
               <div class="mt-2.5">
-                <p class="text-[11.5px] text-dim">{g.label}</p>
+                <p class="text-xs text-dim">{g.label}</p>
                 <ul class="mt-1 divide-y divide-line border-y border-line">
                   {g.items.map((l) => (
                     <li>

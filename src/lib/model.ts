@@ -18,7 +18,8 @@ export type Relation = { source: string; target: string; kind: RelKind };
 
 export type Tone = 'active' | 'shipped' | 'archived' | 'current' | 'concluded' | 'enrolled';
 export type Media = { src: string; alt: string; kind: string; poster?: string };
-export type Action = { label: string; href?: string; icon: 'arrow-right' | 'github' | 'external' | 'file' | 'lock'; external?: boolean };
+// External actions open in a new tab and show the external glyph (NewTab) in place of an icon.
+export type Action = { label: string; href?: string; icon?: 'arrow-right' | 'lock'; external?: boolean };
 
 export type Entity = {
   id: string;
@@ -109,7 +110,7 @@ function buildModel(projects: Project[]) {
     ],
     actions: [
       { label: 'View experience', href: '#experience', icon: 'arrow-right' },
-      { label: 'Resume', href: profile.resume, icon: 'file', external: true },
+      { label: 'Resume', href: profile.resume, external: true },
     ],
   });
 
@@ -183,8 +184,8 @@ function buildModel(projects: Project[]) {
       project: p,
       actions: [
         { label: 'View case study', href: `/projects/${p.id}/`, icon: 'arrow-right' },
-        d.repo ? { label: 'Open repository', href: d.repo, icon: 'github', external: true } : { label: d.repoNote ?? 'Private repository', icon: 'lock' },
-        ...(d.demo ? [{ label: 'Live demo', href: d.demo, icon: 'external', external: true } as Action] : []),
+        d.repo ? { label: 'Open repository', href: d.repo, external: true } : { label: d.repoNote ?? 'Private repository', icon: 'lock' },
+        ...(d.demo ? [{ label: 'Live demo', href: d.demo, external: true } as Action] : []),
       ],
     });
     if (d.org) rel(id, `org:${d.org}`, 'builtAt');

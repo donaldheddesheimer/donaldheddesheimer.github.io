@@ -11,12 +11,14 @@ interface Props {
   as?: 'section' | 'div' | 'aside';
 }
 const { title, code, icon, id, class: cls, bodyClass, as: Tag = 'section' } = Astro.props;
+// Every panel is a named landmark: by its heading when it has an id, else by its title.
+const titleId = id && `${id}-title`;
 ---
 
-<Tag id={id} class:list={['panel flex min-w-0 flex-col', cls]}>
+<Tag id={id} class:list={['panel flex min-w-0 flex-col', cls]} aria-labelledby={titleId} aria-label={titleId ? undefined : title}>
   <header class="panel-head">
     {icon && <Icon name={icon} class="size-4 text-dim" />}
-    <h2 class="panel-title">{title}</h2>
+    <h2 class="panel-title" id={titleId}>{title}</h2>
     {code && <span class="code-chip">{code}</span>}
     <div class="ml-auto flex items-center gap-2">
       <slot name="actions" />

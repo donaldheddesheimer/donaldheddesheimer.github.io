@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
 import Panel from '../../components/Panel.astro';
 import EntityShape from '../../components/EntityShape.astro';
+import NewTab from '../../components/NewTab.astro';
 import { getModel, typeName } from '../../lib/model';
 import { fmtMonth, statusLabel } from '../../lib/format';
 
@@ -46,7 +47,7 @@ const related = all
     <!-- Header -->
     <section class="panel overflow-hidden">
       <div class="flex flex-wrap items-center gap-2 border-b border-line bg-panel-2/60 px-4 py-2">
-        <a href="/#projects" class="flex items-center gap-1.5 text-[12.5px] text-dim hover:text-text">
+        <a href="/#projects" class="flex items-center gap-1.5 text-xs text-dim hover:text-text pointer-coarse:-my-3 pointer-coarse:min-h-11">
           <Icon name="arrow-left" class="size-3.5" /> All projects
         </a>
         <span class="text-dim" aria-hidden="true">/</span>
@@ -57,17 +58,17 @@ const related = all
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2">
             <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
-            {d.context && <span class="readout text-[12px]">{d.context}</span>}
-            {d.featured && <span class="flex items-center gap-1 readout text-[11px] text-orange"><Icon name="star" class="size-3.5" />FEATURED</span>}
+            {d.context && <span class="readout text-xs">{d.context}</span>}
+            {d.featured && <span class="flex items-center gap-1 readout text-2xs text-orange"><Icon name="star" class="size-3.5" />FEATURED</span>}
           </div>
-          <h1 class="mt-2.5 text-[28px] leading-tight font-semibold tracking-tight md:text-[34px]">{d.title}</h1>
-          <p class="mt-2 max-w-3xl text-[15px] leading-relaxed text-muted">{d.summary}</p>
+          <h1 class="mt-2.5 text-2xl leading-tight font-semibold tracking-tight md:text-3xl">{d.title}</h1>
+          <p class="mt-2 max-w-(--measure) text-md leading-relaxed text-muted">{d.summary}</p>
         </div>
         <div class="flex flex-wrap gap-2">
           {
             d.demo && (
               <a href={d.demo} class="btn btn-primary" target="_blank" rel="noopener">
-                <Icon name="external" class="size-4" />
+                <NewTab class="size-4" />
                 Live demo
               </a>
             )
@@ -77,6 +78,7 @@ const related = all
               <a href={d.repo} class:list={['btn', !d.demo && 'btn-primary']} target="_blank" rel="noopener">
                 <Icon name="github" class="size-4" />
                 Repository
+                <NewTab />
               </a>
             ) : (
               <span class="btn cursor-default text-dim">
@@ -92,8 +94,8 @@ const related = all
           <div class="grid grid-cols-2 gap-px border-t border-line bg-line md:grid-cols-4">
             {d.stats.map((s) => (
               <div class="bg-panel px-5 py-3.5">
-                <div class="font-mono text-[20px] font-semibold tracking-tight md:text-[22px]">{s.value}</div>
-                <div class="mt-0.5 text-[12px] text-muted">{s.label}</div>
+                <div class="font-mono text-xl font-semibold tracking-tight">{s.value}</div>
+                <div class="mt-0.5 text-xs text-muted">{s.label}</div>
               </div>
             ))}
           </div>
@@ -106,7 +108,7 @@ const related = all
       <Panel title="Write-up" icon="file" as="section" bodyClass="p-5 md:p-8">
         {
           d.cover && (
-            <figure class="mb-8 overflow-hidden rounded-[3px] border border-line bg-[#0d1014]">
+            <figure class="mb-8 overflow-hidden rounded-2 border border-line bg-[#0d1014]">
               <img src={d.cover} alt={d.coverAlt ?? ''} class="max-h-[520px] w-full object-contain" />
             </figure>
           )
@@ -121,7 +123,7 @@ const related = all
         <Panel title="Properties" icon="list" as="aside">
           <dl class="kv p-4">
             <dt>ID</dt>
-            <dd class="font-mono text-[12.5px]">{d.code}</dd>
+            <dd class="font-mono text-xs">{d.code}</dd>
             <dt>Type</dt>
             <dd>Project</dd>
             <dt>Status</dt>
@@ -139,11 +141,12 @@ const related = all
               )
             }
             <dt>Source</dt>
-            <dd class="min-w-0 truncate">
+            <dd class="min-w-0 wrap-anywhere">
               {
                 d.repo ? (
-                  <a href={d.repo} class="text-blue-3 hover:underline" target="_blank" rel="noopener">
+                  <a href={d.repo} class="inline-flex max-w-full items-center gap-1 text-blue-3 hover:underline pointer-coarse:-my-3 pointer-coarse:py-3" target="_blank" rel="noopener">
                     {d.repo.replace('https://github.com/', '')}
+                    <NewTab />
                   </a>
                 ) : (
                   <span class="text-dim">{d.repoNote ?? 'Private'}</span>
@@ -157,18 +160,18 @@ const related = all
         </Panel>
 
         <Panel title="Linked objects" icon="graph" as="aside">
-          <a slot="actions" href={mapHref(`project:${project.id}`)} class="inline-flex items-center gap-1 text-[12px] text-blue-3 hover:underline">
+          <a slot="actions" href={mapHref(`project:${project.id}`)} class="inline-flex items-center gap-1 text-xs text-blue-3 hover:underline pointer-coarse:-my-3 pointer-coarse:min-h-11">
             Show on map <Icon name="arrow-right" class="size-3.5" />
           </a>
           <div class="divide-y divide-line">
             {
               groups.map((g) => (
                 <div>
-                  <p class="px-4 pt-2.5 text-[11.5px] text-dim">{g.label}</p>
+                  <p class="px-4 pt-2.5 text-xs text-dim">{g.label}</p>
                   <ul class="pb-1">
                     {g.items.map((l) => (
                       <li>
-                        <a href={mapHref(l.id)} class="flex items-center gap-2.5 px-4 py-1.5 text-[13px] hover:bg-panel-2">
+                        <a href={mapHref(l.id)} class="flex items-center gap-2.5 px-4 py-1.5 text-sm hover:bg-panel-2 pointer-coarse:min-h-11">
                           <EntityShape type={l.type} class="size-2.5 shrink-0" />
                           <span class="min-w-0 flex-1 truncate">{l.label}</span>
                           <span class="kicker">{typeName[l.type]}</span>
@@ -182,11 +185,11 @@ const related = all
             {
               related.length > 0 && (
                 <div>
-                  <p class="px-4 pt-2.5 text-[11.5px] text-dim">Shares the most tags with</p>
+                  <p class="px-4 pt-2.5 text-xs text-dim">Shares the most tags with</p>
                   <ul class="pb-1">
                     {related.map(({ p }) => (
                       <li>
-                        <a href={`/projects/${p.id}/`} class="flex items-center gap-2.5 px-4 py-1.5 text-[13px] hover:bg-panel-2">
+                        <a href={`/projects/${p.id}/`} class="flex items-center gap-2.5 px-4 py-1.5 text-sm hover:bg-panel-2 pointer-coarse:min-h-11">
                           <EntityShape type="project" class="size-2.5 shrink-0" />
                           <span class="min-w-0 flex-1 truncate">{p.data.title}</span>
                           <span class="kicker">{p.data.code}</span>
@@ -208,7 +211,7 @@ const related = all
                 <span class="flex items-center gap-1 kicker group-hover:text-blue-3">
                   <Icon name="arrow-left" class="size-3" /> {prev.data.code}
                 </span>
-                <span class="mt-1 block truncate text-[13px] font-medium">{prev.data.title}</span>
+                <span class="mt-1 block truncate text-sm font-medium">{prev.data.title}</span>
               </a>
             ) : (
               <span />
@@ -220,7 +223,7 @@ const related = all
                 <span class="flex items-center justify-end gap-1 kicker group-hover:text-blue-3">
                   {next.data.code} <Icon name="arrow-right" class="size-3" />
                 </span>
-                <span class="mt-1 block truncate text-[13px] font-medium">{next.data.title}</span>
+                <span class="mt-1 block truncate text-sm font-medium">{next.data.title}</span>
               </a>
             )
           }

@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Icon, { type IconName } from '../components/Icon.astro';
 import Panel from '../components/Panel.astro';
+import NewTab from '../components/NewTab.astro';
 import Overview from '../components/Overview.astro';
 import Timeline from '../components/Timeline.astro';
 import { education, experience, offDuty, orgs, profile, skills, socials } from '../data/site';
@@ -30,13 +31,13 @@ const [primaryHobby, ...otherHobbies] = offDuty;
 ---
 
 <Base home>
-  <div class="mx-auto flex max-w-[1680px] flex-col gap-3 p-3 md:gap-4 md:p-4">
+  <div class="mx-auto flex max-w-[1680px] flex-col gap-(--gap-section) p-3 md:p-4">
     <!-- OVERVIEW: identity, systems map, mission / evidence, inspector -->
     <Overview />
 
     <!-- TIMELINE -->
     <Panel id="timeline" title="Activity timeline" code="2023 → 2028" icon="timeline">
-      <div slot="actions" class="hidden items-center gap-3 readout text-[11px] lg:flex">
+      <div slot="actions" class="hidden items-center gap-3 readout text-2xs lg:flex">
         <span class="flex items-center gap-1.5"><span class="tl-key-bar"></span>Role</span>
         <span class="flex items-center gap-1.5"><span class="tl-key-bar is-future"></span>Ahead</span>
         <span class="flex items-center gap-1.5"><span class="tl-key-ring"></span>Project</span>
@@ -46,8 +47,8 @@ const [primaryHobby, ...otherHobbies] = offDuty;
     </Panel>
 
     <!-- EXPERIENCE -->
-    <Panel id="experience" title="Experience" code={`${experience.length + 1} RECORDS`} icon="briefcase">
-      <div class="hidden grid-cols-[2.25rem_minmax(0,1.6fr)_minmax(0,1fr)_10rem_6rem_1rem] gap-3 border-b border-line bg-panel-2/50 px-4 py-2 kicker md:grid">
+    <Panel id="experience" title="Experience" icon="briefcase">
+      <div class="hidden grid-cols-[2.25rem_minmax(0,1.6fr)_minmax(0,1fr)_10rem_6rem_1rem] gap-3 border-b border-line bg-panel-2/50 px-(--pad-panel) py-2 kicker md:grid">
         <span></span><span>Organization / role</span><span>Location</span><span>Period</span><span>Duration</span><span></span>
       </div>
       {
@@ -55,30 +56,30 @@ const [primaryHobby, ...otherHobbies] = offDuty;
           const k = kindMeta[e.kind];
           return (
             <details id={`exp-${e.id}`} data-entity={`org:${e.org}`} class="exp-row group border-b border-line last:border-b-0" open={i === 0}>
-              <summary class="grid cursor-pointer list-none grid-cols-[2.25rem_minmax(0,1fr)_1rem] items-center gap-x-3 gap-y-1 px-4 py-3 hover:bg-panel-2/60 md:grid-cols-[2.25rem_minmax(0,1.6fr)_minmax(0,1fr)_10rem_6rem_1rem] [&::-webkit-details-marker]:hidden">
-                <span class={`grid size-9 place-items-center rounded-[3px] bg-panel-3 ${k.tone}`}>
+              <summary class="grid cursor-pointer list-none grid-cols-[2.25rem_minmax(0,1fr)_1rem] items-center gap-x-3 gap-y-1 px-(--pad-panel) py-3 hover:bg-panel-2/60 md:grid-cols-[2.25rem_minmax(0,1.6fr)_minmax(0,1fr)_10rem_6rem_1rem] [&::-webkit-details-marker]:hidden">
+                <span class={`grid size-9 place-items-center rounded-2 bg-panel-3 ${k.tone}`}>
                   <Icon name={k.icon} class="size-[18px]" />
                 </span>
                 <span class="min-w-0">
                   <span class="flex items-center gap-2">
-                    <span class="truncate font-semibold">{org(e.org).name}</span>
+                    <span class="font-semibold">{org(e.org).name}</span>
                     <span class="code-chip hidden sm:inline-flex">{k.label}</span>
                   </span>
-                  <span class="block truncate text-[13px] text-muted">{e.role}</span>
+                  <span class="block text-sm text-muted">{e.role}</span>
                 </span>
-                <span class="hidden truncate text-[13px] text-muted md:block">{e.location}</span>
+                <span class="hidden truncate text-sm text-muted md:block">{e.location}</span>
                 <span class="hidden readout md:flex md:items-center md:gap-2">
                   {fmtDot(e.start)} → {e.end ? fmtDot(e.end) : <span class="text-green-2">NOW</span>}
                 </span>
                 <span class="hidden readout text-dim md:block">{duration(e.start, e.end)}</span>
                 <Icon name="chevron" class="size-4 text-dim transition-transform group-open:rotate-90" />
-                <span class="col-start-2 readout text-[11px] md:hidden">
+                <span class="col-start-2 readout text-2xs md:hidden">
                   {fmtMonth(e.start)} – {fmtMonth(e.end)} · {duration(e.start, e.end)}
                 </span>
               </summary>
-              <div class="px-4 pb-5 md:pr-8 md:pl-[4.25rem]">
-                {e.unit && <p class="mb-2.5 kicker">{e.unit}</p>}
-                <ul class="max-w-[95ch] space-y-2 text-[13.5px] leading-relaxed text-[#d3d8de]">
+              <div class="px-(--pad-panel) pb-5 md:pr-8 md:pl-[4.25rem]">
+                {e.unit && <p class="mb-2.5 kicker kicker--sentence">{e.unit}</p>}
+                <ul class="max-w-(--measure) space-y-2 text-base text-[#d3d8de]">
                   {e.points.map((pt) => (
                     <li class="flex gap-2.5">
                       <span class="mt-[0.55em] size-1.5 shrink-0 bg-dim" />
@@ -101,27 +102,27 @@ const [primaryHobby, ...otherHobbies] = offDuty;
         })
       }
       <details id="exp-education" data-entity={`org:${education.org}`} class="exp-row group">
-        <summary class="grid cursor-pointer list-none grid-cols-[2.25rem_minmax(0,1fr)_1rem] items-center gap-x-3 gap-y-1 px-4 py-3 hover:bg-panel-2/60 md:grid-cols-[2.25rem_minmax(0,1.6fr)_minmax(0,1fr)_10rem_6rem_1rem] [&::-webkit-details-marker]:hidden">
-          <span class="grid size-9 place-items-center rounded-[3px] bg-panel-3 text-blue-3"><Icon name="cap" class="size-[18px]" /></span>
+        <summary class="grid cursor-pointer list-none grid-cols-[2.25rem_minmax(0,1fr)_1rem] items-center gap-x-3 gap-y-1 px-(--pad-panel) py-3 hover:bg-panel-2/60 md:grid-cols-[2.25rem_minmax(0,1.6fr)_minmax(0,1fr)_10rem_6rem_1rem] [&::-webkit-details-marker]:hidden">
+          <span class="grid size-9 place-items-center rounded-2 bg-panel-3 text-blue-3"><Icon name="cap" class="size-[18px]" /></span>
           <span class="min-w-0">
             <span class="flex items-center gap-2">
-              <span class="truncate font-semibold">{education.school}</span>
+              <span class="font-semibold">{education.school}</span>
               <span class="code-chip hidden sm:inline-flex">Edu</span>
             </span>
-            <span class="block truncate text-[13px] text-muted">{education.degree} · {education.program}</span>
+            <span class="block text-sm text-muted">{education.degree} · {education.program}</span>
           </span>
-          <span class="hidden truncate text-[13px] text-muted md:block">Atlanta, GA</span>
+          <span class="hidden truncate text-sm text-muted md:block">Atlanta, GA</span>
           <span class="hidden readout md:block">{fmtDot(education.start)} → {fmtDot(education.end)}</span>
           <span class="hidden readout text-dim md:block">Expected</span>
           <Icon name="chevron" class="size-4 text-dim transition-transform group-open:rotate-90" />
-          <span class="col-start-2 readout text-[11px] md:hidden">Expected {fmtMonth(education.end)}</span>
+          <span class="col-start-2 readout text-2xs md:hidden">Expected {fmtMonth(education.end)}</span>
         </summary>
-        <div class="px-4 pb-5 md:pl-[4.25rem]">
-          <dl class="kv max-w-2xl text-[13px]">
+        <div class="px-(--pad-panel) pb-5 md:pl-[4.25rem]">
+          <dl class="kv max-w-2xl">
             <dt>Thread</dt>
             <dd>{education.thread}</dd>
             <dt>GPA</dt>
-            <dd class="font-mono text-[12.5px]">{education.gpa}</dd>
+            <dd class="font-mono text-xs">{education.gpa}</dd>
             <dt>Coursework</dt>
             <dd class="flex flex-wrap gap-1.5">{education.coursework.map((c) => <span class="tag">{c}</span>)}</dd>
           </dl>
@@ -134,13 +135,13 @@ const [primaryHobby, ...otherHobbies] = offDuty;
     </Panel>
 
     <!-- PROJECTS -->
-    <Panel id="projects" title="Projects" code={`${projects.length} OBJECTS`} icon="cube">
+    <Panel id="projects" title="Projects" icon="cube">
       <div slot="actions" class="flex items-center gap-2">
         <div class="seg hidden sm:inline-flex" role="group" aria-label="Filter by status">
           {
             (['all', 'active', 'shipped', 'archived'] as const).map((s) => (
               <button type="button" data-filter={s} aria-pressed={s === 'all' ? 'true' : 'false'}>
-                {s === 'all' ? 'All' : statusLabel[s]} <span class="ml-1 font-mono text-[10.5px] text-muted">{counts[s]}</span>
+                {s === 'all' ? 'All' : statusLabel[s]} <span class="ml-1 font-mono text-2xs text-muted">{counts[s]}</span>
               </button>
             ))
           }
@@ -157,7 +158,7 @@ const [primaryHobby, ...otherHobbies] = offDuty;
             const d = p.data;
             const still = model.get(`project:${p.id}`).media[0];
             return (
-              <article data-status={d.status} data-entity={`project:${p.id}`} class="pcard group relative flex flex-col overflow-hidden rounded-[3px] border border-line bg-bg/40 transition-colors hover:border-blue/70 hover:bg-panel-2/40">
+              <article data-status={d.status} data-entity={`project:${p.id}`} class="pcard group relative flex flex-col overflow-hidden rounded-2 border border-line bg-bg/40 transition-colors hover:border-blue/70 hover:bg-panel-2/40">
                 <div class="relative aspect-[16/9] overflow-hidden border-b border-line bg-bg">
                   {still ? (
                     <img src={still.src} alt={still.alt} loading="lazy" decoding="async" class="size-full object-cover object-top opacity-85 transition duration-300 group-hover:opacity-100" />
@@ -167,24 +168,23 @@ const [primaryHobby, ...otherHobbies] = offDuty;
                       <span class="kicker">No screenshots yet</span>
                     </div>
                   )}
-                  <span class="code-chip absolute top-2 left-2 bg-bg/90">{d.code}</span>
-                  <span class="absolute top-2 right-2 rounded-[2px] bg-bg/90">
+                  <span class="absolute top-2 right-2 rounded-1 bg-bg/90">
                     <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
                   </span>
                 </div>
-                <div class="flex flex-1 flex-col p-3.5">
-                  <h3 class="flex items-center gap-1.5 text-[15px] font-semibold">
+                <div class="flex flex-1 flex-col p-4">
+                  <h3 class="flex items-center gap-1.5 text-md font-semibold">
                     <a href={`/projects/${p.id}/`} class="stretched">{d.title}</a>
                     {d.featured && <Icon name="star" class="size-3.5 text-orange" />}
                   </h3>
-                  <p class="mt-1 line-clamp-2 text-[13px] leading-relaxed text-muted">{d.summary}</p>
+                  <p class="mt-1 line-clamp-3 text-sm text-muted">{d.summary}</p>
                   <div class="mt-3 flex flex-wrap gap-1">
                     {d.tags.slice(0, 4).map((t) => (
                       <span class="tag">{t}</span>
                     ))}
                   </div>
                   <div class="mt-auto flex items-center justify-between gap-3 pt-3">
-                    <span class="truncate readout text-[11px] text-dim">
+                    <span class="min-w-0 readout text-2xs text-dim">
                       {fmtMonth(d.start)}
                       {d.context && ` · ${d.context}`}
                     </span>
@@ -201,7 +201,7 @@ const [primaryHobby, ...otherHobbies] = offDuty;
       </div>
 
       <div data-view="table" hidden class="overflow-x-auto">
-        <table class="w-full min-w-[760px] text-left text-[13px]">
+        <table class="w-full min-w-[760px] text-left text-sm">
           <thead class="border-b border-line bg-panel-2/50">
             <tr class="kicker">
               <th class="px-4 py-2 font-normal">ID</th>
@@ -238,12 +238,12 @@ const [primaryHobby, ...otherHobbies] = offDuty;
     </Panel>
 
     <!-- CAPABILITIES -->
-    <Panel id="capabilities" title="Capabilities" code={`${skills.length} GROUPS`} icon="layers">
+    <Panel id="capabilities" title="Capabilities" icon="layers">
       <div class="divide-y divide-line">
         {
           skills.map((s) => (
-            <div class="grid gap-2 px-4 py-3 md:grid-cols-[13rem_1fr] md:gap-4">
-              <div class="pt-1 kicker">{s.group}</div>
+            <div class="grid gap-2 px-(--pad-panel) py-3 md:grid-cols-[13rem_1fr] md:gap-4">
+              <div class="pt-0.5 kicker kicker--sentence">{s.group}</div>
               <div class="flex flex-wrap gap-1.5">
                 {s.items.map((i) => (
                   <span class="tag">{i}</span>
@@ -256,9 +256,9 @@ const [primaryHobby, ...otherHobbies] = offDuty;
     </Panel>
 
     <!-- OFF DUTY -->
-    <Panel id="off-duty" title="Off duty" code={`${offDuty.length} RECORDS`} icon="sun">
+    <Panel id="off-duty" title="Off duty" icon="sun">
       <div class="grid gap-3 p-3 md:grid-cols-3">
-        <article class="grid overflow-hidden rounded-[3px] border border-line bg-bg/40 md:col-span-3 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+        <article class="grid overflow-hidden rounded-2 border border-line bg-bg/40 md:col-span-3 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
           <div class="relative aspect-[4/3] border-b border-line md:aspect-auto md:min-h-[340px] md:border-r md:border-b-0">
             {
               primaryHobby.image ? (
@@ -267,16 +267,15 @@ const [primaryHobby, ...otherHobbies] = offDuty;
                 <div class="hatch absolute inset-0" />
               )
             }
-            <span class="code-chip absolute top-2 left-2 bg-bg/90">OD-01</span>
           </div>
           <div class="flex flex-col p-5">
             <div class="flex items-center gap-2">
               <Icon name={hobbyIcon[primaryHobby.id]} class="size-5 text-orange" />
               <span class="kicker text-orange">Primary interest</span>
             </div>
-            <h3 class="mt-3 text-2xl font-semibold tracking-tight">{primaryHobby.name}</h3>
-            <p class="mt-2 max-w-md text-[14px] leading-relaxed text-muted">{primaryHobby.note}</p>
-            <dl class="kv mt-auto border-t border-line pt-4 text-[13px]">
+            <h3 class="mt-3 text-xl font-semibold tracking-tight">{primaryHobby.name}</h3>
+            <p class="mt-2 max-w-md text-base text-muted">{primaryHobby.note}</p>
+            <dl class="kv mt-auto border-t border-line pt-4">
               <dt>Priority</dt>
               <dd>Highest</dd>
               <dt>Where</dt>
@@ -285,30 +284,29 @@ const [primaryHobby, ...otherHobbies] = offDuty;
           </div>
         </article>
         {
-          otherHobbies.map((h, i) => (
-            <article class="flex flex-col overflow-hidden rounded-[3px] border border-line bg-bg/40">
+          otherHobbies.map((h) => (
+            <article class="flex flex-col overflow-hidden rounded-2 border border-line bg-bg/40">
               <div class="relative aspect-[16/9] border-b border-line">
                 {h.image ? (
                   <img src={h.image} alt={h.imageAlt ?? h.name} loading="lazy" class="absolute inset-0 size-full object-cover" />
                 ) : (
                   <div class="hatch absolute inset-0 grid place-items-center">
                     <div class="flex flex-col items-center gap-2 text-dim">
-                      <Icon name="image" class="size-6" strokeWidth={1.25} />
+                      <Icon name="image" class="size-6" />
                       <span class="kicker">No photo yet</span>
                     </div>
                   </div>
                 )}
-                <span class="code-chip absolute top-2 left-2 bg-bg/90">OD-0{i + 2}</span>
               </div>
               <div class="flex flex-1 flex-col p-4">
                 <div class="flex items-center gap-2">
                   <Icon name={hobbyIcon[h.id]} class="size-4 text-dim" />
                   <h3 class="font-semibold">{h.name}</h3>
                 </div>
-                <p class="mt-1.5 text-[13px] leading-relaxed text-muted">{h.note}</p>
+                <p class="mt-1.5 text-sm leading-relaxed text-muted">{h.note}</p>
                 {h.link && (
-                  <a href={h.link.href} class="mt-3 inline-flex items-center gap-1 text-[13px] text-blue-3 hover:underline" target="_blank" rel="noopener">
-                    {h.link.label} <Icon name="external" class="size-3.5" />
+                  <a href={h.link.href} class="mt-3 inline-flex items-center gap-1 self-start text-sm text-blue-3 hover:underline pointer-coarse:min-h-11" target="_blank" rel="noopener">
+                    {h.link.label} <NewTab />
                   </a>
                 )}
               </div>
@@ -319,11 +317,11 @@ const [primaryHobby, ...otherHobbies] = offDuty;
     </Panel>
 
     <!-- CONTACT -->
-    <Panel id="contact" title="Contact" code="CHANNEL OPEN" icon="radio">
+    <Panel id="contact" title="Contact" icon="radio">
       <div class="grid items-center gap-6 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:p-6">
         <div>
-          <h2 class="text-2xl font-semibold tracking-tight">Let's talk.</h2>
-          <p class="mt-1.5 max-w-xl text-muted">
+          <h2 class="text-xl font-semibold tracking-tight">Let's talk.</h2>
+          <p class="mt-1.5 max-w-(--measure) text-base text-muted">
             Internships, research, or anything GPU- or robot-shaped. Email is the fastest way to reach me.
           </p>
           <div class="mt-5 flex flex-wrap gap-2">
@@ -336,25 +334,28 @@ const [primaryHobby, ...otherHobbies] = offDuty;
                   <a href={s.href} class="btn" target="_blank" rel="noopener">
                     <Icon name={s.icon} class="size-4" />
                     {s.label}
+                    <NewTab class="size-3.5 text-dim" />
                   </a>
                 ))
             }
           </div>
         </div>
-        <dl class="kv min-w-[17rem] rounded-[3px] border border-line bg-bg/50 p-4 text-[13px]">
+        <dl class="kv rounded-2 border border-line bg-bg/50 p-4 sm:min-w-[17rem]">
           <dt>Email</dt>
-          <dd class="font-mono text-[12px]">{profile.email}</dd>
+          <dd class="font-mono text-xs wrap-anywhere">{profile.email}</dd>
           <dt>Location</dt>
           <dd>{profile.location}</dd>
           <dt>Local time</dt>
-          <dd class="font-mono text-[12px]" data-clock>--:--:--</dd>
+          <dd class="font-mono text-xs" data-clock>--:--:--</dd>
           <dt>Resume</dt>
-          <dd><a href={profile.resume} class="-my-1 inline-block py-1 text-blue-3 hover:underline" target="_blank" rel="noopener">PDF ↗</a></dd>
+          <dd>
+            <a href={profile.resume} class="-my-1 inline-flex items-center gap-1 py-1 text-blue-3 hover:underline pointer-coarse:-my-3 pointer-coarse:min-h-11" target="_blank" rel="noopener">PDF <NewTab /></a>
+          </dd>
         </dl>
       </div>
     </Panel>
 
-    <p class="pb-2 text-center readout text-[10.5px] text-dim md:hidden">© {new Date().getFullYear()} {profile.name}</p>
+    <p class="pb-2 text-center readout text-2xs text-dim md:hidden">© {new Date().getFullYear()} {profile.name}</p>
   </div>
 </Base>
 

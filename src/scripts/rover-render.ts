@@ -8,7 +8,7 @@ type RGB = number[];
 const TOKENS = ['bg', 'panel', 'panel-2', 'line', 'line-2', 'text', 'muted', 'blue-3', 'green', 'green-2', 'orange'] as const;
 type Tok = (typeof TOKENS)[number];
 const TAU = Math.PI * 2;
-const MONO = '500 10px "JetBrains Mono",ui-monospace,monospace';
+const MONO = '500 12px "JetBrains Mono",ui-monospace,monospace';
 const hex = (s: string): RGB => {
   const v = parseInt(s.slice(1), 16);
   return [v >> 16, (v >> 8) & 255, v & 255];
@@ -279,13 +279,13 @@ export function mount(root: HTMLElement) {
       c.globalAlpha = Math.min(1, (1.6 - age) / 0.5);
       const tw = c.measureText('REPLAN').width + 10;
       const bx = Math.min(RX + 10, ox + s.cols * cell - tw - 2);
-      const by = Math.max(RY - 26, oy + 2);
+      const by = Math.max(RY - 28, oy + 2);
       c.fillStyle = rgba(C.panel);
-      c.fillRect(bx, by, tw, 15);
+      c.fillRect(bx, by, tw, 18);
       c.strokeStyle = rgba(C['blue-3']);
-      c.strokeRect(bx + 0.5, by + 0.5, tw - 1, 14);
+      c.strokeRect(bx + 0.5, by + 0.5, tw - 1, 17);
       c.fillStyle = rgba(C['blue-3']);
-      c.fillText('REPLAN', bx + 5, by + 8);
+      c.fillText('REPLAN', bx + 5, by + 9);
       c.globalAlpha = 1;
     }
     const n = s.w.wps.length;

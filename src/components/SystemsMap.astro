@@ -14,7 +14,7 @@ const H = 620;
 const pos = layout(
   entities.map((e) => ({ id: e.id, type: e.type, label: e.label })),
   model.relations,
-  { width: W, height: H, pad: 34, labelScale: 1.05 },
+  { width: W, height: H, pad: 34, labelScale: 1.1 },
 );
 const at = new Map(entities.map((e, i) => [e.id, { x: (pos[i].x / W) * 100, y: (pos[i].y / H) * 100 }]));
 const pct = (n: number) => `${n.toFixed(2)}%`;
@@ -31,7 +31,7 @@ const filters: EntityType[] = ['org', 'project', 'skill'];
 <section class="pane pane-map panel" data-pane="map" data-map id="pane-map" aria-labelledby="map-title">
   <header class="panel-head">
     <Icon name="graph" class="size-4 shrink-0 text-dim" />
-    <h2 class="panel-title truncate" id="map-title">Systems map</h2>
+    <h2 class="panel-title" id="map-title">Systems map</h2>
     <span class="map-count code-chip">{entities.length} OBJ · {model.relations.length} LNK</span>
     <div class="ml-auto flex shrink-0 items-center gap-1">
       <div class="seg" role="group" aria-label="Map layout">
@@ -101,8 +101,8 @@ const filters: EntityType[] = ['org', 'project', 'skill'];
               >
                 <span class="shape">
                   {e.type === 'person' && <span class="initials">DH</span>}
-                  {e.type === 'org' && <Icon name="building" class="glyph" strokeWidth={2} />}
-                  {e.type === 'project' && <Icon name="cube" class="glyph" strokeWidth={2} />}
+                  {e.type === 'org' && <Icon name="building" class="glyph" strokeWidth={1.25} />}
+                  {e.type === 'project' && <Icon name="cube" class="glyph" strokeWidth={1.25} />}
                   {e.status?.tone === 'active' || e.status?.tone === 'current' ? <span class="live" /> : null}
                 </span>
                 <span class="lbl" aria-hidden="true">
@@ -147,7 +147,7 @@ const filters: EntityType[] = ['org', 'project', 'skill'];
   </footer>
 
   <div class="map-selbar" data-map-selbar>
-    <span class="min-w-0 flex-1 truncate text-[13px]"><span class="kicker mr-1.5">Selected</span><span data-selbar-label></span></span>
+    <span class="min-w-0 flex-1 truncate text-sm"><span class="kicker mr-1.5">Selected</span><span data-selbar-label></span></span>
     <button type="button" class="btn" data-goto-tab="details">Details</button>
   </div>
 </section>
@@ -183,7 +183,7 @@ const filters: EntityType[] = ['org', 'project', 'skill'];
       lastW = width;
       lastH = height;
       const compact = width < 480;
-      const pos = layout(lnodes, ledges, { width, height, pad: compact ? 20 : 34, labels: !compact, labelScale: 1.05 });
+      const pos = layout(lnodes, ledges, { width, height, pad: compact ? 20 : 34, labels: !compact, labelScale: 1.1 });
       const pct = new Map(lnodes.map((n, i) => [n.id, [(pos[i].x / width) * 100, (pos[i].y / height) * 100]]));
       for (const n of nodes) {
         const [x, y] = pct.get(n.dataset.id!)!;

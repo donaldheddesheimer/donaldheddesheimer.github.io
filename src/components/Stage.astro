@@ -29,12 +29,12 @@ const org = orgs.find((o) => o.id === exp.org)!;
     <div class="stage-view mission-view" data-stage-view="mission">
       <div class="mission-head">
         <div class="flex items-center gap-3">
-          <h3 class="text-[15px] font-semibold">{mission.title}</h3>
+          <h3 class="text-md font-semibold">{mission.title}</h3>
           <span class={`pill pill-${m.status!.tone} ml-auto`}>{m.status!.label}</span>
         </div>
-        <p class="mt-0.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 text-[13px] text-muted">
+        <p class="mt-0.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 text-sm text-muted">
           <span>{org.name} · {exp.unit}</span>
-          <span class="readout text-[12px]">{fmtMonth(exp.start)} – {fmtMonth(exp.end)}</span>
+          <span class="readout text-xs">{fmtMonth(exp.start)} – {fmtMonth(exp.end)}</span>
         </p>
       </div>
       <div class="mission-canvas">

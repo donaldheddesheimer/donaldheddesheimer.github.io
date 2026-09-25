@@ -52,9 +52,10 @@ export type IconName = keyof typeof icons;
 interface Props {
   name: IconName;
   class?: string;
+  /** In screen pixels: the stroke keeps this width at every icon size. */
   strokeWidth?: number;
 }
-const { name, class: cls = 'size-5', strokeWidth = 1.75 } = Astro.props;
+const { name, class: cls = 'size-5', strokeWidth = 1.5 } = Astro.props;
 ---
 
 <svg
@@ -68,3 +69,9 @@ const { name, class: cls = 'size-5', strokeWidth = 1.75 } = Astro.props;
   aria-hidden="true"
   set:html={icons[name]}
 />
+
+<style>
+  svg > :global(*) {
+    vector-effect: non-scaling-stroke;
+  }
+</style>

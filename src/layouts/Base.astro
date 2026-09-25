@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
 import Icon, { type IconName } from '../components/Icon.astro';
+import NewTab from '../components/NewTab.astro';
 import { experience, orgs, profile, socials } from '../data/site';
 import { getModel, typeName } from '../lib/model';
 
@@ -92,14 +93,15 @@ const search = [
           <path d="M19.5 9v14M26 9v14M19.5 16H26" fill="none" stroke="#4c90f0" stroke-width="2.2" stroke-linecap="square" />
         </svg>
       </a>
-      <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2 px-3 text-[13px]">
-        <a href="/" class="hidden py-1 font-semibold whitespace-nowrap sm:inline-block">{profile.name}</a>
+      <!-- Phones show only the current page, so its title has the room. Each page links back to its parent in its own header. -->
+      <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2 px-3 text-sm">
+        <a href="/" class="hidden py-1 font-semibold whitespace-nowrap sm:inline-block pointer-coarse:py-3">{profile.name}</a>
         {
           crumb.map((c, i) => (
             <>
               <span class="hidden text-dim sm:inline" aria-hidden="true">/</span>
               {c.href ? (
-                <a href={c.href} class="truncate text-muted hover:text-text">
+                <a href={c.href} class="truncate text-muted hover:text-text max-sm:hidden pointer-coarse:py-3">
                   {c.label}
                 </a>
               ) : (
@@ -113,7 +115,7 @@ const search = [
       <button
         type="button"
         data-cmdk-open
-        class="mx-auto hidden h-8 w-full max-w-sm items-center gap-2 rounded-[3px] bg-bg px-2.5 text-left text-[13px] text-dim shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[inset_0_0_0_1px_var(--line-2)] md:flex"
+        class="mx-auto hidden h-(--h-md) w-full max-w-sm items-center gap-2 rounded-2 bg-bg px-2.5 text-left text-sm text-dim shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[inset_0_0_0_1px_var(--line-2)] md:flex pointer-coarse:h-11"
       >
         <Icon name="search" class="size-4" />
         <span>Search objects…</span>
@@ -121,7 +123,7 @@ const search = [
       </button>
 
       <div class="ml-auto flex items-center gap-1.5 pr-2 md:ml-0 md:gap-3 md:pr-3">
-        <div class="hidden items-center gap-3 readout text-[11px] lg:flex">
+        <div class="hidden items-center gap-3 readout text-2xs lg:flex">
           <span class="flex items-center gap-2"><span class="live-dot"></span> ONLINE</span>
           <span class="text-dim" aria-hidden="true">|</span>
           <span>ATL <span data-clock>--:--:--</span></span>
@@ -132,40 +134,54 @@ const search = [
         <a href={profile.resume} class="btn btn-primary" target="_blank" rel="noopener">
           <Icon name="file" class="size-4" />
           <span>Resume</span>
+          <NewTab />
         </a>
       </div>
     </header>
 
     <!-- Left rail (desktop) -->
-    <nav aria-label="Sections" class="fixed top-12 bottom-0 left-0 z-30 hidden w-14 flex-col items-center gap-1 border-r border-line bg-panel py-2 md:flex">
+    <nav aria-label="Sections" class="fixed top-12 bottom-0 left-0 z-30 hidden w-14 flex-col items-center gap-1 border-r border-line bg-panel py-2 md:flex" data-rail>
       {
         nav.map((n) => (
-          <a href={`${base}#${n.id}`} data-spy={n.id} class="rail-btn group relative grid size-10 place-items-center rounded-[3px] text-dim hover:bg-panel-3 hover:text-text" aria-label={n.label}>
+          <a href={`${base}#${n.id}`} data-spy={n.id} class="rail-btn relative grid size-10 place-items-center rounded-2 text-dim hover:bg-panel-3 hover:text-text pointer-coarse:size-11" aria-label={n.label}>
             <Icon name={n.icon} class="size-[18px]" />
-            <span class="pointer-events-none absolute left-full ml-2 hidden rounded-[3px] bg-panel-3 px-2 py-1 text-xs whitespace-nowrap text-text shadow-lg group-hover:block group-focus-visible:block">
-              {n.label}
-            </span>
+            <span class="rail-tip" aria-hidden="true">{n.label}</span>
           </a>
         ))
       }
       <div class="mt-auto flex flex-col items-center gap-1">
+        <div class="mb-1 h-px w-6 bg-line" aria-hidden="true"></div>
         {
-          socials.map((s) => (
-            <a href={s.href} class="grid size-10 place-items-center rounded-[3px] text-dim hover:bg-panel-3 hover:text-text" aria-label={s.label} target={s.id === 'email' ? undefined : '_blank'} rel="noopener">
-              <Icon name={s.icon} class="size-4" />
-            </a>
-          ))
+          socials.map((s) => {
+            const newTab = s.id !== 'email';
+            return (
+              <a
+                href={s.href}
+                class="rail-btn relative grid size-10 place-items-center rounded-2 text-dim hover:bg-panel-3 hover:text-text pointer-coarse:size-11"
+                aria-label={newTab ? `${s.label} (opens in new tab)` : s.label}
+                target={newTab ? '_blank' : undefined}
+                rel={newTab ? 'noopener' : undefined}
+              >
+                <Icon name={s.icon} class="size-[18px]" />
+                <span class="rail-tip" aria-hidden="true">{newTab ? `${s.label} ↗` : s.label}</span>
+              </a>
+            );
+          })
         }
       </div>
     </nav>
 
-    <!-- Bottom bar (mobile) -->
-    <nav aria-label="Sections" class="fixed inset-x-0 bottom-0 z-40 grid h-14 grid-cols-5 border-t border-line bg-panel pb-[env(safe-area-inset-bottom)] md:hidden">
+    <main id="main" class="pt-12 pb-20 md:pb-10 md:pl-14">
+      <slot />
+    </main>
+
+    <!-- Bottom bar (mobile). After main in the source, so it lands at the page end when it stops being fixed. -->
+    <nav aria-label="Sections" class="tabbar fixed inset-x-0 bottom-0 z-40 grid h-14 grid-cols-5 border-t border-line bg-panel pb-[env(safe-area-inset-bottom)] md:hidden">
       {
         nav
           .filter((n) => n.mobile)
           .map((n) => (
-            <a href={`${base}#${n.id}`} data-spy={n.id} class="rail-btn flex flex-col items-center justify-center gap-1 text-[10px] text-dim">
+            <a href={`${base}#${n.id}`} data-spy={n.id} class="rail-btn flex flex-col items-center justify-center gap-1 text-2xs text-dim">
               <Icon name={n.icon} class="size-[18px]" />
               {n.label}
             </a>
@@ -173,12 +189,8 @@ const search = [
       }
     </nav>
 
-    <main id="main" class="pt-12 pb-20 md:pb-10 md:pl-14">
-      <slot />
-    </main>
-
     <!-- Status bar (desktop) -->
-    <footer class="fixed right-0 bottom-0 left-14 z-30 hidden h-7 items-center gap-4 border-t border-line bg-panel px-3 readout text-[10.5px] text-dim md:flex">
+    <footer class="fixed right-0 bottom-0 left-14 z-30 hidden h-8 items-center gap-4 border-t border-line bg-panel px-3 readout text-2xs text-dim md:flex">
       <span class="flex items-center gap-1.5 text-green-2"><span class="size-1.5 rounded-full bg-green"></span>All systems nominal</span>
       <button type="button" class="motion-toggle flex h-full items-center gap-1.5 px-1 hover:text-text" data-motion-toggle aria-pressed="true" title="Turn animation on or off">
         Motion <span class="text-text" data-motion-state>ON</span>
@@ -187,19 +199,32 @@ const search = [
       <span>{experience.length} roles</span>
       <span class="ml-auto hidden lg:inline">{profile.coords}</span>
       <span>© {new Date().getFullYear()} {profile.name}</span>
-      <a href="https://github.com/donaldheddesheimer/donaldheddesheimer.github.io" class="-my-1 inline-block py-1 hover:text-text" target="_blank" rel="noopener">Source</a>
+      <a href="https://github.com/donaldheddesheimer/donaldheddesheimer.github.io" class="flex h-full items-center gap-1 hover:text-text" target="_blank" rel="noopener">Source<NewTab class="size-3 shrink-0" /></a>
     </footer>
 
     <!-- ⌘K search -->
-    <dialog id="cmdk" class="m-auto mt-[12vh] w-[min(640px,calc(100%-2rem))] rounded-[3px] border border-line-2 bg-panel p-0 text-text shadow-2xl backdrop:bg-black/60">
+    <dialog id="cmdk" class="m-auto mt-[12vh] w-[min(640px,calc(100%-2rem))] rounded-2 border border-line-2 bg-panel p-0 text-text shadow-elev-3 backdrop:bg-black/60" aria-label="Search">
       <div class="flex items-center gap-2 border-b border-line px-3">
         <Icon name="search" class="size-4 text-dim" />
-        <input id="cmdk-input" type="text" placeholder="Search projects, roles, sections…" autocomplete="off" spellcheck="false" class="h-12 flex-1 bg-transparent text-[15px] outline-none placeholder:text-dim" aria-controls="cmdk-list" aria-label="Search" />
+        <input
+          id="cmdk-input"
+          type="text"
+          role="combobox"
+          aria-expanded="true"
+          aria-controls="cmdk-list"
+          aria-autocomplete="list"
+          aria-label="Search"
+          placeholder="Search projects, roles, sections…"
+          autocomplete="off"
+          spellcheck="false"
+          class="h-12 flex-1 bg-transparent text-md outline-none placeholder:text-dim"
+        />
         <kbd class="code-chip">ESC</kbd>
       </div>
-      <ul id="cmdk-list" role="listbox" class="max-h-[55vh] overflow-y-auto py-1"></ul>
-      <div class="flex gap-4 border-t border-line px-3 py-2 readout text-[10.5px] text-dim">
-        <span>↑↓ navigate</span><span>↵ open</span><span class="ml-auto" id="cmdk-count"></span>
+      <ul id="cmdk-list" role="listbox" aria-label="Search results" class="max-h-[55vh] overflow-y-auto py-1"></ul>
+      <p id="cmdk-empty" class="px-3 py-6 text-center text-dim" hidden>No objects match that query.</p>
+      <div class="flex gap-4 border-t border-line px-3 py-2 readout text-2xs text-dim">
+        <span>↑↓ navigate</span><span>↵ open</span><span class="ml-auto" id="cmdk-count" role="status"></span>
       </div>
     </dialog>
     <script type="application/json" id="cmdk-data" set:html={JSON.stringify(search).replace(/</g, '\\u003c')} />
@@ -243,6 +268,7 @@ const search = [
       const dialog = document.getElementById('cmdk') as HTMLDialogElement;
       const input = document.getElementById('cmdk-input') as HTMLInputElement;
       const list = document.getElementById('cmdk-list')!;
+      const empty = document.getElementById('cmdk-empty')!;
       const count = document.getElementById('cmdk-count')!;
       const items: Item[] = JSON.parse(document.getElementById('cmdk-data')!.textContent!);
       let shown: Item[] = [];
@@ -253,19 +279,26 @@ const search = [
         const q = input.value.trim().toLowerCase();
         shown = items.filter((i) => !q || `${i.label} ${i.sub} ${i.kind} ${i.code} ${i.terms ?? ''}`.toLowerCase().includes(q));
         active = Math.min(active, Math.max(shown.length - 1, 0));
-        list.innerHTML = shown.length
-          ? shown
-              .map(
-                (i, n) => `<li role="option" aria-selected="${n === active}" data-n="${n}">
-                  <a href="${esc(i.href)}" class="flex items-center gap-3 px-3 py-2 ${n === active ? 'bg-blue-2/25' : ''}">
-                    <span class="code-chip w-20 justify-center">${esc(i.code)}</span>
-                    <span class="min-w-0 flex-1 truncate"><span class="text-text">${esc(i.label)}</span> <span class="text-dim">${esc(i.sub)}</span></span>
-                    <span class="kicker">${esc(i.kind)}</span>
-                  </a></li>`,
-              )
-              .join('')
-          : '<li class="px-3 py-6 text-center text-dim">No objects match that query.</li>';
-        count.textContent = `${shown.length} result${shown.length === 1 ? '' : 's'}`;
+        // Each option is the activation target itself; the highlighted row's secondary text is ink so
+        // it keeps 4.5:1 on the blue highlight.
+        list.innerHTML = shown
+          .map((i, n) => {
+            const on = n === active;
+            return `<li role="option" id="cmdk-opt-${n}" aria-selected="${on}" data-n="${n}" class="flex cursor-pointer items-center gap-3 px-3 py-2 pointer-coarse:min-h-11 ${on ? 'bg-blue-2/25' : ''}">
+                  <span class="code-chip w-20 justify-center">${esc(i.code)}</span>
+                  <span class="min-w-0 flex-1 truncate"><span class="text-text">${esc(i.label)}</span> <span class="${on ? 'text-ink' : 'text-dim'}">${esc(i.sub)}</span></span>
+                  <span class="kicker ${on ? 'text-ink' : ''}">${esc(i.kind)}</span>
+                </li>`;
+          })
+          .join('');
+        list.hidden = !shown.length;
+        empty.hidden = !!shown.length;
+        input.setAttribute('aria-expanded', String(!!shown.length));
+        if (shown.length) input.setAttribute('aria-activedescendant', `cmdk-opt-${active}`);
+        else input.removeAttribute('aria-activedescendant');
+        // The count is a live region: only touch it when it changes, so arrowing through results stays quiet.
+        const total = `${shown.length} result${shown.length === 1 ? '' : 's'}`;
+        if (count.textContent !== total) count.textContent = total;
         list.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
       }
       function open() {
@@ -299,14 +332,11 @@ const search = [
         }
       });
       list.addEventListener('click', (e) => {
-        const a = (e.target as HTMLElement).closest('a');
-        if (!a) return;
+        const option = (e.target as HTMLElement).closest<HTMLElement>('[role="option"]');
+        const item = option && shown[Number(option.dataset.n)];
+        if (!item) return;
         dialog.close();
-        const item = shown[Number(a.closest('li')?.dataset.n)];
-        if (item?.sel && onConsole()) {
-          e.preventDefault();
-          go(item);
-        }
+        go(item);
       });
       // On the homepage, map objects are selected in place instead of reloading the page.
       const onConsole = () => !!document.getElementById('entity-data');
@@ -335,9 +365,66 @@ const search = [
       dialog.addEventListener('click', (e) => {
         if (e.target === dialog) dialog.close();
       });
+
+      // Rail labels open 300ms after a mouse arrives (keyboard focus shows them at once, in CSS) and stay
+      // open while the pointer is on the button or its label. Escape closes them until the pointer
+      // leaves or focus moves to another button.
+      const rail = document.querySelector<HTMLElement>('[data-rail]');
+      if (rail) {
+        let timer = 0;
+        rail.querySelectorAll<HTMLElement>('.rail-btn').forEach((btn) => {
+          btn.addEventListener('pointerenter', (e) => {
+            if (e.pointerType === 'mouse') timer = window.setTimeout(() => btn.toggleAttribute('data-tip', true), 300);
+          });
+          btn.addEventListener('pointerleave', () => {
+            clearTimeout(timer);
+            btn.removeAttribute('data-tip');
+          });
+        });
+        addEventListener('keydown', (e) => {
+          if (e.key !== 'Escape' || dialog.open) return;
+          clearTimeout(timer);
+          rail.querySelector('[data-tip]')?.removeAttribute('data-tip');
+          if (rail.contains(document.activeElement)) rail.dataset.tips = 'off';
+        });
+        rail.addEventListener('focusin', () => delete rail.dataset.tips);
+      }
     </script>
 
     <style>
+      /* Rail labels: an edged tooltip, shown on keyboard focus or once the script marks a hovered
+         button (after a short delay), and hoverable and dismissable (WCAG 1.4.13). */
+      .rail-tip {
+        position: absolute;
+        left: 100%;
+        margin-left: 0.5rem;
+        display: none;
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--line-2);
+        border-radius: var(--radius-2);
+        background: var(--panel-3);
+        box-shadow: var(--shadow-elev-2);
+        color: var(--text);
+        font-size: var(--text-xs);
+        white-space: nowrap;
+      }
+      /* Bridges the gap to the button, so the pointer can cross onto the label without closing it. */
+      .rail-tip::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 100%;
+        bottom: 0;
+        width: 0.5rem;
+      }
+      .rail-btn[data-tip] .rail-tip,
+      .rail-btn:focus-visible .rail-tip {
+        display: block;
+      }
+      /* Escape hides the focused button's label; a fresh hover still opens one. */
+      [data-rail][data-tips='off'] .rail-btn:not([data-tip]) .rail-tip {
+        display: none;
+      }
       .rail-btn[aria-current] {
         color: var(--text);
         background: color-mix(in srgb, var(--blue) 18%, transparent);

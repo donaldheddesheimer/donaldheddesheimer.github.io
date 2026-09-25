@@ -56,7 +56,7 @@ function barStyle(b: Bar) {
     <div class="pointer-events-none absolute inset-y-0 right-4 left-[124px]" aria-hidden="true">
       {years.map((y) => <div class="absolute inset-y-0 border-l border-line/60" style={`left:${pct(`${y}-01`)}%`} />)}
       <div class="absolute inset-y-0 border-l border-blue" style={`left:${nowPct}%`} data-now>
-        <span class="absolute top-0 left-1.5 readout text-[10px] font-semibold whitespace-nowrap text-blue-3">NOW · {fmtMonth(now).toUpperCase()}</span>
+        <span class="absolute top-0 left-1.5 readout text-2xs font-semibold whitespace-nowrap text-blue-3">NOW · {fmtMonth(now).toUpperCase()}</span>
       </div>
     </div>
 
@@ -64,7 +64,7 @@ function barStyle(b: Bar) {
       <!-- axis. Lane labels stick to the left edge when the chart scrolls sideways. -->
       <div class="lane-label"></div>
       <div class="relative h-7">
-        {years.map((y) => <span class="absolute top-1 ml-1.5 readout text-[10.5px] text-dim" style={`left:${pct(`${y}-01`)}%`}>{y}</span>)}
+        {years.map((y) => <span class="absolute top-1 ml-1.5 readout text-2xs text-dim" style={`left:${pct(`${y}-01`)}%`}>{y}</span>)}
       </div>
 
       {
@@ -78,7 +78,7 @@ function barStyle(b: Bar) {
                   <a
                     href={b.href}
                     data-entity={b.entity}
-                    class="bar absolute top-[7px] bottom-[7px] flex items-center rounded-[2px] px-2 text-[12px] whitespace-nowrap"
+                    class="bar absolute top-[7px] bottom-[7px] flex items-center rounded-1 px-2 text-2xs whitespace-nowrap"
                     style={`left:${st.left};width:${st.width};${st.future !== null ? `--split:${st.future}%` : ''}`}
                     data-future={st.future !== null ? '' : undefined}
                     title={`${b.label}: ${fmtMonth(b.start)} – ${b.end ? fmtMonth(b.end) : 'Present'}`}
@@ -101,7 +101,7 @@ function barStyle(b: Bar) {
             <a
               href={`/projects/${p.id}/`}
               data-entity={`project:${p.id}`}
-              class="marker absolute flex items-center gap-1.5 py-[3px] text-[12px] whitespace-nowrap text-muted hover:text-text"
+              class="marker absolute flex items-center gap-1.5 py-[3px] text-2xs whitespace-nowrap text-muted hover:text-text"
               style={`left:${x}%;top:${row * 24 + 7}px`}
               title={`${p.data.code} · ${p.data.title} · ${fmtMonth(p.data.start)}`}
             >
@@ -124,9 +124,20 @@ function barStyle(b: Bar) {
     const x = nowLine.getBoundingClientRect().left - tl.getBoundingClientRect().left;
     tl.scrollLeft = x - tl.clientWidth * 0.65;
   }
+  // The browser leaves a half-visible item where it is when it takes keyboard focus. Bring the whole
+  // item into view, clear of the sticky lane labels (the scroll padding below).
+  tl?.addEventListener('focusin', (e) => {
+    const el = e.target as HTMLElement;
+    if (el.matches(':focus-visible')) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  });
 </script>
 
 <style>
+  /* Keyboard focus scrolls a bar or marker clear of the sticky lane labels. */
+  [data-tl] {
+    scroll-padding-left: 8.5rem;
+    scroll-padding-right: 1rem;
+  }
   .lane-label {
     position: sticky;
     left: 0;
