@@ -4,8 +4,10 @@ import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
 import Panel from '../../components/Panel.astro';
 import EntityShape from '../../components/EntityShape.astro';
+import NewTab from '../../components/NewTab.astro';
+import Stat from '../../components/Stat.astro';
 import { getModel, typeName } from '../../lib/model';
-import { fmtMonth, statusLabel } from '../../lib/format';
+import { fmtMonth, mediaKindLabel, statusLabel } from '../../lib/format';
 
 export async function getStaticPaths() {
   const projects = (await getCollection('projects')).sort((a, b) => a.data.code.localeCompare(b.data.code));
@@ -39,14 +41,16 @@ const related = all
   .sort((a, b) => b.shared - a.shared || b.p.data.code.localeCompare(a.p.data.code))
   .slice(0, 3);
 
+// The cover's caption names its kind only when the evidence list already says what it is.
+const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
 ---
 
-<Base title={`${d.title} · ${d.code} · Donald Heddesheimer`} description={d.summary} crumb={[{ label: 'Projects', href: '/#projects' }, { label: d.title }]}>
+<Base title={`${d.title} · ${d.code} · Donald Heddesheimer`} description={d.summary} crumb={[{ label: 'Projects', href: '/#projects' }, { label: d.title }]} section="projects">
   <div class="mx-auto flex max-w-[1400px] flex-col gap-3 p-3 md:gap-4 md:p-4">
     <!-- Header -->
     <section class="panel overflow-hidden">
       <div class="flex flex-wrap items-center gap-2 border-b border-line bg-panel-2/60 px-4 py-2">
-        <a href="/#projects" class="flex items-center gap-1.5 text-[12.5px] text-dim hover:text-text">
+        <a href="/#projects" class="flex items-center gap-1.5 text-xs text-dim hover:text-text pointer-coarse:-my-3 pointer-coarse:min-h-11">
           <Icon name="arrow-left" class="size-3.5" /> All projects
         </a>
         <span class="text-dim" aria-hidden="true">/</span>
@@ -57,17 +61,17 @@ const related = all
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2">
             <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
-            {d.context && <span class="readout text-[12px]">{d.context}</span>}
-            {d.featured && <span class="flex items-center gap-1 readout text-[11px] text-orange"><Icon name="star" class="size-3.5" />FEATURED</span>}
+            {d.context && <span class="readout text-xs">{d.context}</span>}
+            {d.featured && <span class="flex items-center gap-1 readout text-2xs text-ink"><Icon name="star" class="size-3.5" />FEATURED</span>}
           </div>
-          <h1 class="mt-2.5 text-[28px] leading-tight font-semibold tracking-tight md:text-[34px]">{d.title}</h1>
-          <p class="mt-2 max-w-3xl text-[15px] leading-relaxed text-muted">{d.summary}</p>
+          <h1 class="mt-2.5 text-2xl leading-tight font-semibold tracking-tight md:text-3xl">{d.title}</h1>
+          <p class="mt-2 max-w-(--measure) text-md leading-relaxed text-muted">{d.summary}</p>
         </div>
         <div class="flex flex-wrap gap-2">
           {
             d.demo && (
               <a href={d.demo} class="btn btn-primary" target="_blank" rel="noopener">
-                <Icon name="external" class="size-4" />
+                <NewTab class="size-4" />
                 Live demo
               </a>
             )
@@ -77,37 +81,39 @@ const related = all
               <a href={d.repo} class:list={['btn', !d.demo && 'btn-primary']} target="_blank" rel="noopener">
                 <Icon name="github" class="size-4" />
                 Repository
+                <NewTab />
               </a>
             ) : (
-              <span class="btn cursor-default text-dim">
+              <p class="inline-flex min-h-(--h-md) items-center gap-1.5 text-dim">
                 <Icon name="lock" class="size-4" />
                 {d.repoNote ?? 'Private repository'}
-              </span>
+              </p>
             )
           }
         </div>
       </div>
       {
         d.stats.length > 0 && (
-          <div class="grid grid-cols-2 gap-px border-t border-line bg-line md:grid-cols-4">
+          <dl class="grid grid-cols-2 gap-px border-t border-line bg-line md:grid-cols-4">
             {d.stats.map((s) => (
-              <div class="bg-panel px-5 py-3.5">
-                <div class="font-mono text-[20px] font-semibold tracking-tight md:text-[22px]">{s.value}</div>
-                <div class="mt-0.5 text-[12px] text-muted">{s.label}</div>
-              </div>
+              <Stat label={s.label} value={s.value} class="bg-panel px-5 py-3.5" />
             ))}
-          </div>
+          </dl>
         )
       }
     </section>
 
     <div class="grid grid-cols-[minmax(0,1fr)] gap-3 md:gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
       <!-- Body -->
-      <Panel title="Write-up" icon="file" as="section" bodyClass="p-5 md:p-8">
+      <Panel title="Write-up" icon="file" as="section" class="lg:self-start" bodyClass="p-5 md:p-8">
         {
           d.cover && (
-            <figure class="mb-8 overflow-hidden rounded-[3px] border border-line bg-[#0d1014]">
-              <img src={d.cover} alt={d.coverAlt ?? ''} class="max-h-[520px] w-full object-contain" />
+            <figure class="mb-8">
+              <img src={d.cover} alt={d.coverAlt ?? ''} class="mx-auto max-h-[70vh] rounded-2 border border-line" />
+              <figcaption class="fig-cap">
+                <span class="kicker">Cover{coverKind && ` · ${mediaKindLabel[coverKind]}`}</span>
+                {d.coverAlt}
+              </figcaption>
             </figure>
           )
         }
@@ -116,12 +122,12 @@ const related = all
         </article>
       </Panel>
 
-      <!-- Sidebar -->
-      <div class="flex flex-col gap-3 md:gap-4 lg:sticky lg:top-16 lg:self-start">
+      <!-- Sidebar: sticky, and scrolls on its own when it is taller than the screen -->
+      <div class="flex flex-col gap-3 md:gap-4 lg:sticky lg:top-16 lg:max-h-[calc(100dvh-7rem)] lg:self-start lg:overflow-y-auto">
         <Panel title="Properties" icon="list" as="aside">
           <dl class="kv p-4">
             <dt>ID</dt>
-            <dd class="font-mono text-[12.5px]">{d.code}</dd>
+            <dd class="font-mono text-xs">{d.code}</dd>
             <dt>Type</dt>
             <dd>Project</dd>
             <dt>Status</dt>
@@ -139,11 +145,12 @@ const related = all
               )
             }
             <dt>Source</dt>
-            <dd class="min-w-0 truncate">
+            <dd class="min-w-0 wrap-anywhere">
               {
                 d.repo ? (
-                  <a href={d.repo} class="text-blue-3 hover:underline" target="_blank" rel="noopener">
+                  <a href={d.repo} class="inline-flex max-w-full items-center gap-1 text-blue-3 hover:underline pointer-coarse:-my-3 pointer-coarse:py-3" target="_blank" rel="noopener">
                     {d.repo.replace('https://github.com/', '')}
+                    <NewTab />
                   </a>
                 ) : (
                   <span class="text-dim">{d.repoNote ?? 'Private'}</span>
@@ -157,23 +164,20 @@ const related = all
         </Panel>
 
         <Panel title="Linked objects" icon="graph" as="aside">
-          <a slot="actions" href={mapHref(`project:${project.id}`)} class="inline-flex items-center gap-1 text-[12px] text-blue-3 hover:underline">
+          <a slot="actions" href={mapHref(`project:${project.id}`)} class="inline-flex items-center gap-1 text-xs text-blue-3 hover:underline pointer-coarse:-my-3 pointer-coarse:min-h-11">
             Show on map <Icon name="arrow-right" class="size-3.5" />
           </a>
           <div class="divide-y divide-line">
             {
               groups.map((g) => (
                 <div>
-                  <p class="px-4 pt-2.5 text-[11.5px] text-dim">{g.label}</p>
+                  <p class="px-4 pt-2.5 text-xs text-dim">{g.label}</p>
                   <ul class="pb-1">
                     {g.items.map((l) => (
                       <li>
-                        <a href={mapHref(l.id)} class="flex items-center gap-2.5 px-4 py-1.5 text-[13px] hover:bg-panel-2">
+                        <a href={mapHref(l.id)} class="flex items-center gap-2.5 px-4 py-1.5 text-sm hover:bg-panel-2 pointer-coarse:min-h-11">
                           <EntityShape type={l.type} class="size-2.5 shrink-0" />
-                          <span class="min-w-0 flex-1 truncate">
-                            {l.label}
-                            {l.note && <span class="text-dim"> · {l.note}</span>}
-                          </span>
+                          <span class="min-w-0 flex-1 truncate">{l.label}</span>
                           <span class="kicker">{typeName[l.type]}</span>
                         </a>
                       </li>
@@ -183,13 +187,18 @@ const related = all
               ))
             }
             {
+              groups.length === 0 && related.length === 0 && (
+                <p class="px-4 py-3 text-xs text-dim">No linked organizations, capabilities, or projects.</p>
+              )
+            }
+            {
               related.length > 0 && (
                 <div>
-                  <p class="px-4 pt-2.5 text-[11.5px] text-dim">Shares the most tags with</p>
+                  <p class="px-4 pt-2.5 text-xs text-dim">Shares the most tags with</p>
                   <ul class="pb-1">
                     {related.map(({ p }) => (
                       <li>
-                        <a href={`/projects/${p.id}/`} class="flex items-center gap-2.5 px-4 py-1.5 text-[13px] hover:bg-panel-2">
+                        <a href={`/projects/${p.id}/`} class="flex items-center gap-2.5 px-4 py-1.5 text-sm hover:bg-panel-2 pointer-coarse:min-h-11">
                           <EntityShape type="project" class="size-2.5 shrink-0" />
                           <span class="min-w-0 flex-1 truncate">{p.data.title}</span>
                           <span class="kicker">{p.data.code}</span>
@@ -201,17 +210,17 @@ const related = all
               )
             }
           </div>
-          <p class="sr-only">{linkCount} linked objects</p>
+          {linkCount > 0 && <p class="sr-only">{linkCount} linked objects</p>}
         </Panel>
 
         <nav class="grid grid-cols-2 gap-3" aria-label="More projects">
           {
             prev ? (
               <a href={`/projects/${prev.id}/`} class="panel group p-3 hover:border-line-2">
-                <span class="flex items-center gap-1 kicker group-hover:text-blue-3">
+                <span class="flex items-center gap-1 kicker group-hover:text-text">
                   <Icon name="arrow-left" class="size-3" /> {prev.data.code}
                 </span>
-                <span class="mt-1 block truncate text-[13px] font-medium">{prev.data.title}</span>
+                <span class="mt-1 block truncate text-sm font-medium">{prev.data.title}</span>
               </a>
             ) : (
               <span />
@@ -220,10 +229,10 @@ const related = all
           {
             next && (
               <a href={`/projects/${next.id}/`} class="panel group p-3 text-right hover:border-line-2">
-                <span class="flex items-center justify-end gap-1 kicker group-hover:text-blue-3">
+                <span class="flex items-center justify-end gap-1 kicker group-hover:text-text">
                   {next.data.code} <Icon name="arrow-right" class="size-3" />
                 </span>
-                <span class="mt-1 block truncate text-[13px] font-medium">{next.data.title}</span>
+                <span class="mt-1 block truncate text-sm font-medium">{next.data.title}</span>
               </a>
             )
           }

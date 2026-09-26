@@ -1,0 +1,11 @@
+---
+// Marks a link that opens a new tab: the external glyph for sighted readers, words for screen readers.
+import Icon from './Icon.astro';
+
+interface Props {
+  class?: string;
+}
+const { class: cls = 'size-3.5 shrink-0' } = Astro.props;
+---
+
+<Icon name="external" class={cls} /><span class="sr-only"> (opens in new tab)</span>

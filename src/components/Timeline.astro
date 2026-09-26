@@ -1,8 +1,10 @@
 ---
-// Gantt-style activity timeline: roles as bars, projects as markers.
+// Gantt-style activity timeline: roles as bars, projects as markers. Phones get the same lanes as a
+// dated list instead: at 390px the chart can show a readable label or a readable span, not both.
 import { getCollection } from 'astro:content';
 import { education, experience, orgs } from '../data/site';
-import { fmtMonth, monthIndex, nowYM } from '../lib/format';
+import { fmtDot, fmtMonth, monthIndex, nowYM } from '../lib/format';
+import { packMarkers } from '../lib/timeline';
 
 const START = '2023-01';
 const END = '2028-07';
@@ -26,18 +28,19 @@ const lanes: { label: string; bars: Bar[] }[] = [
   { label: 'Teams', bars: lane('team') },
 ];
 
-// Projects as markers, stacked into rows so labels don't collide (assumes ~1000px track).
+// Projects as markers. The script packs them into rows at the chart's real width; this estimate at
+// the narrowest chart (880px, so a 740px track) is the layout without JS, and fits any wider chart.
+// No marker is estimated under 44px, its width on a coarse pointer.
 const projects = (await getCollection('projects')).sort((a, b) => monthIndex(a.data.start) - monthIndex(b.data.start));
-const rowEnds: number[] = [];
-const markers = projects.map((p) => {
-  const x = pct(p.data.start);
-  const w = (p.data.title.length * 6.3 + 26) / 10;
-  let row = rowEnds.findIndex((end) => end < x);
-  if (row === -1) row = rowEnds.length;
-  rowEnds[row] = x + w;
-  return { x, row, p };
-});
-const rows = rowEnds.length;
+const short = (title: string) => title.replace(/:.*/, '');
+const TRACK = 740;
+const places = packMarkers(
+  projects.map((p) => ({ x: (pct(p.data.start) / 100) * TRACK, w: Math.max(44, short(p.data.title).length * 7 + 20) })),
+  TRACK,
+  (nowPct / 100) * TRACK,
+);
+const markers = projects.map((p, i) => ({ p, x: pct(p.data.start), ...places[i] }));
+const rows = Math.max(...places.map((m) => m.row)) + 1;
 
 const years: number[] = [];
 for (let y = Number(START.slice(0, 4)); y <= Number(END.slice(0, 4)); y++) years.push(y);
@@ -48,44 +51,57 @@ function barStyle(b: Bar) {
   const future = b.end && monthIndex(b.end) > monthIndex(now) ? ((nowPct - s) / (e - s)) * 100 : null;
   return { left: `${s}%`, width: `${Math.max(e - s, 0.8)}%`, future };
 }
+
+// The phone list: each lane newest first, as "Solopulse · 2026.05 → now".
+const byStartDesc = (a: { start: string }, b: { start: string }) => monthIndex(b.start) - monthIndex(a.start);
+const list = [
+  ...lanes.map((l) => ({
+    label: l.label,
+    items: [...l.bars].sort(byStartDesc).map((b) => ({ label: b.label, when: `${fmtDot(b.start)} → ${b.end ? fmtDot(b.end) : 'now'}`, href: b.href, entity: b.entity, live: !b.end, active: undefined })),
+  })),
+  {
+    label: 'Projects',
+    items: [...projects].reverse().map((p) => ({ label: p.data.title, when: fmtDot(p.data.start), href: `/projects/${p.id}/`, entity: `project:${p.id}`, live: false, active: p.data.status === 'active' })),
+  },
+];
 ---
 
-<div class="overflow-x-auto" data-tl>
+<div class="overflow-x-auto max-sm:hidden" data-tl>
   <div class="relative min-w-[880px] py-2">
-    <!-- gridlines + now marker, over the track column -->
+    <!-- gridlines and the NOW line, under the lanes -->
     <div class="pointer-events-none absolute inset-y-0 right-4 left-[124px]" aria-hidden="true">
       {years.map((y) => <div class="absolute inset-y-0 border-l border-line/60" style={`left:${pct(`${y}-01`)}%`} />)}
-      <div class="absolute inset-y-0 border-l border-blue" style={`left:${nowPct}%`} data-now>
-        <span class="absolute top-0 left-1.5 readout text-[10px] font-semibold whitespace-nowrap text-blue-3">NOW · {fmtMonth(now).toUpperCase()}</span>
-      </div>
+      <div class="absolute inset-y-0 border-l border-muted" style={`left:${nowPct}%`} data-now />
     </div>
 
     <div class="relative grid grid-cols-[124px_1fr] pr-4">
       <!-- axis. Lane labels stick to the left edge when the chart scrolls sideways. -->
       <div class="lane-label"></div>
-      <div class="relative h-7">
-        {years.map((y) => <span class="absolute top-1 ml-1.5 readout text-[10.5px] text-dim" style={`left:${pct(`${y}-01`)}%`}>{y}</span>)}
+      <div class="relative h-7" data-tl-axis>
+        {years.map((y) => <span class="absolute top-1 ml-1.5 readout text-2xs text-dim" style={`left:${pct(`${y}-01`)}%`} data-year>{y}</span>)}
+        <span class="now-label absolute top-1 readout text-2xs font-semibold whitespace-nowrap text-text" style={`left:${nowPct}%`} data-now-label>NOW · {fmtMonth(now).toUpperCase()}</span>
       </div>
 
       {
         lanes.map((l) => (
           <>
-            <div class="lane-label flex h-10 items-center border-t border-line pl-4 kicker">{l.label}</div>
-            <div class="relative h-10 border-t border-line">
+            <div class="lane-label flex h-(--lane) items-center border-t border-line pl-4 kicker">{l.label}</div>
+            <div class="relative h-(--lane) border-t border-line">
               {l.bars.map((b) => {
                 const st = barStyle(b);
                 return (
                   <a
                     href={b.href}
                     data-entity={b.entity}
-                    class="bar absolute top-[7px] bottom-[7px] flex items-center rounded-[2px] px-2 text-[12px] whitespace-nowrap"
+                    class="bar absolute inset-y-[7px] flex items-center gap-2 rounded-1 px-2 text-2xs whitespace-nowrap pointer-coarse:inset-y-px"
                     style={`left:${st.left};width:${st.width};${st.future !== null ? `--split:${st.future}%` : ''}`}
                     data-future={st.future !== null ? '' : undefined}
+                    data-ongoing={b.end ? undefined : ''}
                     title={`${b.label}: ${fmtMonth(b.start)} – ${b.end ? fmtMonth(b.end) : 'Present'}`}
                   >
-                    <span class="truncate">{b.label}</span>
+                    <span class="bar-label truncate">{b.label}</span>
                     <span class="sr-only">, {fmtMonth(b.start)} – {b.end ? fmtMonth(b.end) : 'present'}</span>
-                    {!b.end && <span class="live-dot ml-2 shrink-0" />}
+                    {!b.end && <span class="live-dot ml-auto shrink-0" />}
                   </a>
                 );
               })}
@@ -95,18 +111,20 @@ function barStyle(b: Bar) {
       }
 
       <div class="lane-label flex items-start border-t border-line pt-3 pl-4 kicker">Projects</div>
-      <div class="relative border-t border-line" style={`height:${rows * 24 + 16}px`}>
+      <div class="marks relative border-t border-line" style={`--rows:${rows}`} data-tl-marks data-now-pct={nowPct}>
         {
-          markers.map(({ x, row, p }) => (
+          markers.map(({ x, row, left, p }) => (
             <a
               href={`/projects/${p.id}/`}
               data-entity={`project:${p.id}`}
-              class="marker absolute flex items-center gap-1.5 py-[3px] text-[12px] whitespace-nowrap text-muted hover:text-text"
-              style={`left:${x}%;top:${row * 24 + 7}px`}
+              class="marker absolute flex items-center gap-0.5 text-2xs whitespace-nowrap text-muted hover:text-text"
+              style={`left:${x}%;--row:${row}`}
+              data-x={x}
+              data-left={left ? '' : undefined}
               title={`${p.data.code} · ${p.data.title} · ${fmtMonth(p.data.start)}`}
             >
               <span class:list={['ring', p.data.status === 'active' && 'is-active']} />
-              {p.data.title.replace(/:.*/, '')}
+              <span class="lbl">{short(p.data.title)}</span>
               <span class="sr-only">, started {fmtMonth(p.data.start)}</span>
             </a>
           ))
@@ -116,23 +134,138 @@ function barStyle(b: Bar) {
   </div>
 </div>
 
+<div class="sm:hidden">
+  {
+    list.map((l, i) => (
+      <div class="grid grid-cols-[6.5rem_minmax(0,1fr)] border-t border-line first:border-t-0">
+        <p class="pt-3.5 pl-(--pad-panel) kicker" id={`tl-lane-${i}`}>
+          {l.label}
+        </p>
+        <ol class="divide-y divide-line/60 border-l border-line" aria-labelledby={`tl-lane-${i}`}>
+          {l.items.map((it) => (
+            <li>
+              <a href={it.href} data-entity={it.entity} class="tl-row">
+                {it.active !== undefined && <span class:list={['ring', it.active && 'is-active']} />}
+                <span class="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-3">
+                  <span class="flex items-center gap-2">
+                    {it.label}
+                    {it.live && <span class="live-dot shrink-0" />}
+                  </span>
+                  <span class="readout text-2xs whitespace-nowrap text-dim">{it.when}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    ))
+  }
+</div>
+
 <script>
-  // On narrow screens the chart scrolls sideways; start with the NOW line in view.
+  import { packMarkers } from '../lib/timeline';
+
   const tl = document.querySelector<HTMLElement>('[data-tl]');
-  const nowLine = tl?.querySelector<HTMLElement>('[data-now]');
-  if (tl && nowLine && tl.scrollWidth > tl.clientWidth) {
-    const x = nowLine.getBoundingClientRect().left - tl.getBoundingClientRect().left;
-    tl.scrollLeft = x - tl.clientWidth * 0.65;
+  if (tl) {
+    const axis = tl.querySelector<HTMLElement>('[data-tl-axis]')!;
+    const lane = tl.querySelector<HTMLElement>('[data-tl-marks]')!;
+    const marks = [...lane.querySelectorAll<HTMLElement>('.marker')];
+    const bars = [...tl.querySelectorAll<HTMLElement>('.bar')];
+    const years = [...axis.querySelectorAll<HTMLElement>('[data-year]')];
+    const nowLabel = axis.querySelector<HTMLElement>('[data-now-label]')!;
+    const nowAt = Number(lane.dataset.nowPct) / 100;
+
+    const fit = () => {
+      const w = lane.clientWidth;
+      if (!w) return; // phones show the list instead
+      // Markers: as few rows as fit at this width, measured rather than estimated.
+      const places = packMarkers(
+        marks.map((m) => ({ x: (Number(m.dataset.x) / 100) * w, w: m.offsetWidth })),
+        w,
+        nowAt * w,
+      );
+      marks.forEach((m, i) => {
+        m.style.setProperty('--row', String(places[i].row));
+        m.toggleAttribute('data-left', places[i].left);
+      });
+      lane.style.setProperty('--rows', String(Math.max(...places.map((p) => p.row)) + 1));
+      // Bars: a label that doesn't fit its bar goes beside it, to the right unless the role runs to
+      // NOW or the next bar is in the way, else to the left; with room on neither side it truncates.
+      for (const bar of bars) {
+        delete bar.dataset.out;
+        const label = bar.querySelector<HTMLElement>('.bar-label')!;
+        if (label.scrollWidth <= label.clientWidth) continue;
+        const need = label.scrollWidth + 12;
+        const start = bar.offsetLeft;
+        const end = start + bar.offsetWidth;
+        const others = [...bar.parentElement!.querySelectorAll<HTMLElement>('.bar')].filter((b) => b !== bar);
+        const before = Math.max(0, ...others.filter((b) => b.offsetLeft < start).map((b) => b.offsetLeft + b.offsetWidth));
+        const after = Math.min(bar.parentElement!.clientWidth, ...others.filter((b) => b.offsetLeft > start).map((b) => b.offsetLeft));
+        if (!bar.hasAttribute('data-ongoing') && after - end >= need) bar.dataset.out = 'right';
+        else if (start - before >= need) bar.dataset.out = 'left';
+      }
+      // The NOW label sits on the axis; a year label it would cover steps aside.
+      const n = nowLabel.getBoundingClientRect();
+      for (const y of years) {
+        const r = y.getBoundingClientRect();
+        y.style.visibility = r.right > n.left - 4 && r.left < n.right + 4 ? 'hidden' : '';
+      }
+    };
+    let queued = 0;
+    new ResizeObserver(() => {
+      cancelAnimationFrame(queued);
+      queued = requestAnimationFrame(fit);
+    }).observe(axis);
+    document.fonts?.ready.then(fit);
+
+    // Between 640px and the chart's 880px minimum it scrolls sideways; start with NOW in view.
+    const nowLine = tl.querySelector<HTMLElement>('[data-now]');
+    if (nowLine && tl.scrollWidth > tl.clientWidth) {
+      const x = nowLine.getBoundingClientRect().left - tl.getBoundingClientRect().left;
+      tl.scrollLeft = x - tl.clientWidth * 0.65;
+    }
+    // The browser leaves a half-visible item where it is when it takes keyboard focus. Bring the
+    // whole item into view, clear of the sticky lane labels (the scroll padding below).
+    tl.addEventListener('focusin', (e) => {
+      const el = e.target as HTMLElement;
+      if (el.matches(':focus-visible')) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    });
   }
 </script>
 
 <style>
+  /* Lane height and marker row pitch; both grow to a 44px target on a coarse pointer, and so does
+     the width of a marker with a short label. */
+  [data-tl] {
+    --lane: 2.5rem;
+    --pitch: 24px;
+  }
+  @media (pointer: coarse) {
+    [data-tl] {
+      --lane: 3rem;
+      --pitch: 44px;
+    }
+    .marker {
+      min-width: 44px;
+    }
+  }
+  /* Keyboard focus scrolls a bar or marker clear of the sticky lane labels. */
+  [data-tl] {
+    scroll-padding-left: 8.5rem;
+    scroll-padding-right: 1rem;
+  }
   .lane-label {
     position: sticky;
     left: 0;
     z-index: 2;
     background: var(--panel);
     box-shadow: 1px 0 0 var(--line);
+  }
+  /* NOW is centred on its line in the axis row, on the panel so the line and gridlines stop under it. */
+  .now-label {
+    translate: -50% 0;
+    padding: 0 0.375rem;
+    background: var(--panel);
   }
   /* Bars are neutral: the lane already says what kind of role it is. Blue marks the selection. */
   .bar {
@@ -148,12 +281,53 @@ function barStyle(b: Bar) {
       linear-gradient(to right, var(--panel-3) var(--split), transparent var(--split)),
       repeating-linear-gradient(135deg, rgb(167 182 194 / 0.12) 0 5px, transparent 5px 10px);
   }
-  .bar:global(.is-sel) {
-    box-shadow: inset 0 0 0 1.5px var(--blue-3);
-    background-color: color-mix(in srgb, var(--blue-2) 22%, var(--panel));
+  /* An ongoing role runs to NOW with its end left open. */
+  .bar[data-ongoing] {
+    border-radius: var(--radius-1) 0 0 var(--radius-1);
+    box-shadow:
+      inset 1px 0 0 var(--line-2),
+      inset 0 1px 0 var(--line-2),
+      inset 0 -1px 0 var(--line-2);
   }
+  .bar:global(.is-sel) {
+    box-shadow: inset 0 0 0 1.5px var(--sel-bar);
+    background-color: var(--sel-bg);
+  }
+  .bar[data-ongoing]:global(.is-sel) {
+    box-shadow:
+      inset 1.5px 0 0 var(--sel-bar),
+      inset 0 1.5px 0 var(--sel-bar),
+      inset 0 -1.5px 0 var(--sel-bar);
+  }
+  /* A label too long for its bar sits beside it (placed by the script). */
+  .bar[data-out] .bar-label {
+    position: absolute;
+    padding: 0 0.25rem;
+    background: var(--panel);
+  }
+  .bar[data-out='left'] .bar-label {
+    right: calc(100% + 0.25rem);
+  }
+  .bar[data-out='right'] .bar-label {
+    left: calc(100% + 0.25rem);
+  }
+  .marks {
+    height: calc(var(--rows) * var(--pitch) + 16px);
+  }
+  /* The ring is centred on the start month; the label runs right, or left of it near NOW. */
   .marker {
+    top: calc(var(--row) * var(--pitch) + 8px);
+    height: var(--pitch);
     translate: -5px 0;
+  }
+  .marker[data-left] {
+    flex-direction: row-reverse;
+    translate: calc(5px - 100%) 0;
+  }
+  .marker .lbl {
+    padding: 0 0.25rem;
+    border-radius: var(--radius-1);
+    background: var(--panel);
   }
   .marker:global(.is-sel) {
     color: var(--text);
@@ -171,7 +345,31 @@ function barStyle(b: Bar) {
     box-shadow: inset 0 0 0 1.5px var(--green), 0 0 0 2px var(--panel);
   }
   .marker:global(.is-sel) .ring {
-    outline: 2px solid var(--blue-3);
+    outline: 2px solid var(--sel-bar);
     outline-offset: 1px;
+  }
+  /* Phones: one row per role or project, a full touch target, selected like the other lists. */
+  .tl-row {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: var(--h-touch);
+    padding: 0.375rem var(--pad-panel) 0.375rem 0.75rem;
+    font-size: var(--text-sm);
+    touch-action: manipulation;
+  }
+  .tl-row:hover {
+    background: var(--hover-bg);
+  }
+  .tl-row:focus-visible {
+    outline-offset: -2px;
+  }
+  .tl-row:global(.is-sel) {
+    background: var(--sel-bg);
+    box-shadow: inset 2px 0 0 var(--sel-bar);
+  }
+  /* On the tint, the dates step up to muted so they keep 4.5:1. */
+  .tl-row:global(.is-sel) .text-dim {
+    color: var(--muted);
   }
 </style>

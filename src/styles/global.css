@@ -20,13 +20,87 @@
   --orange: #ec9a3c;
   --red: #e76a6e;
   --turquoise: #13c9ba;
-  --violet: #bd6bbd;
   /* Neutral type colors for the systems map: orgs are slate, projects are light ink. Hue is kept for
-     meaning: blue = selection, green = active, amber = key metrics and warnings. */
+     meaning: blue = selection, green = active, turquoise = the simulation, and amber is held back
+     for a warning (none today). */
   --slate: #a7b6c2;
   --ink: #d3d8de;
   --edge: #5d6674;
+  /* The recessed surface behind media and code: figures, card stills, the trace well. */
+  --well: #0d1014;
+  /* State colors, one meaning each: hover is neutral, selection is blue, active is green. */
+  --hover-bg: var(--panel-2);
+  --sel-bg: color-mix(in srgb, var(--blue-2) 22%, transparent);
+  --sel-bar: var(--blue-3);
   color-scheme: dark;
+
+  /* Layout rhythm on a 4px grid, and the longest line reading copy may run. */
+  --pad-panel: 1rem;
+  --gap-section: 1rem;
+  --measure: 68ch;
+  /* Component heights: indicators (pill, code chip, tag), small controls (segments, map chips),
+     buttons and search, and the touch target every control grows to on a coarse pointer. */
+  --h-pill: 1.375rem;
+  --h-tag: 1.5rem;
+  --h-sm: 1.75rem;
+  --h-md: 2rem;
+  --h-touch: 2.75rem;
+
+  /* Motion: quick for state changes (hover, press), a little longer for things entering. */
+  --dur-1: 100ms;
+  --dur-2: 200ms;
+  --ease: cubic-bezier(0.4, 1, 0.75, 0.9);
+}
+@media (width < 40rem) {
+  /* Phones: reading copy steps up to 16px. */
+  :root {
+    --text-base: 1rem;
+  }
+}
+@media (width >= 48rem) {
+  :root {
+    --gap-section: 1.5rem;
+  }
+}
+@media (width >= 80rem) {
+  :root {
+    --pad-panel: 1.25rem;
+    --gap-section: 2rem;
+  }
+}
+
+/* Type scale in rem, so text follows the browser's default size. 2xs is the floor for metadata
+   (uppercase mono labels, pills, the status bar), sm is UI text, base is reading copy. */
+@theme {
+  --text-*: initial;
+  --text-2xs: 0.75rem;
+  --text-2xs--line-height: 1.5;
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.6;
+  --text-md: 1rem;
+  --text-md--line-height: 1.5;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.4;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.3;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 1.2;
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 1.15;
+
+  --radius-*: initial;
+  --radius-1: 2px;
+  --radius-2: 3px;
+
+  /* Elevation: panels are border only; buttons, then tooltips, then dialogs sit above them. */
+  --shadow-*: initial;
+  --shadow-elev-1: inset 0 0 0 1px rgb(255 255 255 / 0.06), 0 1px 1px rgb(0 0 0 / 0.4);
+  --shadow-elev-2: 0 4px 12px rgb(0 0 0 / 0.45);
+  --shadow-elev-3: 0 16px 48px rgb(0 0 0 / 0.55);
 }
 
 @theme inline {
@@ -48,31 +122,71 @@
   --color-orange: var(--orange);
   --color-red: var(--red);
   --color-turquoise: var(--turquoise);
-  --color-violet: var(--violet);
   --color-slate: var(--slate);
   --color-ink: var(--ink);
+  --color-edge: var(--edge);
+  --color-well: var(--well);
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
 }
 
+/* Scrolling to a target or a focused control keeps it clear of the fixed top bar and the bottom
+   tab bar (or the status bar from md up). */
 html {
-  scroll-behavior: smooth;
   scroll-padding-top: 4.5rem;
+  scroll-padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
   background: var(--bg);
+}
+@media (width >= 48rem) {
+  html {
+    scroll-padding-bottom: 3rem;
+  }
 }
 
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: var(--text-sm);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: 'cv11', 'ss01';
 }
 
+/* Tabular figures wherever numbers line up in columns or tick over. */
+table,
+[data-tl] {
+  font-variant-numeric: tabular-nums;
+}
+
 ::selection {
-  background: color-mix(in srgb, var(--blue) 45%, transparent);
+  background: color-mix(in srgb, var(--blue-2) 60%, transparent);
+  color: var(--text);
+}
+input {
+  caret-color: var(--blue-3);
+}
+/* Scroll areas keep room for their scrollbar, so content doesn't shift when it appears. */
+#cmdk-list,
+[data-insp-scroll] {
+  scrollbar-gutter: stable;
+}
+
+/* One timing for state changes on every interactive surface; zero specificity, so a component
+   that animates something else (map nodes, the Motion switch) still sets its own. */
+:where(.btn, .chip, .tag-link, .seg > button, .ov-tabs > button, .list-row, .link-row, .ev-row, .rail-btn, .pcard, .exp-row > summary, .motion-switch, .cmdk-opt) {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: var(--dur-1);
+  transition-timing-function: var(--ease);
+}
+/* Section jumps are instant; the panel you land on flashes its header instead. */
+:target > .panel-head {
+  animation: target-flash calc(3 * var(--dur-2)) var(--ease);
+}
+@keyframes target-flash {
+  from {
+    box-shadow: inset 0 0 0 100vmax color-mix(in srgb, var(--text) 10%, transparent);
+  }
 }
 
 * {
@@ -80,62 +194,104 @@ body {
   scrollbar-color: var(--line-2) transparent;
 }
 
-:focus-visible {
-  outline: 2px solid var(--blue-3);
-  outline-offset: 2px;
+/* In the base layer so a utility (outline-none on the palette input) can opt out. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--blue-3);
+    outline-offset: 2px;
+  }
+}
+/* Controls that fill their bar, or rows that fill a scroll area, draw the ring inside so it is never cut off. */
+body > header a:focus-visible,
+.rail-btn:focus-visible,
+.ev-row:focus-visible,
+.list-row:focus-visible,
+.link-row:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Very short screens (landscape phones, 400% zoom): the bars scroll with the page instead of
+   covering half of it. */
+@media (max-height: 30rem) {
+  html {
+    scroll-padding-top: 1rem;
+  }
+  body > header {
+    position: absolute;
+  }
+}
+@media (max-height: 30rem) and (width < 48rem) {
+  html {
+    scroll-padding-bottom: 1rem;
+  }
+  body > main {
+    padding-bottom: 1rem;
+  }
+  .tabbar {
+    position: static;
+  }
 }
 
 @layer components {
   .panel {
     background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: 3px;
-    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.2), 0 1px 2px rgb(0 0 0 / 0.3);
+    border-radius: var(--radius-2);
   }
 
+  /* A head whose actions don't fit beside the title wraps them onto a second line. */
   .panel-head {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.625rem;
-    min-height: 2.5rem;
-    padding: 0.375rem 0.875rem;
+    gap: 0.5rem 0.75rem;
+    min-height: 2.75rem;
+    padding: 0.5rem var(--pad-panel);
     border-bottom: 1px solid var(--line);
     background: linear-gradient(var(--panel-2), color-mix(in srgb, var(--panel-2) 60%, var(--panel)));
   }
 
   .panel-title {
-    font-size: 11px;
+    font-size: var(--text-2xs);
     font-weight: 600;
-    letter-spacing: 0.09em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--muted);
   }
 
   .kicker {
     font-family: var(--font-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.06em;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--dim);
+  }
+  /* Labels of four or more words read as a phrase, not a code. */
+  .kicker--sentence {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    letter-spacing: normal;
+    text-transform: none;
   }
 
   .readout {
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
     color: var(--muted);
   }
 
   .code-chip {
     display: inline-flex;
     align-items: center;
-    height: 1.25rem;
+    height: var(--h-pill);
     padding: 0 0.375rem;
     border: 1px solid var(--line-2);
-    border-radius: 2px;
+    border-radius: var(--radius-1);
     background: var(--bg);
     font-family: var(--font-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.04em;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.03em;
     color: var(--dim);
     white-space: nowrap;
   }
@@ -143,27 +299,47 @@ body {
   .tag {
     display: inline-flex;
     align-items: center;
-    height: 1.375rem;
+    height: var(--h-tag);
     padding: 0 0.5rem;
-    border-radius: 2px;
+    border-radius: var(--radius-1);
     background: var(--panel-3);
     border: 1px solid var(--line);
-    font-size: 11.5px;
+    font-size: var(--text-xs);
     color: var(--muted);
     white-space: nowrap;
+  }
+  /* A skill with evidence on the systems map: brighter, and a button that selects it there. */
+  .tag-link {
+    gap: 0.375rem;
+    border-color: var(--line-2);
+    color: var(--text);
+    touch-action: manipulation;
+  }
+  .tag-link:hover {
+    background: var(--line);
+  }
+  .tag-link.is-sel {
+    border-color: var(--sel-bar);
+    background: var(--sel-bg);
+  }
+  .tag-n {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
   }
 
   .pill {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    height: 1.25rem;
+    height: var(--h-pill);
     padding: 0 0.5rem;
-    border-radius: 2px;
+    border-radius: var(--radius-1);
     font-family: var(--font-mono);
-    font-size: 10.5px;
+    font-size: var(--text-2xs);
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     white-space: nowrap;
   }
@@ -197,20 +373,30 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
-    height: 1.875rem;
+    gap: 0.5rem;
+    height: var(--h-md);
     padding: 0 0.75rem;
-    border-radius: 3px;
+    border-radius: var(--radius-2);
     background: var(--panel-3);
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06), 0 1px 1px rgb(0 0 0 / 0.4);
-    font-size: 13px;
+    box-shadow: var(--shadow-elev-1);
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--text);
     white-space: nowrap;
-    transition: background 0.12s ease;
   }
   .btn:hover {
     background: var(--line);
+  }
+  /* Pressed reads as pushed in, distinct from hover; toggles that are on keep that look. */
+  .btn:active,
+  .btn[aria-pressed='true'] {
+    background: var(--panel-2);
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.35);
+  }
+  .btn:disabled,
+  .btn[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
   .btn-primary {
     color: #fff;
@@ -219,6 +405,9 @@ body {
   }
   .btn-primary:hover {
     background: #215db0;
+  }
+  .btn-primary:active {
+    background: #184a90;
   }
   .btn-ghost {
     background: transparent;
@@ -230,20 +419,22 @@ body {
     color: var(--text);
   }
   .btn-icon {
-    width: 1.875rem;
+    width: var(--h-md);
     padding: 0;
   }
 
   .seg {
     display: inline-flex;
-    border-radius: 3px;
+    border-radius: var(--radius-2);
     box-shadow: inset 0 0 0 1px var(--line);
     overflow: hidden;
+    font-variant-numeric: tabular-nums;
   }
   .seg > button {
-    height: 1.625rem;
+    flex: none;
+    height: var(--h-sm);
     padding: 0 0.625rem;
-    font-size: 12px;
+    font-size: var(--text-xs);
     color: var(--dim);
   }
   .seg > button:hover {
@@ -251,62 +442,137 @@ body {
   }
   .seg > button[aria-pressed='true'] {
     background: var(--panel-3);
+    box-shadow: inset 0 0 0 1px var(--line-2);
     color: var(--text);
   }
-
-  /* Striped "no imagery" placeholder */
-  .hatch {
-    background:
-      repeating-linear-gradient(135deg, transparent 0 7px, rgb(255 255 255 / 0.028) 7px 14px),
-      var(--bg);
+  /* The group clips its corners, so the ring goes inside. */
+  .seg > button:focus-visible {
+    outline-offset: -2px;
   }
 
-  /* Faint dot grid behind canvases */
+  /* Faint dot grid behind canvases (fainter still under the map's edges: --grid-a). */
   .gridfield {
     background:
-      radial-gradient(circle, rgb(143 153 168 / 0.13) 1px, transparent 1.2px) 0 0 / 22px 22px,
+      radial-gradient(circle, rgb(143 153 168 / var(--grid-a, 0.13)) 1px, transparent 1.2px) 0 0 / 22px 22px,
       #13171c;
   }
 
   .kv {
     display: grid;
-    grid-template-columns: minmax(4.5rem, max-content) 1fr;
-    gap: 0.4rem 1.25rem;
-    font-size: 13px;
+    grid-template-columns: minmax(5.5rem, max-content) 1fr;
+    gap: 0.5rem 1.25rem;
+    font-size: var(--text-sm);
   }
   .kv dt {
     font-family: var(--font-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.06em;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--dim);
-    padding-top: 0.15rem;
+    padding-top: 0.125rem;
   }
   .kv dd {
     color: var(--text);
     min-width: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* One project stat (Stat.astro): the value over its label, in neutral text, with numerals that
+     line up. A value in words is set in the sans at a smaller size so it doesn't read as a figure. */
+  .stat {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+  }
+  .stat-value.is-text {
+    font-family: var(--font-sans);
+    font-size: var(--text-md);
+    font-weight: 500;
+    line-height: 1.8;
+    letter-spacing: normal;
+    color: var(--muted);
+  }
+  .stat-label {
+    font-size: var(--text-xs);
+    line-height: 1.4;
+    color: var(--muted);
+  }
+  .stat-inline {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .stat-inline .stat-value {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+  .stat-inline .stat-label {
+    font-size: var(--text-2xs);
+    white-space: nowrap;
+  }
+
+  /* Figure captions everywhere (write-ups, covers, evidence): a mono kicker naming the figure,
+     then what it shows. */
+  .fig-cap {
+    margin-top: 0.5rem;
+    max-width: var(--measure);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+    color: var(--dim);
+  }
+  .fig-cap .kicker {
+    margin-right: 0.5rem;
+    color: var(--muted);
   }
 }
 
-/* Long-form project write-ups */
+/* Long-form project write-ups. Text runs at most --measure wide; figures, tables and code use the
+   whole panel. Sections are numbered 01, 02... in mono above each heading. */
 .prose {
+  counter-reset: sec;
   color: #d3d8de;
-  font-size: 15px;
-  line-height: 1.75;
-  max-width: 72ch;
+  font-size: var(--text-md);
+  line-height: 1.7;
+}
+.prose > :is(p, ul, ol, h2, h3, blockquote) {
+  max-width: var(--measure);
 }
 .prose > * + * {
   margin-top: 1.1em;
 }
 .prose h2 {
-  margin-top: 2.25em;
-  padding-top: 0.9em;
+  counter-increment: sec;
+  margin-top: 2.4em;
+  padding-top: 1.1em;
   border-top: 1px solid var(--line);
-  font-size: 11.5px;
+  font-size: var(--text-lg);
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+/* The index is decoration for the eye; screen readers get the heading text alone. */
+.prose h2::before {
+  content: counter(sec, decimal-leading-zero) / '';
+  display: block;
+  margin-bottom: 0.4em;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--dim);
 }
 .prose h2:first-child {
   margin-top: 0;
@@ -317,7 +583,7 @@ body {
   margin-top: 0.6em;
 }
 .prose h3 {
-  font-size: 15px;
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--text);
 }
@@ -356,17 +622,17 @@ body {
   font-family: var(--font-mono);
   font-size: 0.85em;
   padding: 0.1em 0.35em;
-  border-radius: 2px;
+  border-radius: var(--radius-1);
   background: var(--panel-3);
   color: var(--text);
 }
 .prose pre {
-  padding: 1rem 1.1rem;
+  padding: 1rem 1.125rem;
   border: 1px solid var(--line);
-  border-radius: 3px;
-  background: #0d1014 !important;
+  border-radius: var(--radius-2);
+  background: var(--well) !important;
   overflow-x: auto;
-  font-size: 12.5px;
+  font-size: var(--text-xs);
   line-height: 1.6;
 }
 .prose pre code {
@@ -378,24 +644,45 @@ body {
 .prose video {
   width: 100%;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--radius-2);
   background: #fff;
 }
 .prose video {
   background: #000;
 }
+/* Wide media (traces) keep a readable height and scroll sideways in a well, in write-ups and in the
+   console's evidence. After .prose img, which it overrides. */
+.fig-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-2);
+  background: var(--well);
+}
+.fig-scroll > a {
+  display: block;
+  width: max-content;
+}
+.fig-scroll img {
+  display: block;
+  width: auto;
+  max-width: none;
+  height: 10.5rem;
+  border: 0;
+  border-radius: 0;
+}
 .prose table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13.5px;
+  font-size: var(--text-sm);
   line-height: 1.5;
 }
 .prose th {
   text-align: left;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: var(--text-2xs);
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--dim);
   background: var(--panel-2);
@@ -433,16 +720,8 @@ body {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-}
-
-/* The status bar's Motion switch. Off stops decorative animation and smooth scrolling. */
-html[data-motion='off'] {
-  scroll-behavior: auto;
-}
+/* The Motion switch (on by default, off for people who've asked their OS for reduced motion).
+   Off stops animation and transitions everywhere. */
 html[data-motion='off'] *,
 html[data-motion='off'] *::before,
 html[data-motion='off'] *::after {
@@ -463,9 +742,6 @@ html[data-motion='off'] *::after {
 }
 .t-skill {
   --c: var(--dim);
-}
-.t-outcome {
-  --c: var(--orange);
 }
 .shape-ico .fill {
   fill: var(--c);
@@ -488,7 +764,7 @@ html[data-motion='off'] *::after {
   gap: 0.875rem 1.5rem;
   padding: 1rem;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: 'main' 'facts' 'actions' 'about';
+  grid-template-areas: 'main' 'facts' 'actions';
 }
 .id-main {
   grid-area: main;
@@ -507,8 +783,8 @@ html[data-motion='off'] *::after {
   grid-area: facts;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem 1.25rem;
-  font-size: 13px;
+  gap: 0.25rem 1.25rem;
+  font-size: var(--text-sm);
 }
 .id-facts > div {
   display: flex;
@@ -517,59 +793,47 @@ html[data-motion='off'] *::after {
 }
 .id-facts dt {
   font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
+  font-size: var(--text-2xs);
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--dim);
-  padding-top: 0.15rem;
 }
-.id-about {
-  grid-area: about;
-  display: none;
-  gap: 0.6rem;
-  max-width: 76ch;
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--muted);
+.id-facts dd {
+  font-variant-numeric: tabular-nums;
 }
-/* Below md the about text follows the console instead (.ov-about), so the mission stays near the top. */
+/* The bio follows the console at every width, so the mission sits near the top of the page. */
 .ov-about {
-  padding: 1rem;
-  font-size: 13px;
+  padding: var(--pad-panel);
+  font-size: var(--text-base);
   line-height: 1.6;
   color: var(--muted);
+}
+.ov-about p {
+  max-width: var(--measure);
 }
 .ov-about p + p {
-  margin-top: 0.6rem;
+  margin-top: 0.5rem;
 }
 @media (min-width: 768px) {
-  .ov-about {
-    display: none;
-  }
-  .id-about {
-    display: grid;
-  }
   .ov-id {
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: 'main actions' 'about about' 'facts facts';
+    grid-template-areas: 'main actions' 'facts facts';
   }
   .id-facts {
-    gap: 0.4rem 1.75rem;
+    gap: 0.5rem 1.75rem;
     padding-top: 0.75rem;
     border-top: 1px solid var(--line);
   }
-}
-@media (min-width: 1024px) {
-  .id-about {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
-    max-width: none;
+  .ov-about {
+    columns: 2 22rem;
+    column-gap: 2.5rem;
+  }
+  .ov-about p {
+    break-inside: avoid;
   }
 }
 @media (min-width: 1280px) {
   .ov-id {
-    grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr) auto;
-    grid-template-areas: 'main about actions' 'facts facts facts';
     padding: 0.875rem 1.25rem 0.75rem;
     gap: 0.75rem 1.75rem;
   }
@@ -578,18 +842,19 @@ html[data-motion='off'] *::after {
   }
 }
 
-/* Tabs stand in for the three-pane layout below lg. */
+/* Tabs stand in for the three-pane layout below xl: Mission / Map / Details below lg, and Map /
+   Details over the right column from lg to xl, where the stage always shows. */
 .ov-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-radius: 3px;
+  border-radius: var(--radius-2);
   box-shadow: inset 0 0 0 1px var(--line);
   background: var(--panel);
   overflow: hidden;
 }
 .ov-tabs > button {
-  min-height: 44px;
-  font-size: 13px;
+  min-height: var(--h-touch);
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--muted);
   touch-action: manipulation;
@@ -597,10 +862,14 @@ html[data-motion='off'] *::after {
 .ov-tabs > button + button {
   box-shadow: inset 1px 0 0 var(--line);
 }
+.ov-tabs > button:hover {
+  background: var(--hover-bg);
+  color: var(--text);
+}
 .ov-tabs > button[aria-selected='true'] {
   color: var(--text);
-  background: var(--panel-3);
-  box-shadow: inset 0 -2px 0 var(--blue-3);
+  background: var(--sel-bg);
+  box-shadow: inset 0 -2px 0 var(--sel-bar);
 }
 .ov-tabs > button:focus-visible {
   outline-offset: -3px;
@@ -628,19 +897,18 @@ html:not(.js) .ov-tabs {
   min-height: 620px;
 }
 @media (max-width: 1023.98px) {
-  html.js .ov-console {
-    height: clamp(440px, 72svh, 680px);
-  }
+  /* The mission / evidence and Details tabs take their natural height, so the page scrolls rather
+     than a pane inside it; the map is a fixed box to pan around in. */
   html.js .ov-console > .pane {
     flex: 1;
     min-height: 0;
   }
+  html.js .ov-console > .pane-map {
+    flex: none;
+    height: clamp(440px, 72svh, 680px);
+  }
   html.js .ov-console .map-body {
     min-height: 0;
-  }
-  /* The mission / evidence tab takes its natural height so the page scrolls, not a pane inside it. */
-  html.js .ov-console[data-tab='mission'] {
-    height: auto;
   }
   html.js .ov-console[data-tab='mission'] .stage-view {
     position: static;
@@ -650,9 +918,13 @@ html:not(.js) .ov-tabs {
     flex: none;
     height: clamp(460px, 130vw, 620px);
   }
-  html.js .ov-console[data-tab='mission'] > :not([data-pane='mission']),
-  html.js .ov-console[data-tab='map'] > :not([data-pane='map']),
-  html.js .ov-console[data-tab='details'] > :not([data-pane='details']) {
+  html.js .ov-console[data-tab='details'] [data-insp-scroll] {
+    flex: none;
+    overflow: visible;
+  }
+  html.js .ov-console[data-tab='mission'] > .pane:not([data-pane='mission']),
+  html.js .ov-console[data-tab='map'] > .pane:not([data-pane='map']),
+  html.js .ov-console[data-tab='details'] > .pane:not([data-pane='details']) {
     display: none;
   }
   .map-expand {
@@ -663,11 +935,12 @@ html:not(.js) .ov-tabs {
   .ov-tabs {
     display: none;
   }
-  /* Identity strip on top; the console takes the rest of the first screen (never under 540px). */
+  /* Identity strip on top; the console takes the rest of the first screen (never under 540px, and
+     no taller than 54rem on very tall screens); the bio follows it. 16.75rem is the top bar, page
+     padding, identity strip, gap and status bar, with a little room to spare. */
   .ov {
     display: grid;
-    grid-template-rows: auto minmax(540px, 1fr);
-    min-height: min(calc(100dvh - 6.75rem), 1080px);
+    grid-template-rows: auto minmax(540px, min(calc(100dvh - 16.75rem), 54rem)) auto;
     gap: 1rem;
   }
   /* Size containment keeps the panes' content from growing the row; they scroll inside instead. */
@@ -675,8 +948,8 @@ html:not(.js) .ov-tabs {
     display: grid;
     gap: 1rem;
     contain: size;
-    grid-template-columns: minmax(0, 1fr) 300px;
-    grid-template-rows: 250px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) clamp(300px, 30vw, 360px);
+    grid-template-rows: 272px minmax(0, 1fr);
     grid-template-areas: 'stage map' 'stage insp';
   }
   .pane-map {
@@ -699,18 +972,47 @@ html:not(.js) .ov-tabs {
   .ov-console[data-expanded='true'] .pane-stage {
     display: none;
   }
-  .map-selbar {
-    display: none !important;
+  /* The inspector shows beside the map, so the map's "Details" shortcut has nothing to switch to. */
+  .ov-console[data-expanded='true'] .map-selbar {
+    display: none;
   }
 }
+/* lg to xl: one right column, the map or the details at full height under Map | Details tabs.
+   Without JS the map and inspector stack in it instead. */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  html.js .ov-console:not([data-expanded='true']) {
+    row-gap: 0.5rem;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: 'stage tabs' 'stage side';
+  }
+  html.js .ov-console:not([data-expanded='true']) > .ov-tabs {
+    display: grid;
+    grid-area: tabs;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ov-tabs > [data-tab-btn='mission'] {
+    display: none;
+  }
+  html.js .ov-console:not([data-expanded='true']) > :is(.pane-map, .pane-insp) {
+    grid-area: side;
+  }
+  html.js .ov-console:not([data-expanded='true'])[data-tab='details'] > .pane-map,
+  html.js .ov-console:not([data-expanded='true']):not([data-tab='details']) > .pane-insp {
+    display: none;
+  }
+}
+/* The inspector carries the most text, so it gets the width the map gives up (288 | 664 | 360 at 1440). */
 @media (min-width: 1280px) {
   .ov-console {
-    grid-template-columns: 300px minmax(0, 1fr) 320px;
+    grid-template-columns: clamp(264px, 20vw, 300px) minmax(0, 1fr) clamp(320px, 25vw, 380px);
     grid-template-rows: minmax(0, 1fr);
     grid-template-areas: 'map stage insp';
   }
   .ov-console[data-expanded='true'] {
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1fr) clamp(320px, 25vw, 380px);
+  }
+  .map-selbar {
+    display: none !important;
   }
 }
 
@@ -722,28 +1024,32 @@ html:not(.js) .ov-tabs {
   display: none;
 }
 .map-tools {
+  border-bottom: 1px solid var(--line);
+}
+.map-chips {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem;
   padding: 0.375rem 0.5rem;
-  border-bottom: 1px solid var(--line);
-  overflow-x: auto;
-  scrollbar-width: none;
 }
 .chip {
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 0.4rem;
-  height: 1.75rem;
-  padding: 0 0.55rem;
-  border-radius: 3px;
-  font-size: 12px;
+  gap: 0.375rem;
+  height: var(--h-sm);
+  padding: 0 0.5rem;
+  border-radius: var(--radius-2);
+  font-size: var(--text-xs);
   color: var(--muted);
   touch-action: manipulation;
 }
+.chip[aria-pressed='true'] {
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
 .chip:hover {
-  background: var(--panel-3);
+  background: var(--hover-bg);
   color: var(--text);
 }
 .chip[aria-pressed='false'] {
@@ -752,6 +1058,39 @@ html:not(.js) .ov-tabs {
 }
 .chip[aria-pressed='false'] .shape-ico {
   opacity: 0.4;
+}
+.chip-n {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--dim);
+}
+/* Relations are told apart by weight and dash; the legend draws each the way the map does. */
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.125rem 1rem;
+  padding: 0 0.75rem 0.375rem;
+  font-size: var(--text-2xs);
+  color: var(--muted);
+}
+.map-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.map-legend line {
+  stroke: var(--muted);
+  stroke-width: 1.25;
+}
+.map-legend .lg-dash {
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
+}
+.map-legend .lg-dot {
+  stroke-width: 1.5;
+  stroke-dasharray: 1 3.5;
+  stroke-linecap: round;
 }
 .map-body {
   position: relative;
@@ -763,24 +1102,38 @@ html:not(.js) .ov-tabs {
   inset: 0;
 }
 .map-stage {
+  --grid-a: 0.05;
   overflow: hidden;
 }
 .map-list {
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-.edges {
+.edges,
+.edge-tags {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+}
+.edges {
   overflow: visible;
 }
+.edge-tags {
+  pointer-events: none;
+}
+/* Edges at rest: structural links a little heavier, capability links hidden until traced, and the
+   person's many spokes faded. A traced edge keeps its weight and dash and only gets lighter. */
 .ge {
   stroke: var(--edge);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
-  transition: opacity 0.15s;
+  transition: opacity var(--dur-2) var(--ease);
+}
+.ge.r-affiliation,
+.ge.r-builtAt,
+.ge.r-personal {
+  stroke-width: 1.25;
 }
 .ge.r-partOf,
 .ge.r-related {
@@ -790,22 +1143,42 @@ html:not(.js) .ov-tabs {
   stroke-dasharray: 1 3.5;
   stroke-linecap: round;
 }
-.ge.r-measures {
-  stroke: color-mix(in srgb, var(--orange) 45%, var(--edge));
-}
 .focus .ge:not(.on) {
-  opacity: 0.28;
+  opacity: 0.5;
+}
+.ge[data-types~='person']:not(.on) {
+  opacity: 0.35;
+}
+.tracing .ge:not(.on) {
+  opacity: 0.2;
+}
+.ge.r-uses:not(.on) {
+  opacity: 0;
 }
 .focus .ge.on {
-  stroke: var(--blue-3);
-  stroke-width: 1.5;
+  stroke: var(--muted);
+}
+.tracing .ge.on {
+  stroke: color-mix(in srgb, var(--text) 80%, transparent);
+}
+.etag {
+  position: absolute;
+  translate: -50% -50%;
+  padding: 0 3px;
+  border-radius: var(--radius-1);
+  background: rgb(19 23 28 / 0.84);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--muted);
 }
 .nodes {
   position: absolute;
   inset: 0;
 }
 .gn {
-  --d: 22px;
+  --d: 18px;
   --hit: 28px;
   position: absolute;
   display: grid;
@@ -813,29 +1186,26 @@ html:not(.js) .ov-tabs {
   width: var(--hit);
   height: var(--hit);
   translate: -50% -50%;
-  border-radius: 4px;
+  border-radius: var(--radius-2);
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.15s;
+  transition: opacity var(--dur-2) var(--ease);
 }
 .gn.t-person {
-  --d: 44px;
-  --hit: 48px;
+  --d: 36px;
+  --hit: 44px;
   z-index: 2;
 }
 .gn.t-org {
-  --d: 26px;
-  --hit: 32px;
+  --d: 22px;
 }
 .gn.t-skill {
-  --d: 10px;
+  --d: 7px;
   --hit: 24px;
 }
-.gn.t-outcome {
-  --d: 10px;
-  --hit: 24px;
-}
+/* Shape carries the type: the person a ringed disc, orgs filled squares, projects hollow rings,
+   capabilities dots. None is filled light, so the map stays quieter than the mission. */
 .gn .shape {
   position: relative;
   display: grid;
@@ -845,37 +1215,24 @@ html:not(.js) .ov-tabs {
   border-radius: 999px;
   background: var(--panel);
   box-shadow: inset 0 0 0 1.5px var(--c);
-  color: var(--c);
-  transition: box-shadow 0.15s;
 }
 .gn.t-person .shape {
-  background: #dfe3e8;
-  box-shadow: none;
+  background: var(--panel-2);
 }
+/* A glyph inside the fixed-size disc, not text to read, so it stays in px with the disc. */
 .gn .initials {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.03em;
-  color: #1c2127;
+  color: var(--text);
 }
 .gn.t-org .shape {
-  border-radius: 5px;
+  border-radius: var(--radius-2);
+  background: var(--panel-3);
 }
 .gn.t-skill .shape {
   background: var(--c);
   box-shadow: none;
-}
-.gn.t-outcome .shape {
-  width: 9px;
-  height: 9px;
-  border-radius: 1px;
-  rotate: 45deg;
-  background: var(--c);
-  box-shadow: none;
-}
-.gn .glyph {
-  width: 58%;
-  height: 58%;
 }
 .gn .live {
   position: absolute;
@@ -893,94 +1250,82 @@ html:not(.js) .ov-tabs {
   left: 50%;
   translate: -50% 0;
   padding: 0 3px;
-  border-radius: 2px;
+  border-radius: var(--radius-1);
   background: rgb(19 23 28 / 0.84);
-  font-size: 11.5px;
+  font-size: var(--text-2xs);
   line-height: 1.3;
   white-space: nowrap;
   color: #c5cbd3;
   pointer-events: none;
 }
+/* Where the label pass found room: above, right or left of the shape (below is the default). */
+.gn[data-lp='t'] .lbl {
+  top: auto;
+  bottom: calc(50% + var(--d) / 2 + 3px);
+}
+.gn:is([data-lp='r'], [data-lp='l']) .lbl {
+  top: 50%;
+  translate: 0 -50%;
+}
+.gn[data-lp='r'] .lbl {
+  left: calc(50% + var(--d) / 2 + 4px);
+}
+.gn[data-lp='l'] .lbl {
+  left: auto;
+  right: calc(50% + var(--d) / 2 + 4px);
+}
 .gn.t-person .lbl {
-  font-size: 12.5px;
+  font-size: var(--text-xs);
   font-weight: 600;
   color: var(--text);
 }
 .gn.t-skill .lbl {
-  font-size: 10.5px;
   color: var(--dim);
 }
-.gn.t-outcome .lbl {
-  top: calc(50% + 9px);
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  color: var(--orange);
-}
-.gn:hover .shape {
-  box-shadow: inset 0 0 0 1.5px var(--c), 0 0 0 4px color-mix(in srgb, var(--c) 20%, transparent);
+/* Hover and trace are neutral; blue is kept for the selection. */
+.gn:hover .shape,
+.gn.traced .shape {
+  outline: 1px solid color-mix(in srgb, var(--text) 25%, transparent);
+  outline-offset: 3px;
 }
 .focus .gn:not(.on) {
+  opacity: 0.72;
+}
+.tracing .gn:not(.on, .sel) {
   opacity: 0.5;
 }
 .gn.on .lbl {
   color: var(--text);
 }
-.gn.t-outcome.on .lbl {
-  color: var(--orange);
-}
 .gn.sel {
   z-index: 3;
 }
 .gn.sel .shape {
-  outline: 2px solid var(--blue-3);
+  outline: 2px solid var(--sel-bar);
   outline-offset: 3px;
 }
 .gn.sel .lbl {
   background: color-mix(in srgb, var(--blue-2) 50%, #13171c);
   color: #fff;
 }
-.gn.traced .shape {
-  outline: 1.5px dashed var(--blue-3);
-  outline-offset: 3px;
-}
 .gn:focus-visible {
   outline: 2px solid var(--blue-3);
   outline-offset: 1px;
   z-index: 4;
 }
-.hide-org :is(.gn.t-org, .ge[data-types~='org']),
-.hide-project :is(.gn.t-project, .ge[data-types~='project']),
-.hide-skill :is(.gn.t-skill, .ge[data-types~='skill']),
-.hide-outcome :is(.gn.t-outcome, .ge[data-types~='outcome']) {
+/* A type that is switched off still shows what is related to the selection or the traced node. */
+.hide-org :is(.gn.t-org, .ge[data-types~='org']):not(.on),
+.hide-project :is(.gn.t-project, .ge[data-types~='project']):not(.on),
+.hide-skill :is(.gn.t-skill, .ge[data-types~='skill']):not(.on) {
   display: none;
 }
 .map-hint {
   position: absolute;
   left: 0.75rem;
   bottom: 0.5rem;
-  font-size: 10.5px;
+  font-size: var(--text-2xs);
   color: var(--dim);
   pointer-events: none;
-}
-.map-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1.25rem;
-  padding: 0.4rem 0.75rem;
-  border-top: 1px solid var(--line);
-  font-size: 11px;
-  color: var(--muted);
-}
-.map-legend line {
-  stroke: var(--slate);
-  stroke-width: 1.5;
-}
-.map-legend .lg-dash {
-  stroke-dasharray: 5 3;
-}
-.map-legend .lg-dot {
-  stroke-dasharray: 1 3;
-  stroke-linecap: round;
 }
 .map-selbar {
   display: none;
@@ -996,29 +1341,25 @@ html.js .map-selbar {
 .link-row {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.625rem;
   width: 100%;
   text-align: left;
-  font-size: 13px;
+  font-size: var(--text-sm);
   touch-action: manipulation;
 }
 .list-row {
-  padding: 0.45rem 0.75rem;
+  padding: 0.5rem 0.75rem;
 }
 .link-row {
-  padding: 0.375rem 0.25rem;
+  padding: 0.5rem 0.25rem;
 }
 .list-row:hover,
 .link-row:hover {
-  background: var(--panel-2);
+  background: var(--hover-bg);
 }
 .list-row[aria-current] {
-  background: color-mix(in srgb, var(--blue-2) 22%, transparent);
-  box-shadow: inset 2px 0 0 var(--blue-3);
-}
-.list-row:focus-visible,
-.link-row:focus-visible {
-  outline-offset: -2px;
+  background: var(--sel-bg);
+  box-shadow: inset 2px 0 0 var(--sel-bar);
 }
 .map-expand .ico-collapse,
 .map-expand[aria-pressed='true'] .ico-expand {
@@ -1028,9 +1369,15 @@ html.js .map-selbar {
   display: block;
 }
 
-/* Small map (docked): fewer words. Labels show for the person, orgs, and the traced neighborhood. */
+/* Small map (docked): the script's label pass decides which labels fit (see SystemsMap.astro);
+   the selection and the traced node always keep theirs. */
 @container map (width < 480px) {
-  .chip-text {
+  .chip {
+    gap: 0.25rem;
+    padding: 0 0.375rem;
+  }
+  /* Reset keeps its icon and accessible name so the three type chips and it share one row. */
+  .chip-reset .chip-text {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -1038,18 +1385,19 @@ html.js .map-selbar {
     clip-path: inset(50%);
     white-space: nowrap;
   }
-  .chip {
-    padding: 0 0.45rem;
-  }
-  .map-legend,
   .map-hint {
     display: none;
   }
   .gn .lbl {
     display: none;
   }
-  .gn:is(.sel, .traced, :hover, :focus-visible) .lbl {
+  .gn:is(.sel, .traced, .lbl-on) .lbl {
     display: block;
+  }
+  /* Set for one synchronous pass so every candidate label can be measured. */
+  .lbl-measure .gn .lbl {
+    display: block;
+    visibility: hidden;
   }
 }
 @container map (width >= 560px) {
@@ -1073,6 +1421,15 @@ html.js .map-selbar {
 .stage-view:focus {
   outline: none;
 }
+/* Swapping between the mission and an entity's evidence fades the new view in (not on first load). */
+[data-stage][data-swapped] .stage-view:not([hidden]) {
+  animation: stage-in var(--dur-2) var(--ease);
+}
+@keyframes stage-in {
+  from {
+    opacity: 0;
+  }
+}
 .mission-view {
   display: flex;
   flex-direction: column;
@@ -1081,7 +1438,7 @@ html.js .map-selbar {
   padding: 0.625rem 1rem;
   border-bottom: 1px solid var(--line);
 }
-/* The simulation runs edge to edge; it fills whatever height the record strip leaves. */
+/* The simulation runs edge to edge and fills the rest of the mission view. */
 .mission-canvas {
   display: flex;
   flex-direction: column;
@@ -1090,22 +1447,6 @@ html.js .map-selbar {
 }
 .mission-canvas > figure {
   flex: 1;
-}
-.mission-record {
-  border-top: 1px solid var(--line);
-}
-.record-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
-  gap: 0.25rem 1rem;
-  padding: 0.5rem 1rem 0.875rem;
-}
-.record-grid > div,
-.ev-stats > div {
-  display: flex;
-  flex-direction: column-reverse;
-  justify-content: flex-end;
-  gap: 0.125rem;
 }
 .ev {
   display: flex;
@@ -1130,73 +1471,26 @@ html.js .map-selbar {
   .ev-media.has-more {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .ev-media.has-more .is-lead {
+  .ev-media.has-more :is(.is-lead, .is-wide) {
     grid-column: 1 / -1;
   }
 }
-.ev-fig {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  background: #0d1014;
-}
-.ev-fig img,
-.ev-fig video {
+.ev-fig > :is(img, video) {
   display: block;
   width: 100%;
   max-height: 340px;
   object-fit: contain;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-2);
+  background: var(--well);
 }
-.ev-fig.is-lead img,
-.ev-fig.is-lead video {
+.ev-fig.is-lead > :is(img, video) {
   max-height: 380px;
-}
-.ev-fig figcaption {
-  position: absolute;
-  top: 0.4rem;
-  left: 0.4rem;
-  padding: 0.05rem 0.35rem;
-  border-radius: 2px;
-  background: rgb(17 20 24 / 0.9);
-}
-.ev-pending {
-  display: grid;
-  justify-items: start;
-  gap: 0.35rem;
-  padding: 1.25rem;
-  border: 1px dashed var(--line-2);
-  border-radius: 3px;
 }
 .ev-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
   gap: 0.75rem 1rem;
-}
-.ev-outcomes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-.ev-outcome,
-.ev-row {
-  display: flex;
-  width: 100%;
-  text-align: left;
-  border-radius: 3px;
-  touch-action: manipulation;
-}
-.ev-outcome {
-  flex-direction: column;
-  gap: 0.2rem;
-  height: 100%;
-  padding: 0.6rem 0.75rem;
-  box-shadow: inset 0 0 0 1px var(--line);
-}
-.ev-outcome:hover,
-.ev-row:hover {
-  background: var(--panel-2);
 }
 .ev-list {
   margin-top: 0.5rem;
@@ -1206,10 +1500,18 @@ html.js .map-selbar {
   border-bottom: 1px solid var(--line);
 }
 .ev-row {
+  display: flex;
   align-items: center;
   gap: 0.75rem;
+  width: 100%;
   padding: 0.5rem 0.25rem;
-  font-size: 13.5px;
+  border-radius: var(--radius-2);
+  text-align: left;
+  font-size: var(--text-sm);
+  touch-action: manipulation;
+}
+.ev-row:hover {
+  background: var(--panel-2);
 }
 .ev-projects {
   display: grid;
@@ -1221,7 +1523,7 @@ html.js .map-selbar {
   gap: 0.875rem;
   padding: 0.625rem;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--radius-2);
   background: rgb(17 20 24 / 0.4);
 }
 .ev-thumb {
@@ -1230,8 +1532,8 @@ html.js .map-selbar {
   flex-shrink: 0;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 2px;
-  background: #0d1014;
+  border-radius: var(--radius-1);
+  background: var(--well);
 }
 .ev-thumb img {
   width: 100%;
@@ -1239,19 +1541,49 @@ html.js .map-selbar {
   object-fit: cover;
   object-position: top;
 }
+.ev-thumb.is-contain img {
+  padding: 0.25rem;
+  object-fit: contain;
+}
 .ev-proj-title {
   text-align: left;
-  font-size: 14px;
+  font-size: var(--text-base);
   font-weight: 600;
   touch-action: manipulation;
 }
 .ev-proj-title:hover {
-  color: var(--blue-3);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 @media (max-width: 479.98px) {
   .ev-thumb {
     width: 5.5rem;
   }
+}
+
+/* --- Inspector ---------------------------------------------------------------------------------- */
+/* Beside a stage showing the same object's evidence, the record becomes a properties sheet: type and
+   ID, status, dates, properties, then linked objects. The description and thumbnail are on the stage
+   already. The expanded map hides the stage, so the full record comes back there. */
+@media (min-width: 1024px) {
+  .ov-console:not([data-expanded='true']) .pane-insp[data-mode='evidence'] :is(.insp-desc, .insp-thumb) {
+    display: none;
+  }
+  .ov-console:not([data-expanded='true']) .pane-insp[data-mode='evidence'] .insp-title {
+    font-size: var(--text-base);
+    line-height: 1.4;
+  }
+}
+
+/* --- ⌘K palette --------------------------------------------------------------------------------- */
+/* The active row, moved by the arrow keys or the pointer, is drawn like a selection; on the tint its
+   dim text steps up to muted so it keeps 4.5:1. */
+.cmdk-opt[aria-selected='true'] {
+  background: var(--sel-bg);
+  box-shadow: inset 2px 0 0 var(--sel-bar);
+}
+.cmdk-opt[aria-selected='true'] .text-dim {
+  color: var(--muted);
 }
 
 /* --- Below the fold: things that stand for the selected entity -------------------------------- */
@@ -1264,39 +1596,112 @@ html.js .map-selbar {
 .pcard .card-map {
   position: relative;
   z-index: 2;
-  height: 1.75rem;
+  height: var(--h-sm);
   padding: 0 0.5rem;
-  font-size: 12px;
+  font-size: var(--text-xs);
 }
+/* The icon-only version stays quiet until its card is hovered or holds focus. */
+.pcard .card-map.btn-icon {
+  width: var(--h-sm);
+  padding: 0;
+  color: var(--dim);
+}
+.pcard:is(:hover, :focus-within) .card-map.btn-icon {
+  color: var(--text);
+}
+/* Selected: the selection tint plus a 2px bar on the leading edge, as in the map list and rail. */
 .pcard.is-sel,
-.exp-row.is-sel > summary,
-.metric-tile.is-sel {
-  box-shadow: inset 2px 0 0 var(--blue-3);
+.exp-row.is-sel > summary {
+  background: var(--sel-bg);
+  box-shadow: inset 2px 0 0 var(--sel-bar);
 }
 .pcard.is-sel {
-  border-color: color-mix(in srgb, var(--blue-3) 60%, var(--line));
+  border-color: color-mix(in srgb, var(--sel-bar) 60%, var(--line));
 }
-.plate {
+/* On the selection tint, dim text steps up to muted so it keeps 4.5:1. */
+:is(.list-row[aria-current], .pcard.is-sel, .exp-row.is-sel > summary) :is(.text-dim, .kicker) {
+  color: var(--muted);
+}
+/* Projects table on phones: each row restacks into a compact list item (ID and status, then the
+   title, then context and start date) with no media, and the whole row opens the write-up. */
+@media (width < 40rem) {
+  .ptable,
+  .ptable tbody {
+    display: block;
+  }
+  .ptable tr {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.125rem 0.625rem;
+    padding: 0.5rem var(--pad-panel);
+  }
+  .ptable td {
+    padding: 0;
+  }
+  .ptable .pt-name {
+    order: 1;
+    flex-basis: 100%;
+    font-size: var(--text-base);
+  }
+  .ptable .pt-name a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .ptable .pt-ctx {
+    order: 2;
+  }
+  .ptable .pt-date {
+    order: 3;
+    color: var(--muted);
+  }
+  .ptable .pt-date::before {
+    content: '·';
+    content: '·' / '';
+    margin-right: 0.625rem;
+  }
+  .ptable .pt-stack {
+    display: none;
+  }
+}
+/* An open experience row: the detail sits in its own inset well under the role text, so it doesn't
+   run into the next row. */
+.exp-detail {
+  margin: 0 var(--pad-panel) 1rem;
+  padding: 0.875rem 1rem 1rem;
+  border-left: 1px solid var(--line-2);
+  background: color-mix(in srgb, var(--panel-2) 30%, transparent);
+}
+@media (min-width: 640px) {
+  .exp-detail {
+    margin-left: calc(var(--pad-panel) + 3rem);
+  }
+}
+/* Faint labels that group the long homepage (Record, Work, Personal), sitting close to the panels
+   they head. */
+.group-label {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  height: 100%;
-  padding: 1rem;
-  text-align: center;
+  gap: 0.75rem;
+  margin-bottom: calc(0.5rem - var(--gap-section));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
 }
-.plate-title {
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: #3d4550;
+.group-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
 }
 .tl-key-bar {
   width: 14px;
   height: 8px;
-  border-radius: 1px;
+  border-radius: var(--radius-1);
   background: var(--panel-3);
   box-shadow: inset 0 0 0 1px var(--line-2);
 }
@@ -1310,24 +1715,25 @@ html.js .map-selbar {
   box-shadow: inset 0 0 0 1.5px var(--ink);
 }
 
-/* Comfortable touch targets on coarse pointers. */
+/* 44px touch targets on coarse pointers. Small text links get theirs in the markup
+   (pointer-coarse: utilities). */
 @media (pointer: coarse) {
   .btn,
   .seg > button,
   .chip,
-  .pcard .card-map {
-    min-height: 44px;
-  }
-  .btn-icon,
-  .seg > button {
-    min-width: 44px;
-  }
+  .tag-link,
+  .pcard .card-map,
   .list-row,
   .link-row,
   .ev-row {
-    min-height: 44px;
+    min-height: var(--h-touch);
   }
-  .seg > button:focus-visible {
-    outline-offset: -2px;
+  .btn-icon,
+  .seg > button,
+  .chip {
+    min-width: var(--h-touch);
+  }
+  .chip {
+    justify-content: center;
   }
 }

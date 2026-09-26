@@ -2,21 +2,32 @@
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
 import Icon, { type IconName } from '../components/Icon.astro';
-import { experience, orgs, profile, socials } from '../data/site';
+import NewTab from '../components/NewTab.astro';
+import Mark from '../components/Mark.astro';
+import { education, experience, orgs, profile, socials } from '../data/site';
 import { getModel, typeName } from '../lib/model';
+import { build } from '../lib/build';
 
 interface Props {
   title?: string;
   description?: string;
   crumb?: { label: string; href?: string }[];
   home?: boolean;
+  /** The rail / tab bar section this page belongs to, marked current (subpages). */
+  section?: string;
+  /** A short readout for the left of the status bar on pages without a selection (e.g. the 404). */
+  status?: string;
+  /** False for a page with no address of its own (the 404), which gets no canonical link. */
+  canonical?: boolean;
 }
-const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false } = Astro.props;
+const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false, section, status, canonical = true } = Astro.props;
+// Absolute URLs for link previews. public/og.png is rendered from the profile (see src/data/site.ts).
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/og.png', Astro.site).href;
 
 const base = home ? '' : '/';
 const nav: { id: string; label: string; icon: IconName; mobile?: boolean }[] = [
   { id: 'overview', label: 'Overview', icon: 'graph', mobile: true },
-  { id: 'metrics', label: 'Key metrics', icon: 'gauge' },
   { id: 'timeline', label: 'Timeline', icon: 'timeline' },
   { id: 'experience', label: 'Experience', icon: 'briefcase', mobile: true },
   { id: 'projects', label: 'Projects', icon: 'cube', mobile: true },
@@ -25,27 +36,33 @@ const nav: { id: string; label: string; icon: IconName; mobile?: boolean }[] = [
   { id: 'contact', label: 'Contact', icon: 'radio', mobile: true },
 ];
 
-// Everything the ⌘K search can jump to. `terms` is extra text that matches but isn't shown.
+// Everything the ⌘K search can jump to: one row per object, under the group it lists in. `alias` is
+// the short name the map shows, matched like the title; `terms` is extra text that matches but isn't
+// shown. An org with a role or a degree is an Experience row; it and every other org and capability
+// open on the homepage console with that object selected.
 const projects = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code));
+const org = (id: string) => orgs.find((o) => o.id === id)!;
+const onConsole = (id: string) => ({ sel: id, href: `/?sel=${encodeURIComponent(id)}#overview` });
+const withRecord = new Set([...experience.map((e) => `org:${e.org}`), `org:${education.org}`]);
 const search = [
-  ...projects.map((p) => ({ kind: 'Project', code: p.data.code, label: p.data.title, sub: p.data.tags.join(' · '), terms: `${p.data.summary} ${p.data.context ?? ''}`, href: `/projects/${p.id}/` })),
+  ...nav.map((n) => ({ group: 'Sections', code: 'NAV', label: n.label, sub: '', href: `/#${n.id}` })),
+  ...projects.map((p) => ({ group: 'Projects', code: p.data.code, label: p.data.title, sub: p.data.tags.join(' · '), terms: `${p.data.summary} ${p.data.context ?? ''}`, href: `/projects/${p.id}/` })),
   ...experience.map((e) => ({
-    kind: 'Experience',
+    group: 'Experience',
     code: e.id.toUpperCase().slice(0, 8),
-    label: orgs.find((o) => o.id === e.org)!.name,
+    label: org(e.org).name,
     sub: e.role,
+    alias: org(e.org).short,
     terms: `${e.unit ?? ''} ${e.tags.join(' ')}`,
-    href: `/#exp-${e.id}`,
+    ...onConsole(`org:${e.org}`),
   })),
-  { kind: 'Experience', code: 'EDU', label: 'Georgia Institute of Technology', sub: 'B.S. Computer Science', href: '/#exp-education' },
-  // Orgs and capabilities open on the homepage console with that object selected.
+  { group: 'Experience', code: 'EDU', label: education.school, sub: 'B.S. Computer Science', alias: org(education.org).short, ...onConsole(`org:${education.org}`) },
   ...(await getModel())
     .list()
-    .filter((e) => e.type === 'org' || e.type === 'skill')
-    .map((e) => ({ kind: 'Map', code: typeName[e.type].slice(0, 3).toUpperCase(), label: e.title, sub: e.kind, sel: e.id, href: `/?sel=${encodeURIComponent(e.id)}#overview` })),
-  ...nav.map((n) => ({ kind: 'Section', code: 'NAV', label: n.label, sub: '', href: `/#${n.id}` })),
-  { kind: 'File', code: 'PDF', label: 'Resume', sub: 'Download PDF', href: profile.resume },
-  ...socials.map((s) => ({ kind: 'Link', code: 'EXT', label: s.label, sub: s.handle, href: s.href })),
+    .filter((e) => e.type === 'skill' || (e.type === 'org' && !withRecord.has(e.id)))
+    .map((e) => ({ group: 'Map', code: typeName[e.type].slice(0, 3).toUpperCase(), label: e.title, sub: e.kind, alias: e.label, ...onConsole(e.id) })),
+  { group: 'Links', code: 'PDF', label: 'Resume', sub: 'Download PDF', href: profile.resume },
+  ...socials.map((s) => ({ group: 'Links', code: 'EXT', label: s.label, sub: s.handle, href: s.href })),
 ];
 ---
 
@@ -60,7 +77,16 @@ const search = [
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={profile.name} />
+    {canonical && <meta property="og:url" content={pageUrl} />}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${profile.name}: ${profile.headline}. A console-style card with an abstract systems map.`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {canonical && <link rel="canonical" href={pageUrl} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <script is:inline>
       // Before first paint: note that JS runs, and apply the saved Motion setting (off by default
       // for people who've asked their OS for reduced motion).
@@ -87,24 +113,23 @@ const search = [
     <!-- Top bar -->
     <header class="fixed inset-x-0 top-0 z-40 flex h-12 items-center border-b border-line bg-panel">
       <a href="/" class="grid h-full w-12 shrink-0 place-items-center border-r border-line md:w-14" aria-label="Home">
-        <svg viewBox="0 0 32 32" class="size-7" aria-hidden="true">
-          <rect x="1" y="1" width="30" height="30" rx="3" fill="#111418" stroke="#404854" />
-          <path d="M6 9v14M6 9h3a7 7 0 0 1 0 14H6" fill="none" stroke="#f6f7f9" stroke-width="2.2" stroke-linecap="square" />
-          <path d="M19.5 9v14M26 9v14M19.5 16H26" fill="none" stroke="#4c90f0" stroke-width="2.2" stroke-linecap="square" />
-        </svg>
+        <Mark class="size-7" />
       </a>
-      <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2 px-3 text-[13px]">
-        <a href="/" class="hidden py-1 font-semibold whitespace-nowrap sm:inline-block">{profile.name}</a>
+      <!-- Phones show only the current page, so its title has the room. Each page links back to its parent in its own header. -->
+      <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2 px-3 text-sm">
+        <a href="/" class="hidden py-1 font-semibold whitespace-nowrap sm:inline-block pointer-coarse:py-3">{profile.name}</a>
         {
           crumb.map((c, i) => (
             <>
               <span class="hidden text-dim sm:inline" aria-hidden="true">/</span>
               {c.href ? (
-                <a href={c.href} class="truncate text-muted hover:text-text">
+                <a href={c.href} class="truncate text-muted hover:text-text max-sm:hidden pointer-coarse:py-3">
                   {c.label}
                 </a>
               ) : (
-                <span class:list={['truncate', i === crumb.length - 1 ? 'text-text sm:text-muted' : 'text-muted']}>{c.label}</span>
+                <span class:list={['truncate', i === crumb.length - 1 ? 'text-text sm:text-muted' : 'text-muted']} data-crumb-current={home && i === crumb.length - 1 ? '' : undefined}>
+                  {c.label}
+                </span>
               )}
             </>
           ))
@@ -114,59 +139,89 @@ const search = [
       <button
         type="button"
         data-cmdk-open
-        class="mx-auto hidden h-8 w-full max-w-sm items-center gap-2 rounded-[3px] bg-bg px-2.5 text-left text-[13px] text-dim shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[inset_0_0_0_1px_var(--line-2)] md:flex"
+        class="mx-auto hidden h-(--h-md) w-full max-w-sm items-center gap-2 rounded-2 bg-bg px-2.5 text-left text-sm text-dim shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[inset_0_0_0_1px_var(--line-2)] md:flex pointer-coarse:h-11"
       >
         <Icon name="search" class="size-4" />
         <span>Search objects…</span>
-        <kbd class="ml-auto code-chip">⌘K</kbd>
+        <kbd class="ml-auto code-chip" data-kbd>⌘K</kbd>
       </button>
 
       <div class="ml-auto flex items-center gap-1.5 pr-2 md:ml-0 md:gap-3 md:pr-3">
-        <div class="hidden items-center gap-3 readout text-[11px] lg:flex">
-          <span class="flex items-center gap-2"><span class="live-dot"></span> ONLINE</span>
-          <span class="text-dim" aria-hidden="true">|</span>
-          <span>ATL <span data-clock>--:--:--</span></span>
-        </div>
+        <span class="hidden readout text-2xs lg:inline">ATL <span data-clock>--:--</span></span>
         <button type="button" data-cmdk-open class="btn btn-ghost btn-icon md:hidden" aria-label="Search">
           <Icon name="search" class="size-4" />
         </button>
-        <a href={profile.resume} class="btn btn-primary" target="_blank" rel="noopener">
+        <!-- Not primary: the identity strip below holds the page's one primary action. -->
+        <a href={profile.resume} class="topbar-resume btn" target="_blank" rel="noopener" aria-label="Resume (PDF, opens in new tab)">
           <Icon name="file" class="size-4" />
-          <span>Resume</span>
+          <span class="max-sm:hidden">Resume</span>
+          <NewTab class="size-3.5 shrink-0 max-sm:hidden" />
         </a>
       </div>
     </header>
 
     <!-- Left rail (desktop) -->
-    <nav aria-label="Sections" class="fixed top-12 bottom-0 left-0 z-30 hidden w-14 flex-col items-center gap-1 border-r border-line bg-panel py-2 md:flex">
+    <nav aria-label="Sections" class="fixed top-12 bottom-0 left-0 z-30 hidden w-14 flex-col items-center gap-1 border-r border-line bg-panel py-2 md:flex" data-rail>
       {
         nav.map((n) => (
-          <a href={`${base}#${n.id}`} data-spy={n.id} class="rail-btn group relative grid size-10 place-items-center rounded-[3px] text-dim hover:bg-panel-3 hover:text-text" aria-label={n.label}>
+          <a
+            href={`${base}#${n.id}`}
+            data-spy={n.id}
+            data-spy-label={n.label}
+            class="rail-btn relative grid size-10 place-items-center rounded-2 text-dim hover:bg-(--hover-bg) hover:text-text pointer-coarse:size-11"
+            aria-label={n.label}
+            aria-current={n.id === section ? 'true' : undefined}
+          >
             <Icon name={n.icon} class="size-[18px]" />
-            <span class="pointer-events-none absolute left-full ml-2 hidden rounded-[3px] bg-panel-3 px-2 py-1 text-xs whitespace-nowrap text-text shadow-lg group-hover:block group-focus-visible:block">
-              {n.label}
-            </span>
+            <span class="rail-tip" aria-hidden="true">{n.label}</span>
           </a>
         ))
       }
       <div class="mt-auto flex flex-col items-center gap-1">
+        <div class="mb-1 h-px w-6 bg-line" aria-hidden="true"></div>
         {
-          socials.map((s) => (
-            <a href={s.href} class="grid size-10 place-items-center rounded-[3px] text-dim hover:bg-panel-3 hover:text-text" aria-label={s.label} target={s.id === 'email' ? undefined : '_blank'} rel="noopener">
-              <Icon name={s.icon} class="size-4" />
-            </a>
-          ))
+          socials.map((s) => {
+            const newTab = s.id !== 'email';
+            return (
+              <a
+                href={s.href}
+                class="rail-btn relative grid size-10 place-items-center rounded-2 text-dim hover:bg-(--hover-bg) hover:text-text pointer-coarse:size-11"
+                aria-label={newTab ? `${s.label} (opens in new tab)` : s.label}
+                target={newTab ? '_blank' : undefined}
+                rel={newTab ? 'noopener' : undefined}
+              >
+                <Icon name={s.icon} class="size-[18px]" />
+                <span class="rail-tip" aria-hidden="true">{newTab ? `${s.label} ↗` : s.label}</span>
+              </a>
+            );
+          })
         }
       </div>
     </nav>
 
-    <!-- Bottom bar (mobile) -->
-    <nav aria-label="Sections" class="fixed inset-x-0 bottom-0 z-40 grid h-14 grid-cols-5 border-t border-line bg-panel pb-[env(safe-area-inset-bottom)] md:hidden">
+    <main id="main" class="pt-12 pb-20 md:pb-10 md:pl-14">
+      <slot />
+      <!-- Phones have no status bar, so its copyright line and Motion switch close the page. -->
+      <footer class="flex items-center justify-center gap-4 px-4 pb-2 readout text-2xs text-dim md:hidden">
+        <span>© {new Date().getFullYear()} {profile.name}</span>
+        <button type="button" role="switch" aria-checked="true" class="motion-switch pointer-coarse:min-h-11" data-motion-toggle title="Turn animation on or off">
+          Motion <span class="sw" aria-hidden="true"></span>
+        </button>
+      </footer>
+    </main>
+
+    <!-- Bottom bar (mobile). After main in the source, so it lands at the page end when it stops being fixed. -->
+    <nav aria-label="Sections" class="tabbar fixed inset-x-0 bottom-0 z-40 grid h-14 grid-cols-5 border-t border-line bg-panel pb-[env(safe-area-inset-bottom)] md:hidden">
       {
         nav
           .filter((n) => n.mobile)
           .map((n) => (
-            <a href={`${base}#${n.id}`} data-spy={n.id} class="rail-btn flex flex-col items-center justify-center gap-1 text-[10px] text-dim">
+            <a
+              href={`${base}#${n.id}`}
+              data-spy={n.id}
+              class="rail-btn flex flex-col items-center justify-center gap-1 text-2xs text-dim"
+              aria-current={n.id === section ? 'true' : undefined}
+            >
               <Icon name={n.icon} class="size-[18px]" />
               {n.label}
             </a>
@@ -174,40 +229,65 @@ const search = [
       }
     </nav>
 
-    <main id="main" class="pt-12 pb-20 md:pb-10 md:pl-14">
-      <slot />
-    </main>
-
     <!-- Status bar (desktop) -->
-    <footer class="fixed right-0 bottom-0 left-14 z-30 hidden h-7 items-center gap-4 border-t border-line bg-panel px-3 readout text-[10.5px] text-dim md:flex">
-      <span class="flex items-center gap-1.5 text-green-2"><span class="size-1.5 rounded-full bg-green"></span>All systems nominal</span>
-      <button type="button" class="motion-toggle flex h-full items-center gap-1.5 px-1 hover:text-text" data-motion-toggle aria-pressed="true" title="Turn animation on or off">
-        Motion <span class="text-text" data-motion-state>ON</span>
+    <footer class="fixed right-0 bottom-0 left-14 z-30 hidden h-8 items-center gap-4 border-t border-line bg-panel px-3 readout text-2xs text-dim md:flex">
+      {
+        home ? (
+          <span class="flex min-w-0 items-center gap-1.5">
+            SEL <span class="max-w-[32ch] truncate text-muted" data-status-sel>mission (illustrative)</span>
+          </span>
+        ) : (
+          status && <span class="text-muted">{status}</span>
+        )
+      }
+      <button type="button" role="switch" aria-checked="true" class="motion-switch h-full" data-motion-toggle title="Turn animation on or off">
+        Motion <span class="sw" aria-hidden="true"></span>
       </button>
-      <span>{projects.length} projects</span>
-      <span>{experience.length} roles</span>
-      <span class="ml-auto hidden lg:inline">{profile.coords}</span>
-      <span>© {new Date().getFullYear()} {profile.name}</span>
-      <a href="https://github.com/donaldheddesheimer/donaldheddesheimer.github.io" class="-my-1 inline-block py-1 hover:text-text" target="_blank" rel="noopener">Source</a>
+      <span class="hidden xl:inline">{projects.length} projects</span>
+      <span class="hidden xl:inline">{experience.length} roles</span>
+      <span class="ml-auto hidden xl:inline">{profile.coords}</span>
+      {
+        build && (
+          <span class="ml-auto xl:ml-0">
+            BUILD <span class="text-muted">{build.sha} {build.date}</span>
+          </span>
+        )
+      }
+      <span class="hidden lg:inline">© {new Date().getFullYear()} {profile.name}</span>
+      <a href="https://github.com/donaldheddesheimer/donaldheddesheimer.github.io" class="flex h-full items-center gap-1 hover:text-text" target="_blank" rel="noopener">Source<NewTab class="size-3 shrink-0" /></a>
     </footer>
 
     <!-- ⌘K search -->
-    <dialog id="cmdk" class="m-auto mt-[12vh] w-[min(640px,calc(100%-2rem))] rounded-[3px] border border-line-2 bg-panel p-0 text-text shadow-2xl backdrop:bg-black/60">
+    <dialog id="cmdk" class="m-auto mt-[12vh] w-[min(640px,calc(100%-2rem))] rounded-2 border border-line-2 bg-panel p-0 text-text shadow-elev-3 backdrop:bg-black/60" aria-label="Search">
       <div class="flex items-center gap-2 border-b border-line px-3">
         <Icon name="search" class="size-4 text-dim" />
-        <input id="cmdk-input" type="text" placeholder="Search projects, roles, sections…" autocomplete="off" spellcheck="false" class="h-12 flex-1 bg-transparent text-[15px] outline-none placeholder:text-dim" aria-controls="cmdk-list" aria-label="Search" />
+        <input
+          id="cmdk-input"
+          type="text"
+          role="combobox"
+          aria-expanded="true"
+          aria-controls="cmdk-list"
+          aria-autocomplete="list"
+          aria-label="Search"
+          placeholder="Search projects, roles, sections…"
+          autocomplete="off"
+          spellcheck="false"
+          class="h-12 flex-1 bg-transparent text-md outline-none placeholder:text-dim"
+        />
         <kbd class="code-chip">ESC</kbd>
       </div>
-      <ul id="cmdk-list" role="listbox" class="max-h-[55vh] overflow-y-auto py-1"></ul>
-      <div class="flex gap-4 border-t border-line px-3 py-2 readout text-[10.5px] text-dim">
-        <span>↑↓ navigate</span><span>↵ open</span><span class="ml-auto" id="cmdk-count"></span>
+      <div id="cmdk-list" role="listbox" aria-label="Search results" class="max-h-[55vh] overflow-y-auto pb-1"></div>
+      <p id="cmdk-empty" class="px-3 py-6 text-center text-dim" hidden>No objects match that query.</p>
+      <div class="flex gap-4 border-t border-line px-3 py-2 readout text-2xs text-dim">
+        <span class="pointer-coarse:hidden">↑↓ move · ↵ open · esc close · / also opens</span><span class="ml-auto" id="cmdk-count" role="status"></span>
       </div>
     </dialog>
     <script type="application/json" id="cmdk-data" set:html={JSON.stringify(search).replace(/</g, '\\u003c')} />
 
     <script>
-      // Scroll-spy for the rail and bottom bar.
+      // Scroll-spy for the rail and bottom bar; the breadcrumb names the current section too.
       const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-spy]')];
+      const crumbNow = document.querySelector('[data-crumb-current]');
       const sections = [...new Set(links.map((a) => a.dataset.spy!))]
         .map((id) => document.getElementById(id))
         .filter((el): el is HTMLElement => !!el);
@@ -218,6 +298,8 @@ const search = [
           const atBottom = innerHeight + scrollY >= document.documentElement.scrollHeight - 4;
           const id = atBottom ? sections[sections.length - 1].id : current;
           links.forEach((a) => a.toggleAttribute('aria-current', a.dataset.spy === id));
+          const label = links.find((a) => a.dataset.spy === id && a.dataset.spyLabel)?.dataset.spyLabel;
+          if (crumbNow && label && crumbNow.textContent !== label) crumbNow.textContent = label;
         };
         const spy = new IntersectionObserver(
           (entries) => {
@@ -230,44 +312,99 @@ const search = [
         addEventListener('scroll', mark, { passive: true });
       }
 
-      // Atlanta clock.
+      // Atlanta clock, to the minute ("20:24 EDT"), ticking as each minute turns.
       const clocks = document.querySelectorAll('[data-clock]');
-      const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZoneName: 'short' });
-      const tick = () => clocks.forEach((c) => (c.textContent = fmt.format(new Date())));
-      if (clocks.length) {
-        tick();
-        setInterval(tick, 1000);
-      }
+      const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZoneName: 'short' });
+      const tick = () => {
+        const text = fmt.format(new Date()).replace(',', '');
+        clocks.forEach((c) => (c.textContent = text));
+        setTimeout(tick, 60_000 - (Date.now() % 60_000));
+      };
+      if (clocks.length) tick();
+
+      // The search shortcut as this platform writes it.
+      if (!/Mac|iPhone|iPad|iPod/.test(navigator.platform)) document.querySelectorAll('[data-kbd]').forEach((k) => (k.textContent = 'Ctrl K'));
 
       // ⌘K search.
-      type Item = { kind: string; code: string; label: string; sub: string; terms?: string; href: string; sel?: string };
+      type Item = { group: string; code: string; label: string; alias?: string; sub: string; terms?: string; href: string; sel?: string };
       const dialog = document.getElementById('cmdk') as HTMLDialogElement;
       const input = document.getElementById('cmdk-input') as HTMLInputElement;
       const list = document.getElementById('cmdk-list')!;
+      const empty = document.getElementById('cmdk-empty')!;
       const count = document.getElementById('cmdk-count')!;
       const items: Item[] = JSON.parse(document.getElementById('cmdk-data')!.textContent!);
+      const CAP = 5; // rows per group
       let shown: Item[] = [];
       let active = 0;
       const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
+      // Rank: the title (or its alias) starts with the query, then a word in it does (camelCase humps
+      // count, so "nav" finds RoboNav), then the code matches, then any other text (tags, role, summary).
+      const atWord = (text: string, q: string) => {
+        const t = text.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+        for (let at = t.indexOf(q); at >= 0; at = t.indexOf(q, at + 1)) if (at === 0 || !/[a-z0-9]/.test(t[at - 1])) return true;
+        return false;
+      };
+      const rank = (i: Item, q: string) => {
+        const titles = [i.label, i.alias ?? ''];
+        return titles.some((t) => t.toLowerCase().startsWith(q)) ? 0
+          : titles.some((t) => atWord(t, q)) ? 1
+          : i.code.toLowerCase().includes(q) ? 2
+          : `${i.label} ${i.sub} ${i.group} ${i.terms ?? ''}`.toLowerCase().includes(q) ? 3
+          : -1;
+      };
+
+      function setActive(n: number) {
+        list.querySelector('[aria-selected="true"]')?.setAttribute('aria-selected', 'false');
+        active = n;
+        const option = document.getElementById(`cmdk-opt-${n}`);
+        option?.setAttribute('aria-selected', 'true');
+        if (option) input.setAttribute('aria-activedescendant', option.id);
+        else input.removeAttribute('aria-activedescendant');
+        return option;
+      }
+      // Keyboard moves keep the active row in view, with its group's header when it's the first row.
+      function reveal(option: HTMLElement | null) {
+        if (!option) return;
+        if (option.previousElementSibling?.getAttribute('role') === 'presentation') option.previousElementSibling.scrollIntoView({ block: 'nearest' });
+        option.scrollIntoView({ block: 'nearest' });
+      }
+
       function render() {
         const q = input.value.trim().toLowerCase();
-        shown = items.filter((i) => !q || `${i.label} ${i.sub} ${i.kind} ${i.code} ${i.terms ?? ''}`.toLowerCase().includes(q));
-        active = Math.min(active, Math.max(shown.length - 1, 0));
-        list.innerHTML = shown.length
-          ? shown
-              .map(
-                (i, n) => `<li role="option" aria-selected="${n === active}" data-n="${n}">
-                  <a href="${esc(i.href)}" class="flex items-center gap-3 px-3 py-2 ${n === active ? 'bg-blue-2/25' : ''}">
-                    <span class="code-chip w-20 justify-center">${esc(i.code)}</span>
-                    <span class="min-w-0 flex-1 truncate"><span class="text-text">${esc(i.label)}</span> <span class="text-dim">${esc(i.sub)}</span></span>
-                    <span class="kicker">${esc(i.kind)}</span>
-                  </a></li>`,
-              )
-              .join('')
-          : '<li class="px-3 py-6 text-center text-dim">No objects match that query.</li>';
-        count.textContent = `${shown.length} result${shown.length === 1 ? '' : 's'}`;
-        list.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
+        // Groups list in the order of their best match; with no query, in the data's order.
+        const groups = new Map<string, Item[]>();
+        items
+          .map((item, n) => ({ item, r: q ? rank(item, q) : 0, n }))
+          .filter((h) => h.r >= 0)
+          .sort((a, b) => a.r - b.r || a.n - b.n)
+          .forEach(({ item }) => groups.set(item.group, [...(groups.get(item.group) ?? []), item]));
+        shown = [];
+        // Each option is the activation target itself; group headers are presentational labels.
+        list.innerHTML = [...groups]
+          .map(
+            ([name, all], g) => `<ul role="group" aria-labelledby="cmdk-g-${g}">
+                <li role="presentation" id="cmdk-g-${g}" class="flex justify-between px-3 pt-2.5 pb-1 kicker">${esc(name)}${all.length > CAP ? `<span>${CAP} of ${all.length}</span>` : ''}</li>
+                ${all
+                  .slice(0, CAP)
+                  .map((i) => {
+                    const n = shown.push(i) - 1;
+                    return `<li role="option" id="cmdk-opt-${n}" aria-selected="false" data-n="${n}" class="cmdk-opt flex cursor-pointer items-center gap-3 px-3 py-2 pointer-coarse:min-h-11">
+                      <span class="code-chip w-20 justify-center max-sm:hidden">${esc(i.code)}</span>
+                      <span class="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2"><span class="text-text">${esc(i.label)}</span><span class="min-w-0 truncate text-dim">${esc(i.sub)}</span></span>
+                    </li>`;
+                  })
+                  .join('')}
+              </ul>`,
+          )
+          .join('');
+        list.hidden = !shown.length;
+        empty.hidden = !!shown.length;
+        input.setAttribute('aria-expanded', String(!!shown.length));
+        reveal(setActive(Math.min(active, Math.max(shown.length - 1, 0))));
+        // The count is a live region: only touch it when it changes, so arrowing through results stays quiet.
+        const total = `${shown.length} result${shown.length === 1 ? '' : 's'}`;
+        if (count.textContent !== total) count.textContent = total;
       }
       function open() {
         input.value = '';
@@ -289,25 +426,26 @@ const search = [
         render();
       });
       input.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && shown.length) {
           e.preventDefault();
-          active = (active + (e.key === 'ArrowDown' ? 1 : -1) + shown.length) % Math.max(shown.length, 1);
-          render();
+          reveal(setActive((active + (e.key === 'ArrowDown' ? 1 : -1) + shown.length) % shown.length));
         } else if (e.key === 'Enter' && shown[active]) {
           e.preventDefault();
           dialog.close();
           go(shown[active]);
         }
       });
+      // The pointer moves the active row too (without scrolling it), so hover and ↵ agree.
+      list.addEventListener('pointermove', (e) => {
+        const option = (e.target as HTMLElement).closest<HTMLElement>('[role="option"]');
+        if (option && Number(option.dataset.n) !== active) setActive(Number(option.dataset.n));
+      });
       list.addEventListener('click', (e) => {
-        const a = (e.target as HTMLElement).closest('a');
-        if (!a) return;
+        const option = (e.target as HTMLElement).closest<HTMLElement>('[role="option"]');
+        const item = option && shown[Number(option.dataset.n)];
+        if (!item) return;
         dialog.close();
-        const item = shown[Number(a.closest('li')?.dataset.n)];
-        if (item?.sel && onConsole()) {
-          e.preventDefault();
-          go(item);
-        }
+        go(item);
       });
       // On the homepage, map objects are selected in place instead of reloading the page.
       const onConsole = () => !!document.getElementById('entity-data');
@@ -316,32 +454,89 @@ const search = [
         else location.href = i.href;
       }
 
-      // Motion switch (status bar).
-      const motionBtn = document.querySelector<HTMLButtonElement>('[data-motion-toggle]');
-      const motionState = document.querySelector('[data-motion-state]');
+      // Motion switches (status bar, and the phone footer).
+      const motionBtns = document.querySelectorAll<HTMLButtonElement>('[data-motion-toggle]');
       const showMotion = () => {
         const on = document.documentElement.dataset.motion !== 'off';
-        motionBtn?.setAttribute('aria-pressed', String(on));
-        if (motionState) motionState.textContent = on ? 'ON' : 'OFF';
+        motionBtns.forEach((b) => b.setAttribute('aria-checked', String(on)));
       };
       showMotion();
-      motionBtn?.addEventListener('click', () => {
-        const next = document.documentElement.dataset.motion === 'off' ? 'on' : 'off';
-        document.documentElement.dataset.motion = next;
-        try {
-          localStorage.setItem('motion', next);
-        } catch {}
-        showMotion();
-      });
+      motionBtns.forEach((b) =>
+        b.addEventListener('click', () => {
+          const next = document.documentElement.dataset.motion === 'off' ? 'on' : 'off';
+          document.documentElement.dataset.motion = next;
+          try {
+            localStorage.setItem('motion', next);
+          } catch {}
+          showMotion();
+        }),
+      );
       dialog.addEventListener('click', (e) => {
         if (e.target === dialog) dialog.close();
       });
+
+      // Rail labels open 300ms after a mouse arrives (keyboard focus shows them at once, in CSS) and stay
+      // open while the pointer is on the button or its label. Escape closes them until the pointer
+      // leaves or focus moves to another button.
+      const rail = document.querySelector<HTMLElement>('[data-rail]');
+      if (rail) {
+        let timer = 0;
+        rail.querySelectorAll<HTMLElement>('.rail-btn').forEach((btn) => {
+          btn.addEventListener('pointerenter', (e) => {
+            if (e.pointerType === 'mouse') timer = window.setTimeout(() => btn.toggleAttribute('data-tip', true), 300);
+          });
+          btn.addEventListener('pointerleave', () => {
+            clearTimeout(timer);
+            btn.removeAttribute('data-tip');
+          });
+        });
+        addEventListener('keydown', (e) => {
+          if (e.key !== 'Escape' || dialog.open) return;
+          clearTimeout(timer);
+          rail.querySelector('[data-tip]')?.removeAttribute('data-tip');
+          if (rail.contains(document.activeElement)) rail.dataset.tips = 'off';
+        });
+        rail.addEventListener('focusin', () => delete rail.dataset.tips);
+      }
     </script>
 
     <style>
+      /* Rail labels: an edged tooltip, shown on keyboard focus or once the script marks a hovered
+         button (after a short delay), and hoverable and dismissable (WCAG 1.4.13). */
+      .rail-tip {
+        position: absolute;
+        left: 100%;
+        margin-left: 0.5rem;
+        display: none;
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--line-2);
+        border-radius: var(--radius-2);
+        background: var(--panel-3);
+        box-shadow: var(--shadow-elev-2);
+        color: var(--text);
+        font-size: var(--text-xs);
+        white-space: nowrap;
+      }
+      /* Bridges the gap to the button, so the pointer can cross onto the label without closing it. */
+      .rail-tip::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 100%;
+        bottom: 0;
+        width: 0.5rem;
+      }
+      .rail-btn[data-tip] .rail-tip,
+      .rail-btn:focus-visible .rail-tip {
+        display: block;
+      }
+      /* Escape hides the focused button's label; a fresh hover still opens one. */
+      [data-rail][data-tips='off'] .rail-btn:not([data-tip]) .rail-tip {
+        display: none;
+      }
       .rail-btn[aria-current] {
         color: var(--text);
-        background: color-mix(in srgb, var(--blue) 18%, transparent);
+        background: var(--sel-bg);
       }
       .rail-btn[aria-current]::before {
         content: '';
@@ -350,7 +545,7 @@ const search = [
         top: 8px;
         bottom: 8px;
         width: 2px;
-        background: var(--blue);
+        background: var(--sel-bar);
       }
       @media (max-width: 767px) {
         .rail-btn {
@@ -358,7 +553,7 @@ const search = [
         }
         .rail-btn[aria-current] {
           background: transparent;
-          color: var(--blue-3);
+          color: var(--text);
         }
         .rail-btn[aria-current]::before {
           left: 30%;
@@ -368,6 +563,60 @@ const search = [
           width: auto;
           height: 2px;
         }
+      }
+
+      /* Phones: the top-bar Resume is a 32px icon with a 44px hit area around it. */
+      @media (width < 40rem) {
+        .topbar-resume {
+          position: relative;
+          width: var(--h-md);
+          min-width: 0;
+          min-height: 0;
+          padding: 0;
+        }
+        .topbar-resume::after {
+          content: '';
+          position: absolute;
+          inset: -6px;
+        }
+      }
+
+      /* Motion: a switch, drawn in neutrals (green means active, and this is a preference). */
+      .motion-switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0 0.25rem;
+      }
+      .motion-switch:hover {
+        color: var(--text);
+      }
+      .sw {
+        position: relative;
+        width: 1.5rem;
+        height: 0.875rem;
+        border-radius: 999px;
+        box-shadow: inset 0 0 0 1px var(--line-2);
+        background: var(--bg);
+        transition: background-color var(--dur-1) var(--ease);
+      }
+      .sw::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 999px;
+        background: var(--dim);
+        transition: translate var(--dur-1) var(--ease);
+      }
+      [aria-checked='true'] > .sw {
+        background: var(--panel-3);
+      }
+      [aria-checked='true'] > .sw::after {
+        translate: 0.625rem 0;
+        background: var(--text);
       }
     </style>
   </body>

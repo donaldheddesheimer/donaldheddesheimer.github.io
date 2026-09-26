@@ -1,0 +1,19 @@
+---
+// One project stat, used inside a <dl>: the value in tabular mono numerals, then its label. A value
+// that isn't a figure ("none measurable") is set as text so it doesn't pose as a number. `inline`
+// puts the value and label on one row (the compact card header).
+import { isFigure } from '../lib/format';
+
+interface Props {
+  label: string;
+  value: string;
+  inline?: boolean;
+  class?: string;
+}
+const { label, value, inline = false, class: cls } = Astro.props;
+---
+
+<div class:list={['stat', inline && 'stat-inline', cls]}>
+  <dt class="stat-label">{label}</dt>
+  <dd class:list={['stat-value', !isFigure(value) && 'is-text']}>{value}</dd>
+</div>

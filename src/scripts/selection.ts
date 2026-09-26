@@ -16,8 +16,21 @@ export const isEntity = (id: string | null | undefined): id is string => !!id &&
 const fromUrl = new URLSearchParams(location.search).get('sel');
 let current = isEntity(fromUrl) ? fromUrl : DEFAULT_SEL;
 if (current) html.dataset.sel = current;
+// An old link to an object that no longer exists opens on the default, and drops its stale ?sel=.
+if (data && fromUrl && !isEntity(fromUrl)) {
+  const url = new URL(location.href);
+  url.searchParams.delete('sel');
+  history.replaceState(history.state, '', url);
+}
 
 export const getSel = () => current;
+
+// The status bar names the selection, kept current by the same code that keeps ?sel= current.
+const statusSel = document.querySelector('[data-status-sel]');
+const showSel = () => {
+  if (statusSel) statusSel.textContent = current === DEFAULT_SEL ? 'mission (illustrative)' : current;
+};
+showSel();
 
 export function select(id: string, source = 'api') {
   if (!isEntity(id)) return;
@@ -27,6 +40,7 @@ export function select(id: string, source = 'api') {
   if (id === DEFAULT_SEL) url.searchParams.delete('sel');
   else url.searchParams.set('sel', id);
   if (url.href !== location.href) history.replaceState(history.state, '', url);
+  showSel();
   document.dispatchEvent(new CustomEvent<SelDetail>('entity:select', { detail: { id, source } }));
 }
 

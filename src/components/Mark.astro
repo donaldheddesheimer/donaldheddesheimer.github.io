@@ -1,0 +1,15 @@
+---
+// The DH mark: the same drawing as public/favicon.svg (and public/apple-touch-icon.png, rendered
+// from it). The top-bar logo, and the identity plate when there is no photo.
+interface Props {
+  class?: string;
+}
+const { class: cls } = Astro.props;
+---
+
+<svg viewBox="0 0 32 32" class={cls} aria-hidden="true">
+  <rect width="32" height="32" rx="5" class="fill-panel" />
+  <rect x="0.5" y="0.5" width="31" height="31" rx="4.5" fill="none" class="stroke-faint" />
+  <path d="M4.5 7v18M4.5 7h2.5a9 9 0 0 1 0 18H4.5" fill="none" stroke-width="3.2" stroke-linecap="square" class="stroke-text" />
+  <path d="M20 7v18M27.5 7v18M20 16h7.5" fill="none" stroke-width="3.2" stroke-linecap="square" class="stroke-blue" />
+</svg>

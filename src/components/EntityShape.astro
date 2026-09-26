@@ -1,6 +1,6 @@
 ---
 // The small shape that stands for each entity type everywhere it appears, so type never depends on
-// color alone: person = filled circle, org = square, project = ring, capability = dot, outcome = diamond.
+// color alone: person = filled circle, org = square, project = ring, capability = dot.
 import type { EntityType } from '../lib/layout';
 
 interface Props {
@@ -15,5 +15,4 @@ const { type, class: cls = 'size-3' } = Astro.props;
   {type === 'org' && <rect x="1.75" y="1.75" width="8.5" height="8.5" rx="1.5" class="stroke" />}
   {type === 'project' && <circle cx="6" cy="6" r="4.25" class="stroke" />}
   {type === 'skill' && <circle cx="6" cy="6" r="2.6" class="fill" />}
-  {type === 'outcome' && <path d="M6 1.4 10.6 6 6 10.6 1.4 6z" class="fill" />}
 </svg>

@@ -7,8 +7,6 @@ start: '2025-03'
 tags: [Python, LLMs, Django, Web]
 repo: https://github.com/donaldheddesheimer/TravelMate
 demo: https://travelmate-jv1d.onrender.com/
-cover: /projects/travelmate.jpg
-coverAlt: TravelMate dashboard showing trips, weather, and the AI assistant
 ---
 
 ## Objective
