@@ -1,24 +1,25 @@
 ---
-// The systems map: every entity as a real <button> over an aria-hidden layer of typed edges. Node
-// positions are percentages, so the no-JS view is the build-time layout; with JS the layout reruns
-// for the panel's actual size. A list view gives the same objects without the graph. Capabilities
+// The systems map: every entity as a real <button> over an aria-hidden layer of typed edges. The ring
+// plan (each node's ring and angle) is worked out at build time and written onto the nodes; positions
+// are percentages, so the no-JS view is the plan fitted to a 1000x620 frame, and with JS it is refitted
+// to the panel's actual size. A list view gives the same objects without the graph. Capabilities
 // start hidden (except those related to the selection), so the docked map reads at a glance.
 import Icon from './Icon.astro';
 import EntityShape from './EntityShape.astro';
 import { getModel, MISSION, typeName, typeOrder, typePlural, type Entity } from '../lib/model';
-import { layout, type EntityType } from '../lib/layout';
+import { arrange, layout, type EntityType } from '../lib/layout';
 import { profile } from '../data/site';
 
 const model = await getModel();
 const entities = model.list();
 const W = 1000;
 const H = 620;
-const pos = layout(
-  entities.map((e) => ({ id: e.id, type: e.type, label: e.label })),
-  model.relations,
-  { width: W, height: H, pad: 34, labelScale: 1.1 },
-);
-const at = new Map(entities.map((e, i) => [e.id, { x: (pos[i].x / W) * 100, y: (pos[i].y / H) * 100 }]));
+const lnodes = entities.map((e) => ({ id: e.id, type: e.type, label: e.label }));
+const plan = arrange(lnodes, model.relations);
+const pos = layout(lnodes, plan, { width: W, height: H, pad: 34, labelScale: 1.1 });
+const at = new Map(entities.map((e, i) => [e.id, { x: (pos[i].x / W) * 100, y: (pos[i].y / H) * 100, ...plan[i] }]));
+// Nodes in reading order: by type, then clockwise from 12 o'clock.
+const ordered = [...entities].sort((a, b) => typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type) || at.get(a.id)!.a - at.get(b.id)!.a);
 const pct = (n: number) => `${n.toFixed(2)}%`;
 
 const nodeName = (e: Entity) => {
@@ -114,7 +115,7 @@ const legend = [
       <div class="edge-tags" aria-hidden="true" data-edge-tags></div>
       <div class="nodes" role="group" aria-label="Systems map. Arrow keys move between objects, Enter selects." data-map-nodes>
         {
-          entities.map((e) => {
+          ordered.map((e) => {
             const p = at.get(e.id)!;
             return (
               <button
@@ -123,6 +124,8 @@ const legend = [
                 data-id={e.id}
                 data-type={e.type}
                 data-label={e.label}
+                data-angle={p.a}
+                data-ring={p.r}
                 data-href={e.type === 'project' ? e.href : undefined}
                 tabindex={e.id === MISSION ? 0 : -1}
                 aria-label={nodeName(e)}
@@ -176,12 +179,13 @@ const legend = [
 </section>
 
 <script>
-  import { layout, type EntityType, type LNode, type LEdge } from '../lib/layout';
+  import { layout, type EntityType, type LNode, type Polar } from '../lib/layout';
   import { DEFAULT_SEL, getSel, onPreview, onSelect, preview, select } from '../scripts/selection';
 
   const pane = document.querySelector<HTMLElement>('[data-map]');
   if (pane) {
     const stage = pane.querySelector<HTMLElement>('[data-map-stage]')!;
+    const hint = stage.querySelector<HTMLElement>('.map-hint')!;
     const tags = stage.querySelector<HTMLElement>('[data-edge-tags]')!;
     const list = pane.querySelector<HTMLElement>('[data-map-list]')!;
     const nodes = [...pane.querySelectorAll<HTMLButtonElement>('.gn')];
@@ -196,7 +200,7 @@ const legend = [
       adj.get(t)!.add(s);
     }
     const lnodes: LNode[] = nodes.map((n) => ({ id: n.dataset.id!, type: n.dataset.type as EntityType, label: n.dataset.label! }));
-    const ledges: LEdge[] = lines.map((l) => ({ source: l.dataset.s!, target: l.dataset.t! }));
+    const plan: Polar[] = nodes.map((n) => ({ a: +n.dataset.angle!, r: +n.dataset.ring! }));
 
     // Boxes that must not overlap: node shapes and the labels already placed.
     type Box = { left: number; top: number; right: number; bottom: number };
@@ -207,6 +211,8 @@ const legend = [
     // A compact map has room for only some labels. The selection and the traced node always get
     // theirs; then the person, orgs and live projects, in that order, each only where it collides
     // with no node and no label already placed. Each label tries below, above, right, then left.
+    // A wide map shows every label (every): each one that collides below moves to the first clear
+    // side, or failing that the least crowded one.
     const RANK: Record<string, number> = { person: 2, org: 3, project: 4 };
     const rank = (n: HTMLElement) =>
       n.classList.contains('sel') ? 0 : n.classList.contains('traced') ? 1 : n.dataset.type === 'project' && !n.querySelector('.live') ? -1 : (RANK[n.dataset.type!] ?? -1);
@@ -218,8 +224,9 @@ const legend = [
       const top = side === 'b' ? s.bottom + 3 : side === 't' ? s.top - 3 - h : cy - h / 2;
       return { left, top, right: left + w, bottom: top + h };
     };
-    const placeLabels = (shown: HTMLElement[], taken: Box[]) => {
-      const want = shown.filter((n) => rank(n) >= 0).sort((a, b) => rank(a) - rank(b));
+    const placeLabels = (shown: HTMLElement[], taken: Box[], every: boolean) => {
+      const order = (n: HTMLElement) => (rank(n) < 0 ? 9 : rank(n));
+      const want = shown.filter((n) => every || rank(n) >= 0).sort((a, b) => order(a) - order(b));
       stage.classList.add('lbl-measure');
       const sizes = want.map((n) => n.querySelector('.lbl')!.getBoundingClientRect());
       stage.classList.remove('lbl-measure');
@@ -231,7 +238,7 @@ const legend = [
         const tries = SIDES.map((side) => ({ side, box: around(shape, sizes[i].width, sizes[i].height, side) }));
         let pick = tries.find((t) => !clash(t.box));
         // The selection and the traced node are always labelled, in the least crowded spot.
-        if (!pick && rank(n) <= 1) pick = tries.reduce((a, b) => (clash(b.box) < clash(a.box) ? b : a));
+        if (!pick && (every || rank(n) <= 1)) pick = tries.reduce((a, b) => (clash(b.box) < clash(a.box) ? b : a));
         if (!pick) return;
         if (pick.side !== 'b') n.dataset.lp = pick.side;
         n.classList.add('lbl-on');
@@ -272,13 +279,12 @@ const legend = [
       if (stage.hidden || !lastW) return;
       const shown = nodes.filter(visible);
       const taken: Box[] = shown.map((n) => n.querySelector('.shape')!.getBoundingClientRect());
-      // A wide map shows every label, so only the edge tags need placing around them.
-      if (lastW < 480) placeLabels(shown, taken);
-      else for (const n of shown) taken.push(n.querySelector('.lbl')!.getBoundingClientRect());
+      placeLabels(shown, taken, lastW >= 480);
       tagEdges(taken);
     };
 
-    // Re-run the layout for the panel's real size (compact panels reserve less room for labels).
+    // Refit the build-time plan to the panel's real size (compact panels reserve room for hit areas,
+    // not labels).
     let lastW = 0;
     let lastH = 0;
     const relayout = () => {
@@ -287,7 +293,8 @@ const legend = [
       lastW = width;
       lastH = height;
       const compact = width < 480;
-      const pos = layout(lnodes, ledges, { width, height, pad: compact ? 20 : 34, labels: !compact, labelScale: 1.1 });
+      const bottom = visible(hint) ? height - hint.offsetTop : 0;
+      const pos = layout(lnodes, plan, { width, height, pad: compact ? 20 : 34, labels: !compact, labelScale: 1.1, bottom });
       const pct = new Map(lnodes.map((n, i) => [n.id, [(pos[i].x / width) * 100, (pos[i].y / height) * 100]]));
       for (const n of nodes) {
         const [x, y] = pct.get(n.dataset.id!)!;
@@ -331,7 +338,9 @@ const legend = [
       relabel();
     };
 
-    // One tab stop for the whole graph; arrow keys move between visible nodes.
+    // One tab stop for the whole graph. The arrow keys step through the shown types in reading order
+    // (by type, then clockwise around each ring) and wrap, so every one of those nodes can be reached.
+    // A type that is switched off is skipped even where a trace reveals it; the inspector links to it.
     let rove = byId.get(getSel()) ?? nodes[0];
     const setRove = (n: HTMLButtonElement) => {
       if (n === rove) return;
@@ -340,32 +349,15 @@ const legend = [
       rove.tabIndex = 0;
     };
     nodes.forEach((n) => (n.tabIndex = n === rove ? 0 : -1));
-    const center = (n: HTMLElement) => {
-      const r = n.getBoundingClientRect();
-      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-    };
-    const DIRS: Record<string, [number, number]> = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] };
+    const STEP: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
 
     stage.addEventListener('keydown', (e) => {
       const n = (e.target as Element).closest<HTMLButtonElement>('.gn');
       if (!n) return;
       let next: HTMLButtonElement | undefined;
-      if (e.key in DIRS) {
-        const [dx, dy] = DIRS[e.key];
-        const a = center(n);
-        let best = Infinity;
-        for (const m of nodes) {
-          if (m === n || !visible(m)) continue;
-          const b = center(m);
-          const along = (b.x - a.x) * dx + (b.y - a.y) * dy;
-          if (along < 4) continue;
-          const across = Math.abs((b.x - a.x) * dy - (b.y - a.y) * dx);
-          const score = along + across * 2.2;
-          if (score < best) {
-            best = score;
-            next = m;
-          }
-        }
+      if (e.key in STEP) {
+        const order = nodes.filter((m) => m === n || (visible(m) && !stage.classList.contains(`hide-${m.dataset.type}`)));
+        next = order[(order.indexOf(n) + STEP[e.key] + order.length) % order.length];
       } else if (e.key === 'Home') next = byId.get('person:me');
       else if (e.key === 'End') next = byId.get(getSel());
       else return;
