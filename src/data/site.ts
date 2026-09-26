@@ -155,6 +155,16 @@ export const skills: { group: string; items: string[] }[] = [
   { group: 'Dev & infrastructure', items: ['CMake', 'GoogleTest', 'Git', 'GitHub Actions', 'Docker', 'Slurm'] },
 ];
 
+// Resume skills that name a capability on the systems map (a tag two or more projects or roles
+// share), by that capability's id. Only true matches: a chip listed here opens the evidence.
+export const skillAliases: Record<string, string> = {
+  'C++17/20': 'cpp',
+  'CUDA C++': 'cuda',
+  Python: 'python',
+  'Nsight Systems / Compute': 'nsight',
+  PyTorch: 'pytorch',
+};
+
 // Hobby photos go in public/images/. Leave `image` out for a text-only tile.
 export const offDuty: { id: string; name: string; note: string; image?: string; imageAlt?: string; primary?: boolean; link?: { label: string; href: string } }[] = [
   {

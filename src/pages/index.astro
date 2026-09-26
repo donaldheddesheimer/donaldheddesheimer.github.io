@@ -7,7 +7,7 @@ import NewTab from '../components/NewTab.astro';
 import Overview from '../components/Overview.astro';
 import Timeline from '../components/Timeline.astro';
 import Stat from '../components/Stat.astro';
-import { education, experience, offDuty, orgs, profile, skills, socials } from '../data/site';
+import { education, experience, offDuty, orgs, profile, skillAliases, skills, socials } from '../data/site';
 import { duration, fmtDot, fmtMonth, statusLabel } from '../lib/format';
 import { getModel } from '../lib/model';
 
@@ -31,6 +31,11 @@ const kindMeta: Record<string, { label: string; icon: IconName }> = {
   research: { label: 'Research', icon: 'flask' },
   team: { label: 'Team', icon: 'bot' },
   education: { label: 'Edu', icon: 'cap' },
+};
+// A resume skill the map has evidence for links to it, counting the projects and roles behind it.
+const capability = (item: string) => {
+  const id = skillAliases[item] && `skill:${skillAliases[item]}`;
+  return id && model.entities.has(id) ? { id, n: model.degree(id), summary: model.get(id).summary } : null;
 };
 const hobbyIcon: Record<string, IconName> = { volleyball: 'ball', robotics: 'bot', reading: 'book', hiking: 'mountain' };
 const [primaryHobby, ...otherHobbies] = offDuty;
@@ -146,8 +151,8 @@ const [primaryHobby, ...otherHobbies] = offDuty;
 
     <!-- PROJECTS -->
     <Panel id="projects" title="Projects" icon="cube">
-      <div slot="actions" class="flex items-center gap-2">
-        <div class="seg hidden sm:inline-flex" role="group" aria-label="Filter by status">
+      <div slot="actions" class="flex min-w-0 items-center gap-2">
+        <div class="seg max-w-full overflow-x-auto" role="group" aria-label="Filter by status">
           {
             (['all', 'active', 'shipped', 'archived'] as const).map((s) => (
               <button type="button" data-filter={s} aria-pressed={s === 'all' ? 'true' : 'false'}>
@@ -156,7 +161,7 @@ const [primaryHobby, ...otherHobbies] = offDuty;
             ))
           }
         </div>
-        <div class="seg" role="group" aria-label="View">
+        <div class="seg shrink-0" role="group" aria-label="View">
           <button type="button" data-view-btn="grid" aria-pressed="true" aria-label="Card view" title="Cards"><Icon name="grid" class="size-3.5" /></button>
           <button type="button" data-view-btn="table" aria-pressed="false" aria-label="Table view" title="Table"><Icon name="list" class="size-3.5" /></button>
         </div>
@@ -222,8 +227,8 @@ const [primaryHobby, ...otherHobbies] = offDuty;
       </div>
 
       <div data-view="table" hidden class="overflow-x-auto">
-        <table class="w-full min-w-[760px] text-left text-sm">
-          <thead class="border-b border-line bg-panel-2/50">
+        <table class="ptable w-full text-left text-sm sm:min-w-[760px]">
+          <thead class="border-b border-line bg-panel-2/50 max-sm:sr-only">
             <tr class="kicker">
               <th class="px-4 py-2 font-normal">ID</th>
               <th class="px-4 py-2 font-normal">Name</th>
@@ -237,8 +242,8 @@ const [primaryHobby, ...otherHobbies] = offDuty;
             {
               projects.map((p) => (
                 <tr data-status={p.data.status} data-entity={`project:${p.id}`} class="hover:bg-panel-2/60">
-                  <td class="px-4 py-2.5 readout text-dim">{p.data.code}</td>
-                  <td class="px-4 py-2.5">
+                  <td class="px-4 py-2.5 whitespace-nowrap readout text-dim">{p.data.code}</td>
+                  <td class="pt-name px-4 py-2.5">
                     <a href={`/projects/${p.id}/`} class="font-medium text-text underline-offset-3 hover:underline">
                       {p.data.title}
                     </a>
@@ -246,9 +251,9 @@ const [primaryHobby, ...otherHobbies] = offDuty;
                   <td class="px-4 py-2.5">
                     <span class={`pill pill-${p.data.status}`}>{statusLabel[p.data.status]}</span>
                   </td>
-                  <td class="px-4 py-2.5 readout">{fmtDot(p.data.start)}</td>
-                  <td class="px-4 py-2.5 text-muted">{p.data.context ?? 'Personal'}</td>
-                  <td class="px-4 py-2.5 text-muted">{p.data.tags.slice(0, 3).join(', ')}</td>
+                  <td class="pt-date px-4 py-2.5 whitespace-nowrap readout">{fmtDot(p.data.start)}</td>
+                  <td class="pt-ctx px-4 py-2.5 text-muted">{p.data.context ?? 'Personal'}</td>
+                  <td class="pt-stack px-4 py-2.5 text-muted">{p.data.tags.slice(0, 3).join(', ')}</td>
                 </tr>
               ))
             }
@@ -260,15 +265,28 @@ const [primaryHobby, ...otherHobbies] = offDuty;
 
     <!-- CAPABILITIES -->
     <Panel id="capabilities" title="Capabilities" icon="layers">
-      <div class="divide-y divide-line">
+      <p slot="actions" class="hidden items-center gap-2 text-xs text-dim md:flex">
+        <span class="tag tag-link pointer-events-none" aria-hidden="true">Skill<span class="tag-n">· n</span></span>On the map, with n projects and roles
+      </p>
+      <div class="grid xl:grid-cols-2">
         {
           skills.map((s) => (
-            <div class="grid gap-2 px-(--pad-panel) py-3 md:grid-cols-[13rem_1fr] md:gap-4">
+            <div class="grid gap-2 border-t border-line px-(--pad-panel) py-3 first:border-t-0 md:grid-cols-[13rem_1fr] md:gap-4 xl:grid-cols-[10rem_1fr] xl:nth-2:border-t-0 xl:odd:not-last:border-r">
               <div class="pt-0.5 kicker kicker--sentence">{s.group}</div>
-              <div class="flex flex-wrap gap-1.5">
-                {s.items.map((i) => (
-                  <span class="tag">{i}</span>
-                ))}
+              <div class="flex flex-wrap content-start items-center gap-1.5">
+                {s.items.map((i) => {
+                  const c = capability(i);
+                  return c ? (
+                    <button type="button" class="tag tag-link" data-entity={c.id} data-map-select={c.id} data-reveal title={`${c.summary} Show on the map.`}>
+                      {i}
+                      <span class="tag-n" aria-hidden="true">
+                        · {c.n}
+                      </span>
+                    </button>
+                  ) : (
+                    <span class="tag">{i}</span>
+                  );
+                })}
               </div>
             </div>
           ))
@@ -399,12 +417,16 @@ const [primaryHobby, ...otherHobbies] = offDuty;
       if (empty) empty.hidden = [...cards].some((c) => !c.hidden);
     }),
   );
-  viewBtns.forEach((b) =>
-    b.addEventListener('click', () => {
-      viewBtns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-      document.querySelectorAll<HTMLElement>('[data-view]').forEach((v) => (v.hidden = v.dataset.view !== b.dataset.viewBtn));
-    }),
-  );
+  // On a phone the filter row scrolls sideways. Chrome leaves a button that is more than 32px in
+  // view where it is on focus, so bring the whole of it in.
+  filterBtns.forEach((b) => b.addEventListener('focus', () => b.scrollIntoView({ block: 'nearest', inline: 'nearest' })));
+  const setView = (view: string) => {
+    viewBtns.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.viewBtn === view)));
+    document.querySelectorAll<HTMLElement>('#projects [data-view]').forEach((v) => (v.hidden = v.dataset.view !== view));
+  };
+  viewBtns.forEach((b) => b.addEventListener('click', () => setView(b.dataset.viewBtn!)));
+  // Phones open on the compact list (the table, restacked); the cards are one tap away.
+  if (matchMedia('(width < 40rem)').matches) setView('table');
 
   // Copy email.
   document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((b) =>

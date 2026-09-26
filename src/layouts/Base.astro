@@ -4,7 +4,7 @@ import { getCollection } from 'astro:content';
 import Icon, { type IconName } from '../components/Icon.astro';
 import NewTab from '../components/NewTab.astro';
 import Mark from '../components/Mark.astro';
-import { experience, orgs, profile, socials } from '../data/site';
+import { education, experience, orgs, profile, socials } from '../data/site';
 import { getModel, typeName } from '../lib/model';
 import { build } from '../lib/build';
 
@@ -36,27 +36,33 @@ const nav: { id: string; label: string; icon: IconName; mobile?: boolean }[] = [
   { id: 'contact', label: 'Contact', icon: 'radio', mobile: true },
 ];
 
-// Everything the ⌘K search can jump to. `terms` is extra text that matches but isn't shown.
+// Everything the ⌘K search can jump to: one row per object, under the group it lists in. `alias` is
+// the short name the map shows, matched like the title; `terms` is extra text that matches but isn't
+// shown. An org with a role or a degree is an Experience row; it and every other org and capability
+// open on the homepage console with that object selected.
 const projects = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code));
+const org = (id: string) => orgs.find((o) => o.id === id)!;
+const onConsole = (id: string) => ({ sel: id, href: `/?sel=${encodeURIComponent(id)}#overview` });
+const withRecord = new Set([...experience.map((e) => `org:${e.org}`), `org:${education.org}`]);
 const search = [
-  ...projects.map((p) => ({ kind: 'Project', code: p.data.code, label: p.data.title, sub: p.data.tags.join(' · '), terms: `${p.data.summary} ${p.data.context ?? ''}`, href: `/projects/${p.id}/` })),
+  ...nav.map((n) => ({ group: 'Sections', code: 'NAV', label: n.label, sub: '', href: `/#${n.id}` })),
+  ...projects.map((p) => ({ group: 'Projects', code: p.data.code, label: p.data.title, sub: p.data.tags.join(' · '), terms: `${p.data.summary} ${p.data.context ?? ''}`, href: `/projects/${p.id}/` })),
   ...experience.map((e) => ({
-    kind: 'Experience',
+    group: 'Experience',
     code: e.id.toUpperCase().slice(0, 8),
-    label: orgs.find((o) => o.id === e.org)!.name,
+    label: org(e.org).name,
     sub: e.role,
+    alias: org(e.org).short,
     terms: `${e.unit ?? ''} ${e.tags.join(' ')}`,
-    href: `/#exp-${e.id}`,
+    ...onConsole(`org:${e.org}`),
   })),
-  { kind: 'Experience', code: 'EDU', label: 'Georgia Institute of Technology', sub: 'B.S. Computer Science', href: '/#exp-education' },
-  // Orgs and capabilities open on the homepage console with that object selected.
+  { group: 'Experience', code: 'EDU', label: education.school, sub: 'B.S. Computer Science', alias: org(education.org).short, ...onConsole(`org:${education.org}`) },
   ...(await getModel())
     .list()
-    .filter((e) => e.type === 'org' || e.type === 'skill')
-    .map((e) => ({ kind: 'Map', code: typeName[e.type].slice(0, 3).toUpperCase(), label: e.title, sub: e.kind, sel: e.id, href: `/?sel=${encodeURIComponent(e.id)}#overview` })),
-  ...nav.map((n) => ({ kind: 'Section', code: 'NAV', label: n.label, sub: '', href: `/#${n.id}` })),
-  { kind: 'File', code: 'PDF', label: 'Resume', sub: 'Download PDF', href: profile.resume },
-  ...socials.map((s) => ({ kind: 'Link', code: 'EXT', label: s.label, sub: s.handle, href: s.href })),
+    .filter((e) => e.type === 'skill' || (e.type === 'org' && !withRecord.has(e.id)))
+    .map((e) => ({ group: 'Map', code: typeName[e.type].slice(0, 3).toUpperCase(), label: e.title, sub: e.kind, alias: e.label, ...onConsole(e.id) })),
+  { group: 'Links', code: 'PDF', label: 'Resume', sub: 'Download PDF', href: profile.resume },
+  ...socials.map((s) => ({ group: 'Links', code: 'EXT', label: s.label, sub: s.handle, href: s.href })),
 ];
 ---
 
@@ -270,10 +276,10 @@ const search = [
         />
         <kbd class="code-chip">ESC</kbd>
       </div>
-      <ul id="cmdk-list" role="listbox" aria-label="Search results" class="max-h-[55vh] overflow-y-auto py-1"></ul>
+      <div id="cmdk-list" role="listbox" aria-label="Search results" class="max-h-[55vh] overflow-y-auto pb-1"></div>
       <p id="cmdk-empty" class="px-3 py-6 text-center text-dim" hidden>No objects match that query.</p>
       <div class="flex gap-4 border-t border-line px-3 py-2 readout text-2xs text-dim">
-        <span>↑↓ navigate</span><span>↵ open</span><span class="ml-auto" id="cmdk-count" role="status"></span>
+        <span class="pointer-coarse:hidden">↑↓ move · ↵ open · esc close · / also opens</span><span class="ml-auto" id="cmdk-count" role="status"></span>
       </div>
     </dialog>
     <script type="application/json" id="cmdk-data" set:html={JSON.stringify(search).replace(/</g, '\\u003c')} />
@@ -320,42 +326,85 @@ const search = [
       if (!/Mac|iPhone|iPad|iPod/.test(navigator.platform)) document.querySelectorAll('[data-kbd]').forEach((k) => (k.textContent = 'Ctrl K'));
 
       // ⌘K search.
-      type Item = { kind: string; code: string; label: string; sub: string; terms?: string; href: string; sel?: string };
+      type Item = { group: string; code: string; label: string; alias?: string; sub: string; terms?: string; href: string; sel?: string };
       const dialog = document.getElementById('cmdk') as HTMLDialogElement;
       const input = document.getElementById('cmdk-input') as HTMLInputElement;
       const list = document.getElementById('cmdk-list')!;
       const empty = document.getElementById('cmdk-empty')!;
       const count = document.getElementById('cmdk-count')!;
       const items: Item[] = JSON.parse(document.getElementById('cmdk-data')!.textContent!);
+      const CAP = 5; // rows per group
       let shown: Item[] = [];
       let active = 0;
       const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
+      // Rank: the title (or its alias) starts with the query, then a word in it does (camelCase humps
+      // count, so "nav" finds RoboNav), then the code matches, then any other text (tags, role, summary).
+      const atWord = (text: string, q: string) => {
+        const t = text.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+        for (let at = t.indexOf(q); at >= 0; at = t.indexOf(q, at + 1)) if (at === 0 || !/[a-z0-9]/.test(t[at - 1])) return true;
+        return false;
+      };
+      const rank = (i: Item, q: string) => {
+        const titles = [i.label, i.alias ?? ''];
+        return titles.some((t) => t.toLowerCase().startsWith(q)) ? 0
+          : titles.some((t) => atWord(t, q)) ? 1
+          : i.code.toLowerCase().includes(q) ? 2
+          : `${i.label} ${i.sub} ${i.group} ${i.terms ?? ''}`.toLowerCase().includes(q) ? 3
+          : -1;
+      };
+
+      function setActive(n: number) {
+        list.querySelector('[aria-selected="true"]')?.setAttribute('aria-selected', 'false');
+        active = n;
+        const option = document.getElementById(`cmdk-opt-${n}`);
+        option?.setAttribute('aria-selected', 'true');
+        if (option) input.setAttribute('aria-activedescendant', option.id);
+        else input.removeAttribute('aria-activedescendant');
+        return option;
+      }
+      // Keyboard moves keep the active row in view, with its group's header when it's the first row.
+      function reveal(option: HTMLElement | null) {
+        if (!option) return;
+        if (option.previousElementSibling?.getAttribute('role') === 'presentation') option.previousElementSibling.scrollIntoView({ block: 'nearest' });
+        option.scrollIntoView({ block: 'nearest' });
+      }
+
       function render() {
         const q = input.value.trim().toLowerCase();
-        shown = items.filter((i) => !q || `${i.label} ${i.sub} ${i.kind} ${i.code} ${i.terms ?? ''}`.toLowerCase().includes(q));
-        active = Math.min(active, Math.max(shown.length - 1, 0));
-        // Each option is the activation target itself; the highlighted row's secondary text is ink so
-        // it keeps 4.5:1 on the selection tint.
-        list.innerHTML = shown
-          .map((i, n) => {
-            const on = n === active;
-            return `<li role="option" id="cmdk-opt-${n}" aria-selected="${on}" data-n="${n}" class="flex cursor-pointer items-center gap-3 px-3 py-2 pointer-coarse:min-h-11 ${on ? 'bg-(--sel-bg)' : ''}">
-                  <span class="code-chip w-20 justify-center">${esc(i.code)}</span>
-                  <span class="min-w-0 flex-1 truncate"><span class="text-text">${esc(i.label)}</span> <span class="${on ? 'text-ink' : 'text-dim'}">${esc(i.sub)}</span></span>
-                  <span class="kicker ${on ? 'text-ink' : ''}">${esc(i.kind)}</span>
-                </li>`;
-          })
+        // Groups list in the order of their best match; with no query, in the data's order.
+        const groups = new Map<string, Item[]>();
+        items
+          .map((item, n) => ({ item, r: q ? rank(item, q) : 0, n }))
+          .filter((h) => h.r >= 0)
+          .sort((a, b) => a.r - b.r || a.n - b.n)
+          .forEach(({ item }) => groups.set(item.group, [...(groups.get(item.group) ?? []), item]));
+        shown = [];
+        // Each option is the activation target itself; group headers are presentational labels.
+        list.innerHTML = [...groups]
+          .map(
+            ([name, all], g) => `<ul role="group" aria-labelledby="cmdk-g-${g}">
+                <li role="presentation" id="cmdk-g-${g}" class="flex justify-between px-3 pt-2.5 pb-1 kicker">${esc(name)}${all.length > CAP ? `<span>${CAP} of ${all.length}</span>` : ''}</li>
+                ${all
+                  .slice(0, CAP)
+                  .map((i) => {
+                    const n = shown.push(i) - 1;
+                    return `<li role="option" id="cmdk-opt-${n}" aria-selected="false" data-n="${n}" class="cmdk-opt flex cursor-pointer items-center gap-3 px-3 py-2 pointer-coarse:min-h-11">
+                      <span class="code-chip w-20 justify-center max-sm:hidden">${esc(i.code)}</span>
+                      <span class="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2"><span class="text-text">${esc(i.label)}</span><span class="min-w-0 truncate text-dim">${esc(i.sub)}</span></span>
+                    </li>`;
+                  })
+                  .join('')}
+              </ul>`,
+          )
           .join('');
         list.hidden = !shown.length;
         empty.hidden = !!shown.length;
         input.setAttribute('aria-expanded', String(!!shown.length));
-        if (shown.length) input.setAttribute('aria-activedescendant', `cmdk-opt-${active}`);
-        else input.removeAttribute('aria-activedescendant');
+        reveal(setActive(Math.min(active, Math.max(shown.length - 1, 0))));
         // The count is a live region: only touch it when it changes, so arrowing through results stays quiet.
         const total = `${shown.length} result${shown.length === 1 ? '' : 's'}`;
         if (count.textContent !== total) count.textContent = total;
-        list.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
       }
       function open() {
         input.value = '';
@@ -377,15 +426,19 @@ const search = [
         render();
       });
       input.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && shown.length) {
           e.preventDefault();
-          active = (active + (e.key === 'ArrowDown' ? 1 : -1) + shown.length) % Math.max(shown.length, 1);
-          render();
+          reveal(setActive((active + (e.key === 'ArrowDown' ? 1 : -1) + shown.length) % shown.length));
         } else if (e.key === 'Enter' && shown[active]) {
           e.preventDefault();
           dialog.close();
           go(shown[active]);
         }
+      });
+      // The pointer moves the active row too (without scrolling it), so hover and ↵ agree.
+      list.addEventListener('pointermove', (e) => {
+        const option = (e.target as HTMLElement).closest<HTMLElement>('[role="option"]');
+        if (option && Number(option.dataset.n) !== active) setActive(Number(option.dataset.n));
       });
       list.addEventListener('click', (e) => {
         const option = (e.target as HTMLElement).closest<HTMLElement>('[role="option"]');

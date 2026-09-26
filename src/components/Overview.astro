@@ -1,6 +1,7 @@
 ---
 // The top of the homepage: who this is, then the console (systems map, mission / evidence stage,
-// inspector). Wide screens show all three panes; narrower ones get Mission / Map / Details tabs.
+// inspector). Wide screens show all three panes; from lg to xl the map and inspector share a column
+// under Map | Details tabs, and below lg all three are Mission / Map / Details tabs.
 import Icon from './Icon.astro';
 import NewTab from './NewTab.astro';
 import Mark from './Mark.astro';
@@ -80,17 +81,16 @@ const tabs = [
     </dl>
   </header>
 
-  <div class="ov-tabs" data-ov-tabs aria-label="Console panes">
-    {
-      tabs.map((t) => (
-        <button type="button" id={`tab-${t.id}`} data-tab-btn={t.id} aria-controls={t.pane}>
-          {t.label}
-        </button>
-      ))
-    }
-  </div>
-
   <div class="ov-console" data-console data-tab="mission" data-expanded="false">
+    <div class="ov-tabs" data-ov-tabs aria-label="Console panes">
+      {
+        tabs.map((t) => (
+          <button type="button" id={`tab-${t.id}`} data-tab-btn={t.id} aria-controls={t.pane}>
+            {t.label}
+          </button>
+        ))
+      }
+    </div>
     <SystemsMap />
     <Stage />
     <Inspector />
@@ -109,28 +109,25 @@ const tabs = [
   const con = document.querySelector<HTMLElement>('[data-console]');
   if (ov && con) {
     const narrow = matchMedia('(max-width: 1023.98px)');
-    const tablist = ov.querySelector<HTMLElement>('[data-ov-tabs]')!;
+    const mid = matchMedia('(min-width: 1024px) and (max-width: 1279.98px)');
+    const tablist = con.querySelector<HTMLElement>('[data-ov-tabs]')!;
     const tabBtns = [...tablist.querySelectorAll<HTMLButtonElement>('[data-tab-btn]')];
     const panes = [...con.querySelectorAll<HTMLElement>('[data-pane]')];
     const mapPane = con.querySelector<HTMLElement>('[data-map]')!;
     const expandBtn = con.querySelector<HTMLButtonElement>('[data-map-expand]')!;
 
-    // --- Tabs (below lg only) -----------------------------------------------------------------
-    const setTab = (name: string, focusTab = false) => {
-      con.dataset.tab = name;
-      tabBtns.forEach((b) => {
-        const on = b.dataset.tabBtn === name;
-        b.setAttribute('aria-selected', String(on));
-        if (narrow.matches) b.tabIndex = on ? 0 : -1;
-        if (on && focusTab) b.focus();
-      });
-    };
+    // --- Tabs (below xl, while the map is docked) ------------------------------------------------
+    // The tabs in play: all three below lg; Map and Details from lg to xl, where the stage always
+    // shows; none when every pane is on screen.
+    const live = () => (narrow.matches ? tabBtns : mid.matches && con.dataset.expanded !== 'true' ? tabBtns.slice(1) : []);
     const applyRoles = () => {
-      const on = narrow.matches;
-      if (on) tablist.setAttribute('role', 'tablist');
+      const btns = live();
+      // Beside the stage there is no Mission tab; the map stands in for it.
+      if (btns.length && !btns.some((b) => b.dataset.tabBtn === con.dataset.tab)) con.dataset.tab = btns[0].dataset.tabBtn;
+      if (btns.length) tablist.setAttribute('role', 'tablist');
       else tablist.removeAttribute('role');
       tabBtns.forEach((b) => {
-        if (on) {
+        if (btns.includes(b)) {
           b.setAttribute('role', 'tab');
           b.setAttribute('aria-selected', String(b.dataset.tabBtn === con.dataset.tab));
           b.tabIndex = b.dataset.tabBtn === con.dataset.tab ? 0 : -1;
@@ -142,25 +139,33 @@ const tabs = [
       });
       panes.forEach((p) => {
         p.dataset.label ??= p.getAttribute('aria-labelledby') ?? '';
-        if (on) {
+        const tab = btns.find((b) => b.dataset.tabBtn === p.dataset.pane);
+        if (tab) {
           p.setAttribute('role', 'tabpanel');
-          p.setAttribute('aria-labelledby', `tab-${p.dataset.pane}`);
+          p.setAttribute('aria-labelledby', tab.id);
         } else {
           p.removeAttribute('role');
           p.setAttribute('aria-labelledby', p.dataset.label);
         }
       });
     };
+    const setTab = (name: string, focusTab = false) => {
+      con.dataset.tab = name;
+      applyRoles();
+      if (focusTab) tabBtns.find((b) => b.dataset.tabBtn === name)?.focus();
+    };
     applyRoles();
     narrow.addEventListener('change', applyRoles);
+    mid.addEventListener('change', applyRoles);
     tabBtns.forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tabBtn!)));
     tablist.addEventListener('keydown', (e) => {
-      const i = tabBtns.indexOf(e.target as HTMLButtonElement);
-      if (i < 0 || !narrow.matches) return;
-      const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabBtns.length - 1 }[e.key];
+      const btns = live();
+      const i = btns.indexOf(e.target as HTMLButtonElement);
+      if (i < 0) return;
+      const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: btns.length - 1 }[e.key];
       if (next === undefined) return;
       e.preventDefault();
-      setTab(tabBtns[(next + tabBtns.length) % tabBtns.length].dataset.tabBtn!, true);
+      setTab(btns[(next + btns.length) % btns.length].dataset.tabBtn!, true);
     });
     document.addEventListener('click', (e) => {
       const b = (e.target as Element).closest<HTMLElement>('[data-goto-tab]');
@@ -180,6 +185,7 @@ const tabs = [
       expandBtn.setAttribute('aria-pressed', String(on));
       expandBtn.setAttribute('aria-label', on ? 'Collapse systems map' : 'Expand systems map');
       expandBtn.title = on ? 'Collapse map (Esc)' : 'Expand map';
+      applyRoles();
     };
     expandBtn.addEventListener('click', () => setExpanded(con.dataset.expanded !== 'true'));
     document.addEventListener('keydown', (e) => {
@@ -193,7 +199,7 @@ const tabs = [
     const reveal = (id: string) => {
       document.dispatchEvent(new CustomEvent('map:show-type', { detail: id.split(':')[0] }));
       select(id, 'reveal');
-      if (narrow.matches) setTab('map');
+      if (live().length) setTab('map');
       ov.scrollIntoView({ block: 'start' });
       requestAnimationFrame(() => mapPane.dispatchEvent(new CustomEvent('map:focus-node', { detail: id })));
     };

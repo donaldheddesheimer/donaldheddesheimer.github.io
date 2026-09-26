@@ -67,6 +67,8 @@ const org = orgs.find((o) => o.id === exp.org)!;
     const sub = stage.querySelector<HTMLElement>('[data-stage-sub]')!;
     const back = stage.querySelector<HTMLButtonElement>('[data-stage-back]')!;
     const missionRoot = missionView.querySelector<HTMLElement>('[data-mission-root]');
+    // The inspector trims to a properties sheet while the stage shows the object's evidence.
+    const inspector = document.querySelector<HTMLElement>('[data-pane="details"]');
 
     onSelect(({ id, source }) => {
       const isMission = id === DEFAULT_SEL;
@@ -78,6 +80,7 @@ const org = orgs.find((o) => o.id === exp.org)!;
       title.textContent = isMission ? 'Mission' : 'Evidence';
       document.dispatchEvent(new CustomEvent('stage:title', { detail: title.textContent }));
       sub.hidden = isMission;
+      if (inspector) inspector.dataset.mode = isMission ? 'mission' : 'evidence';
       if (isMission) {
         evidenceView.replaceChildren();
         return;
