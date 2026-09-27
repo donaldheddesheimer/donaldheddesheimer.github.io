@@ -1,0 +1,5 @@
+src @1024x768: frame 26,183,758,641, robots [[379,291,675,554],[675,163,1022,637],[866,302,1149,588]], % visible right of frame 0,76,56, url /systems/
+src @1280x800: frame 32,142,947,714, robots [[475,300,791,579],[791,161,1166,670],[992,310,1297,616]], % visible right of frame 0,58,94, url /systems/
+src @1440x900: frame 36,156,1066,800, robots [[535,333,890,648],[890,176,1312,750],[1116,342,1460,689]], % visible right of frame 0,58,94, url /systems/
+src @1920x1080: frame 48,139,1421,997, robots [[715,387,1145,774],[1145,202,1663,899],[1419,404,1839,824]], % visible right of frame 0,47,100, url /systems/
+labshot exit 0

@@ -1,0 +1,20 @@
+mobile 390: scrollWidth 390 ; still desk display none
+mobile 390: Enter the lab navigated to /systems/ ; lab dialog present: 0
+desktop-1440 reduced motion: {"drawn":false,"offer":true,"label":"Play the robot animation"}
+desktop-1440 reduced motion: Enter the lab navigated to /systems/ (no flight)
+mobile-390 reduced motion: {"drawn":false,"offer":true,"label":"Play the robot animation"}
+desktop-1024 no WebGL: {"failed":true,"still":"1","deskStill":"inline","toggleVisible":false}
+desktop-1440 no WebGL: {"failed":true,"still":"1","deskStill":"inline","toggleVisible":false}
+desktop-1440 no WebGL: Enter the lab navigated to /systems/
+mobile-390 no WebGL: {"failed":true,"still":"1","deskStill":"none","toggleVisible":false}
+desktop-1440 /projects/cucadence/ [200]: {"bg":"rgb(19, 18, 17)","color":"rgb(245, 242, 237)","font":"Inter","header":48,"h1":"Inter 600","sw":1440}
+desktop-1440 /does-not-exist/ [404]: {"bg":"rgb(19, 18, 17)","color":"rgb(245, 242, 237)","font":"Inter","header":48,"h1":"Inter 600","sw":1440}
+desktop-1440 /systems/?sel=project:cucadence [200]: {"bg":"rgb(19, 18, 17)","color":"rgb(245, 242, 237)","font":"Inter","header":48,"h1":"Inter 600","sw":1440}
+desktop-1440 / : {"bg":"rgb(19, 18, 17)","color":"rgb(245, 242, 237)","font":"Inter","header":56,"h1":"Inter 650","sw":1440}
+mobile-390 /projects/cucadence/ [200]: {"bg":"rgb(19, 18, 17)","color":"rgb(245, 242, 237)","font":"Inter","header":48,"h1":"Inter 600","sw":390}
+mobile-390 /does-not-exist/ [404]: {"bg":"rgb(19, 18, 17)","color":"rgb(245, 242, 237)","font":"Inter","header":48,"h1":"Inter 600","sw":390}
+mobile-390 /systems/?sel=project:cucadence [200]: {"bg":"rgb(19, 18, 17)","color":"rgb(245, 242, 237)","font":"Inter","header":48,"h1":"Inter 600","sw":390}
+mobile-390 / : {"bg":"rgb(19, 18, 17)","color":"rgb(245, 242, 237)","font":"Inter","header":56,"h1":"Inter 650","sw":390}
+ERROR page.waitForFunction: Timeout 5000ms exceeded.
+shots exit 1
+ALLDONE

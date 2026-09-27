@@ -1,0 +1,12 @@
+# Scratch repro (not committed): open the lab at 1440x900, resize the open lab to SMALL, leave it (HOW), resize back to 1440x900,
+# and count the points on a 24 px grid over the stage where hovering sets the monitor's pointer cursor. Installed Chrome, ANGLE on Metal.
+# Production build of 78fe42d (before the fix):
+{"how":"escape","small":"1280x960","labFullWhenSmall":true,"afterClose":{"path":"/","lab":null,"focus":"Enter the lab"},"monitorPickPoints":{"before":14,"afterAt1440":0},"errors":[]}
+# interact.cjs with the new check, same build: 27/28, the failure:
+FAIL …Escape leaves without the flight, and the opening's view is back (the monitor picks) — no monitor under the pointer
+# Production build with scene.home() (after the fix):
+{"how":"escape","small":"1280x960","labFullWhenSmall":true,"afterClose":{"path":"/","lab":null,"focus":"Enter the lab"},"monitorPickPoints":{"before":14,"afterAt1440":12},"errors":[]}
+{"how":"back","small":"1280x960","labFullWhenSmall":true,"afterClose":{"path":"/","lab":null,"focus":"Enter the lab"},"monitorPickPoints":{"before":14,"afterAt1440":12},"errors":[]}
+{"how":"escape","small":"900x700","labFullWhenSmall":true,"afterClose":{"path":"/","lab":null,"focus":"Enter the lab"},"monitorPickPoints":{"before":14,"afterAt1440":12},"errors":[]}
+{"how":"back","small":"1440x560","labFullWhenSmall":true,"afterClose":{"path":"/","lab":null,"focus":"Enter the lab"},"monitorPickPoints":{"before":14,"afterAt1440":12},"errors":[]}
+# 14 vs 12: the opening's camera drifts slowly by design (heroView), so the monitor's footprint moves between the two counts.

@@ -14,6 +14,8 @@ interface Props {
   crumb?: { label: string; href?: string }[];
   /** The homepage: its own header and footer in place of the top bar, rail, and status bar. */
   home?: boolean;
+  /** A page read like the homepage (a project case study): its header and footer, linking back to it. */
+  story?: boolean;
   /** The systems map console is on this page: the status bar reads out its selection. */
   console?: boolean;
   /** The rail / tab bar section this page belongs to, marked current (subpages). */
@@ -23,7 +25,9 @@ interface Props {
   /** False for a page with no address of its own (the 404), which gets no canonical link. */
   canonical?: boolean;
 }
-const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false, console = false, section, status, canonical = true } = Astro.props;
+const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false, story = false, console = false, section, status, canonical = true } = Astro.props;
+// The homepage's own chrome (header, footer, no rail or status bar), on it and on the pages read like it.
+const editorial = home || story;
 // Absolute URLs for link previews. public/og.png is rendered from the profile (see src/data/site.ts).
 const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL('/og.png', Astro.site).href;
@@ -131,16 +135,18 @@ const search = [
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 btn btn-primary">Skip to content</a>
 
     {
-      home ? (
-        <header class="home-bar" data-home-bar>
-          <a href="#top" class="home-mark" aria-label={`${profile.name}, back to top`}>
+      editorial ? (
+        <header class:list={['home-bar', story && 'home-bar-story']} data-home-bar>
+          <a href={home ? '#top' : '/'} class="home-mark" aria-label={home ? `${profile.name}, back to top` : `${profile.name}, home`}>
             <Mark class="size-7 shrink-0" />
             <span class="home-mark-name">{profile.name}</span>
           </a>
           <nav aria-label="Sections" class="home-nav">
-            <a href="#work">Work</a>
-            <a href="#experience">Experience</a>
-            <a href="#contact">Contact</a>
+            <a href={`${base}#work`} aria-current={section === 'work' ? 'true' : undefined}>
+              Work
+            </a>
+            <a href={`${base}#experience`}>Experience</a>
+            <a href={`${base}#contact`}>Contact</a>
             <a href="/systems/">Systems map</a>
           </nav>
           <div class="home-bar-end">
@@ -247,10 +253,10 @@ const search = [
     }
 
     <!-- Elsewhere, phones have no status bar, so its copyright line and Motion switch close the page. -->
-    <main id="main" class:list={home ? 'home-main' : 'pt-12 pb-20 md:pb-10 md:pl-14'}>
+    <main id="main" class:list={home ? 'home-main' : story ? 'home-main story-main' : 'pt-12 pb-20 md:pb-10 md:pl-14'}>
       <slot />
       {
-        home ? (
+        editorial ? (
           <footer class="home-foot readout">
             <span>© {new Date().getFullYear()} {profile.name}</span>
             <a href="/systems/">Systems map</a>
@@ -301,7 +307,7 @@ const search = [
     </nav>
 
     {
-      !home && (
+      !editorial && (
         <footer class="fixed right-0 bottom-0 left-14 z-30 hidden h-8 items-center gap-4 border-t border-line bg-panel px-3 readout text-2xs text-dim md:flex">
           {console ? (
             <span class="flex min-w-0 items-center gap-1.5">
@@ -689,7 +695,8 @@ const search = [
         opacity: 0;
         transition: opacity var(--dur-2) var(--ease);
       }
-      .home-bar[data-scrolled] .home-mark-name {
+      .home-bar[data-scrolled] .home-mark-name,
+      .home-bar-story .home-mark-name {
         opacity: 1;
       }
       .home-nav {
@@ -709,6 +716,9 @@ const search = [
       .home-nav a:hover {
         color: var(--text);
         background: var(--hover-bg);
+      }
+      .home-nav a[aria-current] {
+        color: var(--text);
       }
       .home-bar-end {
         display: flex;
@@ -759,6 +769,11 @@ const search = [
         .home-main {
           padding-bottom: 0;
         }
+      }
+      /* A case study starts under the bar; its own header sets the space above its title. */
+      .story-main {
+        position: relative;
+        padding-top: 3.5rem;
       }
       .home-foot {
         display: flex;

@@ -1,0 +1,12 @@
+360x640: tabbar top 584; copy 56,590; stage 590,798; caption 590,643 below fold; enter 590,634 below fold; toggle 590,634 below fold; actions 410,506; social 522,566
+375x667: tabbar top 611; copy 56,567; stage 567,775; caption 567,602 clear; enter 567,611 clear; toggle 567,611 clear; actions 387,483; social 499,543
+360x740: tabbar top 684; copy 56,590; stage 590,798; caption 621,674 clear; enter 630,674 clear; toggle 630,674 clear; actions 410,506; social 522,566
+375x812: tabbar top 756; copy 56,567; stage 567,775; caption 711,746 clear; enter 702,746 clear; toggle 702,746 clear; actions 387,483; social 499,543
+390x844: tabbar top 788; copy 56,570; stage 570,788; caption 743,778 clear; enter 734,778 clear; toggle 734,778 clear; actions 390,486; social 502,546
+393x852: tabbar top 796; copy 56,571; stage 571,796; caption 751,786 clear; enter 742,786 clear; toggle 742,786 clear; actions 391,487; social 503,547
+412x915: tabbar top 859; copy 56,576; stage 576,859; caption 814,849 clear; enter 805,849 clear; toggle 805,849 clear; actions 396,492; social 508,552
+414x736: tabbar top 680; copy 56,576; stage 576,784; caption 635,670 clear; enter 626,670 clear; toggle 626,670 clear; actions 396,492; social 508,552
+430x932: tabbar top 876; copy 56,581; stage 581,876; caption 831,866 clear; enter 822,866 clear; toggle 822,866 clear; actions 401,497; social 513,557
+700x900: tabbar top 844; copy 56,560; stage 560,844; caption 814,834 clear; enter 790,834 clear; toggle 790,834 clear; actions 424,468; social 484,528
+768x1024: tabbar top 1024; copy 56,575; stage 575,959; caption 925,945 clear; enter 905,949 clear; toggle 905,949 clear; actions 439,483; social 499,543
+exit 0

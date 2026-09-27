@@ -1,0 +1,29 @@
+360x640: picture 564–772, caption 777–832, enter 782–826, toggle 782–826, tab bar top 584; row under the picture; first view: row bottom -248 px above the bar
+  scroll 0..1280: 66 control positions between the bars, 0 not hittable
+  pause/play taps: playing → paused → playing ok
+  Enter the lab tap → /systems/ ok; errors none
+390x844: picture 570–778, caption 782–837, enter 788–832, toggle 788–832, tab bar top 788; row under the picture; first view: row bottom -49 px above the bar
+  scroll 0..1688: 92 control positions between the bars, 0 not hittable
+  pause/play taps: playing → paused → playing ok
+  Enter the lab tap → /systems/ ok; errors none
+375x667: picture 567–775, caption 779–834, enter 785–829, toggle 785–829, tab bar top 611; row under the picture; first view: row bottom -223 px above the bar
+  scroll 0..1334: 68 control positions between the bars, 0 not hittable
+  pause/play taps: playing → paused → playing ok
+  Enter the lab tap → /systems/ ok; errors none
+412x915: picture 576–784, caption 788–843, enter 794–838, toggle 794–838, tab bar top 859; row under the picture; first view: row bottom 16 px above the bar
+  scroll 0..1830: 96 control positions between the bars, 0 not hittable
+  pause/play taps: playing → paused → playing ok
+  Enter the lab tap → /systems/ ok; errors none
+430x932: picture 581–800, caption 805–859, enter 810–854, toggle 810–854, tab bar top 876; row under the picture; first view: row bottom 17 px above the bar
+  scroll 0..1864: 98 control positions between the bars, 0 not hittable
+  pause/play taps: playing → paused → playing ok
+  Enter the lab tap → /systems/ ok; errors none
+768x1024: picture 575–959, caption 971–1011, enter 969–1013, toggle 969–1013, tab bar top 1024; row under the picture; first view: row bottom 11 px above the bar
+  scroll 0..2048: 118 control positions between the bars, 0 not hittable
+  pause/play taps: playing → paused → playing ok
+  Enter the lab tap → /systems/ ok; errors none
+844x390: picture 590–846, caption 858–897, enter 856–900, toggle 856–900, tab bar top 390; row under the picture; first view: row bottom -509 px above the bar
+  scroll 0..780: 36 control positions between the bars, 0 not hittable
+  pause/play taps: playing → paused → playing ok
+  Enter the lab tap → /systems/ ok; errors none
+FAILS 0

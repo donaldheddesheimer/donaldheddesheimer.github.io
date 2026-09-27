@@ -1,0 +1,9 @@
+# One-off measurement (a scratch Playwright script, not kept in the harness): this pass's production build at
+# 360x640, 2x, touch; the page scrolled to each offset, then the caption row measured against the tab bar.
+scrollY 0: tabbar top 584; stage 590,798; copy ends 590; caption 590,643 below fold; enter 590,634 below fold; toggle 590,634 below fold
+scrollY 40: tabbar top 584; stage 550,758; copy ends 550; caption 550,603 COVERED 19px; enter 550,594 COVERED 10px; toggle 550,594 COVERED 10px
+scrollY 80: tabbar top 584; stage 510,718; copy ends 510; caption 521,574 clear; enter 530,574 clear; toggle 530,574 clear
+scrollY 120: tabbar top 584; stage 470,678; copy ends 470; caption 521,574 clear; enter 530,574 clear; toggle 530,574 clear
+scrollY 160: tabbar top 584; stage 430,638; copy ends 430; caption 521,574 clear; enter 530,574 clear; toggle 530,574 clear
+scrollY 200: tabbar top 584; stage 390,598; copy ends 390; caption 521,574 clear; enter 530,574 clear; toggle 530,574 clear
+scrollY 240: tabbar top 584; stage 350,558; copy ends 350; caption 495,548 clear; enter 504,548 clear; toggle 504,548 clear

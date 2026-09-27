@@ -1,0 +1,40 @@
+{
+ "hero": {
+  "canvas": {
+   "w": 1382,
+   "h": 1267,
+   "css": [
+    864,
+    792
+   ]
+  },
+  "gpuMB": 251,
+  "rafHz": 60
+ },
+ "lab": {
+  "canvas": {
+   "w": 1800,
+   "h": 1125,
+   "css": [
+    1440,
+    900
+   ]
+  },
+  "gpuMB": 321.7,
+  "rafHz": 60
+ },
+ "inFrame": {
+  "lang": "en",
+  "h1": [
+   "H1:Systems map",
+   "H2:Systems map",
+   "H2:Mission"
+  ],
+  "fs": "14px",
+  "w": 1030,
+  "h": 644
+ },
+ "axeDialog": [],
+ "axeFrame": [],
+ "errs": []
+}

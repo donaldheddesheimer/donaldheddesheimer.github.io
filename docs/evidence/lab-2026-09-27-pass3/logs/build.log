@@ -1,0 +1,44 @@
+
+> donaldheddesheimer.github.io@0.1.0 build
+> astro build
+
+17:52:53 [vite] Re-optimizing dependencies because vite config has changed
+17:52:54 [content] Syncing content
+17:52:54 [content] Synced content
+17:52:54 [types] Generated 644ms
+17:52:54 [build] output: "static"
+17:52:54 [build] mode: "static"
+17:52:54 [build] directory: <repo>/dist/
+17:52:54 [build] Collecting build info...
+17:52:54 [build] ✓ Completed in 659ms.
+17:52:54 [build] Building static entrypoints...
+17:52:54 [vite] ✓ built in 284ms
+17:52:54 [WARN] [vite] [plugin builtin:vite-reporter]
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+17:52:54 [vite] ✓ built in 203ms
+17:52:54 [build] Rearranging server assets...
+
+ generating static routes
+17:52:54   ├─ /404.html (+11ms)
+17:52:54   ├─ /projects/useless-machine/index.html (+2ms)
+17:52:54   ├─ /projects/swerve-drive/index.html (+1ms)
+17:52:54   ├─ /projects/smart-bin/index.html (+1ms)
+17:52:54   ├─ /projects/travelmate/index.html (+1ms)
+17:52:54   ├─ /projects/bytefight/index.html (+1ms)
+17:52:54   ├─ /projects/skyblock-bazaar/index.html (+1ms)
+17:52:54   ├─ /projects/nn-mnist/index.html (+1ms)
+17:52:54   ├─ /projects/claude-status/index.html (+1ms)
+17:52:54   ├─ /projects/cucadence/index.html (+2ms)
+17:52:54   ├─ /projects/fluxion/index.html (+2ms)
+17:52:54   ├─ /projects/traffic-ops-center/index.html (+4ms)
+17:52:54   ├─ /systems/screen/index.html (+205ms)
+17:52:54   ├─ /systems/index.html (+152ms)
+17:52:55   ├─ /index.html (+20ms)
+17:52:55 ✓ Completed in 518ms.
+
+17:52:55 [build] ✓ Completed in 1.02s.
+17:52:55 [build] 15 page(s) built in 1.70s
+17:52:55 [build] Complete!

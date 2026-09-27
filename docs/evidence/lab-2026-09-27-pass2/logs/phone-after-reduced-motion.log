@@ -1,0 +1,5 @@
+360x640: tabbar top 584; copy 56,590; stage 590,798; caption 590,643 below fold; enter 590,634 below fold; toggle 590,634 below fold; actions 410,506; social 522,566
+375x667: tabbar top 611; copy 56,567; stage 567,775; caption 567,602 clear; enter 567,611 clear; toggle 567,611 clear; actions 387,483; social 499,543
+390x844: tabbar top 788; copy 56,570; stage 570,788; caption 743,778 clear; enter 734,778 clear; toggle 734,778 clear; actions 390,486; social 502,546
+412x915: tabbar top 859; copy 56,576; stage 576,859; caption 814,849 clear; enter 805,849 clear; toggle 805,849 clear; actions 396,492; social 508,552
+exit 0

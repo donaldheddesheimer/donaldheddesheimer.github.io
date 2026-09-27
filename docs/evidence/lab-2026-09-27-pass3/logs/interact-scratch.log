@@ -1,0 +1,17 @@
+PASS enter opens lab at /systems/ — {"lab":"open","path":"/systems/","open":true,"frame":true,"title":"Systems map · Donald Heddesheimer","active":"DIALOG","sy":0}
+PASS Back to portfolio closes, restores / and title, focuses enter — {"lab":null,"path":"/","open":false,"frame":false,"title":"Donald Heddesheimer","active":"enter","sy":0}
+PASS browser Back closes lab — {"lab":null,"path":"/","open":false,"frame":false,"title":"Donald Heddesheimer","active":"enter","sy":0}
+PASS browser Forward reopens lab — {"lab":"open","path":"/systems/","open":true,"frame":true,"title":"Systems map · Donald Heddesheimer","active":"DIALOG","sy":0}
+PASS Escape inside the dashboard leaves the lab — {"lab":null,"path":"/","open":false,"frame":false,"title":"Donald Heddesheimer","active":"enter","sy":0}
+PASS Escape on the dialog leaves the lab — {"lab":null,"path":"/","open":false,"frame":false,"title":"Donald Heddesheimer","active":"enter","sy":0}
+PASS selection in the dashboard updates URL and Expand — node=project:skyblock-bazaar {"lab":"open","path":"/systems/?sel=project%3Askyblock-bazaar","open":true,"frame":true,"title":"Systems map · Donald Heddesheimer","active":"IFRAME","sy":0} expand=/systems/?sel=project%3Askyblock-bazaar
+PASS Pause toggles the scene (both toggles agree) — before=null|Pause,null|Pause after=null|Play,null|Play running=false
+PASS small window shows full-width map — {"full":true,"r":{"x":0,"y":56,"width":900,"height":644,"top":56,"right":900,"bottom":700,"left":0},"vw":900}
+PASS large window frames the map again — {"full":false,"r":{"x":36,"y":156,"width":1030,"height":644,"top":156,"right":1066,"bottom":800,"left":36}}
+PASS open record from the dashboard navigates the window — href=/projects/skyblock-bazaar/ at=/projects/skyblock-bazaar/
+PASS Back from the record returns to /systems/ (plain page, lab entry reloads) — {"lab":null,"path":"/systems/?sel=project%3Askyblock-bazaar","open":false,"frame":false,"title":"Systems map · Donald Heddesheimer","active":"BODY","sy":0}
+PASS reload in the lab gives /systems/ page — {"lab":null,"path":"/systems/?sel=project%3Askyblock-bazaar","open":false,"frame":false,"title":"Systems map · Donald Heddesheimer","active":"BODY","sy":0}
+PASS no console errors (flow 1-8)
+PASS reduced motion: Enter navigates to /systems/ — {"lab":null,"path":"/systems/","open":false,"frame":false,"title":"Systems map · Donald Heddesheimer","active":"BODY","sy":0}
+PASS phone: Enter navigates to /systems/ — {"lab":null,"path":"/systems/","open":false,"frame":false,"title":"Systems map · Donald Heddesheimer","active":"BODY","sy":0}
+PASS page scroll held under the lab and after — y0=200 y1=200 y2=200

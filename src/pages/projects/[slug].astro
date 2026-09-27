@@ -2,7 +2,6 @@
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
-import Panel from '../../components/Panel.astro';
 import EntityShape from '../../components/EntityShape.astro';
 import NewTab from '../../components/NewTab.astro';
 import Stat from '../../components/Stat.astro';
@@ -30,7 +29,6 @@ const all = await getCollection('projects');
 const model = await getModel();
 // What this project connects to on the systems map; each opens there with it selected.
 const groups = model.links(`project:${project.id}`).filter((g) => g.items.every((l) => l.type !== 'person'));
-const linkCount = groups.reduce((n, g) => n + g.items.length, 0);
 const mapHref = (id: string) => `/systems/?sel=${encodeURIComponent(id)}#overview`;
 
 // Related projects: most shared tags.
@@ -45,107 +43,114 @@ const related = all
 const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
 ---
 
-<Base title={`${d.title} · ${d.code} · Donald Heddesheimer`} description={d.summary} crumb={[{ label: 'Projects', href: '/#projects' }, { label: d.title }]} section="projects">
-  <div class="mx-auto flex max-w-[1400px] flex-col gap-3 p-3 md:gap-4 md:p-4">
-    <!-- Header -->
-    <section class="panel overflow-hidden">
-      <div class="flex flex-wrap items-center gap-2 border-b border-line bg-panel-2/60 px-4 py-2">
-        <a href="/#projects" class="flex items-center gap-1.5 text-xs text-dim hover:text-text pointer-coarse:-my-3 pointer-coarse:min-h-11">
-          <Icon name="arrow-left" class="size-3.5" /> All projects
-        </a>
-        <span class="text-dim" aria-hidden="true">/</span>
-        <span class="code-chip">{d.code}</span>
-        <span class="kicker">Project object</span>
-      </div>
-      <div class="grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end md:p-6">
-        <div class="min-w-0">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
-            {d.context && <span class="readout text-xs">{d.context}</span>}
-            {d.featured && <span class="flex items-center gap-1 readout text-2xs text-ink"><Icon name="star" class="size-3.5" />FEATURED</span>}
-          </div>
-          <h1 class="mt-2.5 text-2xl leading-tight font-semibold tracking-tight md:text-3xl">{d.title}</h1>
-          <p class="mt-2 max-w-(--measure) text-md leading-relaxed text-muted">{d.summary}</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          {
-            d.demo && (
-              <a href={d.demo} class="btn btn-primary" target="_blank" rel="noopener">
-                <NewTab class="size-4" />
-                Live demo
-              </a>
-            )
-          }
-          {
-            d.repo ? (
-              <a href={d.repo} class:list={['btn', !d.demo && 'btn-primary']} target="_blank" rel="noopener">
-                <Icon name="github" class="size-4" />
-                Repository
-                <NewTab />
-              </a>
-            ) : (
-              <p class="inline-flex min-h-(--h-md) items-center gap-1.5 text-dim">
-                <Icon name="lock" class="size-4" />
-                {d.repoNote ?? 'Private repository'}
-              </p>
-            )
-          }
-        </div>
-      </div>
+<!-- A case study reads like the homepage it opens from: its header and footer, a title over a warm dark
+     band, the write-up, and a quiet column of details and connections. The console view of the same
+     project (its properties, links, and evidence) stays on the systems map, one link away. -->
+<Base title={`${d.title} · ${d.code} · Donald Heddesheimer`} description={d.summary} section="work" story>
+  <header class="cs-head">
+    <a href="/#projects" class="cs-back">
+      <Icon name="arrow-left" class="size-3.5" /> All projects
+    </a>
+    <p class="cs-meta">
+      <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
+      <span>{d.code}</span>
+      <span>
+        {fmtMonth(d.start)}
+        {d.context && ` · ${d.context}`}
+      </span>
       {
-        d.stats.length > 0 && (
-          <dl class="grid grid-cols-2 gap-px border-t border-line bg-line md:grid-cols-4">
-            {d.stats.map((s) => (
-              <Stat label={s.label} value={s.value} class="bg-panel px-5 py-3.5" />
-            ))}
-          </dl>
+        d.featured && (
+          <span class="flex items-center gap-1 text-ink">
+            <Icon name="star" class="size-3.5" />
+            Featured
+          </span>
         )
       }
-    </section>
+    </p>
+    <h1 class="cs-title">{d.title}</h1>
+    <p class="cs-summary">{d.summary}</p>
+    <div class="cs-actions">
+      {
+        d.demo && (
+          <a href={d.demo} class="btn btn-primary" target="_blank" rel="noopener">
+            <NewTab class="size-4" />
+            Live demo
+          </a>
+        )
+      }
+      {
+        d.repo ? (
+          <a href={d.repo} class:list={['btn', !d.demo && 'btn-primary']} target="_blank" rel="noopener">
+            <Icon name="github" class="size-4" />
+            Repository
+            <NewTab />
+          </a>
+        ) : (
+          <p class="inline-flex min-h-(--h-md) items-center gap-1.5 text-dim">
+            <Icon name="lock" class="size-4" />
+            {d.repoNote ?? 'Private repository'}
+          </p>
+        )
+      }
+      <a href={mapHref(`project:${project.id}`)} class="btn btn-ghost">
+        <Icon name="graph" class="size-4" />
+        Show on map
+      </a>
+    </div>
+    {
+      d.stats.length > 0 && (
+        <dl class="cs-stats">
+          {d.stats.map((s) => (
+            <Stat label={s.label} value={s.value} />
+          ))}
+        </dl>
+      )
+    }
+  </header>
 
-    <div class="grid grid-cols-[minmax(0,1fr)] gap-3 md:gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <!-- Body -->
-      <Panel title="Write-up" icon="file" as="section" class="lg:self-start" bodyClass="p-5 md:p-8">
-        {
-          d.cover && (
-            <figure class="mb-8">
-              <img src={d.cover} alt={d.coverAlt ?? ''} class="mx-auto max-h-[70vh] rounded-2 border border-line" />
-              <figcaption class="fig-cap">
-                <span class="kicker">Cover{coverKind && ` · ${mediaKindLabel[coverKind]}`}</span>
-                {d.coverAlt}
-              </figcaption>
-            </figure>
-          )
-        }
-        <article class="prose">
-          <Content />
-        </article>
-      </Panel>
+  <div class="cs-body">
+    <div class="min-w-0">
+      {
+        d.cover && (
+          <figure class="cs-cover">
+            <div class="cs-cover-well">
+              <img src={d.cover} alt={d.coverAlt ?? ''} />
+            </div>
+            <figcaption class="fig-cap">
+              <span class="kicker">Cover{coverKind && ` · ${mediaKindLabel[coverKind]}`}</span>
+              {d.coverAlt}
+            </figcaption>
+          </figure>
+        )
+      }
+      <article class="prose">
+        <Content />
+      </article>
+    </div>
 
-      <!-- Sidebar: sticky, and scrolls on its own when it is taller than the screen -->
-      <div class="flex flex-col gap-3 md:gap-4 lg:sticky lg:top-16 lg:max-h-[calc(100dvh-7rem)] lg:self-start lg:overflow-y-auto">
-        <Panel title="Properties" icon="list" as="aside">
-          <dl class="kv p-4">
-            <dt>ID</dt>
-            <dd class="font-mono text-xs">{d.code}</dd>
-            <dt>Type</dt>
-            <dd>Project</dd>
-            <dt>Status</dt>
-            <dd><span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span></dd>
+    <aside class="cs-aside" aria-label="About this project">
+      <section>
+        <h2 class="cs-aside-title">Details</h2>
+        <dl class="cs-facts">
+          <div>
             <dt>Started</dt>
             <dd>{fmtMonth(d.start)}</dd>
+          </div>
+          <div>
             <dt>Context</dt>
             <dd>{d.context ?? 'Personal project'}</dd>
-            {
-              d.team && (
-                <>
-                  <dt>Team</dt>
-                  <dd>{d.team}</dd>
-                </>
-              )
-            }
+          </div>
+          {
+            d.team && (
+              <div>
+                <dt>Team</dt>
+                <dd>{d.team}</dd>
+              </div>
+            )
+          }
+          <div>
             <dt>Source</dt>
-            <dd class="min-w-0 wrap-anywhere">
+            <dd class="wrap-anywhere">
               {
                 d.repo ? (
                   <a href={d.repo} class="inline-flex max-w-full items-center gap-1 text-blue-3 hover:underline pointer-coarse:-my-3 pointer-coarse:py-3" target="_blank" rel="noopener">
@@ -157,87 +162,274 @@ const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
                 )
               }
             </dd>
-          </dl>
-          <div class="flex flex-wrap gap-1.5 border-t border-line px-4 py-3">
-            {d.tags.map((t) => <span class="tag">{t}</span>)}
           </div>
-        </Panel>
+        </dl>
+        <div class="mt-4 flex flex-wrap gap-1.5">
+          {d.tags.map((t) => <span class="tag">{t}</span>)}
+        </div>
+      </section>
 
-        <Panel title="Linked objects" icon="graph" as="aside">
-          <a slot="actions" href={mapHref(`project:${project.id}`)} class="inline-flex items-center gap-1 text-xs text-blue-3 hover:underline pointer-coarse:-my-3 pointer-coarse:min-h-11">
-            Show on map <Icon name="arrow-right" class="size-3.5" />
-          </a>
-          <div class="divide-y divide-line">
-            {
-              groups.map((g) => (
-                <div>
-                  <p class="px-4 pt-2.5 text-xs text-dim">{g.label}</p>
-                  <ul class="pb-1">
-                    {g.items.map((l) => (
-                      <li>
-                        <a href={mapHref(l.id)} class="flex items-center gap-2.5 px-4 py-1.5 text-sm hover:bg-panel-2 pointer-coarse:min-h-11">
-                          <EntityShape type={l.type} class="size-2.5 shrink-0" />
-                          <span class="min-w-0 flex-1 truncate">{l.label}</span>
-                          <span class="kicker">{typeName[l.type]}</span>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))
-            }
-            {
-              groups.length === 0 && related.length === 0 && (
-                <p class="px-4 py-3 text-xs text-dim">No linked organizations, capabilities, or projects.</p>
-              )
-            }
-            {
-              related.length > 0 && (
-                <div>
-                  <p class="px-4 pt-2.5 text-xs text-dim">Shares the most tags with</p>
-                  <ul class="pb-1">
-                    {related.map(({ p }) => (
-                      <li>
-                        <a href={`/projects/${p.id}/`} class="flex items-center gap-2.5 px-4 py-1.5 text-sm hover:bg-panel-2 pointer-coarse:min-h-11">
-                          <EntityShape type="project" class="size-2.5 shrink-0" />
-                          <span class="min-w-0 flex-1 truncate">{p.data.title}</span>
-                          <span class="kicker">{p.data.code}</span>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )
-            }
-          </div>
-          {linkCount > 0 && <p class="sr-only">{linkCount} linked objects</p>}
-        </Panel>
-
-        <nav class="grid grid-cols-2 gap-3" aria-label="More projects">
-          {
-            prev ? (
-              <a href={`/projects/${prev.id}/`} class="panel group p-3 hover:border-line-2">
-                <span class="flex items-center gap-1 kicker group-hover:text-text">
-                  <Icon name="arrow-left" class="size-3" /> {prev.data.code}
-                </span>
-                <span class="mt-1 block truncate text-sm font-medium">{prev.data.title}</span>
-              </a>
-            ) : (
-              <span />
-            )
-          }
-          {
-            next && (
-              <a href={`/projects/${next.id}/`} class="panel group p-3 text-right hover:border-line-2">
-                <span class="flex items-center justify-end gap-1 kicker group-hover:text-text">
-                  {next.data.code} <Icon name="arrow-right" class="size-3" />
-                </span>
-                <span class="mt-1 block truncate text-sm font-medium">{next.data.title}</span>
-              </a>
-            )
-          }
-        </nav>
-      </div>
-    </div>
+      <section>
+        <h2 class="cs-aside-title">Connections</h2>
+        {
+          groups.map((g) => (
+            <div class="cs-group">
+              <p class="cs-group-label">{g.label}</p>
+              <ul>
+                {g.items.map((l) => (
+                  <li>
+                    <a href={mapHref(l.id)} class="cs-link">
+                      <EntityShape type={l.type} class="size-2.5 shrink-0" />
+                      <span class="min-w-0 flex-1 truncate">{l.label}</span>
+                      <span class="cs-link-note">{typeName[l.type]}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+        {
+          related.length > 0 && (
+            <div class="cs-group">
+              <p class="cs-group-label">Shares the most tags with</p>
+              <ul>
+                {related.map(({ p }) => (
+                  <li>
+                    <a href={`/projects/${p.id}/`} class="cs-link">
+                      <EntityShape type="project" class="size-2.5 shrink-0" />
+                      <span class="min-w-0 flex-1 truncate">{p.data.title}</span>
+                      <span class="cs-link-note">{p.data.code}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+        {groups.length === 0 && related.length === 0 && <p class="mt-2 text-sm text-dim">No linked organizations, capabilities, or projects.</p>}
+      </section>
+    </aside>
   </div>
+
+  <nav class="cs-pager" aria-label="More projects">
+    {
+      prev ? (
+        <a href={`/projects/${prev.id}/`} class="cs-pager-link">
+          <span class="cs-pager-dir">
+            <Icon name="arrow-left" class="size-3.5" /> Previous · {prev.data.code}
+          </span>
+          <span class="cs-pager-title">{prev.data.title}</span>
+        </a>
+      ) : (
+        <span />
+      )
+    }
+    {
+      next && (
+        <a href={`/projects/${next.id}/`} class="cs-pager-link is-next">
+          <span class="cs-pager-dir">
+            Next · {next.data.code} <Icon name="arrow-right" class="size-3.5" />
+          </span>
+          <span class="cs-pager-title">{next.data.title}</span>
+        </a>
+      )
+    }
+  </nav>
 </Base>
+
+<style>
+  /* The title band: the opening's warm dark, running up under the header bar and down into the page. */
+  .cs-head {
+    margin-top: -3.5rem;
+    padding: calc(3.5rem + clamp(1.25rem, 4vw, 3.5rem)) var(--home-edge) clamp(2rem, 4vw, 3rem);
+    background:
+      radial-gradient(55% 90% at 15% 0%, rgb(255 184 120 / 0.075), transparent 70%),
+      linear-gradient(#0a0908, #0a0908 55%, var(--bg));
+  }
+  .cs-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: var(--h-md);
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+  .cs-back:hover {
+    color: var(--text);
+  }
+  .cs-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem 0.75rem;
+    margin-top: 1.25rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    color: var(--dim);
+  }
+  .cs-title {
+    margin-top: 0.75rem;
+    max-width: 18ch;
+    font-size: clamp(2.25rem, 7vw, 4rem);
+    line-height: 1.02;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    text-wrap: balance;
+  }
+  .cs-summary {
+    margin-top: 1rem;
+    max-width: 58ch;
+    font-size: clamp(var(--text-md), 1.6vw, var(--text-lg));
+    line-height: 1.55;
+    color: var(--muted);
+  }
+  .cs-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+  /* The figures on one rule, as many as there are: no empty cells. */
+  .cs-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 1.25rem 2rem;
+    max-width: 52rem;
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .cs-body {
+    display: grid;
+    gap: 3rem;
+    padding: 1rem var(--home-edge) 0;
+  }
+  @media (width >= 64rem) {
+    .cs-body {
+      grid-template-columns: minmax(0, 1fr) 17.5rem;
+      gap: clamp(3rem, 5vw, 5rem);
+    }
+  }
+  .cs-cover {
+    margin-bottom: 2.5rem;
+  }
+  .cs-cover-well {
+    display: grid;
+    place-items: center;
+    padding: clamp(0.75rem, 3%, 1.5rem);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-2);
+    background: radial-gradient(70% 60% at 50% 100%, rgb(255 255 255 / 0.04), transparent 72%), var(--well);
+  }
+  .cs-cover-well img {
+    max-height: 70vh;
+    object-fit: contain;
+  }
+
+  /* Details and connections: text on the page, no panels. */
+  .cs-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--line);
+  }
+  @media (width >= 64rem) {
+    .cs-aside {
+      align-self: start;
+      padding-top: 0;
+      border-top: 0;
+    }
+  }
+  .cs-aside-title {
+    padding-bottom: 0.625rem;
+    border-bottom: 1px solid var(--line);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text);
+  }
+  .cs-facts {
+    display: grid;
+    gap: 0.625rem;
+    margin-top: 0.875rem;
+    font-size: var(--text-sm);
+  }
+  .cs-facts > div {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .cs-facts dt {
+    color: var(--dim);
+  }
+  .cs-group {
+    margin-top: 0.875rem;
+  }
+  .cs-group-label {
+    font-size: var(--text-xs);
+    color: var(--dim);
+  }
+  .cs-link {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2rem;
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+  .cs-link:hover {
+    color: var(--text);
+  }
+  .cs-link-note {
+    font-size: var(--text-2xs);
+    color: var(--dim);
+  }
+  @media (pointer: coarse) {
+    .cs-link {
+      min-height: var(--h-touch);
+    }
+  }
+
+  .cs-pager {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 4rem var(--home-edge) 0;
+    padding: 1.5rem 0 3rem;
+    border-top: 1px solid var(--line);
+  }
+  .cs-pager-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-width: 0;
+  }
+  .cs-pager-link.is-next {
+    align-items: flex-end;
+    text-align: right;
+  }
+  .cs-pager-dir {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    color: var(--dim);
+  }
+  .cs-pager-title {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: clamp(var(--text-md), 2vw, var(--text-xl));
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cs-pager-link:hover :is(.cs-pager-dir, .cs-pager-title) {
+    color: var(--text);
+  }
+</style>

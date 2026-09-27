@@ -781,7 +781,18 @@ html[data-motion='off'] *::after {
 /* The opening: name and links over a dark stage with three dancing robots (RobotStage.astro).
    Phones and tablets read the text, then a band of stage; from lg the stage fills the section and
    the robots stand right of the text (--scene-shift moves the camera's frame, --scene-usable is the
-   width left for them, and the canvas skips the --scene-crop share under the text). */
+   width left for them, and the canvas skips the --scene-crop share under the text). The first two
+   are registered so they compute to plain numbers (robot-scene.ts reads them) even as calc()s. */
+@property --scene-shift {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --scene-usable {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
 .hero {
   position: relative;
   isolation: isolate;
@@ -795,9 +806,10 @@ html[data-motion='off'] *::after {
   --scene-usable: 0.9;
   --still-bottom: 9%;
   --still-scale: 96%;
+  /* The picture's height on stacked layouts; the caption's row is under it (RobotStage.astro). */
+  --stage-h: clamp(13rem, 31svh, 18rem);
   position: relative;
   flex: none;
-  height: clamp(13rem, 31svh, 18rem);
   /* Warm haze behind the group so the dark silhouettes separate from the page. */
   background: radial-gradient(40% 46% at calc(50% + var(--scene-shift) * 100%) 62%, rgb(255 184 120 / 0.09), transparent 72%);
 }
@@ -880,7 +892,39 @@ html[data-motion='off'] *::after {
     padding-block: 2rem;
   }
   .hero .robots.hero-stage {
-    height: clamp(16rem, 38svh, 24rem);
+    --stage-h: clamp(16rem, 38svh, 24rem);
+  }
+}
+@media (width < 64rem) {
+  /* The scrim covers the picture, not the caption's row under it. */
+  .hero .hero-stage::after {
+    grid-area: stage;
+  }
+}
+/* Under md the tab bar covers the window's last 3.5rem (Base.astro). The opening fills the first view
+   above it: the picture takes what the text leaves, at least its minimum, so the caption's row ends
+   0.75rem above the bar. Where the text leaves less, the opening runs on below the fold and the row
+   scrolls into view like the rest of the page. */
+@media (width < 48rem) {
+  .hero {
+    --tabbar-clear: calc(3.5rem + env(safe-area-inset-bottom));
+    min-height: calc(100svh - var(--tabbar-clear) - 0.75rem);
+  }
+  .hero .robots.hero-stage {
+    --stage-h: 13rem;
+    flex: 1 0 0;
+  }
+}
+@media (40rem <= width < 48rem) {
+  .hero .robots.hero-stage {
+    --stage-h: 16rem;
+  }
+}
+/* Very short screens scroll the tab bar with the page (above). */
+@media (max-height: 30rem) and (width < 48rem) {
+  .hero {
+    --tabbar-clear: 0rem;
+    min-height: 0;
   }
 }
 @media (width >= 64rem) {
@@ -890,8 +934,14 @@ html[data-motion='off'] *::after {
     background: linear-gradient(#070605, #0a0908 80%, var(--bg));
   }
   .hero .robots.hero-stage {
-    --scene-shift: 0.3;
-    --scene-usable: 0.4;
+    /* Up to about 90rem the text column reaches the middle of the window, so the picture (desk and
+       robots) is framed smaller and a little further right at 64rem, keeping the desk clear of the lede
+       and the links, and eases with the window's width (--scene-ease, 0 at 1024px to 1 at 1440px) to
+       its full size, with no step. The full size leaves room for the terracotta robot's widest reach
+       (its arm at the window's right edge otherwise). */
+    --scene-ease: clamp(0, (tan(atan2(100vw, 1px)) - 1024) / 416, 1);
+    --scene-shift: calc(0.31 - 0.01 * var(--scene-ease));
+    --scene-usable: calc(0.35 + 0.03 * var(--scene-ease));
     --scene-crop: 0.4;
     --still-bottom: 24%;
     --still-scale: 100%;
@@ -935,7 +985,6 @@ html[data-motion='off'] *::after {
     max-width: min(44ch, 100%);
   }
 }
-
 /* The lab (src/scripts/lab.ts): the opening's text, the bars and the page below fade, then the stage
    leaves the section to fill the window (the camera flies from the same picture) while the page holds
    still under the lab's dialog. On the way back the stage fades out of its dark ground, then drops

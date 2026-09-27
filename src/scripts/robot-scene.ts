@@ -597,8 +597,12 @@ function floorTexture() {
 // sits there faces upstage, past the monitor to the robots. The monitor is the way into the lab: the
 // camera flies to face it and the page lays the systems map over its screen (lab.ts), with the
 // dancers beyond it on the right. At the opening's framing it sits between the introduction and the
-// robots. Sizes are in metres; the robots stand about 1.9 m.
-const DESK = { x: -0.6, z: 3.6, yaw: 0.4 };
+// robots, small enough to keep clear of the text; the reveal carries the detail. Sizes are in metres
+// before `scale`, which shrinks the whole workstation (its lights too); the robots stand about 1.9 m.
+const DESK = { x: -0.6, z: 3.6, yaw: 0.4, scale: 0.72 };
+// Point-light falloff is physical (decay 2), so the desk's lights dim with its size to look the same.
+const DESK_LIGHT = DESK.scale ** 2;
+const GLOW = 0.3 * DESK_LIGHT;
 /** The monitor's screen (16:10), and the height of its centre, about seated eye level. */
 export const SCREEN = { w: 0.68, h: 0.425, y: 1.12 };
 const SCREEN_Z = -0.1475; // the screen's plane, just proud of the bezel, in the desk's frame
@@ -670,6 +674,7 @@ function buildWorkstation() {
   const group = new THREE.Group();
   group.position.set(DESK.x, 0, DESK.z);
   group.rotation.y = DESK.yaw;
+  group.scale.setScalar(DESK.scale);
   // Oiled dark wood on a steel frame; the monitor and keyboard are matte black plastic.
   const wood = new THREE.MeshStandardMaterial({ color: 0x2f2822, roughness: 0.68 });
   const steel = new THREE.MeshStandardMaterial({ color: 0x2a2c30, roughness: 0.4, metalness: 0.75 });
@@ -724,12 +729,12 @@ function buildWorkstation() {
   add(new THREE.ConeGeometry(0.07, 0.11, 24, 1, true), shadeMat, head.x, head.y - 0.05, head.z);
   add(new THREE.SphereGeometry(0.026, 16, 10), bulb, head.x, head.y - 0.085, head.z);
 
-  const lamp = new THREE.SpotLight(0xffc68c, 3.2, 2.6, 0.95, 0.7, 2);
+  const lamp = new THREE.SpotLight(0xffc68c, 3.2 * DESK_LIGHT, 2.6 * DESK.scale, 0.95, 0.7, 2);
   lamp.position.set(head.x, head.y - 0.09, head.z);
   lamp.target.position.set(-0.1, 0.74, 0.12);
   group.add(lamp, lamp.target);
   // The screen's light on the keys and the desk's front edge.
-  const glow = new THREE.PointLight(0x9db9ff, 0.3, 1.6, 2);
+  const glow = new THREE.PointLight(0x9db9ff, GLOW, 1.6 * DESK.scale, 2);
   glow.position.set(0, SCREEN.y - 0.06, SCREEN_Z + 0.28);
   group.add(glow);
 
@@ -751,8 +756,9 @@ export interface RobotScene {
   fly(to: 'lab' | 'hero', rect: Rect | null, onFrame: (quad: Quad, p: number) => void): Promise<void>;
   /** Re-aim at the monitor after the layout moves its screen (a resize while the lab is open). */
   setRect(rect: Rect): void;
-  /** Measure the stage again now instead of on the next resize callback. */
-  settle(): void;
+  /** Back to the opening's view, measured now: after the return flight, or in its place when the lab
+   * closes without one (a window the lab can't fly in, a browser-closed dialog, a page from the cache). */
+  home(): void;
   /** Stop drawing while something opaque covers the whole stage. */
   hold(on: boolean): void;
   /** Width over height of the monitor's screen. */
@@ -773,10 +779,17 @@ interface View {
 const newView = (): View => ({ pos: new THREE.Vector3(), look: new THREE.Vector3(), f: 1, cx: 0, cy: 0 });
 const easeInOut = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2);
 const HERO_FOV = 28;
-// A wider lens in the lab keeps the dancers beyond the monitor at a size that fits beside it.
+// One lens in the lab, a little wider than the opening's, so the dancers beyond the monitor stand at a
+// size that fits beside it. It is composed for wide windows: lab.ts shows narrower ones the map at full
+// width instead of widening the lens to fit them (which only shrinks the robots behind the monitor).
 const LAB_FOV = 62;
 const TAN_HERO = Math.tan(THREE.MathUtils.degToRad(HERO_FOV / 2));
 const TAN_LAB = Math.tan(THREE.MathUtils.degToRad(LAB_FOV / 2));
+// Device-pixel caps for the drawing buffer. In the lab (and in flight) the canvas fills the window,
+// about 1.7x the opening's canvas, as the backdrop to the systems map (HTML, which this doesn't touch):
+// at 1.25 it keeps about the opening's pixel count on a 2x display, 40% fewer than at 1.6.
+const HERO_RATIO = 1.6;
+const LAB_RATIO = 1.25;
 
 /** `play` starts the dance whatever the Motion setting: the visitor asked for it with the Play button.
  * `toggles` are the play/pause buttons, the stage's own and any others (the lab's). */
@@ -929,8 +942,8 @@ export function mountRobots(root: HTMLElement, { play = false, toggles = [] as H
   let t = intent ? 0 : (STILL_BEAT * 60) / BPM;
   let w = 0; // canvas size, CSS px
   let h = 0;
-  // The opening's stage (the figure): its size, and where it sits in the viewport while the lab is
-  // open (the page doesn't scroll then). Views are placed relative to it.
+  // The opening's picture: its size, and where it sits in the viewport while the lab is open (the page
+  // doesn't scroll then). Views are placed relative to it.
   let fw = 1;
   let fh = 1;
   let rootX = 0;
@@ -961,9 +974,18 @@ export function mountRobots(root: HTMLElement, { play = false, toggles = [] as H
   // --scene-shift).
   function measureStage() {
     const cs = getComputedStyle(stage!);
-    shift = parseFloat(cs.getPropertyValue('--scene-shift')) || 0;
-    const usable = parseFloat(cs.getPropertyValue('--scene-usable')) || 1;
-    const r = root.getBoundingClientRect();
+    // Registered in global.css, so calc()s arrive as numbers; where @property isn't supported they
+    // arrive unresolved, and the wide framing stands in.
+    const num = (name: string, fallback: number) => {
+      const n = parseFloat(cs.getPropertyValue(name));
+      return Number.isFinite(n) ? n : fallback;
+    };
+    shift = num('--scene-shift', 0.3);
+    const usable = num('--scene-usable', 0.38) || 1;
+    // The picture is the stage. On stacked layouts the figure also holds the caption's row under it;
+    // from lg (the only layouts with a lab) the two coincide, so while the stage fills the window for
+    // the lab the figure keeps the picture's place.
+    const r = (mode === 'hero' && !flight ? stage! : root).getBoundingClientRect();
     fw = r.width || 1;
     fh = r.height || 1;
     rootX = r.left;
@@ -986,7 +1008,7 @@ export function mountRobots(root: HTMLElement, { play = false, toggles = [] as H
   function labView(v: View) {
     v.f = h / 2 / TAN_LAB;
     v.look.copy(screenCentre);
-    v.pos.copy(screenNormal).multiplyScalar((SCREEN.w * v.f) / labRect.w).add(screenCentre);
+    v.pos.copy(screenNormal).multiplyScalar((SCREEN.w * DESK.scale * v.f) / labRect.w).add(screenCentre);
     v.cx = labRect.x + labRect.w / 2 - rootX;
     v.cy = labRect.y + labRect.h / 2 - rootY;
   }
@@ -1076,7 +1098,8 @@ export function mountRobots(root: HTMLElement, { play = false, toggles = [] as H
     const nw = Math.round(cw * (1 - crop));
     const nh = ch;
     measureStage();
-    if (mode === 'hero' && !flight) {
+    const hero = mode === 'hero' && !flight;
+    if (hero) {
       ox = cw - nw;
       oy = 0;
     } else {
@@ -1084,8 +1107,9 @@ export function mountRobots(root: HTMLElement, { play = false, toggles = [] as H
       ox = -rootX;
       oy = -rootY;
     }
-    // setPixelRatio and setSize reallocate (and clear) the drawing buffer, so only when they change.
-    const ratio = Math.min(devicePixelRatio || 1, 1.6);
+    // setPixelRatio and setSize reallocate (and clear) the drawing buffer, so only when they change
+    // (entering and leaving the lab change the size anyway).
+    const ratio = Math.min(devicePixelRatio || 1, hero ? HERO_RATIO : LAB_RATIO);
     if (renderer.getPixelRatio() !== ratio || nw !== w || nh !== h) {
       w = nw;
       h = nh;
@@ -1183,7 +1207,10 @@ export function mountRobots(root: HTMLElement, { play = false, toggles = [] as H
       labRect = rect;
       if (mode === 'lab' && !flight) settle();
     },
-    settle,
+    home() {
+      mode = 'hero';
+      settle();
+    },
     hold(on) {
       held = on;
       sync();
@@ -1201,7 +1228,7 @@ export function mountRobots(root: HTMLElement, { play = false, toggles = [] as H
         hovered = hit;
         // The screen wakes a little under the pointer.
         desk.screenMat.color.setScalar(hit ? 1.35 : 1);
-        desk.glow.intensity = hit ? 0.55 : 0.3;
+        desk.glow.intensity = hit ? GLOW * 1.8 : GLOW;
         if (!raf && !lost) render();
       }
       return hit;

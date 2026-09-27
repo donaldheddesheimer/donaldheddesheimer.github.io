@@ -1,14 +1,18 @@
 // The lab: "Enter the lab" (or a click on the desk's monitor) flies the opening's camera to the
 // monitor, and the systems map (/systems/screen/, real HTML in a frame) rides on its screen until it
 // faces the viewer, large and flat. The address becomes /systems/ while the lab is open, so Back
-// leaves it, Forward returns, and a reload or a shared link opens the ordinary page. Phones, short
-// windows, reduced motion, and a scene that isn't running skip all of this: the link opens /systems/.
+// leaves it, Forward returns, and a reload or a shared link opens the ordinary page. Phones, short,
+// narrow or portrait windows, reduced motion, and a scene that isn't running skip all of this: the
+// link opens /systems/.
 import type { Quad, Rect, RobotScene } from './robot-scene';
 
 type State = 'closed' | 'opening' | 'open' | 'closing';
 
 const FADE_MS = 250; // the opening's text fades before the camera moves
-const roomy = matchMedia('(width >= 64rem) and (height >= 36rem)');
+// The lab's one lens is composed for wide windows. From 3:2 the dancers beyond the monitor stay in the
+// picture but for an arm at the height of a move; narrower, the nearest is cut in half at the edge, so
+// those windows get the map at full width (the ordinary page, or data-lab-full if the lab is open).
+const roomy = matchMedia('(width >= 64rem) and (height >= 36rem) and (min-aspect-ratio: 3/2)');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 const html = document.documentElement;
 const smooth = (a: number, b: number, x: number) => {
@@ -85,7 +89,7 @@ export function initLab(root: HTMLElement, dialog: HTMLDialogElement, getScene: 
     frame.style.opacity = loaded ? String(fadeIn ? smooth(0.3, 0.7, p) : 1 - smooth(0.05, 0.3, p)) : '0';
   };
 
-  // A window too small for the monitor's framing shows the map across it, and the scene rests.
+  // A window too small or too narrow for the monitor's framing shows the map across it, and the scene rests.
   function relayout() {
     const scene = getScene();
     if (state !== 'open' || !scene) return;
@@ -147,7 +151,7 @@ export function initLab(root: HTMLElement, dialog: HTMLDialogElement, getScene: 
     frame?.remove();
     frame = null;
     delete html.dataset.lab;
-    scene?.settle();
+    scene?.home();
     dialog.close();
     document.title = homeTitle;
     state = 'closed';

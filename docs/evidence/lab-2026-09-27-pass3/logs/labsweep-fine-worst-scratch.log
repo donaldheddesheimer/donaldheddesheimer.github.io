@@ -1,0 +1,5 @@
+# Scratch (not committed): the dance moment, over one loop (0..17.2 s every 0.02 s), where the terracotta robot's body box reaches
+# furthest past the window's right edge, then a screenshot at that moment (screens/lab-*-widest-reach.jpg). Probe build of this pass.
+1350x900 {"t":5.56,"right":-139,"box":[1091,341,1489,664]}
+1440x900 {"t":5.56,"right":-92,"box":[1129,340,1532,665]}
+2560x1440 {"t":5.56,"right":-94,"box":[1992,524,2654,1053]}

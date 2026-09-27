@@ -1,0 +1,10 @@
+# One-off measurement (a scratch Playwright script, not kept in the harness), copied from its output.
+# Lab open at 1440x900; resize to 900x700; after 600 ms, back to 1440x900. "ev" lists the resize events and
+# html[data-lab-full] changes in ms from the start; settledMs is the time from the second resize until the
+# lab was framed again and the scene running. Runs 1-3 this pass's build (:4321), runs 4-5 cbfab9d (:4330).
+# Where "ev" shows only "grow", no resize event arrived within the 600 ms before the window grew back.
+{"settledMs":725,"ev":"full=true@556 resize 900x700@556 grow@5183 full=false@5940 resize 1440x900@5940"}
+{"settledMs":3,"ev":"grow@649"}
+{"settledMs":1273,"ev":"full=true@616 resize 900x700@616 grow@4013 full=false@5321 resize 1440x900@5321"}
+{"settledMs":3,"ev":"grow@644"}
+{"settledMs":4,"ev":"grow@664"}

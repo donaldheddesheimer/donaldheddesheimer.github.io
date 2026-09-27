@@ -42,8 +42,9 @@ const { class: cls } = Astro.props;
         </linearGradient>
       </defs>
       <!-- The workstation, left of the robots and outside the box, where the scene puts it on wide
-           screens (hidden in narrower framings, as in the scene): lamp, monitor, keyboard. -->
-      <g class="still-desk">
+           screens (hidden in narrower framings, as in the scene): lamp, monitor, keyboard. Drawn at
+           full size, then shrunk about its footprint on the floor like the scene's (DESK.scale). -->
+      <g class="still-desk" transform="translate(-117 469) scale(0.72) translate(117 -469)">
         <ellipse cx="-196" cy="306" rx="46" ry="7" fill="#ffb877" opacity="0.14" />
         <g fill="#15171a">
           <rect x="-205" y="316" width="8" height="140" /><rect x="-7" y="316" width="8" height="139" />
@@ -362,30 +363,58 @@ const { class: cls } = Astro.props;
       padding: 0 1rem 0 0.875rem;
     }
   }
-  /* Phones: pause/play is an icon button in the top corner, clear of the robots' feet. It keeps its
-     aria-label. The way into the lab stays bottom right. */
-  @media (width < 40rem) {
+  /* Stacked layouts (under lg): the picture is a band under the text, and the caption and controls are
+     an ordinary row under the picture, in the page's flow, never over the robots. The band's height is
+     --stage-h (global.css); the scrim stays on the picture (grid-area there too). */
+  @media (width < 64rem) {
+    .robots {
+      display: grid;
+      grid-template:
+        'stage stage' minmax(var(--stage-h, 13rem), 1fr)
+        'cap ctl' auto
+        / minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: 0.75rem;
+    }
+    .robots-stage {
+      position: relative;
+      grid-area: stage;
+      align-self: stretch;
+    }
+    .robots-cap,
     .robots-ctl {
-      display: contents;
+      position: relative;
+      inset: auto;
+      padding-block: 0.625rem;
     }
-    .robots-pill {
-      position: absolute;
-      right: 0.625rem;
-      bottom: 0.625rem;
-      z-index: 2;
+    .robots-cap {
+      grid-area: cap;
+      padding-left: var(--home-inset, 1rem);
+      translate: none;
     }
+    .robots-ctl {
+      grid-area: ctl;
+      padding-right: var(--home-inset, 1rem);
+    }
+  }
+  /* Phones: pause/play is an icon button (it keeps its aria-label), and the caption is smaller, with
+     the note under it (and wraps if it still has to), to leave the controls their room. */
+  @media (width < 40rem) {
     .robots-toggle {
-      top: 0.375rem;
-      bottom: auto;
       justify-content: center;
-      width: var(--h-touch);
-      height: var(--h-touch);
+      aspect-ratio: 1;
       padding: 0;
     }
     .robots-toggle [data-robot-toggle-label] {
       display: none;
     }
-    /* The note goes under the caption, which then ends clear of the way into the lab. */
+    .robots {
+      column-gap: 0.5rem;
+    }
+    .robots-cap {
+      font-size: var(--text-xs);
+      white-space: normal;
+    }
     .cap-note {
       display: block;
       margin-left: 0;

@@ -1,0 +1,11 @@
+1024x768: 69 samples t=0..34s; desk↔text min 48 px (t=9.00); robots↔text min 148 px (t=5.50); robots↔canvas edge min 29 px (robot 2 right t=5.50); desk overlaps a robot box in 16 samples
+1100x800: 69 samples t=0..34s; desk↔text min 81 px (t=10.50); robots↔text min 162 px (t=5.50); robots↔canvas edge min 31 px (robot 2 right t=5.50); desk overlaps a robot box in 15 samples
+1200x800: 69 samples t=0..34s; desk↔text min 120 px (t=10.50); robots↔text min 177 px (t=5.50); robots↔canvas edge min 33 px (robot 2 right t=5.50); desk overlaps a robot box in 9 samples
+1279x800: 69 samples t=0..34s; desk↔text min 150 px (t=9.50); robots↔text min 189 px (t=5.50); robots↔canvas edge min 35 px (robot 2 right t=5.50); desk overlaps a robot box in 6 samples
+1280x800: 69 samples t=0..34s; desk↔text min 94 px (t=10.00); robots↔text min 158 px (t=5.50); robots↔canvas edge min 30 px (robot 2 right t=5.50); desk overlaps a robot box in 1 samples
+1281x800: 69 samples t=0..34s; desk↔text min 95 px (t=9.00); robots↔text min 158 px (t=5.50); robots↔canvas edge min 30 px (robot 2 right t=5.50); desk overlaps a robot box in 1 samples
+1360x800: 69 samples t=0..34s; desk↔text min 116 px (t=10.50); robots↔text min 169 px (t=5.50); robots↔canvas edge min 32 px (robot 2 right t=5.50); desk overlaps a robot box in 0 samples
+1440x900: 69 samples t=0..34s; desk↔text min 161 px (t=9.50); robots↔text min 178 px (t=5.50); robots↔canvas edge min 34 px (robot 2 right t=5.50); desk overlaps a robot box in 1 samples
+1600x900: 69 samples t=0..34s; desk↔text min 204 px (t=9.50); robots↔text min 200 px (t=5.50); robots↔canvas edge min 37 px (robot 2 right t=5.50); desk overlaps a robot box in 0 samples
+1920x1080: 69 samples t=0..34s; desk↔text min 288 px (t=11.00); robots↔text min 316 px (t=5.50); robots↔canvas edge min 44 px (robot 2 right t=5.50); desk overlaps a robot box in 0 samples
+exit 0

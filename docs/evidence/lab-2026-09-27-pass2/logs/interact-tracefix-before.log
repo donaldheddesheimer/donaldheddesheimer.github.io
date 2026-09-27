@@ -1,0 +1,28 @@
+PASS enter link is a real link to /systems/
+PASS opening: URL /systems/ with lab history state, dialog holds focus — {"url":"/systems/","active":"dialog"}
+PASS opening: fade → fly → open, title switched — fade@1852 fly@5601 open@5621; title "Systems map · Donald Heddesheimer"
+PASS open: frame at rest is a whole-pixel translate (sharp text), src /systems/screen/ — translate(36px, 156px); /systems/screen/
+PASS frame shows the shared Overview console
+PASS selecting cuCadence in the frame: URL ?sel=, Expand dashboard follows, state kept — /systems/?sel=project%3Acucadence; expand /systems/?sel=project%3Acucadence
+PASS Escape in frame with map expanded collapses the map, lab stays open — lab open
+PASS Escape in frame leaves: return flight, URL /, focus back on Enter the lab, title restored — return@11955 -@14210; /; focus enter-link; "Donald Heddesheimer"
+PASS Forward reopens the lab at /systems/?sel=… and the frame restores the selection — /systems/?sel=project%3Acucadence; frame sel project:cucadence; fade@14273 fly@16179 open@16198
+PASS Back closes the lab with the return flight — /; return@16313 -@21435
+PASS Back during the flight in: lands, then returns; URL /; nothing left open — fade@21471 fly@23018 open@23759 return@23759 -@28787
+PASS Forward during the return flight: reopens after landing, URL /systems/… — return@32254 -@35758 fade@35758 fly@36640 open@39829; /systems/
+PASS Escape on the dialog leaves via Back: URL /, focus on Enter the lab — /; focus enter-link; return@40161 -@44725
+PASS Back to portfolio button leaves, focus restored — focus enter-link
+PASS activating the selected project node opens its case study in the window (not the frame)
+PASS Back from the case study returns to the lab address (open lab if restored from bfcache, else the /systems/ page) — /systems/?sel=project%3Acucadence; the ordinary /systems/ page (not restored from bfcache)
+PASS Refresh in the lab loads the ordinary /systems/ page with the selection — {"url":"/systems/?sel=project%3Acucadence","console":true,"dialog":false,"sel":"project:cucadence","embed":false,"header":true}
+PASS Expand dashboard opens /systems/?sel=… as a page — {"url":"/systems/?sel=project%3Acucadence","sel":"project:cucadence","console":true}
+PASS /systems/?sel=project:cucadence opens with that selection
+PASS /systems/screen/ opened on its own redirects to /systems/ (keeping ?sel=) — http://127.0.0.1:4330/systems/?sel=project:cucadence
+PASS clicking the monitor enters the lab — monitor at 732,444; fade@12721 fly@14138 open@14607
+PASS …and Escape returns focus to Enter the lab (no focused opener) — focus enter-link
+PASS open lab resized below 64rem: map fills the window under the bar, scene held — {"full":true,"running":"false","r":[0,56,900,644]}
+FAIL …and back to 1440: framed on the monitor again, scene running — {"full":true,"running":"false","t":"translate(36px, 156px)"}
+PASS no page errors or console errors (fonts/cert noise excluded)
+
+24/25 passed
+exit 0
