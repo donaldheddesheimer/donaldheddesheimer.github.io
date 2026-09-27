@@ -1,0 +1,60 @@
+---
+// The systems map as the lab's monitor shows it: the same console as /systems/, without the site's
+// bars, framed by the homepage (RobotStage.astro) when the camera reaches the desk. Opened on its own
+// it goes to /systems/. Links leave the frame (<base target="_top">); the selection and Escape are
+// passed up to the homepage, which keeps its address and closes the lab.
+import '../../styles/global.css';
+import Overview from '../../components/Overview.astro';
+import { profile } from '../../data/site';
+---
+
+<!doctype html>
+<html lang="en" data-embed>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Systems map · {profile.name}</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={new URL('/systems/', Astro.site).href} />
+    <base target="_top" />
+    <script is:inline>
+      if (window.top === window.self) location.replace('/systems/' + location.search + location.hash);
+      (function () {
+        var h = document.documentElement;
+        h.classList.add('js');
+        var saved = null;
+        try {
+          saved = localStorage.getItem('motion');
+        } catch (e) {}
+        h.dataset.motion = saved || (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'off' : 'on');
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    />
+  </head>
+  <body>
+    <main class="mx-auto flex max-w-[1680px] flex-col gap-(--gap-section) p-3 md:p-4">
+      <Overview title="Systems map" />
+    </main>
+    <script>
+      import { onSelect } from '../../scripts/selection';
+
+      const post = (msg: object) => parent.postMessage(msg, location.origin);
+      onSelect(() => post({ type: 'lab:sel', search: location.search }));
+      // Escape leaves the lab, unless something in the map is using it (the expanded map collapses).
+      addEventListener(
+        'keydown',
+        (e) => {
+          if (e.key !== 'Escape' || e.defaultPrevented) return;
+          if (document.querySelector('[data-console][data-expanded="true"], dialog[open]')) return;
+          post({ type: 'lab:escape' });
+        },
+        true,
+      );
+    </script>
+  </body>
+</html>

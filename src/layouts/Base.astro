@@ -12,7 +12,10 @@ interface Props {
   title?: string;
   description?: string;
   crumb?: { label: string; href?: string }[];
+  /** The homepage: its own header and footer in place of the top bar, rail, and status bar. */
   home?: boolean;
+  /** The systems map console is on this page: the status bar reads out its selection. */
+  console?: boolean;
   /** The rail / tab bar section this page belongs to, marked current (subpages). */
   section?: string;
   /** A short readout for the left of the status bar on pages without a selection (e.g. the 404). */
@@ -20,32 +23,40 @@ interface Props {
   /** False for a page with no address of its own (the 404), which gets no canonical link. */
   canonical?: boolean;
 }
-const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false, section, status, canonical = true } = Astro.props;
+const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false, console = false, section, status, canonical = true } = Astro.props;
 // Absolute URLs for link previews. public/og.png is rendered from the profile (see src/data/site.ts).
 const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL('/og.png', Astro.site).href;
 
 const base = home ? '' : '/';
-const nav: { id: string; label: string; icon: IconName; mobile?: boolean }[] = [
-  { id: 'overview', label: 'Overview', icon: 'graph', mobile: true },
+// Homepage sections, then the systems map, which is a page of its own (`href`, and no scroll-spy).
+// The phone tab bar carries the entries with a `tab`: its label there, and the sections it lights for.
+type NavItem = { id: string; label: string; icon: IconName; href?: string; tab?: { label: string; name?: string; spy?: string } };
+const nav: NavItem[] = [
+  { id: 'top', label: 'Home', icon: 'home', tab: { label: 'Home' } },
+  { id: 'work', label: 'Selected work', icon: 'star', tab: { label: 'Work', spy: 'work projects' } },
   { id: 'timeline', label: 'Timeline', icon: 'timeline' },
-  { id: 'experience', label: 'Experience', icon: 'briefcase', mobile: true },
-  { id: 'projects', label: 'Projects', icon: 'cube', mobile: true },
+  { id: 'experience', label: 'Experience', icon: 'briefcase', tab: { label: 'Experience' } },
+  { id: 'projects', label: 'More projects', icon: 'cube' },
   { id: 'capabilities', label: 'Capabilities', icon: 'layers' },
-  { id: 'off-duty', label: 'Off duty', icon: 'sun', mobile: true },
-  { id: 'contact', label: 'Contact', icon: 'radio', mobile: true },
+  { id: 'off-duty', label: 'Off duty', icon: 'sun' },
+  { id: 'contact', label: 'Contact', icon: 'radio', tab: { label: 'Contact' } },
+  { id: 'systems', label: 'Systems map', icon: 'graph', href: '/systems/', tab: { label: 'Map', name: 'Systems map' } },
 ];
+const navHref = (n: NavItem) => n.href ?? `${base}#${n.id}`;
+const sourceHref = 'https://github.com/donaldheddesheimer/donaldheddesheimer.github.io';
 
 // Everything the ⌘K search can jump to: one row per object, under the group it lists in. `alias` is
 // the short name the map shows, matched like the title; `terms` is extra text that matches but isn't
-// shown. An org with a role or a degree is an Experience row; it and every other org and capability
-// open on the homepage console with that object selected.
+// shown. Orgs and capabilities open on the systems map (/systems/) with that object selected; an org
+// with a role or a degree is an Experience row that opens its record on the homepage instead, or is
+// selected in place when the map is on the page.
 const projects = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code));
 const org = (id: string) => orgs.find((o) => o.id === id)!;
-const onConsole = (id: string) => ({ sel: id, href: `/?sel=${encodeURIComponent(id)}#overview` });
+const onConsole = (id: string) => ({ sel: id, href: `/systems/?sel=${encodeURIComponent(id)}#overview` });
 const withRecord = new Set([...experience.map((e) => `org:${e.org}`), `org:${education.org}`]);
 const search = [
-  ...nav.map((n) => ({ group: 'Sections', code: 'NAV', label: n.label, sub: '', href: `/#${n.id}` })),
+  ...nav.map((n) => (n.href ? { group: 'Sections', code: 'MAP', label: n.label, sub: 'Orgs, projects, capabilities', href: n.href } : { group: 'Sections', code: 'NAV', label: n.label, sub: '', href: `/#${n.id}` })),
   ...projects.map((p) => ({ group: 'Projects', code: p.data.code, label: p.data.title, sub: p.data.tags.join(' · '), terms: `${p.data.summary} ${p.data.context ?? ''}`, href: `/projects/${p.id}/` })),
   ...experience.map((e) => ({
     group: 'Experience',
@@ -54,9 +65,10 @@ const search = [
     sub: e.role,
     alias: org(e.org).short,
     terms: `${e.unit ?? ''} ${e.tags.join(' ')}`,
-    ...onConsole(`org:${e.org}`),
+    sel: `org:${e.org}`,
+    href: `/#exp-${e.id}`,
   })),
-  { group: 'Experience', code: 'EDU', label: education.school, sub: 'B.S. Computer Science', alias: org(education.org).short, ...onConsole(`org:${education.org}`) },
+  { group: 'Experience', code: 'EDU', label: education.school, sub: 'B.S. Computer Science', alias: org(education.org).short, sel: `org:${education.org}`, href: '/#exp-education' },
   ...(await getModel())
     .list()
     .filter((e) => e.type === 'skill' || (e.type === 'org' && !withRecord.has(e.id)))
@@ -73,7 +85,7 @@ const search = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#111418" />
+    <meta name="theme-color" content="#131211" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -100,6 +112,14 @@ const search = [
         h.dataset.motion = saved || (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'off' : 'on');
       })();
     </script>
+    {
+      home && (
+        <script is:inline>
+          // The systems map moved from the homepage to /systems/: send its old links (/?sel=…) there.
+          if (/[?&]sel=/.test(location.search)) location.replace('/systems/' + location.search + location.hash);
+        </script>
+      )
+    }
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -110,152 +130,210 @@ const search = [
   <body class="min-h-dvh">
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 btn btn-primary">Skip to content</a>
 
-    <!-- Top bar -->
-    <header class="fixed inset-x-0 top-0 z-40 flex h-12 items-center border-b border-line bg-panel">
-      <a href="/" class="grid h-full w-12 shrink-0 place-items-center border-r border-line md:w-14" aria-label="Home">
-        <Mark class="size-7" />
-      </a>
-      <!-- Phones show only the current page, so its title has the room. Each page links back to its parent in its own header. -->
-      <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2 px-3 text-sm">
-        <a href="/" class="hidden py-1 font-semibold whitespace-nowrap sm:inline-block pointer-coarse:py-3">{profile.name}</a>
-        {
-          crumb.map((c, i) => (
-            <>
-              <span class="hidden text-dim sm:inline" aria-hidden="true">/</span>
-              {c.href ? (
-                <a href={c.href} class="truncate text-muted hover:text-text max-sm:hidden pointer-coarse:py-3">
-                  {c.label}
-                </a>
-              ) : (
-                <span class:list={['truncate', i === crumb.length - 1 ? 'text-text sm:text-muted' : 'text-muted']} data-crumb-current={home && i === crumb.length - 1 ? '' : undefined}>
-                  {c.label}
-                </span>
-              )}
-            </>
-          ))
-        }
-      </nav>
-
-      <button
-        type="button"
-        data-cmdk-open
-        class="mx-auto hidden h-(--h-md) w-full max-w-sm items-center gap-2 rounded-2 bg-bg px-2.5 text-left text-sm text-dim shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[inset_0_0_0_1px_var(--line-2)] md:flex pointer-coarse:h-11"
-      >
-        <Icon name="search" class="size-4" />
-        <span>Search objects…</span>
-        <kbd class="ml-auto code-chip" data-kbd>⌘K</kbd>
-      </button>
-
-      <div class="ml-auto flex items-center gap-1.5 pr-2 md:ml-0 md:gap-3 md:pr-3">
-        <span class="hidden readout text-2xs lg:inline">ATL <span data-clock>--:--</span></span>
-        <button type="button" data-cmdk-open class="btn btn-ghost btn-icon md:hidden" aria-label="Search">
-          <Icon name="search" class="size-4" />
-        </button>
-        <!-- Not primary: the identity strip below holds the page's one primary action. -->
-        <a href={profile.resume} class="topbar-resume btn" target="_blank" rel="noopener" aria-label="Resume (PDF, opens in new tab)">
-          <Icon name="file" class="size-4" />
-          <span class="max-sm:hidden">Resume</span>
-          <NewTab class="size-3.5 shrink-0 max-sm:hidden" />
-        </a>
-      </div>
-    </header>
-
-    <!-- Left rail (desktop) -->
-    <nav aria-label="Sections" class="fixed top-12 bottom-0 left-0 z-30 hidden w-14 flex-col items-center gap-1 border-r border-line bg-panel py-2 md:flex" data-rail>
-      {
-        nav.map((n) => (
-          <a
-            href={`${base}#${n.id}`}
-            data-spy={n.id}
-            data-spy-label={n.label}
-            class="rail-btn relative grid size-10 place-items-center rounded-2 text-dim hover:bg-(--hover-bg) hover:text-text pointer-coarse:size-11"
-            aria-label={n.label}
-            aria-current={n.id === section ? 'true' : undefined}
-          >
-            <Icon name={n.icon} class="size-[18px]" />
-            <span class="rail-tip" aria-hidden="true">{n.label}</span>
+    {
+      home ? (
+        <header class="home-bar" data-home-bar>
+          <a href="#top" class="home-mark" aria-label={`${profile.name}, back to top`}>
+            <Mark class="size-7 shrink-0" />
+            <span class="home-mark-name">{profile.name}</span>
           </a>
-        ))
-      }
-      <div class="mt-auto flex flex-col items-center gap-1">
-        <div class="mb-1 h-px w-6 bg-line" aria-hidden="true"></div>
-        {
-          socials.map((s) => {
-            const newTab = s.id !== 'email';
-            return (
-              <a
-                href={s.href}
-                class="rail-btn relative grid size-10 place-items-center rounded-2 text-dim hover:bg-(--hover-bg) hover:text-text pointer-coarse:size-11"
-                aria-label={newTab ? `${s.label} (opens in new tab)` : s.label}
-                target={newTab ? '_blank' : undefined}
-                rel={newTab ? 'noopener' : undefined}
-              >
-                <Icon name={s.icon} class="size-[18px]" />
-                <span class="rail-tip" aria-hidden="true">{newTab ? `${s.label} ↗` : s.label}</span>
-              </a>
-            );
-          })
-        }
-      </div>
-    </nav>
-
-    <main id="main" class="pt-12 pb-20 md:pb-10 md:pl-14">
-      <slot />
-      <!-- Phones have no status bar, so its copyright line and Motion switch close the page. -->
-      <footer class="flex items-center justify-center gap-4 px-4 pb-2 readout text-2xs text-dim md:hidden">
-        <span>© {new Date().getFullYear()} {profile.name}</span>
-        <button type="button" role="switch" aria-checked="true" class="motion-switch pointer-coarse:min-h-11" data-motion-toggle title="Turn animation on or off">
-          Motion <span class="sw" aria-hidden="true"></span>
-        </button>
-      </footer>
-    </main>
-
-    <!-- Bottom bar (mobile). After main in the source, so it lands at the page end when it stops being fixed. -->
-    <nav aria-label="Sections" class="tabbar fixed inset-x-0 bottom-0 z-40 grid h-14 grid-cols-5 border-t border-line bg-panel pb-[env(safe-area-inset-bottom)] md:hidden">
-      {
-        nav
-          .filter((n) => n.mobile)
-          .map((n) => (
-            <a
-              href={`${base}#${n.id}`}
-              data-spy={n.id}
-              class="rail-btn flex flex-col items-center justify-center gap-1 text-2xs text-dim"
-              aria-current={n.id === section ? 'true' : undefined}
-            >
-              <Icon name={n.icon} class="size-[18px]" />
-              {n.label}
+          <nav aria-label="Sections" class="home-nav">
+            <a href="#work">Work</a>
+            <a href="#experience">Experience</a>
+            <a href="#contact">Contact</a>
+            <a href="/systems/">Systems map</a>
+          </nav>
+          <div class="home-bar-end">
+            <button type="button" data-cmdk-open class="btn btn-ghost btn-icon" aria-label="Search" title="Search (⌘K)">
+              <Icon name="search" class="size-4" />
+            </button>
+            <!-- Not primary: the opening holds the page's one primary action. -->
+            <a href={profile.resume} class="topbar-resume btn" target="_blank" rel="noopener" aria-label="Resume (PDF, opens in new tab)">
+              <Icon name="file" class="size-4" />
+              <span class="max-sm:hidden">Resume</span>
+              <NewTab class="size-3.5 shrink-0 max-sm:hidden" />
             </a>
-          ))
-      }
-    </nav>
+          </div>
+        </header>
+      ) : (
+        <>
+          {/* Top bar */}
+          <header class="fixed inset-x-0 top-0 z-40 flex h-12 items-center border-b border-line bg-panel">
+            <a href="/" class="grid h-full w-12 shrink-0 place-items-center border-r border-line md:w-14" aria-label="Home">
+              <Mark class="size-7" />
+            </a>
+            {/* Phones show only the current page, so its title has the room. Each page links back to its parent in its own header. */}
+            <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2 px-3 text-sm">
+              <a href="/" class="hidden py-1 font-semibold whitespace-nowrap sm:inline-block pointer-coarse:py-3">{profile.name}</a>
+              {crumb.map((c, i) => (
+                <>
+                  <span class="hidden text-dim sm:inline" aria-hidden="true">/</span>
+                  {c.href ? (
+                    <a href={c.href} class="truncate text-muted hover:text-text max-sm:hidden pointer-coarse:py-3">
+                      {c.label}
+                    </a>
+                  ) : (
+                    <span class:list={['truncate', i === crumb.length - 1 ? 'text-text sm:text-muted' : 'text-muted']}>{c.label}</span>
+                  )}
+                </>
+              ))}
+            </nav>
 
-    <!-- Status bar (desktop) -->
-    <footer class="fixed right-0 bottom-0 left-14 z-30 hidden h-8 items-center gap-4 border-t border-line bg-panel px-3 readout text-2xs text-dim md:flex">
+            <button
+              type="button"
+              data-cmdk-open
+              class="mx-auto hidden h-(--h-md) w-full max-w-sm items-center gap-2 rounded-2 bg-bg px-2.5 text-left text-sm text-dim shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[inset_0_0_0_1px_var(--line-2)] md:flex pointer-coarse:h-11"
+            >
+              <Icon name="search" class="size-4" />
+              <span>Search objects…</span>
+              <kbd class="ml-auto code-chip" data-kbd>⌘K</kbd>
+            </button>
+
+            <div class="ml-auto flex items-center gap-1.5 pr-2 md:ml-0 md:gap-3 md:pr-3">
+              <span class="hidden readout text-2xs lg:inline">
+                ATL <span data-clock>--:--</span>
+              </span>
+              <button type="button" data-cmdk-open class="btn btn-ghost btn-icon md:hidden" aria-label="Search">
+                <Icon name="search" class="size-4" />
+              </button>
+              {/* Not primary: each page keeps its one primary action in its own header. */}
+              <a href={profile.resume} class="topbar-resume btn" target="_blank" rel="noopener" aria-label="Resume (PDF, opens in new tab)">
+                <Icon name="file" class="size-4" />
+                <span class="max-sm:hidden">Resume</span>
+                <NewTab class="size-3.5 shrink-0 max-sm:hidden" />
+              </a>
+            </div>
+          </header>
+
+          {/* Left rail (desktop) */}
+          <nav aria-label="Sections" class="fixed top-12 bottom-0 left-0 z-30 hidden w-14 flex-col items-center gap-1 border-r border-line bg-panel py-2 md:flex" data-rail>
+            {nav.map((n) => (
+              <a
+                href={navHref(n)}
+                data-spy={n.href ? undefined : n.id}
+                class="rail-btn relative grid size-10 place-items-center rounded-2 text-dim hover:bg-(--hover-bg) hover:text-text pointer-coarse:size-11"
+                aria-label={n.label}
+                aria-current={n.id === section ? (n.href ? 'page' : 'true') : undefined}
+              >
+                <Icon name={n.icon} class="size-[18px]" />
+                <span class="rail-tip" aria-hidden="true">
+                  {n.label}
+                </span>
+              </a>
+            ))}
+            <div class="mt-auto flex flex-col items-center gap-1">
+              <div class="mb-1 h-px w-6 bg-line" aria-hidden="true" />
+              {socials.map((s) => {
+                const newTab = s.id !== 'email';
+                return (
+                  <a
+                    href={s.href}
+                    class="rail-btn relative grid size-10 place-items-center rounded-2 text-dim hover:bg-(--hover-bg) hover:text-text pointer-coarse:size-11"
+                    aria-label={newTab ? `${s.label} (opens in new tab)` : s.label}
+                    target={newTab ? '_blank' : undefined}
+                    rel={newTab ? 'noopener' : undefined}
+                  >
+                    <Icon name={s.icon} class="size-[18px]" />
+                    <span class="rail-tip" aria-hidden="true">
+                      {newTab ? `${s.label} ↗` : s.label}
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+          </nav>
+        </>
+      )
+    }
+
+    <!-- Elsewhere, phones have no status bar, so its copyright line and Motion switch close the page. -->
+    <main id="main" class:list={home ? 'home-main' : 'pt-12 pb-20 md:pb-10 md:pl-14'}>
+      <slot />
       {
         home ? (
-          <span class="flex min-w-0 items-center gap-1.5">
-            SEL <span class="max-w-[32ch] truncate text-muted" data-status-sel>mission (illustrative)</span>
-          </span>
+          <footer class="home-foot readout">
+            <span>© {new Date().getFullYear()} {profile.name}</span>
+            <a href="/systems/">Systems map</a>
+            <button type="button" role="switch" aria-checked="true" class="motion-switch" data-motion-toggle title="Turn animation on or off">
+              Motion <span class="sw" aria-hidden="true" />
+            </button>
+            {build && (
+              <span>
+                BUILD <span class="text-muted">{build.sha} {build.date}</span>
+              </span>
+            )}
+            <a href={sourceHref} target="_blank" rel="noopener">
+              Source
+              <NewTab class="size-3 shrink-0" />
+            </a>
+          </footer>
         ) : (
-          status && <span class="text-muted">{status}</span>
+          <footer class="flex items-center justify-center gap-4 px-4 pb-2 readout text-2xs text-dim md:hidden">
+            <span>© {new Date().getFullYear()} {profile.name}</span>
+            <button type="button" role="switch" aria-checked="true" class="motion-switch pointer-coarse:min-h-11" data-motion-toggle title="Turn animation on or off">
+              Motion <span class="sw" aria-hidden="true" />
+            </button>
+          </footer>
         )
       }
-      <button type="button" role="switch" aria-checked="true" class="motion-switch h-full" data-motion-toggle title="Turn animation on or off">
-        Motion <span class="sw" aria-hidden="true"></span>
-      </button>
-      <span class="hidden xl:inline">{projects.length} projects</span>
-      <span class="hidden xl:inline">{experience.length} roles</span>
-      <span class="ml-auto hidden xl:inline">{profile.coords}</span>
+    </main>
+
+    <!-- Bottom bar (phones, every page). After main in the source, so it lands at the page end when it stops being fixed. -->
+    <nav aria-label="Sections" class="tabbar fixed inset-x-0 bottom-0 z-40 grid h-14 grid-cols-5 border-t border-line bg-panel pb-[env(safe-area-inset-bottom)] md:hidden">
       {
-        build && (
-          <span class="ml-auto xl:ml-0">
-            BUILD <span class="text-muted">{build.sha} {build.date}</span>
-          </span>
+        nav.flatMap((n) =>
+          n.tab ? (
+            <a
+              href={navHref(n)}
+              data-spy={n.href ? undefined : (n.tab.spy ?? n.id)}
+              class="rail-btn flex flex-col items-center justify-center gap-1 text-2xs text-dim"
+              aria-label={n.tab.name}
+              aria-current={n.id === section ? (n.href ? 'page' : 'true') : undefined}
+            >
+              <Icon name={n.icon} class="size-[18px]" />
+              {n.tab.label}
+            </a>
+          ) : (
+            []
+          ),
         )
       }
-      <span class="hidden lg:inline">© {new Date().getFullYear()} {profile.name}</span>
-      <a href="https://github.com/donaldheddesheimer/donaldheddesheimer.github.io" class="flex h-full items-center gap-1 hover:text-text" target="_blank" rel="noopener">Source<NewTab class="size-3 shrink-0" /></a>
-    </footer>
+    </nav>
+
+    {
+      !home && (
+        <footer class="fixed right-0 bottom-0 left-14 z-30 hidden h-8 items-center gap-4 border-t border-line bg-panel px-3 readout text-2xs text-dim md:flex">
+          {console ? (
+            <span class="flex min-w-0 items-center gap-1.5">
+              SEL{' '}
+              <span class="max-w-[32ch] truncate text-muted" data-status-sel>
+                mission (illustrative)
+              </span>
+            </span>
+          ) : (
+            status && <span class="text-muted">{status}</span>
+          )}
+          <button type="button" role="switch" aria-checked="true" class="motion-switch h-full" data-motion-toggle title="Turn animation on or off">
+            Motion <span class="sw" aria-hidden="true" />
+          </button>
+          <span class="hidden xl:inline">{projects.length} projects</span>
+          <span class="hidden xl:inline">{experience.length} roles</span>
+          <span class="ml-auto hidden xl:inline">{profile.coords}</span>
+          {build && (
+            <span class="ml-auto xl:ml-0">
+              BUILD <span class="text-muted">{build.sha} {build.date}</span>
+            </span>
+          )}
+          <span class="hidden lg:inline">
+            © {new Date().getFullYear()} {profile.name}
+          </span>
+          <a href={sourceHref} class="flex h-full items-center gap-1 hover:text-text" target="_blank" rel="noopener">
+            Source
+            <NewTab class="size-3 shrink-0" />
+          </a>
+        </footer>
+      )
+    }
 
     <!-- ⌘K search -->
     <dialog id="cmdk" class="m-auto mt-[12vh] w-[min(640px,calc(100%-2rem))] rounded-2 border border-line-2 bg-panel p-0 text-text shadow-elev-3 backdrop:bg-black/60" aria-label="Search">
@@ -285,21 +363,20 @@ const search = [
     <script type="application/json" id="cmdk-data" set:html={JSON.stringify(search).replace(/</g, '\\u003c')} />
 
     <script>
-      // Scroll-spy for the rail and bottom bar; the breadcrumb names the current section too.
+      // Scroll-spy for the bottom bar (and the rail, on pages that have the sections).
       const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-spy]')];
-      const crumbNow = document.querySelector('[data-crumb-current]');
-      const sections = [...new Set(links.map((a) => a.dataset.spy!))]
+      const spies = (a: HTMLElement) => a.dataset.spy!.split(' ');
+      const sections = [...new Set(links.flatMap(spies))]
         .map((id) => document.getElementById(id))
-        .filter((el): el is HTMLElement => !!el);
+        .filter((el): el is HTMLElement => !!el)
+        .sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
       if (sections.length) {
         // The last section is too short to cross the middle band, so it wins at the bottom of the page.
         let current = sections[0].id;
         const mark = () => {
           const atBottom = innerHeight + scrollY >= document.documentElement.scrollHeight - 4;
           const id = atBottom ? sections[sections.length - 1].id : current;
-          links.forEach((a) => a.toggleAttribute('aria-current', a.dataset.spy === id));
-          const label = links.find((a) => a.dataset.spy === id && a.dataset.spyLabel)?.dataset.spyLabel;
-          if (crumbNow && label && crumbNow.textContent !== label) crumbNow.textContent = label;
+          links.forEach((a) => (spies(a).includes(id) ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
         };
         const spy = new IntersectionObserver(
           (entries) => {
@@ -447,11 +524,16 @@ const search = [
         dialog.close();
         go(item);
       });
-      // On the homepage, map objects are selected in place instead of reloading the page.
+      // With the systems map on the page, map objects are selected in place instead of reloading it.
+      // A link to the section already in the address scrolls back to it (and opens its row).
       const onConsole = () => !!document.getElementById('entity-data');
       function go(i: Item) {
-        if (i.sel && onConsole()) document.dispatchEvent(new CustomEvent('entity:reveal', { detail: i.sel }));
-        else location.href = i.href;
+        if (i.sel && onConsole()) return document.dispatchEvent(new CustomEvent('entity:reveal', { detail: i.sel }));
+        const url = new URL(i.href, location.href);
+        if (url.hash && url.hash === location.hash && url.pathname === location.pathname && url.search === location.search) {
+          document.getElementById(decodeURIComponent(url.hash.slice(1)))?.scrollIntoView();
+          dispatchEvent(new HashChangeEvent('hashchange'));
+        } else location.href = i.href;
       }
 
       // Motion switches (status bar, and the phone footer).
@@ -474,6 +556,14 @@ const search = [
       dialog.addEventListener('click', (e) => {
         if (e.target === dialog) dialog.close();
       });
+
+      // Homepage bar: clear over the opening, solid once the page scrolls.
+      const bar = document.querySelector<HTMLElement>('[data-home-bar]');
+      if (bar) {
+        const onScroll = () => bar.toggleAttribute('data-scrolled', scrollY > 24);
+        onScroll();
+        addEventListener('scroll', onScroll, { passive: true });
+      }
 
       // Rail labels open 300ms after a mouse arrives (keyboard focus shows them at once, in CSS) and stay
       // open while the pointer is on the button or its label. Escape closes them until the pointer
@@ -562,6 +652,139 @@ const search = [
           bottom: auto;
           width: auto;
           height: 2px;
+        }
+      }
+
+      /* Homepage bar: the mark and the section links over the opening, turning solid (with the name)
+         once the page scrolls. The opening's Resume is the primary one; this one stays quiet. */
+      .home-bar {
+        position: fixed;
+        inset: 0 0 auto;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        height: 3.5rem;
+        padding: 0 1rem;
+        background: linear-gradient(rgb(10 9 8 / 0.8), rgb(10 9 8 / 0));
+        transition:
+          background-color var(--dur-2) var(--ease),
+          box-shadow var(--dur-2) var(--ease),
+          opacity 250ms var(--ease);
+      }
+      .home-bar[data-scrolled] {
+        background: rgb(19 18 17 / 0.92);
+        box-shadow: 0 1px 0 var(--line);
+        backdrop-filter: blur(10px);
+      }
+      .home-mark {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        min-height: var(--h-md);
+        font-size: var(--text-sm);
+        font-weight: 600;
+      }
+      .home-mark-name {
+        opacity: 0;
+        transition: opacity var(--dur-2) var(--ease);
+      }
+      .home-bar[data-scrolled] .home-mark-name {
+        opacity: 1;
+      }
+      .home-nav {
+        display: none;
+        gap: 0.25rem;
+        font-size: var(--text-sm);
+      }
+      .home-nav a {
+        display: inline-flex;
+        align-items: center;
+        min-height: var(--h-md);
+        padding: 0 0.625rem;
+        border-radius: var(--radius-2);
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .home-nav a:hover {
+        color: var(--text);
+        background: var(--hover-bg);
+      }
+      .home-bar-end {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        margin-left: auto;
+      }
+      @media (min-width: 768px) {
+        .home-bar {
+          padding: 0 1.75rem;
+        }
+        .home-nav {
+          display: flex;
+          margin-left: auto;
+        }
+        .home-bar-end {
+          margin-left: 0;
+        }
+      }
+      /* The name needs room: it is left out on phones and while the section links share the bar with it. */
+      @media (width < 30rem), (768px <= width < 64rem) {
+        .home-mark-name {
+          display: none;
+        }
+      }
+      @media (pointer: coarse) {
+        .home-mark,
+        .home-nav a {
+          min-height: var(--h-touch);
+        }
+      }
+      /* Very short screens: the bar scrolls away with the page instead of covering it. */
+      @media (max-height: 30rem) {
+        .home-bar {
+          position: absolute;
+        }
+      }
+      /* The phone tab bar covers the page end, so the page ends above it. */
+      .home-main {
+        padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+      }
+      @media (min-width: 768px) {
+        .home-main {
+          padding-bottom: 0;
+        }
+      }
+      @media (max-height: 30rem) {
+        .home-main {
+          padding-bottom: 0;
+        }
+      }
+      .home-foot {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem 1.5rem;
+        padding: 1.5rem 1rem 1.75rem;
+        border-top: 1px solid var(--line);
+        font-size: var(--text-2xs);
+        color: var(--dim);
+      }
+      .home-foot a,
+      .home-foot button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        min-height: var(--h-md);
+      }
+      .home-foot a:hover {
+        color: var(--text);
+      }
+      @media (pointer: coarse) {
+        .home-foot a,
+        .home-foot button {
+          min-height: var(--h-touch);
         }
       }
 

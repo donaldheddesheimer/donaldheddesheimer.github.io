@@ -134,7 +134,7 @@ export const education = {
   coursework: ['Operating Systems', 'Processor Design', 'Computer Architecture', 'Computer Networks', 'Algorithms'],
 };
 
-// The homepage opens on this record. Its simulation is illustrative, not recorded data.
+// The systems map (/systems/) opens on this record. Its simulation is illustrative, not recorded data.
 export const mission = {
   exp: 'robonav',
   title: 'Rover autonomy',

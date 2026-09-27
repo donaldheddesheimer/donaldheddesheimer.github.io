@@ -1,17 +1,19 @@
 @import 'tailwindcss';
 
-/* Dark-only console palette, after Palantir's Blueprint dark theme. */
+/* Dark-only console palette, in the lab's materials: warm near-blacks and warm greys (the opening's
+   stage after hours), with the cool hues kept for meaning. Luminance follows Blueprint's dark theme,
+   so contrast is unchanged. */
 :root {
-  --bg: #111418;
-  --panel: #1c2127;
-  --panel-2: #252a31;
-  --panel-3: #2f343c;
-  --line: #383e47;
-  --line-2: #404854;
-  --text: #f6f7f9;
-  --muted: #abb3bf;
-  --dim: #8f99a8;
-  --faint: #5f6b7c;
+  --bg: #131211;
+  --panel: #1c1b19;
+  --panel-2: #252320;
+  --panel-3: #2f2c28;
+  --line: #3a3632;
+  --line-2: #47423c;
+  --text: #f5f2ed;
+  --muted: #b4ada3;
+  --dim: #9a9288;
+  --faint: #6b645b;
   --blue: #4c90f0;
   --blue-2: #2d72d2;
   --blue-3: #8abbff;
@@ -24,10 +26,10 @@
      meaning: blue = selection, green = active, turquoise = the simulation, and amber is held back
      for a warning (none today). */
   --slate: #a7b6c2;
-  --ink: #d3d8de;
-  --edge: #5d6674;
+  --ink: #ddd8d0;
+  --edge: #655e55;
   /* The recessed surface behind media and code: figures, card stills, the trace well. */
-  --well: #0d1014;
+  --well: #0e0d0c;
   /* State colors, one meaning each: hover is neutral, selection is blue, active is green. */
   --hover-bg: var(--panel-2);
   --sel-bg: color-mix(in srgb, var(--blue-2) 22%, transparent);
@@ -422,6 +424,11 @@ body > header a:focus-visible,
     width: var(--h-md);
     padding: 0;
   }
+  .btn-lg {
+    height: 2.625rem;
+    padding: 0 1.125rem;
+    font-size: var(--text-base);
+  }
 
   .seg {
     display: inline-flex;
@@ -453,8 +460,8 @@ body > header a:focus-visible,
   /* Faint dot grid behind canvases (fainter still under the map's edges: --grid-a). */
   .gridfield {
     background:
-      radial-gradient(circle, rgb(143 153 168 / var(--grid-a, 0.13)) 1px, transparent 1.2px) 0 0 / 22px 22px,
-      #13171c;
+      radial-gradient(circle, rgb(154 146 136 / var(--grid-a, 0.13)) 1px, transparent 1.2px) 0 0 / 22px 22px,
+      #151412;
   }
 
   .kv {
@@ -753,7 +760,375 @@ html[data-motion='off'] *::after {
 }
 
 /* ------------------------------------------------------------------------------------------------
-   Homepage console: identity strip, then map / stage / inspector. */
+   Homepage. One edge lines up the opening's text with every section below it: the inset, or on very
+   wide screens enough to centre a --home-max column. */
+:root {
+  --home-inset: 1rem;
+  --home-max: 100rem;
+  --home-edge: max(var(--home-inset), (100% - var(--home-max)) / 2);
+}
+@media (width >= 40rem) {
+  :root {
+    --home-inset: 1.5rem;
+  }
+}
+@media (width >= 64rem) {
+  :root {
+    --home-inset: clamp(2rem, 6vw, 7rem);
+  }
+}
+
+/* The opening: name and links over a dark stage with three dancing robots (RobotStage.astro).
+   Phones and tablets read the text, then a band of stage; from lg the stage fills the section and
+   the robots stand right of the text (--scene-shift moves the camera's frame, --scene-usable is the
+   width left for them, and the canvas skips the --scene-crop share under the text). */
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  padding-top: 3.5rem;
+  background: #0a0908;
+}
+.hero .robots.hero-stage {
+  --scene-shift: 0;
+  --scene-usable: 0.9;
+  --still-bottom: 9%;
+  --still-scale: 96%;
+  position: relative;
+  flex: none;
+  height: clamp(13rem, 31svh, 18rem);
+  /* Warm haze behind the group so the dark silhouettes separate from the page. */
+  background: radial-gradient(40% 46% at calc(50% + var(--scene-shift) * 100%) 62%, rgb(255 184 120 / 0.09), transparent 72%);
+}
+/* Scrim over the canvas: out of the text above, and down into the page below. */
+.hero .hero-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(#0a0908, transparent 12%, transparent 72%, var(--bg));
+}
+.hero-copy {
+  position: relative;
+  z-index: 1;
+  padding: 1.25rem var(--home-edge) 1.5rem;
+}
+.hero-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.hero-kicker span {
+  white-space: nowrap;
+}
+.hero-name {
+  margin-top: 0.875rem;
+  max-width: 11ch;
+  font-size: clamp(2.5rem, 11vw, 5.75rem);
+  line-height: 0.98;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  color: var(--text);
+  text-wrap: balance;
+}
+.hero-role {
+  margin-top: 0.75rem;
+  font-size: clamp(1.125rem, 4.6vw, 1.5rem);
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.hero-lede {
+  margin-top: 0.875rem;
+  max-width: 52ch;
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--muted);
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+.hero-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  margin-top: 1rem;
+  font-size: var(--text-sm);
+}
+.hero-social a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: var(--h-md);
+  color: var(--muted);
+}
+.hero-social a:hover {
+  color: var(--text);
+}
+@media (width >= 40rem) {
+  .hero-copy {
+    padding-block: 2rem;
+  }
+  .hero .robots.hero-stage {
+    height: clamp(16rem, 38svh, 24rem);
+  }
+}
+@media (width >= 64rem) {
+  .hero {
+    justify-content: center;
+    min-height: clamp(36rem, 88svh, 60rem);
+    background: linear-gradient(#070605, #0a0908 80%, var(--bg));
+  }
+  .hero .robots.hero-stage {
+    --scene-shift: 0.3;
+    --scene-usable: 0.4;
+    --scene-crop: 0.4;
+    --still-bottom: 24%;
+    --still-scale: 100%;
+    --cap-left: calc(50% + var(--scene-shift) * 100%);
+    --cap-translate: -50%;
+    --cap-bottom: 12%;
+    position: absolute;
+    inset: 0;
+    height: auto;
+    background: radial-gradient(26% 40% at calc(50% + var(--scene-shift) * 100%) 58%, rgb(255 184 120 / 0.08), transparent 72%);
+  }
+  /* The fade into the page is the top layer, so the section ends on the page colour at every x. */
+  .hero .hero-stage::after {
+    background:
+      linear-gradient(transparent 72%, var(--bg)),
+      linear-gradient(90deg, rgb(7 6 5 / 0.85), rgb(7 6 5 / 0.45) 32%, transparent 52%);
+  }
+  .hero-copy {
+    width: min(40rem, 50% - var(--home-edge));
+    margin-left: var(--home-edge);
+    padding: 2rem 0;
+    text-shadow: 0 1px 24px rgb(0 0 0 / 0.55);
+  }
+  .hero-name {
+    font-size: clamp(3.25rem, 5.4vw, 5.5rem);
+  }
+  .hero-lede {
+    font-size: var(--text-md);
+  }
+  /* The desk's monitor, on the canvas under the text column's empty space, takes clicks there. */
+  .hero-copy {
+    pointer-events: none;
+  }
+  .hero-copy > * {
+    width: fit-content;
+    max-width: 100%;
+    pointer-events: auto;
+  }
+  /* A shorter measure: easier to read, and it ends before the desk in the picture. */
+  .hero-copy > .hero-lede {
+    max-width: min(44ch, 100%);
+  }
+}
+
+/* The lab (src/scripts/lab.ts): the opening's text, the bars and the page below fade, then the stage
+   leaves the section to fill the window (the camera flies from the same picture) while the page holds
+   still under the lab's dialog. On the way back the stage fades out of its dark ground, then drops
+   back in place. */
+.hero-copy,
+.hero .hero-stage::after,
+.robots-cap,
+.robots-ctl,
+.home-sections,
+.home-foot {
+  transition: opacity 250ms var(--ease);
+}
+html[data-lab] {
+  overflow: hidden;
+}
+html[data-lab] :is(.home-bar, .hero-copy, .robots-cap, .robots-ctl, .home-sections, .home-foot),
+html[data-lab] .hero .hero-stage::after {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 250ms var(--ease),
+    visibility 0s linear 250ms;
+}
+.hero .robots-stage {
+  transition: background-color 0.4s linear;
+}
+html[data-lab]:not([data-lab='fade']) .hero {
+  z-index: 45;
+}
+html[data-lab]:not([data-lab='fade']) .hero .robots-stage {
+  --scene-crop: 0;
+  position: fixed;
+  inset: 0;
+  background-color: #0a0908;
+}
+html[data-lab='return'] .hero .robots-stage {
+  background-color: transparent;
+  transition: background-color 0.35s linear 0.8s;
+}
+
+/* Sections below the opening: a plain heading on a rule (Section.astro), content boxed like a panel. */
+.home-sections {
+  padding: 0 var(--home-edge) 3rem;
+}
+.sect {
+  padding-top: 2rem;
+}
+.sect + .sect {
+  margin-top: 2rem;
+  border-top: 1px solid var(--line);
+}
+.sect-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  min-height: var(--h-md);
+  margin-bottom: 1rem;
+}
+.sect-title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+.sect-code {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.04em;
+  color: var(--dim);
+}
+.sect-actions {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+.sect-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: var(--h-md);
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+.sect-link:hover {
+  color: var(--text);
+}
+@media (width >= 64rem) {
+  .sect {
+    padding-top: 2.5rem;
+  }
+  .sect + .sect {
+    margin-top: 2.5rem;
+  }
+  .sect-head {
+    margin-bottom: 1.25rem;
+  }
+}
+
+/* Selected work: the featured projects, large. Stills are contained, never cropped, so reports and
+   pixel art keep their whole frame. */
+.work-grid {
+  display: grid;
+  gap: 2.5rem 2rem;
+}
+@media (width >= 56rem) {
+  .work-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.work-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.work-media {
+  aspect-ratio: 16 / 10;
+  padding: clamp(0.75rem, 4%, 2rem);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-2);
+  background: radial-gradient(70% 60% at 50% 100%, rgb(255 255 255 / 0.04), transparent 72%), var(--well);
+}
+.work-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.92;
+  transition: opacity var(--dur-2) var(--ease);
+}
+.work-card:hover .work-media {
+  border-color: var(--line-2);
+}
+.work-card:hover .work-media img {
+  opacity: 1;
+}
+.work-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.75rem;
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--dim);
+}
+.work-title {
+  margin-top: 0.5rem;
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.work-card:hover .work-title a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+.work-summary {
+  margin-top: 0.5rem;
+  max-width: var(--measure);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--muted);
+}
+.work-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+.work-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--text-sm);
+  color: var(--blue-3);
+}
+.work-card .card-map {
+  position: relative;
+  z-index: 2;
+  height: var(--h-sm);
+  padding: 0 0.5rem;
+  font-size: var(--text-xs);
+}
+
+/* ------------------------------------------------------------------------------------------------
+   Systems map console (/systems/): identity strip, then map / stage / inspector. */
 .ov {
   display: flex;
   flex-direction: column;
@@ -1166,7 +1541,7 @@ html:not(.js) .ov-tabs {
   translate: -50% -50%;
   padding: 0 3px;
   border-radius: var(--radius-1);
-  background: rgb(19 23 28 / 0.84);
+  background: rgb(21 20 18 / 0.84);
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
   line-height: 1.3;
@@ -1251,7 +1626,7 @@ html:not(.js) .ov-tabs {
   translate: -50% 0;
   padding: 0 3px;
   border-radius: var(--radius-1);
-  background: rgb(19 23 28 / 0.84);
+  background: rgb(21 20 18 / 0.84);
   font-size: var(--text-2xs);
   line-height: 1.3;
   white-space: nowrap;
@@ -1305,7 +1680,7 @@ html:not(.js) .ov-tabs {
   outline-offset: 3px;
 }
 .gn.sel .lbl {
-  background: color-mix(in srgb, var(--blue-2) 50%, #13171c);
+  background: color-mix(in srgb, var(--blue-2) 50%, #151412);
   color: #fff;
 }
 .gn:focus-visible {
@@ -1463,8 +1838,10 @@ html.js .map-selbar {
   padding-top: 0.875rem;
   border-top: 1px solid var(--line);
 }
+/* minmax(0, 1fr): without it the single phone column grows to a trace's full width. */
 .ev-media {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.75rem;
 }
 @media (min-width: 640px) {
@@ -1524,7 +1901,7 @@ html.js .map-selbar {
   padding: 0.625rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-2);
-  background: rgb(17 20 24 / 0.4);
+  background: rgb(19 18 17 / 0.4);
 }
 .ev-thumb {
   width: 7.5rem;
@@ -1679,25 +2056,6 @@ html.js .map-selbar {
     margin-left: calc(var(--pad-panel) + 3rem);
   }
 }
-/* Faint labels that group the long homepage (Record, Work, Personal), sitting close to the panels
-   they head. */
-.group-label {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: calc(0.5rem - var(--gap-section));
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--dim);
-}
-.group-label::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--line);
-}
 .tl-key-bar {
   width: 14px;
   height: 8px;
@@ -1723,6 +2081,9 @@ html.js .map-selbar {
   .chip,
   .tag-link,
   .pcard .card-map,
+  .work-card .card-map,
+  .hero-social a,
+  .sect-link,
   .list-row,
   .link-row,
   .ev-row {

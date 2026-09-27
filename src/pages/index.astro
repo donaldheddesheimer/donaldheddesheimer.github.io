@@ -2,21 +2,30 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Icon, { type IconName } from '../components/Icon.astro';
-import Panel from '../components/Panel.astro';
+import Section from '../components/Section.astro';
 import NewTab from '../components/NewTab.astro';
-import Overview from '../components/Overview.astro';
+import RobotStage from '../components/RobotStage.astro';
 import Timeline from '../components/Timeline.astro';
 import Stat from '../components/Stat.astro';
 import { education, experience, offDuty, orgs, profile, skillAliases, skills, socials } from '../data/site';
 import { duration, fmtDot, fmtMonth, statusLabel } from '../lib/format';
 import { getModel } from '../lib/model';
 
-const projects = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code));
+const all = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code));
 const model = await getModel();
-// Cards lead with the featured projects, then those with a capture, so text-only cards share rows
-// and none stretches beside an image. Newest first within each; the table keeps plain newest-first.
-const rank = (p: (typeof projects)[number]) => (p.data.featured ? 0 : model.get(`project:${p.id}`).media.length ? 1 : 2);
+// Featured projects with a still lead under Selected work; every other project is listed once, under
+// More projects.
+const featured = all.flatMap((p) => {
+  const still = p.data.featured && model.get(`project:${p.id}`).media[0];
+  return still ? [{ p, still }] : [];
+});
+const projects = all.filter((p) => !featured.some((f) => f.p === p));
+// Cards lead with those with a capture, so text-only cards share rows and none stretches beside an
+// image. Newest first within each; the table keeps plain newest-first.
+const rank = (p: (typeof projects)[number]) => (model.get(`project:${p.id}`).media.length ? 0 : 1);
 const cards = [...projects].sort((a, b) => rank(a) - rank(b));
+// Links into the systems map (/systems/), which opens with that object selected.
+const mapHref = (id: string) => `/systems/?sel=${encodeURIComponent(id)}#overview`;
 const counts = {
   all: projects.length,
   active: projects.filter((p) => p.data.status === 'active').length,
@@ -42,14 +51,83 @@ const [primaryHobby, ...otherHobbies] = offDuty;
 ---
 
 <Base home>
-  <div class="mx-auto flex max-w-[1680px] flex-col gap-(--gap-section) p-3 md:p-4">
-    <!-- OVERVIEW: identity, systems map, mission / evidence, inspector -->
-    <Overview />
+  <!-- OPENING: who this is, over a stage of dancing robots (an illustration). Phones read the text,
+       then the stage; from lg the stage fills the section and the robots stand right of the text. -->
+  <section id="top" class="hero" aria-labelledby="hero-name">
+    <div class="hero-copy">
+      <p class="hero-kicker"><span>{profile.status} ·</span> <span>{profile.school}</span></p>
+      <h1 id="hero-name" class="hero-name">{profile.name}</h1>
+      <p class="hero-role">{profile.headline}</p>
+      <p class="hero-lede">{profile.tagline}</p>
+      <div class="hero-actions">
+        <a href={profile.resume} class="btn btn-primary btn-lg" target="_blank" rel="noopener"><Icon name="file" class="size-4" />Resume<NewTab class="size-3.5 shrink-0" /></a>
+        <a href="#work" class="btn btn-lg">Selected work<Icon name="arrow-right" class="size-4" /></a>
+        <a href="#contact" class="btn btn-ghost btn-lg"><Icon name="mail" class="size-4" />Contact</a>
+      </div>
+      <div class="hero-social">
+        {
+          socials
+            .filter((s) => s.id !== 'email')
+            .map((s) => (
+              <a href={s.href} target="_blank" rel="noopener">
+                <Icon name={s.icon} class="size-4" />
+                {s.label}
+                <NewTab class="size-3 shrink-0" />
+              </a>
+            ))
+        }
+      </div>
+    </div>
+    <RobotStage class="hero-stage" />
+  </section>
 
-    <p class="group-label">Record</p>
+  <div class="home-sections">
+    <!-- SELECTED WORK: the featured projects, large -->
+    <Section id="work" title="Selected work" open>
+      <a slot="actions" href="#projects" class="sect-link">More projects <Icon name="arrow-right" class="size-3.5" /></a>
+      <div class="work-grid">
+        {
+          featured.map(({ p, still }) => {
+            const d = p.data;
+            return (
+              <article data-entity={`project:${p.id}`} class="work-card">
+                <div class="work-media">
+                  <img src={still.src} alt={still.alt} loading="lazy" decoding="async" />
+                </div>
+                <p class="work-meta">
+                  <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
+                  <span>
+                    {fmtMonth(d.start)}
+                    {d.context && ` · ${d.context}`}
+                  </span>
+                </p>
+                <h3 class="work-title">
+                  <a href={`/projects/${p.id}/`} class="stretched">{d.title}</a>
+                </h3>
+                <p class="work-summary">{d.summary}</p>
+                <div class="mt-3 flex flex-wrap gap-1">
+                  {d.tags.slice(0, 4).map((t) => (
+                    <span class="tag">{t}</span>
+                  ))}
+                </div>
+                <div class="work-foot">
+                  <span class="work-more">
+                    Case study <Icon name="arrow-right" class="size-3.5" />
+                  </span>
+                  <a href={mapHref(`project:${p.id}`)} class="card-map btn btn-ghost">
+                    <Icon name="graph" class="size-3.5" />
+                    Show on map
+                  </a>
+                </div>
+              </article>
+            );
+          })
+        }
+      </div>
+    </Section>
 
     <!-- TIMELINE -->
-    <Panel id="timeline" title="Activity timeline" code="2023 → 2028" icon="timeline">
+    <Section id="timeline" title="Timeline" code="2023 → 2028">
       <div slot="actions" class="hidden items-center gap-3 readout text-2xs lg:flex">
         <span class="flex items-center gap-1.5"><span class="tl-key-bar"></span>Role</span>
         <span class="flex items-center gap-1.5"><span class="tl-key-bar is-future"></span>Ahead</span>
@@ -57,10 +135,10 @@ const [primaryHobby, ...otherHobbies] = offDuty;
         <span class="flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-green"></span>Active</span>
       </div>
       <Timeline />
-    </Panel>
+    </Section>
 
     <!-- EXPERIENCE -->
-    <Panel id="experience" title="Experience" icon="briefcase">
+    <Section id="experience" title="Experience">
       <div class="hidden grid-cols-[2.25rem_minmax(0,1.6fr)_minmax(0,1fr)_10rem_6rem_1rem] gap-3 border-b border-line bg-panel-2/50 px-(--pad-panel) py-2 kicker md:grid">
         <span></span><span>Organization / role</span><span>Location</span><span>Period</span><span>Duration</span><span></span>
       </div>
@@ -92,7 +170,7 @@ const [primaryHobby, ...otherHobbies] = offDuty;
               </summary>
               <div class="exp-detail">
                 {e.unit && <p class="mb-2.5 kicker kicker--sentence">{e.unit}</p>}
-                <ul class="max-w-(--measure) space-y-2 text-base text-[#d3d8de]">
+                <ul class="max-w-(--measure) space-y-2 text-base text-ink">
                   {e.points.map((pt) => (
                     <li class="flex gap-2.5">
                       <span class="mt-[0.55em] size-1.5 shrink-0 bg-dim" />
@@ -104,10 +182,10 @@ const [primaryHobby, ...otherHobbies] = offDuty;
                   {e.tags.map((t) => (
                     <span class="tag">{t}</span>
                   ))}
-                  <button type="button" class="btn btn-ghost" data-map-select={`org:${e.org}`} data-reveal>
+                  <a href={mapHref(`org:${e.org}`)} class="btn btn-ghost">
                     <Icon name="graph" class="size-4" />
                     Show on map
-                  </button>
+                  </a>
                 </div>
               </div>
             </details>
@@ -139,18 +217,16 @@ const [primaryHobby, ...otherHobbies] = offDuty;
             <dt>Coursework</dt>
             <dd class="flex flex-wrap gap-1.5">{education.coursework.map((c) => <span class="tag">{c}</span>)}</dd>
           </dl>
-          <button type="button" class="btn btn-ghost mt-3" data-map-select={`org:${education.org}`} data-reveal>
+          <a href={mapHref(`org:${education.org}`)} class="btn btn-ghost mt-3">
             <Icon name="graph" class="size-4" />
             Show on map
-          </button>
+          </a>
         </div>
       </details>
-    </Panel>
+    </Section>
 
-    <p class="group-label">Work</p>
-
-    <!-- PROJECTS -->
-    <Panel id="projects" title="Projects" icon="cube">
+    <!-- MORE PROJECTS: everything not under Selected work -->
+    <Section id="projects" title="More projects">
       <div slot="actions" class="flex min-w-0 items-center gap-2">
         <div class="seg max-w-full overflow-x-auto" role="group" aria-label="Filter by status">
           {
@@ -174,7 +250,7 @@ const [primaryHobby, ...otherHobbies] = offDuty;
             const still = model.get(`project:${p.id}`).media[0];
             const stat = d.stats[0];
             return (
-              <article data-status={d.status} data-entity={`project:${p.id}`} class:list={['pcard group relative flex flex-col overflow-hidden rounded-2 border border-line bg-bg/40 hover:border-edge hover:bg-panel-2/40', d.featured ? 'xl:col-span-3' : 'xl:col-span-2']}>
+              <article data-status={d.status} data-entity={`project:${p.id}`} class="pcard group relative flex flex-col overflow-hidden rounded-2 border border-line bg-bg/40 hover:border-edge hover:bg-panel-2/40 xl:col-span-2">
                 {still ? (
                   <div class:list={['relative aspect-[16/9] overflow-hidden border-b border-line', d.cardFit === 'contain' ? 'bg-well' : 'bg-bg']}>
                     <img src={still.src} alt={still.alt} loading="lazy" decoding="async" class:list={['size-full opacity-85 transition-opacity duration-(--dur-2) ease-(--ease) group-hover:opacity-100', d.cardFit === 'contain' ? 'object-contain p-3' : 'object-cover object-top']} />
@@ -193,9 +269,8 @@ const [primaryHobby, ...otherHobbies] = offDuty;
                   </div>
                 )}
                 <div class="flex flex-1 flex-col p-4">
-                  <h3 class:list={['flex items-center gap-1.5 font-semibold', d.featured ? 'text-lg' : 'text-md']}>
+                  <h3 class="text-md font-semibold">
                     <a href={`/projects/${p.id}/`} class="stretched">{d.title}</a>
-                    {d.featured && <Icon name="star" class="size-3.5 text-ink" />}
                   </h3>
                   <p class="mt-1 line-clamp-3 text-sm text-muted">{d.summary}</p>
                   <div class="mt-3 flex flex-wrap gap-1">
@@ -208,16 +283,9 @@ const [primaryHobby, ...otherHobbies] = offDuty;
                       {fmtMonth(d.start)}
                       {d.context && ` · ${d.context}`}
                     </span>
-                    {d.featured ? (
-                      <button type="button" class="card-map btn btn-ghost shrink-0" data-map-select={`project:${p.id}`} data-reveal>
-                        <Icon name="graph" class="size-3.5" />
-                        Show on map
-                      </button>
-                    ) : (
-                      <button type="button" class="card-map btn btn-ghost btn-icon shrink-0" data-map-select={`project:${p.id}`} data-reveal aria-label={`Show ${d.title} on map`} title="Show on map">
-                        <Icon name="graph" class="size-4" />
-                      </button>
-                    )}
+                    <a href={mapHref(`project:${p.id}`)} class="card-map btn btn-ghost btn-icon shrink-0" aria-label={`Show ${d.title} on map`} title="Show on map">
+                      <Icon name="graph" class="size-4" />
+                    </a>
                   </div>
                 </div>
               </article>
@@ -261,10 +329,10 @@ const [primaryHobby, ...otherHobbies] = offDuty;
         </table>
       </div>
       <p data-empty hidden class="px-4 py-10 text-center text-dim">No projects with that status.</p>
-    </Panel>
+    </Section>
 
     <!-- CAPABILITIES -->
-    <Panel id="capabilities" title="Capabilities" icon="layers">
+    <Section id="capabilities" title="Capabilities">
       <p slot="actions" class="hidden items-center gap-2 text-xs text-dim md:flex">
         <span class="tag tag-link pointer-events-none" aria-hidden="true">Skill<span class="tag-n">· n</span></span>On the map, with n projects and roles
       </p>
@@ -277,12 +345,12 @@ const [primaryHobby, ...otherHobbies] = offDuty;
                 {s.items.map((i) => {
                   const c = capability(i);
                   return c ? (
-                    <button type="button" class="tag tag-link" data-entity={c.id} data-map-select={c.id} data-reveal title={`${c.summary} Show on the map.`}>
+                    <a href={mapHref(c.id)} class="tag tag-link" data-entity={c.id} title={`${c.summary} Show on the map.`}>
                       {i}
                       <span class="tag-n" aria-hidden="true">
                         · {c.n}
                       </span>
-                    </button>
+                    </a>
                   ) : (
                     <span class="tag">{i}</span>
                   );
@@ -292,12 +360,10 @@ const [primaryHobby, ...otherHobbies] = offDuty;
           ))
         }
       </div>
-    </Panel>
-
-    <p class="group-label">Personal</p>
+    </Section>
 
     <!-- OFF DUTY -->
-    <Panel id="off-duty" title="Off duty" icon="sun">
+    <Section id="off-duty" title="Off duty">
       <div class="grid gap-3 p-3 md:grid-cols-3">
         <article class:list={['grid overflow-hidden rounded-2 border border-line bg-bg/40 md:col-span-3', primaryHobby.image && 'md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]']}>
           {
@@ -346,13 +412,13 @@ const [primaryHobby, ...otherHobbies] = offDuty;
           ))
         }
       </div>
-    </Panel>
+    </Section>
 
     <!-- CONTACT -->
-    <Panel id="contact" title="Contact" icon="radio">
+    <Section id="contact" title="Contact">
       <div class="grid items-center gap-6 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:p-6">
         <div>
-          <h2 class="text-xl font-semibold tracking-tight">Let's talk.</h2>
+          <p class="text-lg font-semibold tracking-tight">Let's talk.</p>
           <p class="mt-1.5 max-w-(--measure) text-base text-muted">
             Internships, research, or anything GPU- or robot-shaped. Email is the fastest way to reach me.
           </p>
@@ -385,8 +451,7 @@ const [primaryHobby, ...otherHobbies] = offDuty;
           </dd>
         </dl>
       </div>
-    </Panel>
-
+    </Section>
   </div>
 </Base>
 

@@ -1,6 +1,6 @@
 ---
-// The top of the homepage: who this is, then the console (systems map, mission / evidence stage,
-// inspector). Wide screens show all three panes; from lg to xl the map and inspector share a column
+// The systems map page (/systems/): its heading and who this is, then the console (systems map,
+// mission / evidence stage, inspector). Wide screens show all three panes; from lg to xl the map and inspector share a column
 // under Map | Details tabs, and below lg all three are Mission / Map / Details tabs.
 import Icon from './Icon.astro';
 import NewTab from './NewTab.astro';
@@ -11,6 +11,11 @@ import Inspector from './Inspector.astro';
 import { getModel, MISSION } from '../lib/model';
 import { education, profile, socials } from '../data/site';
 
+interface Props {
+  /** The page heading; the name and headline stand under it. */
+  title: string;
+}
+const { title } = Astro.props;
 const model = await getModel();
 const entityData = JSON.stringify({ ids: model.list().map((e) => e.id), fallback: MISSION });
 const tabs = [
@@ -20,7 +25,7 @@ const tabs = [
 ];
 ---
 
-<section id="overview" class="ov" aria-label="Overview">
+<section id="overview" class="ov" aria-labelledby="ov-title">
   <header class="ov-id panel">
     <div class="id-main">
       {
@@ -31,8 +36,8 @@ const tabs = [
         )
       }
       <div class="min-w-0">
-        <h1 class="text-xl leading-tight font-semibold tracking-tight">{profile.name}</h1>
-        <p class="mt-0.5 text-base text-muted">{profile.headline}</p>
+        <h1 id="ov-title" class="text-xl leading-tight font-semibold tracking-tight">{title}</h1>
+        <p class="mt-0.5 text-base text-muted">{profile.name} · {profile.headline}</p>
       </div>
     </div>
 

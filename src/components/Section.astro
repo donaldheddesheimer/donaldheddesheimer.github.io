@@ -1,0 +1,28 @@
+---
+// A homepage section: a plain heading on a rule, then the content, boxed like a panel unless `open`.
+// Every section is a named landmark, by its heading.
+interface Props {
+  title: string;
+  id: string;
+  /** A short readout beside the heading (a date range). */
+  code?: string;
+  /** The content sits on the page instead of in a box. */
+  open?: boolean;
+  class?: string;
+  bodyClass?: string;
+}
+const { title, id, code, open = false, class: cls, bodyClass } = Astro.props;
+---
+
+<section id={id} class:list={['sect', cls]} aria-labelledby={`${id}-title`}>
+  <header class="sect-head">
+    <h2 class="sect-title" id={`${id}-title`}>{title}</h2>
+    {code && <span class="sect-code">{code}</span>}
+    <div class="sect-actions">
+      <slot name="actions" />
+    </div>
+  </header>
+  <div class:list={[open ? 'min-w-0' : 'panel min-w-0', bodyClass]}>
+    <slot />
+  </div>
+</section>

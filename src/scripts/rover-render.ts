@@ -37,7 +37,7 @@ export function mount(root: HTMLElement) {
   const C = {} as Record<Tok, RGB>;
   for (const k of TOKENS) {
     const v = cs.getPropertyValue('--' + k).trim();
-    C[k] = hex(/^#[\da-f]{6}$/i.test(v) ? v : '#8f99a8');
+    C[k] = hex(/^#[\da-f]{6}$/i.test(v) ? v : '#9a9288');
   }
   const seedAttr = Number(root.dataset.seed);
   const base = Number.isFinite(seedAttr) && root.dataset.seed ? seedAttr : DEFAULT_SEED;

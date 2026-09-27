@@ -1,4 +1,4 @@
-// Shared selection for the homepage console. Exactly one entity is selected at a time; the map,
+// Shared selection for the systems map console (/systems/). Exactly one entity is selected at a time; the map,
 // inspector, evidence stage, timeline, cards, and ⌘K all follow it. The current id lives on
 // <html data-sel>, changes go out as `entity:select` events, and `?sel=` keeps it linkable.
 // A separate `entity:preview` event traces an entity's neighbors on hover without selecting it.

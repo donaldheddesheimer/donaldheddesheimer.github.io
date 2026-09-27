@@ -374,7 +374,8 @@ const legend = [
       const id = n.dataset.id!;
       setRove(n);
       if (id === getSel() && n.dataset.href) {
-        location.href = n.dataset.href;
+        // On the lab's monitor (/systems/screen/) the page opens in the window, not the frame.
+        (document.documentElement.dataset.embed != null ? window.top! : window).location.href = n.dataset.href;
         return;
       }
       select(id, 'map');

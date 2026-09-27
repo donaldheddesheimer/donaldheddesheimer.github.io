@@ -28,10 +28,10 @@ const { Content } = await render(project);
 
 const all = await getCollection('projects');
 const model = await getModel();
-// What this project connects to on the homepage systems map; each opens there with it selected.
+// What this project connects to on the systems map; each opens there with it selected.
 const groups = model.links(`project:${project.id}`).filter((g) => g.items.every((l) => l.type !== 'person'));
 const linkCount = groups.reduce((n, g) => n + g.items.length, 0);
-const mapHref = (id: string) => `/?sel=${encodeURIComponent(id)}#overview`;
+const mapHref = (id: string) => `/systems/?sel=${encodeURIComponent(id)}#overview`;
 
 // Related projects: most shared tags.
 const related = all

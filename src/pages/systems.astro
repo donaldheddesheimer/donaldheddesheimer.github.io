@@ -1,0 +1,19 @@
+---
+// The systems map, off the homepage: map, mission / evidence stage, and inspector, sharing one
+// selection that `?sel=` keeps linkable.
+import Base from '../layouts/Base.astro';
+import Overview from '../components/Overview.astro';
+import { profile } from '../data/site';
+---
+
+<Base
+  title={`Systems map · ${profile.name}`}
+  description="How my organizations, projects, and capabilities connect, with the evidence behind each."
+  crumb={[{ label: 'Systems map' }]}
+  section="systems"
+  console
+>
+  <div class="mx-auto flex max-w-[1680px] flex-col gap-(--gap-section) p-3 md:p-4">
+    <Overview title="Systems map" />
+  </div>
+</Base>

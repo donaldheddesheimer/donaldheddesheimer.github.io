@@ -1,4 +1,4 @@
-// The homepage console's single source of truth: every entity (the person, organizations, projects,
+// The systems map console's single source of truth: every entity (the person, organizations, projects,
 // capabilities), the typed relations between them, and where each one leads.
 // The systems map, inspector, evidence views, timeline, project pages, and ⌘K search all read it.
 // Build time only (it reads the content collection). Everything it says comes from src/data/site.ts
@@ -109,7 +109,7 @@ function buildModel(projects: Project[]) {
       ['Location', profile.location],
     ],
     actions: [
-      { label: 'View experience', href: '#experience', icon: 'arrow-right' },
+      { label: 'View experience', href: '/#experience', icon: 'arrow-right' },
       { label: 'Resume', href: profile.resume, external: true },
     ],
   });
@@ -135,14 +135,14 @@ function buildModel(projects: Project[]) {
       e.period = `${fmtMonth(exp.start)} – ${fmtMonth(exp.end)} · ${duration(exp.start, exp.end)}`;
       e.summary = exp.unit ? `${exp.role}, ${exp.unit}` : exp.role;
       e.props.push(['Role', exp.role], ...(exp.unit ? ([['Unit', exp.unit]] as [string, string][]) : []), ['Location', exp.location]);
-      e.href = `#exp-${exp.id}`;
+      e.href = `/#exp-${exp.id}`;
       e.actions.push({ label: 'Open record', href: e.href, icon: 'arrow-right' });
     } else if (o.id === education.org) {
       e.status = { tone: 'enrolled', label: 'Enrolled' };
       e.period = `${fmtMonth(education.start)} – ${fmtMonth(education.end)} (expected)`;
       e.summary = `${education.degree}, ${education.program}`;
       e.props.push(['Thread', education.thread], ['GPA', education.gpa]);
-      e.href = '#exp-education';
+      e.href = '/#exp-education';
       e.actions.push({ label: 'Open record', href: e.href, icon: 'arrow-right' });
     }
     entities.set(id, e);
