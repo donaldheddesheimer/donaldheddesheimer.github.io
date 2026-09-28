@@ -1,0 +1,57 @@
+
+> donaldheddesheimer.github.io@0.1.0 build
+> astro build
+
+00:41:08 [content] Syncing content
+00:41:08 [content] Synced content
+00:41:08 [types] Generated 696ms
+00:41:08 [build] output: "static"
+00:41:08 [build] mode: "static"
+00:41:08 [build] directory: /home/user/donaldheddesheimer.github.io/dist/
+00:41:08 [build] Collecting build info...
+00:41:08 [build] ✓ Completed in 712ms.
+00:41:08 [build] Building static entrypoints...
+00:41:09 [vite] ✓ built in 670ms
+00:41:09 [WARN] [vite] [plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+00:41:09 [vite] ✓ built in 461ms
+00:41:09 [build] Rearranging server assets...
+
+ generating static routes 
+00:41:09   ├─ /404.html (+16ms) 
+00:41:09   ├─ /computer/projects/useless-machine/index.html (+4ms) 
+00:41:09   ├─ /computer/projects/swerve-drive/index.html (+2ms) 
+00:41:09   ├─ /computer/projects/smart-bin/index.html (+2ms) 
+00:41:09   ├─ /computer/projects/travelmate/index.html (+2ms) 
+00:41:09   ├─ /computer/projects/bytefight/index.html (+2ms) 
+00:41:09   ├─ /computer/projects/skyblock-bazaar/index.html (+7ms) 
+00:41:09   ├─ /computer/projects/nn-mnist/index.html (+2ms) 
+00:41:09   ├─ /computer/projects/claude-status/index.html (+3ms) 
+00:41:09   ├─ /computer/projects/cucadence/index.html (+2ms) 
+00:41:09   ├─ /computer/projects/fluxion/index.html (+2ms) 
+00:41:09   ├─ /computer/projects/traffic-ops-center/index.html (+2ms) 
+00:41:09   ├─ /computer/systems/index.html (+483ms) 
+00:41:10   ├─ /computer/index.html (+8ms) 
+00:41:10   ├─ /projects/useless-machine/index.html (+2ms) 
+00:41:10   ├─ /projects/swerve-drive/index.html (+2ms) 
+00:41:10   ├─ /projects/smart-bin/index.html (+2ms) 
+00:41:10   ├─ /projects/travelmate/index.html (+2ms) 
+00:41:10   ├─ /projects/bytefight/index.html (+3ms) 
+00:41:10   ├─ /projects/skyblock-bazaar/index.html (+4ms) 
+00:41:10   ├─ /projects/nn-mnist/index.html (+1ms) 
+00:41:10   ├─ /projects/claude-status/index.html (+1ms) 
+00:41:10   ├─ /projects/cucadence/index.html (+1ms) 
+00:41:10   ├─ /projects/fluxion/index.html (+1ms) 
+00:41:10   ├─ /projects/traffic-ops-center/index.html (+2ms) 
+00:41:10   ├─ /prototype/index.html (+5ms) 
+00:41:10   ├─ /systems/screen/index.html (+403ms) 
+00:41:10   ├─ /systems/index.html (+360ms) 
+00:41:10   ├─ /index.html (+5ms) 
+00:41:10 ✓ Completed in 1.37s.
+
+00:41:10 [build] ✓ Completed in 2.54s.
+00:41:10 [build] 29 page(s) built in 3.25s
+00:41:10 [build] Complete!

@@ -1,0 +1,13 @@
+# 2026-09-28T00:30:14Z · 1440x900, SwiftShader
+{"label":"tabbed to entry","pc":null,"focus":"enter link","history":2,"state":null,"title":"The lab · Donald Heddesheimer"}
+{"label":"desk","pc":"desk","focus":"Use the computer","history":3,"state":{"pc":true},"title":"The lab · Donald Heddesheimer"}
+{"label":"read","pc":"read","focus":"pc-frame","history":3,"state":{"pc":true},"title":"Portfolio · Donald Heddesheimer"}
+frame focused true
+tab inside frame Portfolio
+{"label":"escape from page","pc":"desk","focus":"Use the computer","history":3,"state":{"pc":true},"title":"The lab · Donald Heddesheimer"}
+{"label":"escape from desk","pc":null,"focus":"enter link","history":3,"state":null,"title":"The lab · Donald Heddesheimer"}
+{"label":"in again","pc":"read","focus":"pc-frame","history":3,"state":{"pc":true},"title":"Portfolio · Donald Heddesheimer"}
+{"label":"cuCadence in the monitor","pc":"read","focus":"pc-frame","history":3,"state":{"pc":true},"title":"cuCadence · Portfolio"}
+ordinary /projects/cucadence/
+{"label":"overview again","pc":"read","focus":"pc-frame","history":3,"state":{"pc":true},"title":"Portfolio · Donald Heddesheimer"}
+{"label":"browser Back","pc":null,"focus":"enter link","history":3,"state":null,"title":"The lab · Donald Heddesheimer"}

@@ -1,0 +1,9 @@
+# 2026-09-28T00:29:18Z · same machine, prefers-reduced-motion: reduce
+browser 141.0.7390.37 | viewport 1440x900 | reduced motion true
+{"label":"opening (still)","state":"opening","drawnFramesPerSec":0,"rafPerSec":60,"drawnFrames":0,"callsPerFrame":{"median":0,"max":0},"trianglesPerFrame":{"median":0,"max":0},"buffer":"1440x900","jsHeapMB":10.7}
+{"label":"workstation","state":"desk","drawnFramesPerSec":0,"rafPerSec":60,"drawnFrames":0,"callsPerFrame":{"median":0,"max":0},"trianglesPerFrame":{"median":0,"max":0},"buffer":"1440x900","jsHeapMB":10.7}
+{"label":"reading, 0-6 s (robots easing to rest)","state":"read","drawnFramesPerSec":0,"rafPerSec":60,"drawnFrames":0,"callsPerFrame":{"median":0,"max":0},"trianglesPerFrame":{"median":0,"max":0},"buffer":"1440x900","jsHeapMB":10.7}
+{"label":"reading, 6-12 s","state":"read","drawnFramesPerSec":0,"rafPerSec":60,"drawnFrames":0,"callsPerFrame":{"median":0,"max":0},"trianglesPerFrame":{"median":0,"max":0},"buffer":"1440x900","jsHeapMB":10.7}
+{"label":"reading, 12-18 s (settled)","state":"read","drawnFramesPerSec":0,"rafPerSec":60,"drawnFrames":0,"callsPerFrame":{"median":0,"max":0},"trianglesPerFrame":{"median":0,"max":0},"buffer":"1440x900","jsHeapMB":10.7}
+{"label":"opening again","state":"opening","drawnFramesPerSec":0,"rafPerSec":60,"drawnFrames":0,"callsPerFrame":{"median":0,"max":0},"trianglesPerFrame":{"median":0,"max":0},"buffer":"1440x900","jsHeapMB":10.7}
+{"label":"scrolled past the opening","state":"opening","drawnFramesPerSec":0,"rafPerSec":60,"drawnFrames":0,"callsPerFrame":{"median":0,"max":0},"trianglesPerFrame":{"median":0,"max":0},"buffer":"1440x900","jsHeapMB":10.7}

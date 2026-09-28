@@ -1,0 +1,471 @@
+---
+// PROTOTYPE (lab-prototype, 2026-09-27): the opening of /prototype/, a robotics lab after hours with the
+// portfolio on the desk's computer. Forked from RobotStage.astro (the released opening), which is left as
+// it is. The figure holds the scene (src/scripts/lab-prototype/scene.ts) over a composed SVG still of the
+// robots, which renders with the page and stays as the fallback (no JS, no WebGL). The dialog is the lab
+// once entered: its controls, and the frame the portfolio reads in (src/scripts/lab-prototype/computer.ts).
+// Save-Data leaves the scene unloaded until asked for (the still, with a Play button). Reduced motion (or
+// Motion off) loads it and holds one composed moment; entering cuts between the views.
+import { getCollection } from 'astro:content';
+import Icon from './Icon.astro';
+import { profile } from '../data/site';
+import { fmtMonth, statusLabel } from '../lib/format';
+import { getModel } from '../lib/model';
+
+interface Props {
+  class?: string;
+}
+const { class: cls } = Astro.props;
+
+// The monitor's picture before the page is laid over it: the Portfolio home's first screen.
+const model = await getModel();
+const featured = (await getCollection('projects'))
+  .sort((a, b) => b.data.code.localeCompare(a.data.code))
+  .flatMap((p) => {
+    const still = p.data.featured && model.get(`project:${p.id}`).media[0];
+    return still ? [{ title: p.data.title, meta: `${statusLabel[p.data.status]} · ${fmtMonth(p.data.start)}`, img: still.src }] : [];
+  });
+const screen = { kicker: `${profile.status} · ${profile.school}`, name: profile.name, role: profile.headline, cards: featured };
+---
+
+<figure data-lab-root data-screen={JSON.stringify(screen)} class:list={['lab', cls]}>
+  <div class="lab-canvas" data-lab-stage>
+    <svg class="still" viewBox="0 0 600 420" preserveAspectRatio="xMidYMax meet" overflow="visible" aria-hidden="true">
+      <defs>
+        <radialGradient id="ls-pool" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#4a3b2e" stop-opacity="0.95" />
+          <stop offset="0.6" stop-color="#2e2620" stop-opacity="0.6" />
+          <stop offset="1" stop-color="#2e2620" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="ls-shadow" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#000" stop-opacity="0.7" />
+          <stop offset="1" stop-color="#000" stop-opacity="0" />
+        </radialGradient>
+        <linearGradient id="ls-ivory" x1="0" x2="1">
+          <stop offset="0" stop-color="#ece5d6" />
+          <stop offset="1" stop-color="#a9a293" />
+        </linearGradient>
+        <linearGradient id="ls-graphite" x1="0" x2="1">
+          <stop offset="0" stop-color="#6d7681" />
+          <stop offset="1" stop-color="#3f464f" />
+        </linearGradient>
+        <linearGradient id="ls-terracotta" x1="0" x2="1">
+          <stop offset="0" stop-color="#cf7f60" />
+          <stop offset="1" stop-color="#8c4c37" />
+        </linearGradient>
+      </defs>
+      <!-- The three robots of RobotStage.astro's still, without its desk. -->
+      <ellipse cx="310" cy="382" rx="270" ry="42" fill="url(#ls-pool)" />
+      <ellipse cx="150" cy="373" rx="70" ry="10" fill="url(#ls-shadow)" />
+      <ellipse cx="488" cy="379" rx="48" ry="8" fill="url(#ls-shadow)" />
+      <ellipse cx="300" cy="390" rx="66" ry="10" fill="url(#ls-shadow)" />
+      <g transform="translate(150 372) scale(0.88) translate(-163 -382)">
+        <g stroke-linecap="round" fill="none">
+          <path d="M145 300 140 336 142 372M178 300 183 336 184 372" stroke="url(#ls-graphite)" stroke-width="20" />
+          <path d="M112 216 86 180 72 146M210 216 236 180 250 146" stroke="url(#ls-graphite)" stroke-width="15" />
+        </g>
+        <g fill="#1b1e23">
+          <rect x="120" y="368" width="42" height="14" rx="5" /><rect x="164" y="368" width="42" height="14" rx="5" />
+          <circle cx="140" cy="336" r="10" /><circle cx="183" cy="336" r="10" />
+          <circle cx="86" cy="180" r="9" /><circle cx="236" cy="180" r="9" />
+          <circle cx="70" cy="142" r="10" /><circle cx="252" cy="142" r="10" />
+          <rect x="130" y="284" width="62" height="24" rx="8" />
+        </g>
+        <rect x="112" y="204" width="98" height="84" rx="16" fill="url(#ls-graphite)" />
+        <circle cx="112" cy="214" r="15" fill="url(#ls-graphite)" /><circle cx="210" cy="214" r="15" fill="url(#ls-graphite)" />
+        <rect x="138" y="222" width="46" height="30" rx="5" fill="#1b1e23" />
+        <rect x="130" y="158" width="62" height="46" rx="20" fill="url(#ls-graphite)" />
+        <rect x="135" y="172" width="52" height="15" rx="7" fill="#07090b" />
+        <rect x="147" y="177.5" width="28" height="4" rx="2" fill="#9cc4ff" />
+      </g>
+      <g transform="translate(488 378) scale(0.96) translate(-444 -381)">
+        <g stroke-linecap="round" fill="none" stroke="url(#ls-terracotta)">
+          <path d="M433 320 427 347 428 374M451 320 457 347 458 374" stroke-width="13" />
+          <path d="M476 266 500 266 500 242M408 266 384 266 384 290" stroke-width="11" />
+        </g>
+        <g fill="#262a30">
+          <rect x="414" y="370" width="30" height="11" rx="4" /><rect x="444" y="370" width="30" height="11" rx="4" />
+          <circle cx="427" cy="347" r="7" /><circle cx="457" cy="347" r="7" />
+          <circle cx="500" cy="266" r="6" /><circle cx="384" cy="266" r="6" />
+          <circle cx="500" cy="238" r="8" /><circle cx="384" cy="294" r="8" />
+          <rect x="421" y="307" width="44" height="18" rx="8" />
+        </g>
+        <rect x="410" y="252" width="66" height="60" rx="22" fill="url(#ls-terracotta)" />
+        <circle cx="442" cy="220" r="31" fill="url(#ls-terracotta)" />
+        <rect x="420" y="209" width="44" height="19" rx="9.5" fill="#07090b" />
+        <circle cx="433" cy="218.5" r="3.5" fill="#ffe3b8" /><circle cx="451" cy="218.5" r="3.5" fill="#ffe3b8" />
+      </g>
+      <g transform="translate(300 390) scale(1.06) translate(-304 -382)">
+        <g stroke-linecap="round" fill="none" stroke="url(#ls-ivory)">
+          <path d="M292 286 287 330 287 372M311 286 316 330 318 372" stroke-width="15" />
+          <path d="M334 200 362 170 378 132M269 200 246 226 266 254" stroke-width="12" />
+        </g>
+        <g fill="#262a30">
+          <rect x="268" y="368" width="36" height="13" rx="5" /><rect x="304" y="368" width="36" height="13" rx="5" />
+          <circle cx="287" cy="330" r="8" /><circle cx="316" cy="330" r="8" />
+          <circle cx="334" cy="200" r="8" /><circle cx="269" cy="200" r="8" />
+          <circle cx="362" cy="170" r="7" /><circle cx="246" cy="226" r="7" />
+          <rect x="370" y="118" width="16" height="18" rx="5" /><rect x="258" y="248" width="16" height="16" rx="5" />
+          <rect x="281" y="268" width="42" height="24" rx="8" />
+          <rect x="296" y="176" width="12" height="16" rx="3" />
+          <rect x="300.5" y="106" width="3" height="24" />
+        </g>
+        <rect x="271" y="190" width="62" height="80" rx="13" fill="url(#ls-ivory)" />
+        <rect x="286" y="208" width="32" height="26" rx="5" fill="#262a30" />
+        <circle cx="310" cy="214" r="2.5" fill="#ffb561" />
+        <rect x="272" y="128" width="60" height="50" rx="13" fill="url(#ls-ivory)" />
+        <rect x="280" y="141" width="44" height="21" rx="8" fill="#07090b" />
+        <rect x="288" y="148" width="8" height="6" rx="2" fill="#ffb561" /><rect x="308" y="148" width="8" height="6" rx="2" fill="#ffb561" />
+        <circle cx="302" cy="104" r="4.5" fill="#ffb561" />
+      </g>
+    </svg>
+  </div>
+  <figcaption class="lab-cap"><span class="cap-title">After hours in the lab.</span> <span class="cap-note">Illustration</span></figcaption>
+  <div class="lab-ctl">
+    <button type="button" class="lab-pill lab-toggle" data-robot-toggle data-state="paused" aria-label="Play the robot animation">
+      <Icon name="pause" class="i-pause size-3.5" />
+      <Icon name="play" class="i-play size-3.5" />
+      <span data-robot-toggle-label>Play</span>
+    </button>
+  </div>
+</figure>
+
+<dialog class="pc" data-pc-dialog aria-labelledby="pc-title" tabindex="-1" data-name={profile.name}>
+  <div class="pc-top">
+    <button type="button" class="lab-pill in-desk" data-pc-leave><Icon name="arrow-left" class="size-3.5" />Leave the lab</button>
+    <button type="button" class="lab-pill in-read" data-pc-desk><Icon name="arrow-left" class="size-3.5" />Back to desk</button>
+    <h2 id="pc-title" class="pc-title" data-pc-title>The lab</h2>
+    <div class="pc-end">
+      <a href="/" class="lab-pill in-read in-full" data-pc-ordinary>Open ordinary page<Icon name="external" class="size-3.5" /></a>
+      <button type="button" class="lab-pill in-read in-full" data-pc-leave>Leave the lab</button>
+      <button type="button" class="lab-pill lab-toggle in-desk" data-robot-toggle data-state="playing" aria-label="Pause the robot animation">
+        <Icon name="pause" class="i-pause size-3.5" />
+        <Icon name="play" class="i-play size-3.5" />
+        <span data-robot-toggle-label>Pause</span>
+      </button>
+    </div>
+  </div>
+  <button type="button" class="lab-pill pc-use in-desk" data-pc-use>Use the computer<Icon name="arrow-right" class="size-3.5" /></button>
+</dialog>
+
+<script>
+  import type { LabScene, ScreenData } from '../scripts/lab-prototype/scene';
+  import { initComputer } from '../scripts/lab-prototype/computer';
+
+  const root = document.querySelector<HTMLElement>('[data-lab-root]');
+  const dialog = document.querySelector<HTMLDialogElement>('[data-pc-dialog]');
+  const toggle = root?.querySelector<HTMLButtonElement>('[data-robot-toggle]');
+  if (root && dialog && toggle) {
+    let scene: LabScene | null = null;
+    let loading: Promise<LabScene | null> | null = null;
+    let screen: ScreenData | null = null;
+    try {
+      screen = JSON.parse(root.dataset.screen ?? 'null');
+    } catch {}
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    const fail = () => {
+      delete root.dataset.offer;
+      root.setAttribute('data-failed', '');
+    };
+    const load = (play = false) =>
+      (loading ??= import('../scripts/lab-prototype/scene')
+        .then((m) => {
+          scene = m.mountLab(root, { play, toggles: [...document.querySelectorAll<HTMLButtonElement>('[data-robot-toggle]')], screen, avoid: document.querySelector<HTMLElement>('[data-lab-avoid]') });
+          delete root.dataset.offer;
+          if (!scene) fail();
+          return scene;
+        })
+        .catch(() => {
+          fail();
+          return null;
+        }));
+    const idle = (fn: () => void) => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 1200 }) : setTimeout(fn, 150));
+    // Text first: the scene is requested once the page has loaded. With reduced motion it still loads,
+    // and holds still; with Save-Data it waits to be asked (Play, or entering the lab).
+    toggle.addEventListener('click', () => {
+      if (!loading) load(true);
+    });
+    if (saveData) root.dataset.offer = '';
+    else {
+      const start = () => idle(() => load(false));
+      if (document.readyState === 'complete') start();
+      else addEventListener('load', start, { once: true });
+    }
+    addEventListener('pagehide', (e) => {
+      if (e.persisted || !scene) return;
+      scene.dispose();
+      scene = null;
+      loading = null;
+    });
+    initComputer(root, dialog, () => scene, () => load(false));
+  }
+</script>
+
+<style>
+  .lab {
+    position: relative;
+    margin: 0;
+  }
+  .lab-canvas {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background-color: #0a0908;
+  }
+  .lab-canvas :global(canvas) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.7s ease;
+  }
+  [data-drawn] .lab-canvas :global(canvas) {
+    opacity: 1;
+  }
+  [data-failed] .lab-canvas :global(canvas) {
+    display: none;
+  }
+  /* Reading: the room steps back behind the page while the robots come to rest (scene.ts quiet()). */
+  .lab-canvas::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgb(5 4 3 / 0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s var(--ease);
+  }
+  :global(html[data-pc='read']) .lab-canvas::after {
+    opacity: 1;
+  }
+  /* The still stands where the dancers will, then gives way once the scene has drawn. */
+  .still {
+    position: absolute;
+    bottom: var(--still-bottom, 8%);
+    left: var(--still-x, 50%);
+    width: min(var(--still-w, 90%), 780px);
+    height: 80%;
+    translate: -50% 0;
+    transition: opacity 0.25s ease;
+  }
+  [data-drawn]:not([data-failed]) .still {
+    opacity: 0;
+  }
+
+  .lab-cap {
+    position: absolute;
+    left: var(--cap-left, 1rem);
+    bottom: var(--cap-bottom, 0.875rem);
+    z-index: 2;
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .cap-title {
+    font-style: italic;
+  }
+  .cap-note {
+    margin-left: 0.375rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .lab-ctl {
+    position: absolute;
+    right: 1rem;
+    bottom: 0.625rem;
+    z-index: 2;
+  }
+  .lab-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: var(--h-md);
+    padding: 0 0.75rem;
+    border-radius: 999px;
+    background: rgb(22 20 18 / 0.72);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+    backdrop-filter: blur(6px);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    touch-action: manipulation;
+  }
+  .lab-pill:hover {
+    background: rgb(46 42 38 / 0.92);
+  }
+  .lab:not([data-mounted], [data-offer]) .lab-toggle,
+  .lab[data-failed] .lab-toggle {
+    display: none;
+  }
+  .lab-toggle[data-state='playing'] :global(.i-play),
+  .lab-toggle[data-state='paused'] :global(.i-pause) {
+    display: none;
+  }
+  @media (pointer: coarse) {
+    .lab-pill {
+      height: var(--h-touch);
+      padding: 0 1rem;
+    }
+  }
+  /* Stacked (phones, and any window the lab can't open in): the picture is a band, its caption and
+     controls a row under it, in the page's flow. */
+  @media not ((width >= 64rem) and (height >= 36rem) and (min-aspect-ratio: 3/2)) {
+    .lab {
+      display: grid;
+      grid-template:
+        'stage stage' var(--stage-h, 15rem)
+        'cap ctl' auto
+        / minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: 0.75rem;
+    }
+    .lab-canvas {
+      position: relative;
+      grid-area: stage;
+      align-self: stretch;
+    }
+    .lab-cap,
+    .lab-ctl {
+      position: relative;
+      inset: auto;
+      padding-block: 0.625rem;
+    }
+    .lab-cap {
+      grid-area: cap;
+      padding-left: var(--home-inset, 1rem);
+    }
+    .lab-ctl {
+      grid-area: ctl;
+      padding-right: var(--home-inset, 1rem);
+    }
+  }
+  @media (width < 40rem) {
+    .lab-ctl .lab-toggle {
+      justify-content: center;
+      aspect-ratio: 1;
+      padding: 0;
+    }
+    .lab-ctl .lab-toggle [data-robot-toggle-label] {
+      display: none;
+    }
+    .lab-cap {
+      font-size: var(--text-xs);
+      white-space: normal;
+    }
+    .cap-note {
+      display: block;
+      margin-left: 0;
+    }
+  }
+
+  /* The lab, once entered: the whole window, see-through but for its controls and the page's frame
+     (added by computer.ts), over the scene, which fills the window under it. */
+  .pc {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    background: transparent;
+    color: var(--text);
+    outline: none;
+  }
+  .pc::backdrop {
+    background: transparent;
+  }
+  .pc-top {
+    position: absolute;
+    inset: 0.875rem 1rem auto;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .pc-title {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text);
+    text-shadow: 0 1px 12px rgb(0 0 0 / 0.8);
+  }
+  .pc-end {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+  .pc-use {
+    position: absolute;
+    left: var(--x, 50%);
+    top: var(--y, 70%);
+    z-index: 2;
+    translate: -50% 0;
+    height: var(--h-lg, 2.5rem);
+    padding: 0 1.125rem;
+    background: var(--text);
+    box-shadow: 0 6px 24px rgb(0 0 0 / 0.5);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--bg);
+  }
+  .pc-use:hover {
+    background: #fff;
+  }
+  /* Each view's controls, once the camera has landed there. */
+  .pc :is(.in-desk, .in-read, .in-full) {
+    display: none;
+  }
+  :global(html[data-pc='desk']:not([data-pc-full])) .pc .in-desk,
+  :global(html[data-pc='read']:not([data-pc-full])) .pc .in-read,
+  :global(html[data-pc-full]) .pc .in-full {
+    display: inline-flex;
+    animation: pc-in 0.25s var(--ease);
+  }
+  .pc-title {
+    opacity: 0;
+    transition: opacity 0.25s var(--ease);
+  }
+  :global(html:is([data-pc='desk'], [data-pc='read'], [data-pc-full])) .pc-title {
+    opacity: 1;
+  }
+  @keyframes pc-in {
+    from {
+      opacity: 0;
+    }
+  }
+  .pc :global(.pc-frame) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 0;
+    background: var(--bg);
+    transform-origin: 0 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s var(--ease);
+  }
+  :global(html[data-pc='read']) .pc :global(.pc-frame),
+  :global(html[data-pc-full]) .pc :global(.pc-frame) {
+    pointer-events: auto;
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06);
+  }
+  :global(html[data-pc-full]) .pc :global(.pc-frame) {
+    top: 4rem;
+    width: 100% !important;
+    height: calc(100% - 4rem) !important;
+    transform: none !important;
+  }
+  :global(html[data-pc-loading]) [data-lab-enter] {
+    cursor: progress;
+  }
+</style>

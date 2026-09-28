@@ -1,0 +1,17 @@
+# 2026-09-28T00:41:56Z · 1440x900, SwiftShader
+{"label":"loaded","url":"/prototype/","pc":null,"history":2,"state":null,"y":0,"focus":"min-h-dvh"}
+{"label":"reading (address unchanged, one entry)","url":"/prototype/","pc":"read","history":3,"state":{"pc":true},"y":120,"focus":"pc-frame"}
+{"label":"frame scroll after read -> desk -> read","frameY":700}
+{"label":"left with Escape (scroll 120 and the entry focused expected)","url":"/prototype/","pc":null,"history":3,"state":null,"y":120,"focus":"entry link"}
+{"label":"Back","url":"/prototype/","pc":null,"history":3,"state":null,"y":0,"focus":"entry link"}
+{"label":"Forward","url":"/prototype/","pc":null,"history":3,"state":{"pc":true},"y":0,"focus":"entry link"}
+{"label":"entered again after Forward (no new entry)","url":"/prototype/","pc":"read","history":3,"state":{"pc":true},"y":0,"focus":"pc-frame"}
+{"label":"résumé from the monitor","popupUrl":":","download":null,"labStill":"read"}
+{"label":"repository link from the monitor","popup":"https://github.com/donald-heddesheimer/cadence","labStill":"read"}
+{"label":"same-origin links the computer has no page for (case study)","count":0,"sample":[]}
+{"label":"Copy address in the monitor","button":"Copied","clipboard":"donaldheddes@gmail.com"}
+{"label":"reloaded while reading","url":"/prototype/","pc":null,"history":3,"state":null,"y":0,"focus":"min-h-dvh"}
+{"label":"Back from another page, left from inside the lab","url":"/prototype/","pc":null,"history":5,"state":null,"y":0,"focus":"min-h-dvh","restoredFromCache":false}
+{"label":"opened on its own","from":"/computer/","to":"/"}
+{"label":"opened on its own","from":"/computer/projects/cucadence/#objective","to":"/projects/cucadence/#objective"}
+{"label":"opened on its own","from":"/computer/systems/?sel=project:cucadence","to":"/systems/?sel=project:cucadence"}

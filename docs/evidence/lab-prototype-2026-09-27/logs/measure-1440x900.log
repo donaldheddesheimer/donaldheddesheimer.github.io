@@ -1,0 +1,10 @@
+# 2026-09-28T00:26:31Z · Intel Xeon @ 2.10GHz, 4 vCPU, 15 GB RAM, no GPU · headless Chromium, ANGLE on SwiftShader (CPU)
+browser 141.0.7390.37 | viewport 1440x900 | reduced motion false
+{"label":"opening, dancing","state":"opening","drawnFramesPerSec":2,"rafPerSec":2,"drawnFrames":12,"callsPerFrame":{"median":312,"max":312},"trianglesPerFrame":{"median":100600,"max":100600},"buffer":"1440x900","jsHeapMB":11.3}
+{"label":"workstation","state":"desk","drawnFramesPerSec":1.33,"rafPerSec":1.3,"drawnFrames":8,"callsPerFrame":{"median":303,"max":303},"trianglesPerFrame":{"median":98228,"max":98228},"buffer":"1440x900","jsHeapMB":11.3}
+{"label":"reading, 0-6 s (robots easing to rest)","state":"read","drawnFramesPerSec":1.5,"rafPerSec":1.8,"drawnFrames":9,"callsPerFrame":{"median":168,"max":170},"trianglesPerFrame":{"median":57814,"max":58922},"buffer":"1440x900","jsHeapMB":11.3}
+{"label":"reading, 6-12 s","state":"read","drawnFramesPerSec":0,"rafPerSec":58.5,"drawnFrames":0,"callsPerFrame":{"median":0,"max":0},"trianglesPerFrame":{"median":0,"max":0},"buffer":"1440x900","jsHeapMB":11.3}
+{"label":"reading, 12-18 s (settled)","state":"read","drawnFramesPerSec":0,"rafPerSec":60,"drawnFrames":0,"callsPerFrame":{"median":0,"max":0},"trianglesPerFrame":{"median":0,"max":0},"buffer":"1440x900","jsHeapMB":11.3}
+{"label":"opening again","state":"opening","drawnFramesPerSec":2.5,"rafPerSec":2.5,"drawnFrames":15,"callsPerFrame":{"median":312,"max":312},"trianglesPerFrame":{"median":100600,"max":100600},"buffer":"1440x900","jsHeapMB":11.3}
+{"label":"opening, paused","state":"opening","drawnFramesPerSec":0,"rafPerSec":42.5,"drawnFrames":0,"callsPerFrame":{"median":0,"max":0},"trianglesPerFrame":{"median":0,"max":0},"buffer":"1440x900","jsHeapMB":11.3}
+{"label":"scrolled past the opening","state":"opening","drawnFramesPerSec":0,"rafPerSec":60.2,"drawnFrames":0,"callsPerFrame":{"median":0,"max":0},"trianglesPerFrame":{"median":0,"max":0},"buffer":"1440x900","jsHeapMB":11.3}

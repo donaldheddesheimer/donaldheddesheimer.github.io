@@ -1,6 +1,198 @@
 # Robotics lab implementation handoff
 
-## Current checkpoint: release pass, 2026-09-27 (Claude)
+## Current checkpoint: computer-first prototype, 2026-09-28 (Claude)
+
+**Status: waiting for visual approval of the composition and the reading experience.** Nothing here is pushed, merged or deployed.
+
+- **Branch:** `computer-first-prototype`, local only, from `origin/main` at `67f036f`. This pass is the commit that adds this section: `git log -1 -- docs/lab-scene-handoff.md`.
+- **Brief:** "Handoff: Computer-first robotics portfolio prototype". One focused pass, stopping after the opening, the workstation view, a real project read in the monitor, and the mobile and reduced-motion presentations.
+- **Where to look:**
+  - `/prototype/` is the prototype. It's unlinked and `noindex`.
+  - The monitor's pages are under `/computer/`: `/computer/`, `/computer/projects/<id>/` and `/computer/systems/`. Each is `noindex`, and its canonical link points at the ordinary page.
+  - The released pages (`/`, `/projects/<id>/`, `/systems/`) and the released lab (`robot-scene.ts`, `lab.ts`, `RobotStage.astro`) are untouched. The release diff below shows it.
+- **What to judge:** `docs/evidence/lab-prototype-2026-09-27/screens/`. Everything was rendered in software (below), with the fallback font, because Google Fonts is blocked here. Inter will set the text a little differently.
+
+### What the prototype does
+
+1. **The opening** (`screens/opening-{1280x800,1440x900,1920x1080}.jpg`).
+   - The room fills the first view: an after-hours lab.
+   - The name, role, "Explore the lab", Resume and Contact are a small block over its dark top-left corner.
+   - The workstation is nearest at the left. Its monitor shows a drawn preview of the Portfolio home, made from the page's own data and cover images.
+   - The three dancers are in the middle, with the workbench, the unfinished robot on its service stand, and the window beyond them.
+   - "Explore the lab" and a click on the monitor both enter. There are no walking controls.
+2. **The workstation** (`screens/desk-1440x900.jpg`).
+   - "Explore the lab" flies the camera to about 2 m from the monitor, standing back and to its right. The monitor is large at the left and nearly square on; the dancers are beyond it.
+   - The bar holds "Leave the lab", the title and pause/play. "Use the computer" sits under the monitor, and the monitor itself is clickable.
+3. **Reading** (`screens/read-overview-1440x900.jpg`, `read-cucadence-1440x900.jpg`, `scrolled-read-cucadence-1440x900.jpg`).
+   - The camera moves square on to the screen. The page is real HTML in a frame laid flat over it: 1123×702 px at 1440×900, focused and scrollable.
+   - A strip of the room shows around it. The room dims behind the page, the robots come to rest, and the scene stops drawing.
+   - The bar holds "Back to desk", the title "Portfolio", "Open ordinary page" (a new tab, at the page being read) and "Leave the lab".
+   - The monitor's home is "Portfolio": the introduction, selected work, projects, experience, contact and résumé links, and a link to the systems map. A case study reads as it does on its own page.
+4. **Phones and windows that can't hold the composition** (`screens/phone-*-390x844.jpg`, `stacked-*-1024x768.jpg`).
+   - Under the release's `roomy` gate (`(width >= 64rem) and (height >= 36rem) and (min-aspect-ratio: 3/2)`), the opening stacks: the text, then a band of the room.
+   - The entry reads "Selected work" and goes to the page's own sections below, at full width.
+   - The lab doesn't open there.
+5. **Reduced motion** (`screens/reduced-*-1440x900.jpg`).
+   - The robots hold one still pose, beat 21.2 of the routine: each in character, with arms clear of the text. Pause/play reads "Play".
+   - The camera cuts rather than flies, and a frame is drawn only when something changes.
+6. **Below the opening** is the homepage's content (`HomeSections`), unchanged and visually secondary. It's the whole page for the stacked layouts, and for anyone who scrolls.
+
+**Environment:**
+- A concrete floor with the dance area taped out, a block wall with a high night window, and a workbench with a pegboard under a pendant.
+- The unfinished robot on its service stand, a task chair rolled aside, and a tool cart (the two foreground props).
+- The workstation: desk, monitor, keyboard, lamp, mug and notebook.
+- Warm practical light (pendant, desk lamp, screen glow, and a tripod work light as the key, placed out of every view) with one cool accent, the moonlight through the window.
+- Simple geometry throughout. The lens is fixed per view (34° opening, 40° workstation and reading) and never widened.
+
+**Robots** (`scene.ts` `BUILDS`):
+- **Graphite** is heavy and deliberate: the broadest build and a low stance. It sways at half time, bounces every other beat and arrives late on arm moves.
+- **Ivory** is precise and curious: tall and long-necked. It snaps to each arm key, and looks around and tilts its head between moves.
+- **Terracotta** is small and playful. It bounces twice a beat, hops its steps and throws its arms wide.
+- **The unfinished robot** doesn't dance. It hangs on the service stand in bare aluminium and primer, with exposed joints, partial surfaces and a few construction lines.
+
+### How the opening is framed (`fitHero()` in `scene.ts`)
+
+- One lens. The camera dollies back to the nearest distance at which the room's fit points sit inside the frame's safe area.
+- Then it looks for the smallest slide of the picture (up to 10% right and 5% down, off-centre projection) that lets it come nearest while keeping the dancers' heads and reach, and the monitor, clear of the text block, which `data-lab-avoid` marks.
+- The distance is capped at 1.25× the unconstrained fit, so the room never shrinks far. A `ResizeObserver` on the text refits it when the web font arrives.
+- Reach is approximated as a point 0.6 m to each robot's left, at head height (2.05 m). That is simpler than a sweep of the routine, and at 1280×800 it keeps graphite's raised arms off "Contact".
+
+### Shared content: one source, two frames
+
+- **Extracted, not copied:**
+  - `src/components/HomeSections.astro` is the homepage's sections, moved out of `index.astro`.
+  - `src/components/CaseStudy.astro` is a case study's body, moved out of `projects/[slug].astro`.
+  - The ordinary pages now render these components. The systems map was already a component (`Overview.astro`).
+- **The monitor's pages** (`src/pages/computer/`) render the same three components in `src/layouts/Screen.astro`. That layout has no site header, footer, tab bar, search, 3D opening or lab controller, only one slim "Portfolio" bar. No robot scene is ever inside the monitor.
+- **`src/scripts/lab-prototype/computer.ts`** runs the lab: its states (`html[data-pc]`: fade, fly, desk, read, return), history, focus, Escape, and laying the frame on the screen. It is warped onto the screen quad at the workstation (inert) and flat while reading.
+- **`src/scripts/lab-prototype/scene.ts`** is the room.
+- **`src/components/LabStage.astro`** is the stage, the fallback still and the controls.
+- Both scripts are forks of the released `lab.ts` and `robot-scene.ts`, which are left as they are.
+
+### Temporary behaviour (documented at the top of `computer.ts` and `Screen.astro`)
+
+- The lab takes one history entry at the same address. Back (or "Leave the lab") leaves it from either view, and moving between the workstation and reading adds no entry. Escape steps back one view: reading → workstation → out.
+- Pages inside the monitor have no history of their own. A link to a page the computer has opens its `/computer/` version in the frame with `location.replace`. Same-page anchors scroll in place.
+- Anything else leaves the frame for the top page (`<base target="_top">`). New-tab links keep their own target.
+- A reload or a shared link opens the opening: no address names the lab or a page in it. A `/computer/` page opened on its own replaces itself with its ordinary page, keeping the query and hash.
+
+**Validation list** (`harness/validate.cjs` → `logs/validate.log`, and `keys.cjs` → `logs/keys.log`; headless Chromium, 1440×900):
+
+| Item | Behaviour | Checked here |
+|---|---|---|
+| History duplicates | One `{pc:true}` entry per visit. `history.length` stays 3 through desk ↔ read, moving between pages in the monitor, leaving and re-entering, and entering after Forward. | yes |
+| Back / Forward | Back leaves the lab from either view and focuses the entry link. Forward returns to the lab's entry but doesn't reopen the lab; entering from there reuses the entry. | yes |
+| Refresh | A reload while reading opens the opening; the entry's state is cleared, and no entry is added. | yes |
+| Shareable URLs | The address stays `/prototype/` throughout. `/computer/`, `/computer/projects/cucadence/#objective` and `/computer/systems/?sel=…` opened on their own land on `/`, `/projects/cucadence/#objective` and `/systems/?sel=…`. | yes |
+| Internal links | Monitor pages link only to pages the computer has: 0 same-origin links on the case study would leave the lab. | yes; a link that leaves via `_top` wasn't exercised, because none exist |
+| External links | The repository link opens a new tab, and the lab stays open. | yes |
+| Downloads | No `download` links on these pages. The résumé (PDF) opens a new tab and the lab stays. | partly: headless Chromium has no PDF viewer, so the tab's content wasn't observed |
+| Clipboard | "Copy address" in the monitor writes the address and shows "Copied" (same-origin frame). | yes, with clipboard permission granted; not in Safari or Firefox |
+| Focus and scroll restoration | Leaving restores the page's scroll (120 px in the test) and focuses the control that opened the lab. The monitor's page keeps its scroll between reading and the workstation (700 px). Re-entering starts at the overview's top (the frame is discarded on leaving). | yes |
+| Loading | The frame loads on entry. Until it does, the monitor shows the drawn preview. With Save-Data the scene loads on the first entry, which waits for its first frame (at most 8 s) under a progress cursor. | Save-Data path yes (`logs/fallback.log`); slow networks not measured |
+| bfcache | `pageshow` with `persisted` reconciles the lab with its entry. | not observed: in this run the page came back by a reload (to the opening), not from the cache. The cause wasn't established; Playwright's request routing, on in this context, may itself prevent caching. |
+
+### Results on the final build
+
+**Keyboard and history** (`logs/keys.log`):
+- Tab reaches "Explore the lab". Enter goes to the workstation, with focus on "Use the computer". Enter on that goes to reading, with focus in the frame; Tab inside reaches "Portfolio".
+- Escape goes to the workstation, then leaves, with focus back on the entry link.
+- In again: cuCadence and back to the overview inside the monitor, then browser Back leaves.
+- `history.length` is 3 from the first entry on (2 before it).
+
+**Fallbacks** (`logs/fallback.log`, `screens/fallback-*.jpg`):
+- **No JavaScript:** the release's still and "Selected work".
+- **No WebGL:** `data-failed`, "Selected work", and the click goes down the page to `#work`.
+- **Save-Data:** the scene isn't loaded until "Explore the lab". Then it loads, draws, and reaches the workstation.
+
+**Performance** (`harness/measure.cjs` → `logs/measure-1440x900.log`, `logs/measure-reduced-1440x900.log`):
+- **Hardware:** a cloud container with an Intel Xeon at 2.10 GHz (4 vCPU), 15 GB RAM and **no GPU**. Headless Chromium 141.0.7390.37, with WebGL through ANGLE on **SwiftShader, a CPU renderer**.
+- **Not GPU numbers:** the frame rates below are this CPU's software rendering. They say nothing about frame rate on a real GPU, and none was available.
+- **What is hardware-independent:** draw calls, triangles and buffer sizes, which are counted by wrapping WebGL's draw calls from outside the page, shadow pass included.
+
+| State | Frames drawn per second (software) | Draw calls per drawn frame | Triangles per drawn frame |
+|---|---|---|---|
+| Opening, dancing | 2.0 | 312 | 100,600 |
+| Workstation | 1.33 | 303 | 98,228 |
+| Reading, first 6 s (robots easing to rest) | 1.5 | 168 median, 170 max | 57,814 median, 58,922 max |
+| Reading, 6–12 s and 12–18 s | 0 | — | — |
+| Opening, paused | 0 | — | — |
+| Opening, scrolled out of view | 0 | — | — |
+| Every state, reduced motion | 0 (frames are drawn only on a change, outside these windows) | — | — |
+
+- **Budgets:**
+  - At most 312 draw calls against the provisional ~450.
+  - 6 lights against ≤ 6: pendant, desk lamp, screen glow, key, moon and hemisphere.
+  - 1 shadow caster against 1: the key, with a 1024² map.
+- **Buffer:** the canvas buffer is 1440×900 at DPR 1. The pixel ratio is capped at 1.25, so a 2x display gets 1800×1125; that wasn't measured.
+- **JS heap:** 10.7–11.3 MB, from `performance.memory`.
+- **GPU memory:** not measured. Pausing, reading and scrolling away stop drawing, but they don't release GPU memory: the renderer, buffers and textures stay allocated.
+- **Easing at software frame rates:** the robots' ease to rest advances at most 0.1 s per frame, so at ~1.5 fps it takes about nine drawn frames rather than 0.9 s.
+- **Found and fixed while measuring:** the workstation's frame could draw twice (606 calls). Landing re-rendered outside the animation loop in the same frame the loop drew. `resize()` now only re-aims the camera when the loop is running and the buffer wasn't resized. Before the fix, the out-of-loop draws at landing were traced to `settle()` → `resize()` → `render()`, which `setRect()` calls on landing. After it, there are none at flight or desk (a scratch trace, not committed), and the workstation's max is 303.
+
+**Release pages against `67f036f`** (`harness/release-diff.cjs` → `logs/release-diff.log`, `logs/release-diff-pxstat.log`; full page, reduced motion, pixel by pixel):
+- `/projects/cucadence/` and `/systems/` are identical at 1440×900 and 390×844.
+- `/` differs only inside downscaled photos, by up to 9 per channel (mean about 1). Which photo differs changes from run to run.
+- The same capture of the prototype build against itself differs by up to 18 in the same way, and the baseline against itself was identical in one run. So this is capture noise at the level of the build's own variation, not a change.
+- The built HTML of `/` matches the baseline apart from asset hashes, one identical inline script's position, and the timeline's CSS now being inlined rather than in `index.css`: `HomeSections` is shared, so the bundler splits its CSS.
+- The harness now loads every lazy image before capturing. An earlier run caught the claude-status card's lazy image loaded in one shot and not the other.
+
+### Commands (from the repository root)
+
+```sh
+npm run build                     # exit 0: 29 pages (15 + /prototype/ + 13 /computer/ pages); the existing chunk-size warning (logs/build.log)
+git diff --check                  # exit 0
+/opt/node22/bin/tsc --noEmit -p . # TypeScript 6.0.2 (not a dependency): the same two src/lib/build.ts errors, none elsewhere (logs/tsc.log)
+npm run preview -- --host 127.0.0.1 --port 4321 # every harness script's default BASE
+
+# Playwright is not a dependency: NODE_PATH=$(npm root -g). The scripts launch SwiftShader.
+E=docs/evidence/lab-prototype-2026-09-27
+(cd $E && sh harness/screens.sh)                          # screens/, logs/screens.log
+node $E/harness/measure.cjs; REDUCE=1 node $E/harness/measure.cjs
+node $E/harness/keys.cjs; node $E/harness/validate.cjs
+OUT=$E/screens node $E/harness/fallback.cjs
+# Baseline: origin/main 67f036f built into a scratch copy, served with python3 -m http.server 4330
+node $E/harness/release-diff.cjs; BASE_B=http://127.0.0.1:4330 node $E/harness/release-diff.cjs   # control
+```
+
+### Evidence
+
+`docs/evidence/lab-prototype-2026-09-27/`:
+- `screens/`: small JPEGs, named above.
+- `logs/`: the runs above.
+- `harness/`: the scripts, run on the final build.
+
+No recording is committed. A 1280×800 walkthrough (opening → workstation → reading → cuCadence, scrolled → Escape twice) was recorded with Playwright and shared outside the repository. It's software-rendered, so its motion runs at 1–2 fps.
+
+### Known limitations
+
+1. **Software rendering only.**
+   - No real GPU, phone, Safari, Firefox or screen-reader pass.
+   - No axe pass on this prototype.
+   - The fallback font throughout.
+2. **The fallback still** (no JavaScript, no WebGL, and Save-Data before entry) is the release's robots-only illustration, not the lab.
+3. **Temporary navigation**, as listed above:
+   - The monitor has no history of its own.
+   - A reload leaves the lab.
+   - Forward doesn't reopen it.
+   - A bfcache restore wasn't observed.
+4. **Framing assumptions.**
+   - Text clearance assumes 0.6 m of reach to each robot's left. A move that reaches further could still cross the text at some window size; only 1280×800, 1440×900 and 1920×1080 were looked at.
+   - On the stacked layouts the room is a band under the text, not composed for those shapes.
+5. **Carried over:**
+   - The chunk-size warning.
+   - The two `src/lib/build.ts` type errors.
+   - A DPR change with no resize is unhandled.
+
+### After approval (not started)
+
+- Decide the production navigation from the validation list: history inside the monitor, deep links, and reload.
+- Then fold the prototype into `/` in place of the released lab.
+- Measure on real GPUs and phones.
+- Replace the fallback still with the lab.
+- Retire the forked `lab.ts` and `robot-scene.ts`, or the forks.
+
+## Earlier checkpoint: release pass, `67f036f` (Claude)
 
 - Branch: `robot-hero-integration`, continuing from `678c33e`. This pass is the commit that adds this section: `git log -1 -- docs/lab-scene-handoff.md`.
 - Scope: the two issues in the release brief, lab framing on narrow and portrait windows and the phone controls, plus two bugs found while checking them (changes 3 and 5).
@@ -697,5 +889,6 @@ These are reports, not a portable benchmark.
 - Keep to focused passes, with no extra agents or research rounds unless asked. Preserve unrelated local work.
 - Don't commit large recordings or build output.
 - The harness needs a global Playwright (`NODE_PATH=$(npm root -g)`). Use real hardware for anything about performance.
-- The release pass (top) is the checkpoint prepared for main. Its remaining issues still apply.
+- The release pass (`67f036f`) is what main has. Its remaining issues still apply to the released lab.
+- The computer-first prototype (top) is on the local branch `computer-first-prototype` and waits for visual approval before any further work.
 - On main, `cbfab9d`, `678c33e` and the release pass are one squashed commit; `robot-hero-integration` keeps them separately.

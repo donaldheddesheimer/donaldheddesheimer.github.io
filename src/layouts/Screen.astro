@@ -1,0 +1,210 @@
+---
+// PROTOTYPE (lab-prototype, 2026-09-27). The lab computer's screen: a page of the portfolio as the
+// monitor shows it in /prototype/, framed by src/scripts/lab-prototype/computer.ts. The content is the
+// site's own (HomeSections, CaseStudy, Overview); this layout swaps the site's chrome (header, footer,
+// tab bar, search, the opening's robots) for one slim bar, the computer's "Portfolio" interface.
+//
+// Temporary behaviour, to be validated before production navigation (docs/lab-scene-handoff.md):
+// - Links to pages the computer has (/, /projects/<id>/, /systems/) open their /computer/ versions in
+//   the frame with location.replace, so moving between them adds no history entries anywhere; the
+//   parent's Back leaves the lab. Same-page anchors scroll in place.
+// - Anything else leaves the frame (<base target="_top">); new-tab links and downloads keep their own
+//   target. Opened on its own, a page goes to its ordinary address.
+import '../styles/global.css';
+import Mark from '../components/Mark.astro';
+import NewTab from '../components/NewTab.astro';
+import { profile } from '../data/site';
+
+interface Props {
+  title: string;
+  /** The ordinary page with the same content: the canonical link, and where "Open ordinary page" goes. */
+  page: string;
+  /** The page's name after "Portfolio" in the bar (none on the overview). */
+  crumb?: string;
+}
+const { title, page, crumb } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-embed data-screen>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={new URL(page, Astro.site).href} />
+    <base target="_top" />
+    <script is:inline define:vars={{ page }}>
+      if (window.top === window.self) location.replace(page + (page.startsWith('/systems/') ? location.search : '') + location.hash);
+      (function () {
+        var h = document.documentElement;
+        h.classList.add('js');
+        var saved = null;
+        try {
+          saved = localStorage.getItem('motion');
+        } catch (e) {}
+        h.dataset.motion = saved || (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'off' : 'on');
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    />
+  </head>
+  <body data-page={page}>
+    <header class="scr-bar">
+      <a href="/computer/" class="scr-home" aria-label={crumb ? 'Portfolio, overview' : undefined}>
+        <Mark class="size-5 shrink-0" />
+        Portfolio
+      </a>
+      {
+        crumb && (
+          <>
+            <span class="scr-sep" aria-hidden="true">
+              /
+            </span>
+            <span class="scr-crumb">{crumb}</span>
+          </>
+        )
+      }
+      <nav class="scr-nav" aria-label="Portfolio">
+        <a href="/computer/#work">Work</a>
+        <a href="/computer/#experience">Experience</a>
+        <a href="/computer/systems/">Systems map</a>
+        <a href="/computer/#contact">Contact</a>
+        <a href={profile.resume} target="_blank" rel="noopener">Resume<NewTab class="size-3 shrink-0" /></a>
+      </nav>
+    </header>
+    <main id="main" class="scr-main">
+      <slot />
+    </main>
+
+    <script>
+      const html = document.documentElement;
+      const post = (msg: object) => parent !== window && parent.postMessage(msg, location.origin);
+      const ordinary = () => {
+        const page = document.body.dataset.page!;
+        return page + (page.startsWith('/systems/') ? location.search : '');
+      };
+
+      // The /computer/ page for an address on the site, or null for one the computer doesn't have.
+      function inside(u: URL): string | null {
+        if (u.origin !== location.origin) return null;
+        const p = u.pathname;
+        if (p.startsWith('/computer/')) return p + u.search + u.hash;
+        if (p === '/') return `/computer/${u.hash}`;
+        const project = p.match(/^\/projects\/([^/]+)\/?$/);
+        if (project) return `/computer/projects/${project[1]}/${u.hash}`;
+        if (p === '/systems/' || p === '/systems') return `/computer/systems/${u.search}${u.hash}`;
+        return null;
+      }
+
+      const smooth = () => html.dataset.motion !== 'off' && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function scrollToHash(hash: string) {
+        const el = hash.length > 1 ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
+        if (el instanceof HTMLDetailsElement) el.open = true;
+        if (el) el.scrollIntoView({ block: 'start', behavior: smooth() ? 'smooth' : 'auto' });
+        else scrollTo({ top: 0, behavior: smooth() ? 'smooth' : 'auto' });
+      }
+
+      document.addEventListener('click', (e) => {
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        const a = (e.target as Element).closest<HTMLAnchorElement>('a[href]');
+        if (!a || a.hasAttribute('download') || (a.target && a.target !== '_top' && a.target !== '_self')) return;
+        const to = inside(new URL(a.href));
+        if (!to) return; // leaves the frame (<base target="_top">), or opens a mail client
+        e.preventDefault();
+        const dest = new URL(to, location.href);
+        if (dest.pathname === location.pathname && dest.search === location.search) {
+          history.replaceState(history.state, '', dest.hash || location.pathname);
+          scrollToHash(dest.hash);
+        } else location.replace(dest.href);
+      });
+
+      // Tell the lab which page this is (for "Open ordinary page"), and pass Escape up to it, unless
+      // something here is using it (an open dialog, the expanded map).
+      post({ type: 'pc:page', href: ordinary(), title: document.title });
+      addEventListener(
+        'keydown',
+        (e) => {
+          if (e.key !== 'Escape' || e.defaultPrevented) return;
+          if (document.querySelector('[data-console][data-expanded="true"], dialog[open]')) return;
+          post({ type: 'pc:escape' });
+        },
+        true,
+      );
+      if (location.hash) requestAnimationFrame(() => scrollToHash(location.hash));
+    </script>
+
+    <style>
+      /* The computer's own bar: its name, where it is, and a few places to go. */
+      .scr-bar {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        height: 2.75rem;
+        padding: 0 var(--home-edge);
+        border-bottom: 1px solid var(--line);
+        background: rgb(19 18 17 / 0.94);
+        backdrop-filter: blur(8px);
+        font-size: var(--text-sm);
+      }
+      .scr-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-height: 2rem;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .scr-sep {
+        color: var(--dim);
+      }
+      .scr-crumb {
+        min-width: 0;
+        overflow: hidden;
+        color: var(--muted);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .scr-nav {
+        display: flex;
+        gap: 0.125rem;
+        margin-left: auto;
+      }
+      .scr-nav a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        min-height: 2rem;
+        padding: 0 0.5rem;
+        border-radius: var(--radius-2);
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .scr-nav a:hover {
+        color: var(--text);
+        background: var(--hover-bg);
+      }
+      @media (width < 44rem) {
+        .scr-nav a:not(:last-child) {
+          display: none;
+        }
+      }
+      .scr-main {
+        --cs-under: 2.75rem;
+        padding-bottom: 2rem;
+      }
+      /* A screen is narrower than the windows the homepage's edge is set for; anchors land under the bar. */
+      :global(html[data-screen]) {
+        --home-inset: clamp(1.25rem, 4vw, 2.5rem);
+        scroll-padding-top: 3.5rem;
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+# 2026-09-28T00:33:20Z · baseline: origin/main 67f036f built and served on :4330 · prototype build on :4321 · reduced motion, full page
+{"size":"1440x5543","path":"/","same":false,"diffPixels":86005,"box":[100,4539,511,4952]}
+{"size":"1440x3346","path":"/projects/cucadence/","same":true,"diffPixels":0,"box":null}
+{"size":"1440x1050","path":"/systems/","same":true,"diffPixels":0,"box":null}
+{"size":"390x7913","path":"/","same":true,"diffPixels":0,"box":null}
+{"size":"390x4424","path":"/projects/cucadence/","same":true,"diffPixels":0,"box":null}
+{"size":"390x1541","path":"/systems/","same":true,"diffPixels":0,"box":null}
+# control: the baseline against itself
+{"size":"1440x5543","path":"/","same":true,"diffPixels":0,"box":null}
+{"size":"1440x3346","path":"/projects/cucadence/","same":true,"diffPixels":0,"box":null}
+{"size":"1440x1050","path":"/systems/","same":true,"diffPixels":0,"box":null}
+{"size":"390x7913","path":"/","same":true,"diffPixels":0,"box":null}
+{"size":"390x4424","path":"/projects/cucadence/","same":true,"diffPixels":0,"box":null}
+{"size":"390x1541","path":"/systems/","same":true,"diffPixels":0,"box":null}
+# control 2: the prototype build against itself, /
+{"size":"1440x5543","path":"/","same":false,"diffPixels":120178,"box":[112,919,677,1236]}
+{"size":"390x7913","path":"/","same":true,"diffPixels":0,"box":null}
+# repeat: baseline against the prototype build, /
+{"size":"1440x5543","path":"/","same":false,"diffPixels":86005,"box":[100,4539,511,4952]}
+{"size":"390x7913","path":"/","same":false,"diffPixels":42301,"box":[31,918,358,1101]}

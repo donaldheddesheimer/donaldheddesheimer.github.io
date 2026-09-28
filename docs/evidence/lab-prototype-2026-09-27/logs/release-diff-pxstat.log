@@ -1,0 +1,5 @@
+# pxstat (harness/pxstat.cjs) on the full-page captures of / from logs/release-diff.log: "self" is the
+# prototype build against itself (the capture's noise floor), "again" is the baseline against the prototype.
+self rel-base-1440x900-_.png: {"differing":120178,"maxChannelDiff":18,"meanDiff":1.14,"hist":{"1-2":116341,"3-8":3564,"9-32":273}}
+again rel-base-1440x900-_.png: {"differing":86005,"maxChannelDiff":9,"meanDiff":1.03,"hist":{"1-2":85610,"3-8":394,"9-32":1}}
+again rel-base-390x844-_.png: {"differing":42301,"maxChannelDiff":8,"meanDiff":1.07,"hist":{"1-2":41652,"3-8":649}}
