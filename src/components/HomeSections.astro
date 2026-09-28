@@ -1,13 +1,12 @@
 ---
-// The homepage's sections, from Selected work to Contact: on the homepage under the opening, and on the
-// lab computer's Portfolio screen (/computer/), so the two never drift apart.
+// The homepage's sections, from Selected work to Contact, under the opening.
 import { getCollection } from 'astro:content';
 import Icon, { type IconName } from './Icon.astro';
 import Section from './Section.astro';
 import NewTab from './NewTab.astro';
 import Timeline from './Timeline.astro';
 import Stat from './Stat.astro';
-import { education, experience, offDuty, orgs, profile, skillAliases, skills, socials } from '../data/site';
+import { contact, education, experience, offDuty, orgs, profile, skillAliases, skills, socials } from '../data/site';
 import { duration, fmtDot, fmtMonth, statusLabel } from '../lib/format';
 import { getModel } from '../lib/model';
 
@@ -387,9 +386,9 @@ const [primaryHobby, ...otherHobbies] = offDuty;
   <Section id="contact" title="Contact">
     <div class="grid items-center gap-6 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:p-6">
       <div>
-        <p class="text-lg font-semibold tracking-tight">Let's talk.</p>
+        <p class="text-lg font-semibold tracking-tight">{contact.title}</p>
         <p class="mt-1.5 max-w-(--measure) text-base text-muted">
-          Internships, research, or anything GPU- or robot-shaped. Email is the fastest way to reach me.
+          {contact.note}
         </p>
         <div class="mt-5 flex flex-wrap gap-2">
           <a href={`mailto:${profile.email}`} class="btn btn-primary"><Icon name="mail" class="size-4" />Email me</a>

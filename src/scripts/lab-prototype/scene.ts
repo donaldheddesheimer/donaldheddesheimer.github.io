@@ -1,12 +1,13 @@
-// PROTOTYPE (lab-prototype, 2026-09-27): the robotics lab of /prototype/, where the computer on the
-// desk holds the portfolio. Forked from src/scripts/robot-scene.ts (the released opening), which is left
-// as it is; the rig and the routine are the same. What is new: a room (a concrete floor with the dance
-// area taped out, a block wall with a high window, a workbench under a pendant, an unfinished robot on a
-// service stand), two foreground props (a task chair rolled aside, a tool cart), a tripod work light as
-// the key, the three dancers given characters through proportion and timing, and three camera views:
-// the opening, the workstation (closer, at the desk) and reading (square on to the monitor, whose
-// screen the page covers with real HTML; computer.ts). Simple geometry throughout: final models and
-// choreography are deferred.
+// PROTOTYPE (lab-cinematic, 2026-09-28; first pass lab-prototype, 2026-09-27): the robotics lab of
+// /prototype/, where the computer on the desk holds the portfolio. Forked from src/scripts/robot-scene.ts
+// (the released opening), which is left as it is; the rig and the routine are the same. What is new: a
+// room (a concrete floor with the dance area taped out, a block wall with a high window, a workbench
+// under a pendant, an unfinished robot on a service stand), two props (a task chair pushed aside, a tool
+// cart), a tripod work light as the key, the three dancers given characters through proportion, timing,
+// where they stand and how they answer each other, and two camera views: the opening, which the pointer
+// may look around a little (lookAround), and reading, square on to the monitor, whose screen the page
+// covers with real HTML (computer.ts). One flight joins them. Simple geometry throughout: final models
+// and choreography are deferred.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -307,14 +308,19 @@ interface Build {
 const STILL: Persona = { lag: 0, canon: 0, sway: 0, bounce: 0, arm: 0, twist: 0, tilt: 0, look: 0, dir: 1, groove: 1, dip: 1, pace: 1, low: 0, hop: 1, curious: 0 };
 
 // Graphite: heavy, grounded, deliberate. The broadest build, thick limbs and a wide low stance; it
-// sways at half time, bounces every other beat and arrives late on every arm move.
+// sways at half time, bounces every other beat and arrives late on every arm move. It keeps to the
+// workstation's side of the floor.
 // Ivory: precise, curious, attentive. Tall, slim and long-necked; snaps to each arm key and looks
-// around (and tilts its head) between moves.
+// around (and tilts its head) between moves. It stands back by the service stand, and leaves the step
+// now and then to inspect the unfinished robot on it.
 // Terracotta: small, energetic, playful. Bounces twice a beat, hops its steps and throws its arms wide.
+// It has the front of the floor, and starts the exchanges (react()).
+// The three stand as a loose triangle, not a line: Graphite and Terracotta a little apart at the front,
+// turned partly toward each other, Ivory further back.
 const BUILDS: Build[] = [
   {
     name: 'graphite',
-    at: [-1.3, -0.45, 0.24],
+    at: [-0.75, 0.45, 0.5],
     paint: 0x464c54,
     trim: 0x202328,
     eye: 0xc9d6e6,
@@ -339,7 +345,7 @@ const BUILDS: Build[] = [
   },
   {
     name: 'ivory',
-    at: [0.2, 0.5, 0.04],
+    at: [1.0, -1.85, 0.25],
     paint: 0xdcd5c6,
     trim: 0x2a2d33,
     eye: 0xffb561,
@@ -364,7 +370,7 @@ const BUILDS: Build[] = [
   },
   {
     name: 'terracotta',
-    at: [1.2, -0.55, -0.2],
+    at: [0.6, 0.8, -0.3],
     paint: 0xb86a4e,
     trim: 0x2a2d33,
     eye: 0xffe3b8,
@@ -414,6 +420,71 @@ const PROTO: Build = {
   schematic: true,
   persona: STILL,
 };
+
+// --- Relationships ---------------------------------------------------------------------------------
+// A few restrained exchanges over the routine, on its beats (32 to a loop, about 17 s):
+// - Terracotta turns to Graphite and waves (beats 3 to 6.5); Graphite turns, slowly, and nods once (5.5
+//   to 9.4).
+// - Between the gestures and the canon, Terracotta shimmies at Ivory (14.3 to 16.4); Ivory glances over.
+// - Late in the travel, Ivory leaves the step to inspect the unfinished robot on its stand (25.6 to 31.8):
+//   it turns to it, leans in, head tilted, one hand raised to its chin.
+const spot = (name: string) => BUILDS.find((b) => b.name === name)!.at;
+
+/** Turn toward a point on the floor by `k` (0 to 1): the head most of the way, the body the rest. */
+function face(o: Pose, at: Build['at'], x: number, z: number, k: number, body = 0.4) {
+  if (k <= 0) return;
+  let a = Math.atan2(x - at[0], z - at[1]) - at[2];
+  a = Math.atan2(Math.sin(a), Math.cos(a));
+  o.hYaw = lerp(o.hYaw, Math.max(-0.95, Math.min(0.95, a * (1 - body))), k);
+  o.cYaw += a * body * 0.6 * k;
+  o.pYaw += a * body * 0.4 * k;
+}
+
+const WAVE: Arm = [0.35, 2.3, 0, 0.55, 0];
+const CHIN: Arm = [1.05, 0.28, 0, 2.05, 0.2];
+const EASE_ARM: Arm = [0.05, 0.22, 0, 0.3, 0];
+const FEET: Ch[] = ['lfx', 'lfy', 'lfz', 'rfx', 'rfy', 'rfz'];
+
+function react(o: Pose, b: Build, beat: number) {
+  const at = b.at;
+  if (b.name === 'terracotta') {
+    const g = spot('graphite');
+    const call = win(beat, 3, 3.5, 6, 6.6);
+    face(o, at, g[0], g[1], call, 0.5);
+    blendArm(o, 'r', WAVE, call);
+    o.rE += Math.sin(TAU * (beat - 3)) * 0.4 * call;
+    o.cRoll -= call * 0.05;
+    const iv = spot('ivory');
+    const nudge = win(beat, 14.3, 14.7, 15.9, 16.4);
+    face(o, at, iv[0], iv[1], nudge, 0.35);
+    o.cRoll += Math.sin(TAU * beat * 2) * 0.09 * nudge;
+    o.cYaw += Math.sin(TAU * beat * 2 + 0.6) * 0.07 * nudge;
+  } else if (b.name === 'graphite') {
+    const t = spot('terracotta');
+    const answer = win(beat, 5.4, 6.3, 8.4, 9.4);
+    face(o, at, t[0], t[1], answer, 0.45);
+    const nod = win(beat, 6.5, 7, 7.5, 8.2);
+    o.hPitch += nod * 0.34;
+    o.cPitch += nod * 0.07;
+  } else if (b.name === 'ivory') {
+    const t = spot('terracotta');
+    face(o, at, t[0], t[1], win(beat, 14.8, 15.2, 16.2, 16.7), 0.2);
+    const look = win(beat, 25.6, 26.6, 30.8, 31.8);
+    if (look > 0) {
+      // Out of the step: feet back under it, the travel's drift gone, arms easing down.
+      for (const c of FEET) o[c] *= 1 - look;
+      o.px *= 1 - look;
+      o.py *= 1 - look * 0.7;
+      blendArm(o, 'l', EASE_ARM, look);
+      blendArm(o, 'r', CHIN, win(beat, 26.4, 27.2, 30.2, 31.2));
+      face(o, at, STAND.x, STAND.z, look, 0.55);
+      o.pPitch += look * 0.06;
+      o.cPitch += look * 0.16;
+      o.hPitch += look * 0.12;
+      o.hRoll = lerp(o.hRoll, 0.2 + Math.sin(beat * 0.9) * 0.06, look);
+    }
+  }
+}
 
 const UP = new THREE.Vector3(0, 1, 0);
 const X_AXIS = new THREE.Vector3(1, 0, 0);
@@ -647,6 +718,7 @@ class Robot {
         o.hYaw += yaw * p.curious * between;
         o.hRoll += roll * p.curious * between;
       }
+      react(o, b, beat % BEATS);
     }
     if (rest > 0) for (const c of CH) o[c] *= 1 - smooth(0, 1, rest);
     const L = this.L;
@@ -864,17 +936,19 @@ function nightTexture() {
 }
 
 export interface ScreenData {
-  kicker: string;
   name: string;
-  role: string;
-  cards: { title: string; meta: string; img: string }[];
+  lede: string;
+  /** The Work page's leading projects. */
+  cards: { title: string; meta: string; img: string; contain?: boolean }[];
 }
 
-// The monitor's picture before the real page is laid over it: the Portfolio home, drawn from the page's
-// data (the featured projects and their stills), in the site's colours.
+// The monitor's picture before the real page is laid over it: the computer's Work page as it first
+// shows (src/layouts/Screen.astro, src/components/FolioWork.astro), drawn from the page's data in the
+// site's colours, laid out as the page is at a 1209 px frame (reading, in a 1440 x 900 window).
 function portfolioTexture(data: ScreenData | null, onChange: () => void) {
   const W = 1280;
   const H = 800;
+  const S = W / 1209; // texture px per CSS px
   const c = document.createElement('canvas');
   c.width = W;
   c.height = H;
@@ -883,84 +957,74 @@ function portfolioTexture(data: ScreenData | null, onChange: () => void) {
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 4;
   const sans = 'Inter, ui-sans-serif, system-ui, sans-serif';
-  const mono = '"JetBrains Mono", ui-monospace, monospace';
   const images: (HTMLImageElement | null)[] = [];
-  const cardY = 404;
-  const cardW = 560;
-  const cardH = 300;
+  const edge = 40; // the page's side margin, CSS px
+  const font = (weight: number, px: number) => `${weight} ${px * S}px ${sans}`;
+  const text = (s: string, x: number, y: number, colour: string, f: string, align: CanvasTextAlign = 'left') => {
+    g.font = f;
+    g.fillStyle = colour;
+    g.textAlign = align;
+    g.fillText(s, x * S, y * S);
+    return g.measureText(s).width / S;
+  };
   const draw = () => {
     g.fillStyle = '#131211';
     g.fillRect(0, 0, W, H);
-    g.fillStyle = '#1b1917';
-    g.fillRect(0, 0, W, 60);
-    g.fillStyle = '#2a2724';
-    g.fillRect(0, 59, W, 1);
-    g.fillStyle = '#24211e';
-    g.fillRect(48, 17, 26, 26);
-    g.fillStyle = '#ece8e1';
-    g.font = `600 22px ${sans}`;
+    // The bar: the mark and name, the four places, the ordinary page and the way out.
+    g.fillStyle = '#3a3632';
+    g.fillRect(0, 44 * S - 1, W, 1);
     g.textBaseline = 'middle';
-    g.fillText('Portfolio', 88, 31);
-    g.fillStyle = '#8f8a82';
-    g.font = `400 18px ${sans}`;
-    let x = W - 48;
-    for (const s of ['Resume', 'Contact', 'Systems map', 'Experience', 'Work']) {
-      const w = g.measureText(s).width;
-      x -= w;
-      g.fillText(s, x, 31);
-      x -= 30;
+    g.strokeStyle = '#f5f2ed';
+    g.lineWidth = 1.6 * S;
+    g.strokeRect((edge + 1) * S, 13 * S, 18 * S, 18 * S);
+    if (data) text(data.name, edge + 28, 22, '#f5f2ed', font(600, 14));
+    let x = 1209 - edge;
+    x -= text('Leave computer', x - 10, 22, '#b4ada3', font(400, 14), 'right') + 20;
+    x -= text('Open ordinary page', x - 10, 22, '#9a9288', font(400, 14), 'right') + 20;
+    g.fillStyle = '#3a3632';
+    g.fillRect((x - 2) * S, 10 * S, 1, 24 * S);
+    x -= 14;
+    for (const [i, label] of ['Contact', 'Résumé', 'About', 'Work'].entries()) {
+      const w = text(label, x - 10, 22, i === 3 ? '#f5f2ed' : '#b4ada3', font(400, 14), 'right');
+      if (i === 3) {
+        g.fillStyle = '#f5f2ed';
+        g.fillRect((x - w - 20) * S, 42 * S, (w + 20) * S, 2 * S);
+      }
+      x -= w + 22;
     }
     if (!data) return;
+    // Work: the title, the lede, and the leading projects two across.
     g.textBaseline = 'alphabetic';
-    g.fillStyle = '#8f8a82';
-    g.font = `500 15px ${mono}`;
-    g.fillText(data.kicker.toUpperCase(), 64, 124);
-    g.fillStyle = '#f3f0ea';
-    g.font = `650 64px ${sans}`;
-    g.fillText(data.name, 60, 196);
-    g.fillStyle = '#d9d4cc';
-    g.font = `500 26px ${sans}`;
-    g.fillText(data.role, 64, 240);
-    const pill = (px: number, w: number, label: string, primary: boolean) => {
-      g.fillStyle = primary ? '#ebe7df' : '#1d1b19';
-      g.beginPath();
-      g.roundRect(px, 272, w, 44, 8);
-      g.fill();
-      if (!primary) {
-        g.strokeStyle = '#3a3632';
-        g.lineWidth = 2;
-        g.stroke();
-      }
-      g.fillStyle = primary ? '#141312' : '#e6e2da';
-      g.font = `600 18px ${sans}`;
-      g.fillText(label, px + 18, 300);
-    };
-    pill(64, 170, 'Selected work', true);
-    pill(246, 118, 'Resume', false);
-    pill(376, 118, 'Contact', false);
-    g.fillStyle = '#ece8e1';
-    g.font = `600 26px ${sans}`;
-    g.fillText('Selected work', 64, 376);
+    text('Work', edge, 44 + 56 + 36, '#f5f2ed', font(650, 38.7));
+    text(data.lede, edge, 44 + 56 + 76, '#b4ada3', font(400, 16));
+    const cardW = (1209 - 2 * edge - 28) / 2;
+    const top = 44 + 56 + 124;
     data.cards.slice(0, 2).forEach((card, i) => {
-      const cx = 64 + i * (cardW + 32);
+      const cx = edge + i * (cardW + 28);
+      const mh = (cardW * 9) / 16;
       g.fillStyle = '#0e0d0c';
-      g.fillRect(cx, cardY, cardW, cardH);
-      g.strokeStyle = '#2a2724';
-      g.lineWidth = 2;
-      g.strokeRect(cx + 1, cardY + 1, cardW - 2, cardH - 2);
+      g.fillRect(cx * S, top * S, cardW * S, mh * S);
       const img = images[i];
       if (img?.naturalWidth) {
-        const s = Math.min((cardW - 48) / img.naturalWidth, (cardH - 40) / img.naturalHeight);
-        const iw = img.naturalWidth * s;
-        const ih = img.naturalHeight * s;
-        g.drawImage(img, cx + (cardW - iw) / 2, cardY + (cardH - ih) / 2, iw, ih);
+        g.save();
+        g.beginPath();
+        g.rect(cx * S, top * S, cardW * S, mh * S);
+        g.clip();
+        const pad = card.contain ? 12 : 0;
+        const fit = card.contain ? Math.min : Math.max;
+        const k = fit(((cardW - 2 * pad) * S) / img.naturalWidth, ((mh - 2 * pad) * S) / img.naturalHeight);
+        const iw = img.naturalWidth * k;
+        const ih = img.naturalHeight * k;
+        g.globalAlpha = 0.9;
+        // Cover pictures are anchored at the top, as the page's are.
+        g.drawImage(img, cx * S + (cardW * S - iw) / 2, card.contain ? top * S + (mh * S - ih) / 2 : top * S, iw, ih);
+        g.restore();
       }
-      g.fillStyle = '#8f8a82';
-      g.font = `500 14px ${mono}`;
-      g.fillText(card.meta.toUpperCase(), cx, cardY + cardH + 36);
-      g.fillStyle = '#f3f0ea';
-      g.font = `600 28px ${sans}`;
-      g.fillText(card.title, cx, cardY + cardH + 74);
+      g.strokeStyle = '#3a3632';
+      g.lineWidth = 1;
+      g.strokeRect(cx * S + 0.5, top * S + 0.5, cardW * S - 1, mh * S - 1);
+      text(card.meta, cx, top + mh + 10 + 20, '#9a9288', font(400, 14));
+      text(card.title, cx, top + mh + 10 + 20 + 34, '#f5f2ed', font(600, 24));
     });
   };
   draw();
@@ -1233,7 +1297,11 @@ export const DESK = { x: -1.35, z: 3.3, yaw: 0.5 };
 /** The monitor's screen (16:10), and the height of its centre, about seated eye level. */
 export const SCREEN = { w: 0.68, h: 0.425, y: 1.12 };
 const SCREEN_Z = -0.1475;
-const GLOW = 0.35;
+// The screen is the brightest thing in the room, a little over the page's own white, and lights the desk.
+const SCREEN_LIT = 1.08;
+const GLOW = 0.5;
+/** Where the chair stands, in the desk's frame (metres; x to the desk's right), and its turn. */
+const CHAIR = { x: -1.0, z: 0.25, yaw: 1.9 };
 
 function buildWorkstation(mats: Mats, screenMap: THREE.Texture) {
   const group = new THREE.Group();
@@ -1283,6 +1351,14 @@ function buildWorkstation(mats: Mats, screenMap: THREE.Texture) {
   const bezel = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN.w + 0.036, SCREEN.h + 0.036), new THREE.MeshBasicMaterial({ visible: false }));
   bezel.position.set(0, SCREEN.y, SCREEN_Z - 0.001);
   monitor.add(bezel);
+  // A faint warm veil over the screen, added for the hover and the idle hint (scene light()).
+  const lift = new THREE.Mesh(
+    new THREE.PlaneGeometry(SCREEN.w, SCREEN.h),
+    new THREE.MeshBasicMaterial({ color: 0xfff1dc, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }),
+  );
+  lift.position.set(0, SCREEN.y, SCREEN_Z + 0.0015);
+  lift.visible = false;
+  monitor.add(lift);
 
   const lamp = new THREE.SpotLight(0xffc68c, 3.2, 2.6, 0.95, 0.7, 2);
   lamp.position.set(head.x, head.y - 0.09, head.z);
@@ -1293,7 +1369,7 @@ function buildWorkstation(mats: Mats, screenMap: THREE.Texture) {
   glow.position.set(0, SCREEN.y - 0.06, SCREEN_Z + 0.28);
   group.add(glow);
 
-  return { group, monitor, screen, screenMat, glow };
+  return { group, monitor, screen, screenMat, glow, lift };
 }
 
 export type Quad = [x: number, y: number][];
@@ -1303,7 +1379,7 @@ export interface Rect {
   w: number;
   h: number;
 }
-export type Mode = 'hero' | 'desk' | 'read';
+export type Mode = 'hero' | 'read';
 
 export interface LabScene {
   /** Move the camera to a view, the screen's corners (viewport px) passed to `onFrame` as it goes.
@@ -1318,8 +1394,10 @@ export interface LabScene {
   /** Robots ease to standing still and drawing stops (reading), or they carry on. */
   quiet(on: boolean): void;
   readonly screenAspect: number;
-  /** Whether a point (client px) is over the monitor, from the opening or the workstation view. */
+  /** Whether a point (client px) is over the monitor, from the opening. */
   pick(x: number, y: number): boolean;
+  /** Whether the last press on the room turned into a drag (a look around), rather than a click. */
+  dragged(): boolean;
   /** What the last frame drew, for measurements. */
   stats(): Record<string, number>;
   dispose(): void;
@@ -1345,23 +1423,26 @@ const easeInOut = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 
 // One lens per view, never widened to fit a window: the opening dollies back instead, and windows
 // that can't hold the composition get the simpler stacked page (computer.ts, LabStage.astro).
 const HERO_FOV = 34;
-const DESK_FOV = 40;
 const READ_FOV = 40;
 const tanHalf = (fov: number) => Math.tan(THREE.MathUtils.degToRad(fov / 2));
 const PIXEL_RATIO = 1.25;
-const FLIGHT: Record<string, number> = { 'hero>desk': 1700, 'hero>read': 1900, 'desk>read': 1100, 'read>desk': 1000, 'desk>hero': 1300, 'read>hero': 1500 };
+const FLIGHT: Record<string, number> = { 'hero>read': 1900, 'read>hero': 1500 };
+// Looking around the opening (mouse or pen, in windows the lab opens in, with motion on): where the
+// pointer is turns the camera a little about the room's centre, and a drag turns it further, never past
+// LOOK (radians; `up` raises the camera). Let go, and it settles back to the composed view.
+const PARALLAX = { az: 0.03, el: 0.015 };
+const LOOK = { az: 0.16, down: 0.05, up: 0.07 };
+const DRAG_PX = 6; // a press that moves further than this is a drag, not a click
+// The monitor brightens once, gently, if nobody has touched anything for a while.
+const IDLE_MS = 5000;
+const HINT_MS = 2200;
 
 // The opening: from the front and a little right, looking into the room, the desk nearest at the left.
 const HERO_LOOK = new THREE.Vector3(-0.6, 1.0, -0.5);
 const HERO_DIR = new THREE.Vector3(0.2, 0.14, 1).normalize();
-// The workstation view: standing back from the desk and to its right, about two metres from the
-// monitor. The monitor is large at the left, nearly square on; the dancers are beyond it at the right.
-const DESK_EYE = new THREE.Vector3(-0.64, 1.45, 5.0);
-const DANCE_FLOOR = new THREE.Vector3(0, 1.0, -0.1);
-
-/** `play` starts the dance whatever the Motion setting. `toggles` are the play/pause buttons. `avoid` is
- *  the opening's text, where it lies over the picture: the dancers and the monitor keep clear of it. */
-export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTMLButtonElement[], screen = null as ScreenData | null, avoid = null as HTMLElement | null } = {}): LabScene | null {
+/** `screen` is what the monitor shows before the page is laid over it. `avoid` is the opening's text,
+ *  where it lies over the picture: the dancers and the monitor keep clear of it. */
+export function mountLab(root: HTMLElement, { screen = null as ScreenData | null, avoid = null as HTMLElement | null } = {}): LabScene | null {
   const stage = root.querySelector<HTMLElement>('[data-lab-stage]');
   if (!stage || root.dataset.mounted != null) return null;
 
@@ -1441,10 +1522,10 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
   const proto = new Robot(PROTO, blobTex, random);
   scene.add(buildStand(mats, proto));
 
-  // The chair rolled back from the desk and aside, turned half away.
-  const [cx, cz] = [0.95, 0.9];
+  // The chair pushed aside past the desk's left end, out of the way of the monitor, turned half away.
+  const [cx, cz] = [CHAIR.x, CHAIR.z];
   props.chair.position.set(DESK.x + cx * Math.cos(DESK.yaw) + cz * Math.sin(DESK.yaw), 0, DESK.z - cx * Math.sin(DESK.yaw) + cz * Math.cos(DESK.yaw));
-  props.chair.rotation.y = DESK.yaw + 2.6;
+  props.chair.rotation.y = DESK.yaw + CHAIR.yaw;
   props.cart.position.set(2.3, 0, 2.1);
   props.cart.rotation.y = -0.5;
   scene.add(props.chair, props.cart);
@@ -1465,9 +1546,6 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
   ].map(([sx, sy]) => desk.group.localToWorld(new THREE.Vector3((sx * SCREEN.w) / 2, SCREEN.y + (sy * SCREEN.h) / 2, SCREEN_Z)));
   const screenCentre = desk.group.localToWorld(new THREE.Vector3(0, SCREEN.y, SCREEN_Z));
   const screenNormal = new THREE.Vector3(Math.sin(DESK.yaw), 0, Math.cos(DESK.yaw));
-  // Aim halfway between the monitor and the dance floor, so each sits a third of the way in from its side.
-  const deskEye = DESK_EYE;
-  const deskLook = screenCentre.clone().sub(deskEye).normalize().add(DANCE_FLOOR.clone().sub(deskEye).normalize()).add(deskEye);
 
   // What the opening keeps in the picture: the monitor and keyboard, the dancers at the top of a reach,
   // the unfinished robot on its stand. The foreground props and the room's edges may crop.
@@ -1510,8 +1588,7 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
   const html = document.documentElement;
   const mq = matchMedia('(prefers-reduced-motion: reduce)');
   const motionOK = () => !mq.matches && html.dataset.motion !== 'off';
-  let intent = play || motionOK();
-  let userPaused = false;
+  let intent = motionOK();
   let inView = false;
   let raf = 0;
   let last = 0;
@@ -1525,6 +1602,7 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
   let ox = 0;
   let oy = 0;
   let heroDist = 10;
+  let heroFramed = 10; // the distance before the text had its say
   const heroShift = new THREE.Vector2();
   let mode: Mode = 'hero';
   let readRect: Rect = { x: 0, y: 0, w: 1, h: 1 };
@@ -1553,7 +1631,23 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
   // takes whichever slide keeps the room largest; failing that it shrinks, by no more than a quarter.
   function fitHero(box: DOMRect) {
     const f = fh / 2 / tanHalf(HERO_FOV);
-    const a = avoid?.getBoundingClientRect();
+    // The text's own extent (its lines are as wide as they are, not the box they're set in).
+    const parts: DOMRect[] = [];
+    if (avoid) {
+      const range = document.createRange();
+      const walk = document.createTreeWalker(avoid, NodeFilter.SHOW_TEXT);
+      while (walk.nextNode()) {
+        range.selectNodeContents(walk.currentNode);
+        parts.push(...range.getClientRects());
+      }
+      avoid.querySelectorAll('a, button').forEach((b) => parts.push(b.getBoundingClientRect()));
+    }
+    parts.splice(0, parts.length, ...parts.filter((r) => r.width > 0 && r.height > 0));
+    const a = parts.length ? new DOMRect(Math.min(...parts.map((r) => r.left)), Math.min(...parts.map((r) => r.top)), 0, 0) : null;
+    if (a) {
+      a.width = Math.max(...parts.map((r) => r.right)) - a.x;
+      a.height = Math.max(...parts.map((r) => r.bottom)) - a.y;
+    }
     const text = a?.width && a.right > box.left && a.left < box.right && a.bottom > box.top && a.top < box.bottom ? { r: a.right - box.left + 16, b: a.bottom - box.top + 16 } : null;
     let sx = 0;
     let sy = 0;
@@ -1587,7 +1681,7 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
     };
     const framed = nearest(false);
     heroShift.set(0, 0);
-    heroDist = framed;
+    heroDist = heroFramed = framed;
     if (!text) return;
     let best = Infinity;
     for (const y of [0, 0.025, 0.05]) {
@@ -1609,24 +1703,19 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
     fitHero(r);
   }
 
+  const across = new THREE.Vector3();
   function heroView(v: View) {
-    // A slow drift about the opening's angle, never a cut.
-    const az = Math.sin(t * 0.13) * 0.025;
+    // A slow drift about the opening's angle, never a cut, and wherever the pointer has turned it.
+    const az = Math.sin(t * 0.13) * 0.025 + look.az;
     const d = heroDist + Math.sin(t * 0.07) * 0.12;
-    v.pos.copy(HERO_DIR).applyAxisAngle(UP, az).multiplyScalar(d).add(HERO_LOOK);
+    v.pos.copy(HERO_DIR).applyAxisAngle(UP, az);
+    v.pos.applyAxisAngle(across.crossVectors(v.pos, UP).normalize(), look.el).multiplyScalar(d).add(HERO_LOOK);
     v.pos.y += Math.sin(t * 0.09 + 1.3) * 0.04;
     v.look.copy(HERO_LOOK);
     v.look.x += Math.sin(t * 0.11) * 0.04;
     v.f = fh / 2 / tanHalf(HERO_FOV);
     v.cx = fw / 2 + heroShift.x;
     v.cy = fh / 2 + heroShift.y;
-  }
-  function deskView(v: View) {
-    v.pos.copy(deskEye);
-    v.look.copy(deskLook);
-    v.f = h / 2 / tanHalf(DESK_FOV);
-    v.cx = w / 2 - rootX;
-    v.cy = h / 2 - rootY;
   }
   // Square on to the monitor, near enough that its screen covers readRect.
   function readView(v: View) {
@@ -1636,7 +1725,7 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
     v.cx = readRect.x + readRect.w / 2 - rootX;
     v.cy = readRect.y + readRect.h / 2 - rootY;
   }
-  const VIEWS: Record<Mode, (v: View) => void> = { hero: heroView, desk: deskView, read: readView };
+  const VIEWS: Record<Mode, (v: View) => void> = { hero: heroView, read: readView };
 
   function place(v: View) {
     camera.position.copy(v.pos);
@@ -1680,6 +1769,7 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
     screenDirty = false;
     if (!drawn) {
       drawn = true;
+      idleFrom = now;
       root.dataset.drawn = '';
     }
     if (flight) {
@@ -1702,6 +1792,8 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
     last = now;
     if (intent) t += dt;
     rest = quietOn ? Math.min(1, rest + dt / 0.9) : Math.max(0, rest - dt / 0.9);
+    steer(dt);
+    hint(now, dt);
     render(now);
     if (settled()) sync();
   }
@@ -1717,13 +1809,6 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
       raf = 0;
     }
     root.dataset.running = String(go && intent);
-    const label = intent ? 'Pause' : 'Play';
-    for (const b of toggles) {
-      b.setAttribute('aria-label', `${label} the robot animation`);
-      b.dataset.state = intent ? 'playing' : 'paused';
-      const text = b.querySelector('[data-robot-toggle-label]');
-      if (text) text.textContent = label;
-    }
   }
 
   function resize(cw: number, ch: number) {
@@ -1754,14 +1839,14 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
     resize(Math.round(r.width), Math.round(r.height));
   };
 
-  const onToggle = () => {
-    intent = !intent;
-    userPaused = !intent;
-    sync();
-  };
+  // The Motion switch (the page's bar) and the system setting: off holds one composed moment, and there
+  // is no looking around.
   const onMotion = () => {
-    if (!motionOK()) intent = false;
-    else if (!userPaused) intent = true;
+    intent = motionOK();
+    if (!intent) {
+      endHint();
+      unlook();
+    }
     sync();
   };
   const onLost = (e: Event) => {
@@ -1784,7 +1869,6 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
     render();
     sync();
   };
-  for (const b of toggles) b.addEventListener('click', onToggle);
   mq.addEventListener('change', onMotion);
   document.addEventListener('visibilitychange', sync);
   canvas.addEventListener('webglcontextlost', onLost);
@@ -1808,6 +1892,153 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
   const raycaster = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
   let hovered = false;
+
+  // The screen's light: brighter under the pointer, and while the idle hint plays.
+  let hintK = 0;
+  function light() {
+    const k = (hovered ? 1 : 0) * 0.6 + hintK;
+    desk.screenMat.color.setScalar(SCREEN_LIT * (1 + 0.14 * k));
+    desk.lift.material.opacity = 0.05 * k;
+    desk.lift.visible = k > 0.002;
+    desk.glow.intensity = GLOW * (1 + 1.2 * k);
+  }
+  light();
+
+  // --- The idle hint -------------------------------------------------------------------------------
+  // Once: if nothing has moved the pointer, scrolled or pressed a key for IDLE_MS since the room first
+  // drew, the monitor brightens and dims again over HINT_MS. Any press, a drag or going in ends it for
+  // good. It needs motion (the frame loop only runs with it), and the opening in view.
+  let hintState: 'wait' | 'on' | 'off' = 'wait';
+  let hintStart = 0;
+  let idleFrom = performance.now();
+  function endHint() {
+    if (hintState === 'off') return;
+    root.dataset.hint = hintState === 'on' ? 'stopped' : 'cancelled';
+    hintState = 'off';
+  }
+  function hint(now: number, dt: number) {
+    if (hintState === 'wait' && drawn && inView && intent && mode === 'hero' && !flight && !html.dataset.pc && !press && now - idleFrom >= IDLE_MS) {
+      hintState = 'on';
+      hintStart = now;
+      root.dataset.hint = 'on';
+    }
+    const was = hintK;
+    if (hintState === 'on') {
+      const p = (now - hintStart) / HINT_MS;
+      hintK = p >= 1 ? 0 : Math.sin(Math.PI * p) ** 2;
+      if (p >= 1) {
+        hintState = 'off';
+        root.dataset.hint = 'done';
+      }
+    } else hintK = hintK < 0.002 ? 0 : hintK * Math.exp(-dt * 8);
+    if (hintK !== was) light();
+  }
+  const idle = () => {
+    idleFrom = performance.now();
+  };
+  const idleEvents: [string, () => void][] = [
+    ['pointermove', idle],
+    ['wheel', idle],
+    ['scroll', idle],
+    ['pointerdown', endHint],
+    ['keydown', endHint],
+  ];
+  for (const [type, fn] of idleEvents) addEventListener(type, fn, { capture: true, passive: true });
+
+  // --- Looking around ------------------------------------------------------------------------------
+  // `par` follows the pointer over the stage, `drag` a press moved past DRAG_PX (it eases back to nothing
+  // once let go), and `look` eases toward their sum, softly held inside LOOK. Mouse and pen only: touch
+  // scrolls the page as ever. Links and buttons keep their clicks; the keyboard and the wheel are left alone.
+  const par = { az: 0, el: 0 };
+  const drag = { az: 0, el: 0 };
+  const look = { az: 0, el: 0 };
+  let press: { id: number; x: number; y: number; az: number; el: number; moved: boolean } | null = null;
+  let wasDrag = false;
+  const soft = (x: number, lo: number, hi: number) => (x >= 0 ? hi * Math.tanh(x / hi) : lo * Math.tanh(x / lo));
+  const lookOK = () => intent && mode === 'hero' && !flight && !lost && html.hasAttribute('data-pc-able') && !html.dataset.pc;
+  const fine = (e: PointerEvent) => e.pointerType === 'mouse' || e.pointerType === 'pen';
+  function steer(dt: number) {
+    if (!press?.moved) {
+      const k = Math.exp(-dt * 1.6);
+      drag.az *= k;
+      drag.el *= k;
+    }
+    const k = 1 - Math.exp(-dt * 6);
+    look.az += (soft(par.az + drag.az, LOOK.az, LOOK.az) - look.az) * k;
+    look.el += (soft(par.el + drag.el, LOOK.down, LOOK.up) - look.el) * k;
+  }
+  function unlook() {
+    if (press && root.hasPointerCapture(press.id)) root.releasePointerCapture(press.id);
+    press = null;
+    par.az = par.el = drag.az = drag.el = look.az = look.el = 0;
+    root.style.cursor = '';
+  }
+  function cursor(x: number, y: number) {
+    root.style.cursor = press?.moved ? 'grabbing' : mode !== 'hero' || flight ? '' : pickAt(x, y) ? 'pointer' : lookOK() ? 'grab' : '';
+  }
+  const onDown = (e: PointerEvent) => {
+    wasDrag = false;
+    if (e.button !== 0 || !fine(e) || !lookOK() || (e.target as Element).closest('a, button, input, select, textarea, label, [tabindex]')) return;
+    press = { id: e.pointerId, x: e.clientX, y: e.clientY, az: drag.az, el: drag.el, moved: false };
+    e.preventDefault(); // no text selection while dragging; the click still comes
+  };
+  const onMove = (e: PointerEvent) => {
+    if (!fine(e)) return;
+    if (press && e.pointerId === press.id) {
+      const dx = e.clientX - press.x;
+      const dy = e.clientY - press.y;
+      if (!press.moved && Math.hypot(dx, dy) >= DRAG_PX) {
+        press.moved = wasDrag = true;
+        endHint();
+        root.setPointerCapture(e.pointerId);
+      }
+      if (press.moved) {
+        // Grab the room: drag right and it turns right. Wound up no further than the limits.
+        drag.az = Math.max(-2 * LOOK.az, Math.min(2 * LOOK.az, press.az - (dx / fw) * 0.9));
+        drag.el = Math.max(-2 * LOOK.down, Math.min(2 * LOOK.up, press.el + (dy / fh) * 0.5));
+      }
+    } else if (lookOK()) {
+      const r = stage!.getBoundingClientRect();
+      const nx = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1));
+      const ny = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height) * 2 - 1));
+      par.az = -nx * PARALLAX.az;
+      par.el = ny * PARALLAX.el;
+    }
+    cursor(e.clientX, e.clientY);
+  };
+  const onUp = (e: PointerEvent) => {
+    if (!press || e.pointerId !== press.id) return;
+    if (root.hasPointerCapture(press.id)) root.releasePointerCapture(press.id);
+    press = null;
+    cursor(e.clientX, e.clientY);
+  };
+  const onLeave = () => {
+    par.az = par.el = 0;
+    if (!press) pickAt(-1, -1);
+    if (!press) root.style.cursor = '';
+  };
+  root.addEventListener('pointerdown', onDown);
+  root.addEventListener('pointermove', onMove);
+  root.addEventListener('pointerup', onUp);
+  root.addEventListener('pointercancel', onUp);
+  root.addEventListener('lostpointercapture', onUp);
+  root.addEventListener('pointerleave', onLeave);
+
+  function pickAt(x: number, y: number) {
+    const r = canvas.getBoundingClientRect();
+    let hit = false;
+    if (mode === 'hero' && !flight && drawn && r.width && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+      ndc.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
+      raycaster.setFromCamera(ndc, camera);
+      hit = raycaster.intersectObject(desk.monitor, true).length > 0;
+    }
+    if (hit !== hovered) {
+      hovered = hit;
+      light();
+      if (!raf && !lost && w) render();
+    }
+    return hit;
+  }
   const textures = new Set<THREE.Texture>([blobTex, dotTex, screenMap, ...room.textures]);
 
   return {
@@ -1819,6 +2050,10 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
         copyView(from, cur);
         const key = `${mode}>${to}`;
         mode = to;
+        endHint();
+        unlook();
+        hovered = false;
+        light();
         if (to !== 'hero') {
           // The stage fills the window from here on (computer.ts has set the page's state).
           ox = -rootX;
@@ -1836,6 +2071,7 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
     quad,
     home() {
       mode = 'hero';
+      unlook();
       quietOn = false;
       rest = 0;
       settle();
@@ -1850,22 +2086,8 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
       sync();
     },
     screenAspect: SCREEN.w / SCREEN.h,
-    pick(x, y) {
-      const r = canvas.getBoundingClientRect();
-      let hit = false;
-      if (mode !== 'read' && !flight && r.width && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
-        ndc.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
-        raycaster.setFromCamera(ndc, camera);
-        hit = raycaster.intersectObject(desk.monitor, true).length > 0;
-      }
-      if (hit !== hovered) {
-        hovered = hit;
-        desk.screenMat.color.setScalar(hit ? 1.25 : 1);
-        desk.glow.intensity = hit ? GLOW * 1.8 : GLOW;
-        if (!raf && !lost) render();
-      }
-      return hit;
-    },
+    pick: pickAt,
+    dragged: () => wasDrag,
     stats() {
       if (!lost && w) render();
       const info = renderer.info;
@@ -1890,6 +2112,11 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
         pixelRatio: renderer.getPixelRatio(),
         frames,
         screenDirty: screenDirty ? 1 : 0,
+        hint: hintK,
+        heroDist,
+        heroFramed,
+        lookAz: look.az,
+        lookEl: look.el,
       };
     },
     dispose() {
@@ -1899,8 +2126,14 @@ export function mountLab(root: HTMLElement, { play = false, toggles = [] as HTML
       ro.disconnect();
       textRo.disconnect();
       motionObs.disconnect();
-      for (const b of toggles) b.removeEventListener('click', onToggle);
       mq.removeEventListener('change', onMotion);
+      root.removeEventListener('pointerdown', onDown);
+      root.removeEventListener('pointermove', onMove);
+      root.removeEventListener('pointerup', onUp);
+      root.removeEventListener('pointercancel', onUp);
+      root.removeEventListener('lostpointercapture', onUp);
+      root.removeEventListener('pointerleave', onLeave);
+      for (const [type, fn] of idleEvents) removeEventListener(type, fn, true);
       document.removeEventListener('visibilitychange', sync);
       scene.traverse((o) => {
         if (!(o instanceof THREE.Mesh || o instanceof THREE.Points || o instanceof THREE.Line)) return;

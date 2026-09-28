@@ -1,0 +1,10 @@
+---
+// PROTOTYPE (lab-cinematic, 2026-09-28). The lab computer's Contact page (src/layouts/Screen.astro).
+import Screen from '../../layouts/Screen.astro';
+import FolioContact from '../../components/FolioContact.astro';
+import { profile } from '../../data/site';
+---
+
+<Screen title={`Contact · ${profile.name}`} path="contact">
+  <FolioContact level={1} />
+</Screen>

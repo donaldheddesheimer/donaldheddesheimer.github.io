@@ -1,22 +1,44 @@
 ---
-// PROTOTYPE (lab-prototype, 2026-09-27): a computer-first opening, for review. Not linked from the site
-// and not indexed. The opening is the lab (LabStage.astro): the name, role, Resume, Contact and the way
-// in ("Explore the lab", or the monitor) over the room. Inside, the desk's computer holds the portfolio
-// (/computer/). The homepage's own sections follow below, unchanged, as the page for every window the
-// lab doesn't open in (phones; narrow, short or portrait windows) and for anyone who scrolls past it.
+// PROTOTYPE (lab-cinematic, 2026-09-28): a cinematic opening, for review. Not linked from the site and
+// not indexed. The opening is the lab (LabStage.astro): the name, role, Resume, Contact and the way in
+// ("Explore the lab", or the monitor) over the room. Inside, the desk's computer holds a simple
+// portfolio (/computer/…: Work, About, Résumé, Contact). The same four sections follow below as the
+// page for every window the lab doesn't open in (phones; narrow, short or portrait windows) and for
+// anyone who scrolls past it.
+//
+// /prototype/?computer=<path> is the lab reading that page (routes.ts): a shared link or a reload opens
+// it at once, without the camera's entrance; a window the lab doesn't open in goes to the ordinary page.
+import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import NewTab from '../components/NewTab.astro';
 import LabStage from '../components/LabStage.astro';
-import HomeSections from '../components/HomeSections.astro';
+import FolioWork from '../components/FolioWork.astro';
+import FolioAbout from '../components/FolioAbout.astro';
+import FolioResume from '../components/FolioResume.astro';
+import FolioContact from '../components/FolioContact.astro';
 import { profile } from '../data/site';
+import { PAGES } from '../scripts/lab-prototype/routes';
+
+const projects = (await getCollection('projects')).map((p) => p.id);
 ---
 
-<Base home noindex title={`The lab · ${profile.name}`} description={profile.tagline}>
+<Base home lab noindex title={`The lab · ${profile.name}`} description={profile.tagline}>
   <section id="top" class="lab-hero" aria-labelledby="hero-name">
-    <script is:inline>
-      // Offer the lab before first paint where the window can hold it (computer.ts keeps this current).
-      if (matchMedia('(width >= 64rem) and (height >= 36rem) and (min-aspect-ratio: 3/2)').matches) document.documentElement.dataset.pcAble = '';
+    <script is:inline define:vars={{ projects, pages: PAGES }}>
+      // Before first paint: offer the lab where the window can hold it (computer.ts keeps this current),
+      // and open a shared computer address straight on its page (routes.ts parse(), inlined).
+      var h = document.documentElement;
+      var roomy = matchMedia('(width >= 64rem) and (height >= 36rem) and (min-aspect-ratio: 3/2)').matches;
+      if (roomy) h.dataset.pcAble = '';
+      var path = new URLSearchParams(location.search).get('computer');
+      if (path != null) {
+        path = path.replace(/^\/+|\/+$/g, '');
+        var m = path.match(/^work\/([\w-]+)$/);
+        if (!(pages.indexOf(path) >= 0 || (m && projects.indexOf(m[1]) >= 0))) history.replaceState(history.state, '', location.pathname + location.hash);
+        else if (!roomy) location.replace(m ? '/prototype/' + path + '/' : '/prototype/#' + path);
+        else h.dataset.pc = 'read';
+      }
     </script>
     <div class="lab-copy" data-lab-avoid>
       <p class="hero-kicker"><span>{profile.status} ·</span> <span>{profile.school}</span></p>
@@ -24,7 +46,7 @@ import { profile } from '../data/site';
       <p class="lab-role">{profile.headline}</p>
       <div class="hero-actions">
         <a href="#work" class="btn btn-primary btn-lg" data-lab-enter>
-          <span class="pc-yes">Explore the lab</span><span class="pc-no">Selected work</span>
+          <span class="pc-yes">Explore the lab</span><span class="pc-no">See the work</span>
           <Icon name="arrow-right" class="size-4" />
         </a>
         <a href={profile.resume} class="btn btn-lg" target="_blank" rel="noopener"><Icon name="file" class="size-4" />Resume<NewTab class="size-3.5 shrink-0" /></a>
@@ -34,7 +56,12 @@ import { profile } from '../data/site';
     <LabStage class="lab-hero-stage" />
   </section>
 
-  <HomeSections />
+  <div class="lab-sections">
+    <FolioWork href={(id) => `/prototype/work/${id}/`} />
+    <FolioAbout />
+    <FolioResume />
+    <FolioContact />
+  </div>
 </Base>
 
 <style>
@@ -88,7 +115,7 @@ import { profile } from '../data/site';
       inset: 0;
     }
     .lab-hero :global(.lab-cap) {
-      right: 7.5rem;
+      right: 1rem;
       left: auto;
     }
     /* Out of the text's corner, and down into the page. */
@@ -127,8 +154,7 @@ import { profile } from '../data/site';
      drops back in place. */
   .lab-copy,
   .lab-hero::after,
-  :global(.lab-cap),
-  :global(.lab-ctl) {
+  :global(.lab-cap) {
     transition: opacity 250ms var(--ease);
   }
   :global(html[data-pc]) {
@@ -136,7 +162,7 @@ import { profile } from '../data/site';
   }
   :global(html[data-pc]) .lab-copy,
   :global(html[data-pc]) .lab-hero::after,
-  :global(html[data-pc]) :global(:is(.home-bar, .lab-cap, .lab-ctl, .home-sections, .home-foot, .tabbar)) {
+  :global(html[data-pc]) :global(:is(.home-bar, .lab-cap, .lab-sections, .home-foot, .tabbar)) {
     opacity: 0;
     visibility: hidden;
     transition:

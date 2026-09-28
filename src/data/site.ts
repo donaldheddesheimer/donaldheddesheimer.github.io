@@ -30,6 +30,12 @@ export const socials = [
   { id: 'email', label: 'Email', handle: 'donaldheddes@gmail.com', href: 'mailto:donaldheddes@gmail.com', icon: 'mail' },
 ] as const;
 
+// The contact section's heading and note (the homepage's Contact, and the lab computer's).
+export const contact = {
+  title: "Let's talk.",
+  note: 'Internships, research, or anything GPU- or robot-shaped. Email is the fastest way to reach me.',
+};
+
 // Organizations appear as nodes in the entity graph. Projects point at them with `org:` / `related:`.
 export type OrgKind = 'education' | 'work' | 'research' | 'team' | 'event' | 'school';
 export type Org = { id: string; name: string; short: string; kind: OrgKind; parent?: string };

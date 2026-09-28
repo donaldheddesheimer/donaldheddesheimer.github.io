@@ -1,8 +1,11 @@
 ---
-// PROTOTYPE. A case study on the lab computer's screen: the same CaseStudy as /projects/<id>/.
+// PROTOTYPE (lab-cinematic, 2026-09-28). A case study on the lab computer: the same CaseStudy as
+// /projects/<id>/, plain (no systems map parts), its links staying on the computer.
 import { getCollection, type CollectionEntry } from 'astro:content';
 import Screen from '../../../layouts/Screen.astro';
 import CaseStudy from '../../../components/CaseStudy.astro';
+import { profile } from '../../../data/site';
+import { labHref } from '../../../scripts/lab-prototype/routes';
 
 export async function getStaticPaths() {
   const projects = (await getCollection('projects')).sort((a, b) => a.data.code.localeCompare(b.data.code));
@@ -18,9 +21,8 @@ interface Props {
   next?: CollectionEntry<'projects'>;
 }
 const { project } = Astro.props;
-const d = project.data;
 ---
 
-<Screen title={`${d.title} · Portfolio`} page={`/projects/${project.id}/`} crumb={d.title}>
-  <CaseStudy {...Astro.props} />
+<Screen title={`${project.data.title} · ${profile.name}`} path={`work/${project.id}`}>
+  <CaseStudy {...Astro.props} plain projectHref={(id) => labHref(`work/${id}`)} indexHref={labHref('work')} />
 </Screen>

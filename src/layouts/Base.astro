@@ -26,19 +26,29 @@ interface Props {
   canonical?: boolean;
   /** Kept out of search results (a prototype). */
   noindex?: boolean;
+  /** PROTOTYPE (lab-cinematic): the lab prototype's pages (/prototype/…): its four sections (Work, About,
+   *  Résumé, Contact) in the header and tab bar, the Motion switch in the header, no systems map links. */
+  lab?: boolean;
 }
-const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false, story = false, console = false, section, status, canonical = true, noindex = false } = Astro.props;
+const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false, story = false, console = false, section, status, canonical = true, noindex = false, lab = false } = Astro.props;
 // The homepage's own chrome (header, footer, no rail or status bar), on it and on the pages read like it.
 const editorial = home || story;
 // Absolute URLs for link previews. public/og.png is rendered from the profile (see src/data/site.ts).
 const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL('/og.png', Astro.site).href;
 
-const base = home ? '' : '/';
+const base = home ? '' : lab ? '/prototype/' : '/';
 // Homepage sections, then the systems map, which is a page of its own (`href`, and no scroll-spy).
 // The phone tab bar carries the entries with a `tab`: its label there, and the sections it lights for.
 type NavItem = { id: string; label: string; icon: IconName; href?: string; tab?: { label: string; name?: string; spy?: string } };
-const nav: NavItem[] = [
+const labNav: NavItem[] = [
+  { id: 'top', label: 'Home', icon: 'home', tab: { label: 'Home' } },
+  { id: 'work', label: 'Work', icon: 'star', tab: { label: 'Work' } },
+  { id: 'about', label: 'About', icon: 'briefcase', tab: { label: 'About' } },
+  { id: 'resume', label: 'Résumé', icon: 'file', tab: { label: 'Résumé' } },
+  { id: 'contact', label: 'Contact', icon: 'radio', tab: { label: 'Contact' } },
+];
+const nav: NavItem[] = lab ? labNav : [
   { id: 'top', label: 'Home', icon: 'home', tab: { label: 'Home' } },
   { id: 'work', label: 'Selected work', icon: 'star', tab: { label: 'Work', spy: 'work projects' } },
   { id: 'timeline', label: 'Timeline', icon: 'timeline' },
@@ -61,7 +71,13 @@ const projects = (await getCollection('projects')).sort((a, b) => b.data.code.lo
 const org = (id: string) => orgs.find((o) => o.id === id)!;
 const onConsole = (id: string) => ({ sel: id, href: `/systems/?sel=${encodeURIComponent(id)}#overview` });
 const withRecord = new Set([...experience.map((e) => `org:${e.org}`), `org:${education.org}`]);
-const search = [
+const labSearch = [
+  ...labNav.map((n) => ({ group: 'Sections', code: 'NAV', label: n.label, sub: '', href: `/prototype/#${n.id}` })),
+  ...projects.map((p) => ({ group: 'Projects', code: 'PRJ', label: p.data.title, sub: p.data.tags.join(' · '), terms: `${p.data.summary} ${p.data.context ?? ''}`, href: `/prototype/work/${p.id}/` })),
+  { group: 'Links', code: 'PDF', label: 'Resume', sub: 'Download PDF', href: profile.resume },
+  ...socials.map((s) => ({ group: 'Links', code: 'EXT', label: s.label, sub: s.handle, href: s.href })),
+];
+const search = lab ? labSearch : [
   ...nav.map((n) => (n.href ? { group: 'Sections', code: 'MAP', label: n.label, sub: 'Orgs, projects, capabilities', href: n.href } : { group: 'Sections', code: 'NAV', label: n.label, sub: '', href: `/#${n.id}` })),
   ...projects.map((p) => ({ group: 'Projects', code: p.data.code, label: p.data.title, sub: p.data.tags.join(' · '), terms: `${p.data.summary} ${p.data.context ?? ''}`, href: `/projects/${p.id}/` })),
   ...experience.map((e) => ({
@@ -140,18 +156,35 @@ const search = [
     {
       editorial ? (
         <header class:list={['home-bar', story && 'home-bar-story']} data-home-bar>
-          <a href={home ? '#top' : '/'} class="home-mark" aria-label={home ? `${profile.name}, back to top` : `${profile.name}, home`}>
+          <a href={home ? '#top' : base} class="home-mark" aria-label={home ? `${profile.name}, back to top` : `${profile.name}, home`}>
             <Mark class="size-7 shrink-0" />
             <span class="home-mark-name">{profile.name}</span>
           </a>
-          <nav aria-label="Sections" class="home-nav">
-            <a href={`${base}#work`} aria-current={section === 'work' ? 'true' : undefined}>
-              Work
-            </a>
-            <a href={`${base}#experience`}>Experience</a>
-            <a href={`${base}#contact`}>Contact</a>
-            <a href="/systems/">Systems map</a>
-          </nav>
+          {lab ? (
+            <nav aria-label="Sections" class="home-nav">
+              {labNav.slice(1).map((n) => (
+                <a href={`${base}#${n.id}`} aria-current={section === n.id ? 'true' : undefined}>
+                  {n.label}
+                </a>
+              ))}
+            </nav>
+          ) : (
+            <nav aria-label="Sections" class="home-nav">
+              <a href={`${base}#work`} aria-current={section === 'work' ? 'true' : undefined}>
+                Work
+              </a>
+              <a href={`${base}#experience`}>Experience</a>
+              <a href={`${base}#contact`}>Contact</a>
+              <a href="/systems/">Systems map</a>
+            </nav>
+          )}
+          {lab ? (
+            <div class="home-bar-end">
+              <button type="button" role="switch" aria-checked="true" class="motion-switch bar-motion" data-motion-toggle title="Turn the animation on or off">
+                Motion <span class="sw" aria-hidden="true" />
+              </button>
+            </div>
+          ) : (
           <div class="home-bar-end">
             <button type="button" data-cmdk-open class="btn btn-ghost btn-icon" aria-label="Search" title="Search (⌘K)">
               <Icon name="search" class="size-4" />
@@ -163,6 +196,7 @@ const search = [
               <NewTab class="size-3.5 shrink-0 max-sm:hidden" />
             </a>
           </div>
+          )}
         </header>
       ) : (
         <>
@@ -262,7 +296,7 @@ const search = [
         editorial ? (
           <footer class="home-foot readout">
             <span>© {new Date().getFullYear()} {profile.name}</span>
-            <a href="/systems/">Systems map</a>
+            {!lab && <a href="/systems/">Systems map</a>}
             <button type="button" role="switch" aria-checked="true" class="motion-switch" data-motion-toggle title="Turn animation on or off">
               Motion <span class="sw" aria-hidden="true" />
             </button>
@@ -822,6 +856,22 @@ const search = [
         }
       }
 
+      /* The lab prototype's header carries the Motion switch in place of search and Resume. */
+      .bar-motion {
+        min-height: var(--h-md);
+        padding: 0 0.625rem;
+        border-radius: var(--radius-2);
+        font-size: var(--text-sm);
+        color: var(--muted);
+      }
+      .bar-motion:hover {
+        background: var(--hover-bg);
+      }
+      @media (pointer: coarse) {
+        .bar-motion {
+          min-height: var(--h-touch);
+        }
+      }
       /* Motion: a switch, drawn in neutrals (green means active, and this is a preference). */
       .motion-switch {
         display: inline-flex;

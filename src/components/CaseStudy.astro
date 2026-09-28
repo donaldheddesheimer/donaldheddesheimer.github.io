@@ -1,6 +1,8 @@
 ---
 // A case study's content: its title band, write-up, details and connections, and the pager. On the
-// project's own page (/projects/<id>/) and on the lab computer's screen (/computer/projects/<id>/).
+// project's own page (/projects/<id>/). `plain` (the lab prototype's pages: /prototype/work/<id>/ and the
+// lab computer's /computer/work/<id>/) keeps the write-up and leaves out the systems map's parts: its
+// links, the connections graph, and the project codes.
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Icon from './Icon.astro';
 import EntityShape from './EntityShape.astro';
@@ -13,8 +15,14 @@ interface Props {
   project: CollectionEntry<'projects'>;
   prev?: CollectionEntry<'projects'>;
   next?: CollectionEntry<'projects'>;
+  /** Without the systems map's parts (see above). */
+  plain?: boolean;
+  /** Where another project's case study is. */
+  projectHref?: (id: string) => string;
+  /** Where "All projects" goes. */
+  indexHref?: string;
 }
-const { project, prev, next } = Astro.props;
+const { project, prev, next, plain = false, projectHref = (id: string) => `/projects/${id}/`, indexHref = '/#projects' } = Astro.props;
 const d = project.data;
 const { Content } = await render(project);
 
@@ -40,18 +48,18 @@ const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
      band, the write-up, and a quiet column of details and connections. The console view of the same
      project (its properties, links, and evidence) stays on the systems map, one link away. -->
 <header class="cs-head">
-  <a href="/#projects" class="cs-back">
+  <a href={indexHref} class="cs-back">
     <Icon name="arrow-left" class="size-3.5" /> All projects
   </a>
   <p class="cs-meta">
     <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
-    <span>{d.code}</span>
+    {!plain && <span>{d.code}</span>}
     <span>
       {fmtMonth(d.start)}
       {d.context && ` · ${d.context}`}
     </span>
     {
-      d.featured && (
+      d.featured && !plain && (
         <span class="flex items-center gap-1 text-ink">
           <Icon name="star" class="size-3.5" />
           Featured
@@ -84,10 +92,14 @@ const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
         </p>
       )
     }
-    <a href={mapHref(`project:${project.id}`)} class="btn btn-ghost">
-      <Icon name="graph" class="size-4" />
-      Show on map
-    </a>
+    {
+      !plain && (
+        <a href={mapHref(`project:${project.id}`)} class="btn btn-ghost">
+          <Icon name="graph" class="size-4" />
+          Show on map
+        </a>
+      )
+    }
   </div>
   {
     d.stats.length > 0 && (
@@ -161,9 +173,10 @@ const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
       </div>
     </section>
 
-    <section>
-      <h2 class="cs-aside-title">Connections</h2>
+    <section hidden={plain && related.length === 0}>
+      <h2 class="cs-aside-title">{plain ? 'Related work' : 'Connections'}</h2>
       {
+        !plain &&
         groups.map((g) => (
           <div class="cs-group">
             <p class="cs-group-label">{g.label}</p>
@@ -184,14 +197,14 @@ const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
       {
         related.length > 0 && (
           <div class="cs-group">
-            <p class="cs-group-label">Shares the most tags with</p>
+            {!plain && <p class="cs-group-label">Shares the most tags with</p>}
             <ul>
               {related.map(({ p }) => (
                 <li>
-                  <a href={`/projects/${p.id}/`} class="cs-link">
-                    <EntityShape type="project" class="size-2.5 shrink-0" />
+                  <a href={projectHref(p.id)} class="cs-link">
+                    {!plain && <EntityShape type="project" class="size-2.5 shrink-0" />}
                     <span class="min-w-0 flex-1 truncate">{p.data.title}</span>
-                    <span class="cs-link-note">{p.data.code}</span>
+                    {!plain && <span class="cs-link-note">{p.data.code}</span>}
                   </a>
                 </li>
               ))}
@@ -199,7 +212,7 @@ const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
           </div>
         )
       }
-      {groups.length === 0 && related.length === 0 && <p class="mt-2 text-sm text-dim">No linked organizations, capabilities, or projects.</p>}
+      {!plain && groups.length === 0 && related.length === 0 && <p class="mt-2 text-sm text-dim">No linked organizations, capabilities, or projects.</p>}
     </section>
   </aside>
 </div>
@@ -207,9 +220,9 @@ const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
 <nav class="cs-pager" aria-label="More projects">
   {
     prev ? (
-      <a href={`/projects/${prev.id}/`} class="cs-pager-link">
+      <a href={projectHref(prev.id)} class="cs-pager-link">
         <span class="cs-pager-dir">
-          <Icon name="arrow-left" class="size-3.5" /> Previous · {prev.data.code}
+          <Icon name="arrow-left" class="size-3.5" /> Previous{!plain && ` · ${prev.data.code}`}
         </span>
         <span class="cs-pager-title">{prev.data.title}</span>
       </a>
@@ -219,9 +232,9 @@ const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
   }
   {
     next && (
-      <a href={`/projects/${next.id}/`} class="cs-pager-link is-next">
+      <a href={projectHref(next.id)} class="cs-pager-link is-next">
         <span class="cs-pager-dir">
-          Next · {next.data.code} <Icon name="arrow-right" class="size-3.5" />
+          Next{!plain && ` · ${next.data.code}`} <Icon name="arrow-right" class="size-3.5" />
         </span>
         <span class="cs-pager-title">{next.data.title}</span>
       </a>
