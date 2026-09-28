@@ -4,97 +4,45 @@ import { getCollection } from 'astro:content';
 import Icon, { type IconName } from '../components/Icon.astro';
 import NewTab from '../components/NewTab.astro';
 import Mark from '../components/Mark.astro';
-import { education, experience, orgs, profile, socials } from '../data/site';
-import { getModel, typeName } from '../lib/model';
+import { profile, socials } from '../data/site';
 import { build } from '../lib/build';
 
 interface Props {
   title?: string;
   description?: string;
-  crumb?: { label: string; href?: string }[];
-  /** The homepage: its own header and footer in place of the top bar, rail, and status bar. */
+  /** The homepage (the lab): its header links to the sections on the page itself. */
   home?: boolean;
-  /** A page read like the homepage (a project case study): its header and footer, linking back to it. */
+  /** A page of its own under the same header (a project case study, the 404): the name always shows. */
   story?: boolean;
-  /** The systems map console is on this page: the status bar reads out its selection. */
-  console?: boolean;
-  /** The rail / tab bar section this page belongs to, marked current (subpages). */
+  /** The section this page belongs to, marked current in the header and tab bar. */
   section?: string;
-  /** A short readout for the left of the status bar on pages without a selection (e.g. the 404). */
-  status?: string;
   /** False for a page with no address of its own (the 404), which gets no canonical link. */
   canonical?: boolean;
-  /** Kept out of search results (a prototype). */
+  /** Kept out of search results. */
   noindex?: boolean;
-  /** PROTOTYPE (lab-cinematic): the lab prototype's pages (/prototype/…): its four sections (Work, About,
-   *  Résumé, Contact) in the header and tab bar, the Motion switch in the header, no systems map links. */
-  lab?: boolean;
 }
-const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false, story = false, console = false, section, status, canonical = true, noindex = false, lab = false } = Astro.props;
-// The homepage's own chrome (header, footer, no rail or status bar), on it and on the pages read like it.
-const editorial = home || story;
-// Absolute URLs for link previews. public/og.png is rendered from the profile (see src/data/site.ts).
+const { title = profile.name, description = profile.tagline, home = false, story = false, section, canonical = true, noindex = false } = Astro.props;
+// Absolute URLs for link previews. public/og.jpg is a render of the homepage's opening (see src/data/site.ts).
 const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
-const ogImage = new URL('/og.png', Astro.site).href;
+const ogImage = new URL('/og.jpg', Astro.site).href;
 
-const base = home ? '' : lab ? '/prototype/' : '/';
-// Homepage sections, then the systems map, which is a page of its own (`href`, and no scroll-spy).
-// The phone tab bar carries the entries with a `tab`: its label there, and the sections it lights for.
-type NavItem = { id: string; label: string; icon: IconName; href?: string; tab?: { label: string; name?: string; spy?: string } };
-const labNav: NavItem[] = [
-  { id: 'top', label: 'Home', icon: 'home', tab: { label: 'Home' } },
-  { id: 'work', label: 'Work', icon: 'star', tab: { label: 'Work' } },
-  { id: 'about', label: 'About', icon: 'briefcase', tab: { label: 'About' } },
-  { id: 'resume', label: 'Résumé', icon: 'file', tab: { label: 'Résumé' } },
-  { id: 'contact', label: 'Contact', icon: 'radio', tab: { label: 'Contact' } },
+const base = home ? '' : '/';
+// The homepage's sections: in the header (all but Home) and the phone tab bar (all five).
+const nav: { id: string; label: string; icon: IconName }[] = [
+  { id: 'top', label: 'Home', icon: 'home' },
+  { id: 'work', label: 'Work', icon: 'star' },
+  { id: 'about', label: 'About', icon: 'briefcase' },
+  { id: 'resume', label: 'Résumé', icon: 'file' },
+  { id: 'contact', label: 'Contact', icon: 'radio' },
 ];
-const nav: NavItem[] = lab ? labNav : [
-  { id: 'top', label: 'Home', icon: 'home', tab: { label: 'Home' } },
-  { id: 'work', label: 'Selected work', icon: 'star', tab: { label: 'Work', spy: 'work projects' } },
-  { id: 'timeline', label: 'Timeline', icon: 'timeline' },
-  { id: 'experience', label: 'Experience', icon: 'briefcase', tab: { label: 'Experience' } },
-  { id: 'projects', label: 'More projects', icon: 'cube' },
-  { id: 'capabilities', label: 'Capabilities', icon: 'layers' },
-  { id: 'off-duty', label: 'Off duty', icon: 'sun' },
-  { id: 'contact', label: 'Contact', icon: 'radio', tab: { label: 'Contact' } },
-  { id: 'systems', label: 'Systems map', icon: 'graph', href: '/systems/', tab: { label: 'Map', name: 'Systems map' } },
-];
-const navHref = (n: NavItem) => n.href ?? `${base}#${n.id}`;
 const sourceHref = 'https://github.com/donaldheddesheimer/donaldheddesheimer.github.io';
 
-// Everything the ⌘K search can jump to: one row per object, under the group it lists in. `alias` is
-// the short name the map shows, matched like the title; `terms` is extra text that matches but isn't
-// shown. Orgs and capabilities open on the systems map (/systems/) with that object selected; an org
-// with a role or a degree is an Experience row that opens its record on the homepage instead, or is
-// selected in place when the map is on the page.
+// Everything the ⌘K search can jump to: one row per object, under the group it lists in. `terms` is
+// extra text that matches but isn't shown.
 const projects = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code));
-const org = (id: string) => orgs.find((o) => o.id === id)!;
-const onConsole = (id: string) => ({ sel: id, href: `/systems/?sel=${encodeURIComponent(id)}#overview` });
-const withRecord = new Set([...experience.map((e) => `org:${e.org}`), `org:${education.org}`]);
-const labSearch = [
-  ...labNav.map((n) => ({ group: 'Sections', code: 'NAV', label: n.label, sub: '', href: `/prototype/#${n.id}` })),
-  ...projects.map((p) => ({ group: 'Projects', code: 'PRJ', label: p.data.title, sub: p.data.tags.join(' · '), terms: `${p.data.summary} ${p.data.context ?? ''}`, href: `/prototype/work/${p.id}/` })),
-  { group: 'Links', code: 'PDF', label: 'Resume', sub: 'Download PDF', href: profile.resume },
-  ...socials.map((s) => ({ group: 'Links', code: 'EXT', label: s.label, sub: s.handle, href: s.href })),
-];
-const search = lab ? labSearch : [
-  ...nav.map((n) => (n.href ? { group: 'Sections', code: 'MAP', label: n.label, sub: 'Orgs, projects, capabilities', href: n.href } : { group: 'Sections', code: 'NAV', label: n.label, sub: '', href: `/#${n.id}` })),
-  ...projects.map((p) => ({ group: 'Projects', code: p.data.code, label: p.data.title, sub: p.data.tags.join(' · '), terms: `${p.data.summary} ${p.data.context ?? ''}`, href: `/projects/${p.id}/` })),
-  ...experience.map((e) => ({
-    group: 'Experience',
-    code: e.id.toUpperCase().slice(0, 8),
-    label: org(e.org).name,
-    sub: e.role,
-    alias: org(e.org).short,
-    terms: `${e.unit ?? ''} ${e.tags.join(' ')}`,
-    sel: `org:${e.org}`,
-    href: `/#exp-${e.id}`,
-  })),
-  { group: 'Experience', code: 'EDU', label: education.school, sub: 'B.S. Computer Science', alias: org(education.org).short, sel: `org:${education.org}`, href: '/#exp-education' },
-  ...(await getModel())
-    .list()
-    .filter((e) => e.type === 'skill' || (e.type === 'org' && !withRecord.has(e.id)))
-    .map((e) => ({ group: 'Map', code: typeName[e.type].slice(0, 3).toUpperCase(), label: e.title, sub: e.kind, alias: e.label, ...onConsole(e.id) })),
+const search = [
+  ...nav.map((n) => ({ group: 'Sections', code: 'NAV', label: n.label, sub: '', href: `/#${n.id}` })),
+  ...projects.map((p) => ({ group: 'Projects', code: 'PRJ', label: p.data.title, sub: p.data.tags.join(' · '), terms: `${p.data.summary} ${p.data.context ?? ''}`, href: `/projects/${p.id}/` })),
   { group: 'Links', code: 'PDF', label: 'Resume', sub: 'Download PDF', href: profile.resume },
   ...socials.map((s) => ({ group: 'Links', code: 'EXT', label: s.label, sub: s.handle, href: s.href })),
 ];
@@ -117,7 +65,7 @@ const search = lab ? labSearch : [
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content={`${profile.name}: ${profile.headline}. A console-style card with an abstract systems map.`} />
+    <meta property="og:image:alt" content={`${profile.name}: ${profile.headline}. His name over a robotics lab after hours, three robots dancing beside a desk with a computer.`} />
     <meta name="twitter:card" content="summary_large_image" />
     {canonical && <link rel="canonical" href={pageUrl} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -135,14 +83,7 @@ const search = lab ? labSearch : [
         h.dataset.motion = saved || (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'off' : 'on');
       })();
     </script>
-    {
-      home && !lab && (
-        <script is:inline>
-          // The systems map moved from the homepage to /systems/: send its old links (/?sel=…) there.
-          if (/[?&]sel=/.test(location.search)) location.replace('/systems/' + location.search + location.hash);
-        </script>
-      )
-    }
+    <slot name="head" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -153,230 +94,72 @@ const search = lab ? labSearch : [
   <body class="min-h-dvh">
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 btn btn-primary">Skip to content</a>
 
-    {
-      editorial ? (
-        <header class:list={['home-bar', story && 'home-bar-story']} data-home-bar>
-          <a href={home ? '#top' : base} class="home-mark" aria-label={home ? `${profile.name}, back to top` : `${profile.name}, home`}>
-            <Mark class="size-7 shrink-0" />
-            <span class="home-mark-name">{profile.name}</span>
-          </a>
-          {lab ? (
-            <nav aria-label="Sections" class="home-nav">
-              {labNav.slice(1).map((n) => (
-                <a href={`${base}#${n.id}`} aria-current={section === n.id ? 'true' : undefined}>
-                  {n.label}
-                </a>
-              ))}
-            </nav>
-          ) : (
-            <nav aria-label="Sections" class="home-nav">
-              <a href={`${base}#work`} aria-current={section === 'work' ? 'true' : undefined}>
-                Work
-              </a>
-              <a href={`${base}#experience`}>Experience</a>
-              <a href={`${base}#contact`}>Contact</a>
-              <a href="/systems/">Systems map</a>
-            </nav>
-          )}
-          {lab ? (
-            <div class="home-bar-end">
-              <button type="button" role="switch" aria-checked="true" class="motion-switch bar-motion" data-motion-toggle title="Turn the animation on or off">
-                Motion <span class="sw" aria-hidden="true" />
-              </button>
-            </div>
-          ) : (
-          <div class="home-bar-end">
-            <button type="button" data-cmdk-open class="btn btn-ghost btn-icon" aria-label="Search" title="Search (⌘K)">
-              <Icon name="search" class="size-4" />
-            </button>
-            <!-- Not primary: the opening holds the page's one primary action. -->
-            <a href={profile.resume} class="topbar-resume btn" target="_blank" rel="noopener" aria-label="Resume (PDF, opens in new tab)">
-              <Icon name="file" class="size-4" />
-              <span class="max-sm:hidden">Resume</span>
-              <NewTab class="size-3.5 shrink-0 max-sm:hidden" />
+    <header class:list={['home-bar', story && 'home-bar-story']} data-home-bar>
+      <a href={home ? '#top' : base} class="home-mark" aria-label={home ? `${profile.name}, back to top` : `${profile.name}, home`}>
+        <Mark class="size-7 shrink-0" />
+        <span class="home-mark-name">{profile.name}</span>
+      </a>
+      <nav aria-label="Sections" class="home-nav">
+        {
+          nav.slice(1).map((n) => (
+            <a href={`${base}#${n.id}`} aria-current={section === n.id ? 'true' : undefined}>
+              {n.label}
             </a>
-          </div>
-          )}
-        </header>
-      ) : (
-        <>
-          {/* Top bar */}
-          <header class="fixed inset-x-0 top-0 z-40 flex h-12 items-center border-b border-line bg-panel">
-            <a href="/" class="grid h-full w-12 shrink-0 place-items-center border-r border-line md:w-14" aria-label="Home">
-              <Mark class="size-7" />
-            </a>
-            {/* Phones show only the current page, so its title has the room. Each page links back to its parent in its own header. */}
-            <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2 px-3 text-sm">
-              <a href="/" class="hidden py-1 font-semibold whitespace-nowrap sm:inline-block pointer-coarse:py-3">{profile.name}</a>
-              {crumb.map((c, i) => (
-                <>
-                  <span class="hidden text-dim sm:inline" aria-hidden="true">/</span>
-                  {c.href ? (
-                    <a href={c.href} class="truncate text-muted hover:text-text max-sm:hidden pointer-coarse:py-3">
-                      {c.label}
-                    </a>
-                  ) : (
-                    <span class:list={['truncate', i === crumb.length - 1 ? 'text-text sm:text-muted' : 'text-muted']}>{c.label}</span>
-                  )}
-                </>
-              ))}
-            </nav>
+          ))
+        }
+      </nav>
+      <!-- Settings: the Motion switch, out of the way until asked for (the footer has it too). -->
+      <div class="home-bar-end settings" data-settings>
+        <button type="button" class="btn btn-ghost btn-icon settings-btn" aria-expanded="false" aria-controls="settings" aria-label="Settings" title="Settings" data-settings-toggle>
+          <Icon name="sliders" class="size-4" />
+        </button>
+        <div id="settings" class="settings-pop" role="group" aria-label="Settings" hidden>
+          <button type="button" role="switch" aria-checked="true" class="motion-switch" data-motion-toggle aria-describedby="settings-motion-note">
+            Motion <span class="sw" aria-hidden="true" />
+          </button>
+          <p id="settings-motion-note" class="settings-note">The lab's robots and camera, and the page's transitions. It starts off if your system asks for reduced motion, and the robots and camera then stay still.</p>
+        </div>
+      </div>
+    </header>
 
-            <button
-              type="button"
-              data-cmdk-open
-              class="mx-auto hidden h-(--h-md) w-full max-w-sm items-center gap-2 rounded-2 bg-bg px-2.5 text-left text-sm text-dim shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[inset_0_0_0_1px_var(--line-2)] md:flex pointer-coarse:h-11"
-            >
-              <Icon name="search" class="size-4" />
-              <span>Search objects…</span>
-              <kbd class="ml-auto code-chip" data-kbd>⌘K</kbd>
-            </button>
-
-            <div class="ml-auto flex items-center gap-1.5 pr-2 md:ml-0 md:gap-3 md:pr-3">
-              <span class="hidden readout text-2xs lg:inline">
-                ATL <span data-clock>--:--</span>
-              </span>
-              <button type="button" data-cmdk-open class="btn btn-ghost btn-icon md:hidden" aria-label="Search">
-                <Icon name="search" class="size-4" />
-              </button>
-              {/* Not primary: each page keeps its one primary action in its own header. */}
-              <a href={profile.resume} class="topbar-resume btn" target="_blank" rel="noopener" aria-label="Resume (PDF, opens in new tab)">
-                <Icon name="file" class="size-4" />
-                <span class="max-sm:hidden">Resume</span>
-                <NewTab class="size-3.5 shrink-0 max-sm:hidden" />
-              </a>
-            </div>
-          </header>
-
-          {/* Left rail (desktop) */}
-          <nav aria-label="Sections" class="fixed top-12 bottom-0 left-0 z-30 hidden w-14 flex-col items-center gap-1 border-r border-line bg-panel py-2 md:flex" data-rail>
-            {nav.map((n) => (
-              <a
-                href={navHref(n)}
-                data-spy={n.href ? undefined : n.id}
-                class="rail-btn relative grid size-10 place-items-center rounded-2 text-dim hover:bg-(--hover-bg) hover:text-text pointer-coarse:size-11"
-                aria-label={n.label}
-                aria-current={n.id === section ? (n.href ? 'page' : 'true') : undefined}
-              >
-                <Icon name={n.icon} class="size-[18px]" />
-                <span class="rail-tip" aria-hidden="true">
-                  {n.label}
-                </span>
-              </a>
-            ))}
-            <div class="mt-auto flex flex-col items-center gap-1">
-              <div class="mb-1 h-px w-6 bg-line" aria-hidden="true" />
-              {socials.map((s) => {
-                const newTab = s.id !== 'email';
-                return (
-                  <a
-                    href={s.href}
-                    class="rail-btn relative grid size-10 place-items-center rounded-2 text-dim hover:bg-(--hover-bg) hover:text-text pointer-coarse:size-11"
-                    aria-label={newTab ? `${s.label} (opens in new tab)` : s.label}
-                    target={newTab ? '_blank' : undefined}
-                    rel={newTab ? 'noopener' : undefined}
-                  >
-                    <Icon name={s.icon} class="size-[18px]" />
-                    <span class="rail-tip" aria-hidden="true">
-                      {newTab ? `${s.label} ↗` : s.label}
-                    </span>
-                  </a>
-                );
-              })}
-            </div>
-          </nav>
-        </>
-      )
-    }
-
-    <!-- Elsewhere, phones have no status bar, so its copyright line and Motion switch close the page. -->
-    <main id="main" class:list={home ? 'home-main' : story ? 'home-main story-main' : 'pt-12 pb-20 md:pb-10 md:pl-14'}>
+    <!-- Phones have no header links beyond the mark, so the tab bar carries them; the footer closes the page. -->
+    <main id="main" class:list={story ? 'home-main story-main' : 'home-main'}>
       <slot />
-      {
-        editorial ? (
-          <footer class="home-foot readout">
-            <span>© {new Date().getFullYear()} {profile.name}</span>
-            {!lab && <a href="/systems/">Systems map</a>}
-            <button type="button" role="switch" aria-checked="true" class="motion-switch" data-motion-toggle title="Turn animation on or off">
-              Motion <span class="sw" aria-hidden="true" />
-            </button>
-            {build && (
-              <span>
-                BUILD <span class="text-muted">{build.sha} {build.date}</span>
-              </span>
-            )}
-            <a href={sourceHref} target="_blank" rel="noopener">
-              Source
-              <NewTab class="size-3 shrink-0" />
-            </a>
-          </footer>
-        ) : (
-          <footer class="flex items-center justify-center gap-4 px-4 pb-2 readout text-2xs text-dim md:hidden">
-            <span>© {new Date().getFullYear()} {profile.name}</span>
-            <button type="button" role="switch" aria-checked="true" class="motion-switch pointer-coarse:min-h-11" data-motion-toggle title="Turn animation on or off">
-              Motion <span class="sw" aria-hidden="true" />
-            </button>
-          </footer>
-        )
-      }
+      <footer class="home-foot readout">
+        <span>© {new Date().getFullYear()} {profile.name}</span>
+        <button type="button" role="switch" aria-checked="true" class="motion-switch" data-motion-toggle title="Turn animation on or off">
+          Motion <span class="sw" aria-hidden="true" />
+        </button>
+        {
+          build && (
+            <span>
+              BUILD <span class="text-muted">{build.sha} {build.date}</span>
+            </span>
+          )
+        }
+        <a href={sourceHref} target="_blank" rel="noopener">
+          Source
+          <NewTab class="size-3 shrink-0" />
+        </a>
+      </footer>
     </main>
 
     <!-- Bottom bar (phones, every page). After main in the source, so it lands at the page end when it stops being fixed. -->
     <nav aria-label="Sections" class="tabbar fixed inset-x-0 bottom-0 z-40 grid h-14 grid-cols-5 border-t border-line bg-panel pb-[env(safe-area-inset-bottom)] md:hidden">
       {
-        nav.flatMap((n) =>
-          n.tab ? (
-            <a
-              href={navHref(n)}
-              data-spy={n.href ? undefined : (n.tab.spy ?? n.id)}
-              class="rail-btn flex flex-col items-center justify-center gap-1 text-2xs text-dim"
-              aria-label={n.tab.name}
-              aria-current={n.id === section ? (n.href ? 'page' : 'true') : undefined}
-            >
-              <Icon name={n.icon} class="size-[18px]" />
-              {n.tab.label}
-            </a>
-          ) : (
-            []
-          ),
-        )
+        nav.map((n) => (
+          <a
+            href={`${base}#${n.id}`}
+            data-spy={n.id}
+            class="tab-btn relative flex flex-col items-center justify-center gap-1 text-2xs text-dim"
+            aria-current={n.id === section ? 'true' : undefined}
+          >
+            <Icon name={n.icon} class="size-[18px]" />
+            {n.label}
+          </a>
+        ))
       }
     </nav>
-
-    {
-      !editorial && (
-        <footer class="fixed right-0 bottom-0 left-14 z-30 hidden h-8 items-center gap-4 border-t border-line bg-panel px-3 readout text-2xs text-dim md:flex">
-          {console ? (
-            <span class="flex min-w-0 items-center gap-1.5">
-              SEL{' '}
-              <span class="max-w-[32ch] truncate text-muted" data-status-sel>
-                mission (illustrative)
-              </span>
-            </span>
-          ) : (
-            status && <span class="text-muted">{status}</span>
-          )}
-          <button type="button" role="switch" aria-checked="true" class="motion-switch h-full" data-motion-toggle title="Turn animation on or off">
-            Motion <span class="sw" aria-hidden="true" />
-          </button>
-          <span class="hidden xl:inline">{projects.length} projects</span>
-          <span class="hidden xl:inline">{experience.length} roles</span>
-          <span class="ml-auto hidden xl:inline">{profile.coords}</span>
-          {build && (
-            <span class="ml-auto xl:ml-0">
-              BUILD <span class="text-muted">{build.sha} {build.date}</span>
-            </span>
-          )}
-          <span class="hidden lg:inline">
-            © {new Date().getFullYear()} {profile.name}
-          </span>
-          <a href={sourceHref} class="flex h-full items-center gap-1 hover:text-text" target="_blank" rel="noopener">
-            Source
-            <NewTab class="size-3 shrink-0" />
-          </a>
-        </footer>
-      )
-    }
 
     <!-- ⌘K search -->
     <dialog id="cmdk" class="m-auto mt-[12vh] w-[min(640px,calc(100%-2rem))] rounded-2 border border-line-2 bg-panel p-0 text-text shadow-elev-3 backdrop:bg-black/60" aria-label="Search">
@@ -390,7 +173,7 @@ const search = lab ? labSearch : [
           aria-controls="cmdk-list"
           aria-autocomplete="list"
           aria-label="Search"
-          placeholder="Search projects, roles, sections…"
+          placeholder="Search projects, sections…"
           autocomplete="off"
           spellcheck="false"
           class="h-12 flex-1 bg-transparent text-md outline-none placeholder:text-dim"
@@ -398,7 +181,7 @@ const search = lab ? labSearch : [
         <kbd class="code-chip">ESC</kbd>
       </div>
       <div id="cmdk-list" role="listbox" aria-label="Search results" class="max-h-[55vh] overflow-y-auto pb-1"></div>
-      <p id="cmdk-empty" class="px-3 py-6 text-center text-dim" hidden>No objects match that query.</p>
+      <p id="cmdk-empty" class="px-3 py-6 text-center text-dim" hidden>Nothing matches that query.</p>
       <div class="flex gap-4 border-t border-line px-3 py-2 readout text-2xs text-dim">
         <span class="pointer-coarse:hidden">↑↓ move · ↵ open · esc close · / also opens</span><span class="ml-auto" id="cmdk-count" role="status"></span>
       </div>
@@ -406,11 +189,10 @@ const search = lab ? labSearch : [
     <script type="application/json" id="cmdk-data" set:html={JSON.stringify(search).replace(/</g, '\\u003c')} />
 
     <script>
-      // Scroll-spy for the bottom bar (and the rail, on pages that have the sections).
+      // Scroll-spy for the tab bar, on the page that has the sections.
       const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-spy]')];
-      const spies = (a: HTMLElement) => a.dataset.spy!.split(' ');
-      const sections = [...new Set(links.flatMap(spies))]
-        .map((id) => document.getElementById(id))
+      const sections = links
+        .map((a) => document.getElementById(a.dataset.spy!))
         .filter((el): el is HTMLElement => !!el)
         .sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
       if (sections.length) {
@@ -419,7 +201,7 @@ const search = lab ? labSearch : [
         const mark = () => {
           const atBottom = innerHeight + scrollY >= document.documentElement.scrollHeight - 4;
           const id = atBottom ? sections[sections.length - 1].id : current;
-          links.forEach((a) => (spies(a).includes(id) ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+          links.forEach((a) => (a.dataset.spy === id ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
         };
         const spy = new IntersectionObserver(
           (entries) => {
@@ -432,21 +214,8 @@ const search = lab ? labSearch : [
         addEventListener('scroll', mark, { passive: true });
       }
 
-      // Atlanta clock, to the minute ("20:24 EDT"), ticking as each minute turns.
-      const clocks = document.querySelectorAll('[data-clock]');
-      const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZoneName: 'short' });
-      const tick = () => {
-        const text = fmt.format(new Date()).replace(',', '');
-        clocks.forEach((c) => (c.textContent = text));
-        setTimeout(tick, 60_000 - (Date.now() % 60_000));
-      };
-      if (clocks.length) tick();
-
-      // The search shortcut as this platform writes it.
-      if (!/Mac|iPhone|iPad|iPod/.test(navigator.platform)) document.querySelectorAll('[data-kbd]').forEach((k) => (k.textContent = 'Ctrl K'));
-
       // ⌘K search.
-      type Item = { group: string; code: string; label: string; alias?: string; sub: string; terms?: string; href: string; sel?: string };
+      type Item = { group: string; code: string; label: string; sub: string; terms?: string; href: string };
       const dialog = document.getElementById('cmdk') as HTMLDialogElement;
       const input = document.getElementById('cmdk-input') as HTMLInputElement;
       const list = document.getElementById('cmdk-list')!;
@@ -458,21 +227,19 @@ const search = lab ? labSearch : [
       let active = 0;
       const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
-      // Rank: the title (or its alias) starts with the query, then a word in it does (camelCase humps
-      // count, so "nav" finds RoboNav), then the code matches, then any other text (tags, role, summary).
+      // Rank: the title starts with the query, then a word in it does (camelCase humps count, so "nav"
+      // finds RoboNav), then the code matches, then any other text (tags, summary).
       const atWord = (text: string, q: string) => {
         const t = text.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
         for (let at = t.indexOf(q); at >= 0; at = t.indexOf(q, at + 1)) if (at === 0 || !/[a-z0-9]/.test(t[at - 1])) return true;
         return false;
       };
-      const rank = (i: Item, q: string) => {
-        const titles = [i.label, i.alias ?? ''];
-        return titles.some((t) => t.toLowerCase().startsWith(q)) ? 0
-          : titles.some((t) => atWord(t, q)) ? 1
-          : i.code.toLowerCase().includes(q) ? 2
-          : `${i.label} ${i.sub} ${i.group} ${i.terms ?? ''}`.toLowerCase().includes(q) ? 3
-          : -1;
-      };
+      const rank = (i: Item, q: string) =>
+        i.label.toLowerCase().startsWith(q) ? 0
+        : atWord(i.label, q) ? 1
+        : i.code.toLowerCase().includes(q) ? 2
+        : `${i.label} ${i.sub} ${i.group} ${i.terms ?? ''}`.toLowerCase().includes(q) ? 3
+        : -1;
 
       function setActive(n: number) {
         list.querySelector('[aria-selected="true"]')?.setAttribute('aria-selected', 'false');
@@ -567,19 +334,19 @@ const search = lab ? labSearch : [
         dialog.close();
         go(item);
       });
-      // With the systems map on the page, map objects are selected in place instead of reloading it.
-      // A link to the section already in the address scrolls back to it (and opens its row).
-      const onConsole = () => !!document.getElementById('entity-data');
+      // A link to the section already in the address scrolls back to it.
       function go(i: Item) {
-        if (i.sel && onConsole()) return document.dispatchEvent(new CustomEvent('entity:reveal', { detail: i.sel }));
         const url = new URL(i.href, location.href);
         if (url.hash && url.hash === location.hash && url.pathname === location.pathname && url.search === location.search) {
           document.getElementById(decodeURIComponent(url.hash.slice(1)))?.scrollIntoView();
           dispatchEvent(new HashChangeEvent('hashchange'));
         } else location.href = i.href;
       }
+      dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) dialog.close();
+      });
 
-      // Motion switches (status bar, and the phone footer).
+      // Motion switches (the header's settings, and the footer).
       const motionBtns = document.querySelectorAll<HTMLButtonElement>('[data-motion-toggle]');
       const showMotion = () => {
         const on = document.documentElement.dataset.motion !== 'off';
@@ -596,110 +363,58 @@ const search = lab ? labSearch : [
           showMotion();
         }),
       );
-      dialog.addEventListener('click', (e) => {
-        if (e.target === dialog) dialog.close();
-      });
 
-      // Homepage bar: clear over the opening, solid once the page scrolls.
+      // Settings: a disclosure. It closes on Escape (focus back on its button), when focus leaves it,
+      // and on a press anywhere else.
+      const settings = document.querySelector<HTMLElement>('[data-settings]');
+      const settingsBtn = settings?.querySelector<HTMLButtonElement>('[data-settings-toggle]');
+      const settingsPop = settings?.querySelector<HTMLElement>('#settings');
+      if (settings && settingsBtn && settingsPop) {
+        const show = (open: boolean) => {
+          settingsPop.hidden = !open;
+          settingsBtn.setAttribute('aria-expanded', String(open));
+        };
+        settingsBtn.addEventListener('click', () => show(settingsPop.hidden));
+        settings.addEventListener('keydown', (e) => {
+          if (e.key !== 'Escape' || settingsPop.hidden) return;
+          e.preventDefault();
+          show(false);
+          settingsBtn.focus();
+        });
+        settings.addEventListener('focusout', (e) => {
+          if (!settings.contains(e.relatedTarget as Node | null)) show(false);
+        });
+        document.addEventListener('pointerdown', (e) => {
+          if (!settingsPop.hidden && !settings.contains(e.target as Node)) show(false);
+        });
+      }
+
+      // Header: clear over the opening, solid once the page scrolls.
       const bar = document.querySelector<HTMLElement>('[data-home-bar]');
       if (bar) {
         const onScroll = () => bar.toggleAttribute('data-scrolled', scrollY > 24);
         onScroll();
         addEventListener('scroll', onScroll, { passive: true });
       }
-
-      // Rail labels open 300ms after a mouse arrives (keyboard focus shows them at once, in CSS) and stay
-      // open while the pointer is on the button or its label. Escape closes them until the pointer
-      // leaves or focus moves to another button.
-      const rail = document.querySelector<HTMLElement>('[data-rail]');
-      if (rail) {
-        let timer = 0;
-        rail.querySelectorAll<HTMLElement>('.rail-btn').forEach((btn) => {
-          btn.addEventListener('pointerenter', (e) => {
-            if (e.pointerType === 'mouse') timer = window.setTimeout(() => btn.toggleAttribute('data-tip', true), 300);
-          });
-          btn.addEventListener('pointerleave', () => {
-            clearTimeout(timer);
-            btn.removeAttribute('data-tip');
-          });
-        });
-        addEventListener('keydown', (e) => {
-          if (e.key !== 'Escape' || dialog.open) return;
-          clearTimeout(timer);
-          rail.querySelector('[data-tip]')?.removeAttribute('data-tip');
-          if (rail.contains(document.activeElement)) rail.dataset.tips = 'off';
-        });
-        rail.addEventListener('focusin', () => delete rail.dataset.tips);
-      }
     </script>
 
     <style>
-      /* Rail labels: an edged tooltip, shown on keyboard focus or once the script marks a hovered
-         button (after a short delay), and hoverable and dismissable (WCAG 1.4.13). */
-      .rail-tip {
-        position: absolute;
-        left: 100%;
-        margin-left: 0.5rem;
-        display: none;
-        padding: 0.25rem 0.5rem;
-        border: 1px solid var(--line-2);
-        border-radius: var(--radius-2);
-        background: var(--panel-3);
-        box-shadow: var(--shadow-elev-2);
+      /* Tab bar (phones): the current section is marked with a bar along its top edge. */
+      .tab-btn[aria-current] {
         color: var(--text);
-        font-size: var(--text-xs);
-        white-space: nowrap;
       }
-      /* Bridges the gap to the button, so the pointer can cross onto the label without closing it. */
-      .rail-tip::before {
+      .tab-btn[aria-current]::before {
         content: '';
         position: absolute;
         top: 0;
-        right: 100%;
-        bottom: 0;
-        width: 0.5rem;
-      }
-      .rail-btn[data-tip] .rail-tip,
-      .rail-btn:focus-visible .rail-tip {
-        display: block;
-      }
-      /* Escape hides the focused button's label; a fresh hover still opens one. */
-      [data-rail][data-tips='off'] .rail-btn:not([data-tip]) .rail-tip {
-        display: none;
-      }
-      .rail-btn[aria-current] {
-        color: var(--text);
-        background: var(--sel-bg);
-      }
-      .rail-btn[aria-current]::before {
-        content: '';
-        position: absolute;
-        left: -8px;
-        top: 8px;
-        bottom: 8px;
-        width: 2px;
+        left: 30%;
+        right: 30%;
+        height: 2px;
         background: var(--sel-bar);
       }
-      @media (max-width: 767px) {
-        .rail-btn {
-          position: relative;
-        }
-        .rail-btn[aria-current] {
-          background: transparent;
-          color: var(--text);
-        }
-        .rail-btn[aria-current]::before {
-          left: 30%;
-          right: 30%;
-          top: 0;
-          bottom: auto;
-          width: auto;
-          height: 2px;
-        }
-      }
 
-      /* Homepage bar: the mark and the section links over the opening, turning solid (with the name)
-         once the page scrolls. The opening's Resume is the primary one; this one stays quiet. */
+      /* Header: the mark and the section links over the opening, turning solid (with the name) once the
+         page scrolls. */
       .home-bar {
         position: fixed;
         inset: 0 0 auto;
@@ -793,6 +508,61 @@ const search = lab ? labSearch : [
           position: absolute;
         }
       }
+
+      /* Settings: a quiet icon button, and under it a small panel with the Motion switch. */
+      .settings {
+        position: relative;
+      }
+      .settings-btn[aria-expanded='true'] {
+        background: var(--panel-3);
+        color: var(--text);
+      }
+      @media (pointer: coarse) {
+        .settings-btn {
+          width: var(--h-touch);
+          height: var(--h-touch);
+        }
+      }
+      .settings-pop {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: 0;
+        display: grid;
+        gap: 0.5rem;
+        width: 17rem;
+        padding: 0.75rem 0.875rem 0.875rem;
+        border: 1px solid var(--line-2);
+        border-radius: var(--radius-2);
+        background: var(--panel);
+        box-shadow: var(--shadow-elev-3);
+        font-size: var(--text-sm);
+        color: var(--muted);
+      }
+      .settings-pop .motion-switch {
+        justify-content: space-between;
+        min-height: var(--h-md);
+        padding: 0;
+        color: var(--text);
+        font-weight: 500;
+      }
+      @media (pointer: coarse) {
+        .settings-pop .motion-switch {
+          min-height: var(--h-touch);
+        }
+      }
+      .settings-note {
+        font-size: var(--text-xs);
+        line-height: 1.5;
+        color: var(--dim);
+      }
+      /* Without JavaScript the switches can't work (and the lab doesn't run), so they aren't offered. */
+      @media (scripting: none) {
+        .settings,
+        .home-foot .motion-switch {
+          display: none;
+        }
+      }
+
       /* The phone tab bar covers the page end, so the page ends above it. */
       .home-main {
         padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
@@ -807,7 +577,7 @@ const search = lab ? labSearch : [
           padding-bottom: 0;
         }
       }
-      /* A case study starts under the bar; its own header sets the space above its title. */
+      /* A page of its own starts under the bar; its own header sets the space above its title. */
       .story-main {
         position: relative;
         padding-top: 3.5rem;
@@ -840,38 +610,6 @@ const search = lab ? labSearch : [
         }
       }
 
-      /* Phones: the top-bar Resume is a 32px icon with a 44px hit area around it. */
-      @media (width < 40rem) {
-        .topbar-resume {
-          position: relative;
-          width: var(--h-md);
-          min-width: 0;
-          min-height: 0;
-          padding: 0;
-        }
-        .topbar-resume::after {
-          content: '';
-          position: absolute;
-          inset: -6px;
-        }
-      }
-
-      /* The lab prototype's header carries the Motion switch in place of search and Resume. */
-      .bar-motion {
-        min-height: var(--h-md);
-        padding: 0 0.625rem;
-        border-radius: var(--radius-2);
-        font-size: var(--text-sm);
-        color: var(--muted);
-      }
-      .bar-motion:hover {
-        background: var(--hover-bg);
-      }
-      @media (pointer: coarse) {
-        .bar-motion {
-          min-height: var(--h-touch);
-        }
-      }
       /* Motion: a switch, drawn in neutrals (green means active, and this is a preference). */
       .motion-switch {
         display: inline-flex;

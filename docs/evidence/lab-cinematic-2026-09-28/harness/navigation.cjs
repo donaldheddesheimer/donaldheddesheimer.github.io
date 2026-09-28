@@ -1,4 +1,4 @@
-// Navigation and history of the lab computer on /prototype/ (src/scripts/lab-prototype/computer.ts,
+// Navigation and history of the lab computer on / (src/scripts/lab/computer.ts,
 // routes.ts, src/layouts/Screen.astro), at 1440x900 unless a check says otherwise. Eleven checks:
 //   1 entering and moving inside the computer: one entry each, the address follows, the top page stays
 //   2 Back and Forward through the computer's pages and out; the frame's scroll per entry
@@ -166,7 +166,7 @@ const waitRead = (page, p) =>
     .then(() => page.waitForTimeout(300));
 const waitClosed = (page) => page.waitForFunction(() => !document.documentElement.dataset.pc && !document.querySelector('[data-pc-dialog]')?.open, null, { timeout: 30000 }).then(() => page.waitForTimeout(300));
 const frameOf = async (page) => (await page.$('.pc-frame'))?.contentFrame();
-const navSel = (p) => `.scr-nav a[href="/prototype/?computer=${p}"]`;
+const navSel = (p) => `.scr-nav a[href="/?computer=${p}"]`;
 // The computer's bar is sticky: Playwright's own click scrolls a sticky element "into view", which moves
 // the page under it (a scrolled case study went from 1200 to 480 before the click landed). Bar controls
 // are clicked with the mouse at their place instead, as a person would; other links with Playwright's click.
@@ -176,7 +176,7 @@ async function barClick(page, sel) {
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
 }
 async function go(page, p, sel) {
-  if (sel || p.startsWith('work/')) await (await frameOf(page)).click(sel || `a[href="/prototype/?computer=${p}"] >> nth=0`);
+  if (sel || p.startsWith('work/')) await (await frameOf(page)).click(sel || `a[href="/?computer=${p}"] >> nth=0`);
   else await barClick(page, navSel(p));
   await waitRead(page, p);
 }
@@ -194,7 +194,7 @@ const shot = async (page, name, clip) => {
 // ---------------------------------------------------------------------------------------------------------
 async function c1(browser) {
   const { ctx, page } = await mk(browser);
-  await page.goto(BASE + '/prototype/', { waitUntil: 'load' });
+  await page.goto(BASE + '/', { waitUntil: 'load' });
   await drawn(page);
   const s0 = await S(page);
   L('opening', s0);
@@ -204,7 +204,7 @@ async function c1(browser) {
   const s1 = await S(page);
   L('entered with "Explore the lab"', { ...s1, pcSeq: await seq(page) });
   expect(s1.idx === s0.idx + 1 && s1.n === s0.n + 1 && s1.len === s0.len + 1, 'entering adds exactly one entry', { idx: [s0.idx, s1.idx], n: [s0.n, s1.n], len: [s0.len, s1.len] });
-  expect(s1.url === '/prototype/?computer=work', 'address is /prototype/?computer=work', s1.url);
+  expect(s1.url === '/?computer=work', 'address is /?computer=work', s1.url);
   expect(s1.doc === s0.doc, 'top page did not load a new document', [s0.doc, s1.doc]);
   let prev = s1;
   for (const p of ['work/cucadence', 'about', 'resume', 'contact']) {
@@ -212,7 +212,7 @@ async function c1(browser) {
     const s = await S(page);
     L(`inside the computer -> ${p}`, s);
     expect(s.idx === prev.idx + 1 && s.n === prev.n + 1 && s.len === prev.len + 1, `-> ${p}: one entry`, { idx: [prev.idx, s.idx], n: [prev.n, s.n], len: [prev.len, s.len] });
-    expect(s.url === `/prototype/?computer=${p}`, `-> ${p}: address follows`, s.url);
+    expect(s.url === `/?computer=${p}`, `-> ${p}: address follows`, s.url);
     expect(s.frame?.path === `/computer/${p}/` && s.doc === s0.doc, `-> ${p}: the frame changed, the top page did not navigate`, { frame: s.frame?.path, doc: s.doc });
     expect(s.state?.pc === p && s.state?.back === (prev.state?.back ?? 0) + 1, `-> ${p}: history.state {pc, back+1}`, s.state);
     prev = s;
@@ -230,7 +230,7 @@ async function c1(browser) {
 }
 
 async function walk(page) {
-  await page.goto(BASE + '/prototype/', { waitUntil: 'load' });
+  await page.goto(BASE + '/', { waitUntil: 'load' });
   await drawn(page);
   const s0 = await S(page);
   await enter(page);
@@ -248,8 +248,8 @@ async function c2(browser) {
     else await waitClosed(page);
     const s = await S(page);
     L(`Back -> ${p ?? 'opening'}`, s);
-    if (p) expect(s.url === `/prototype/?computer=${p}` && s.frame?.path === `/computer/${p}/` && s.pc === 'read', `Back -> ${p}: address, frame and lab agree`, { url: s.url, frame: s.frame?.path, pc: s.pc });
-    else expect(s.url === '/prototype/' && s.pc === null && !s.dialog && s.idx === s0.idx && s.doc === s0.doc, 'Back -> the opening: lab closed, same document', { url: s.url, pc: s.pc, idx: s.idx, doc: s.doc });
+    if (p) expect(s.url === `/?computer=${p}` && s.frame?.path === `/computer/${p}/` && s.pc === 'read', `Back -> ${p}: address, frame and lab agree`, { url: s.url, frame: s.frame?.path, pc: s.pc });
+    else expect(s.url === '/' && s.pc === null && !s.dialog && s.idx === s0.idx && s.doc === s0.doc, 'Back -> the opening: lab closed, same document', { url: s.url, pc: s.pc, idx: s.idx, doc: s.doc });
   }
   await clearSeq(page);
   for (const p of ['work', 'work/cucadence', 'about', 'resume', 'contact']) {
@@ -257,7 +257,7 @@ async function c2(browser) {
     await waitRead(page, p);
     const s = await S(page);
     L(`Forward -> ${p}`, { ...s, ...(p === 'work' ? { pcSeq: await seq(page) } : {}) });
-    expect(s.url === `/prototype/?computer=${p}` && s.frame?.path === `/computer/${p}/`, `Forward -> ${p}: address and frame agree`, { url: s.url, frame: s.frame?.path });
+    expect(s.url === `/?computer=${p}` && s.frame?.path === `/computer/${p}/`, `Forward -> ${p}: address and frame agree`, { url: s.url, frame: s.frame?.path });
   }
   // Scroll per entry: the case study scrolled, About, Back.
   for (let i = 0; i < 3; i++) await page.goBack();
@@ -295,7 +295,7 @@ async function c3(browser) {
   // a) entered with "Explore the lab" from a scrolled page, three pages deep, then Leave.
   {
     const { ctx, page } = await mk(browser);
-    await page.goto(BASE + '/prototype/', { waitUntil: 'load' });
+    await page.goto(BASE + '/', { waitUntil: 'load' });
     await drawn(page);
     await page.evaluate(() => scrollTo(0, 150));
     await page.waitForTimeout(300);
@@ -318,7 +318,7 @@ async function c3(browser) {
     await waitClosed(page);
     const s = await S(page);
     L('a) after Leave computer', { ...s, pcSeq: await seq(page) });
-    expect(s.idx === s0.idx && s.url === '/prototype/' && s.doc === s0.doc, 'a) Leave goes back through the entries to the opening', { idx: [s0.idx, before.idx, s.idx], url: s.url });
+    expect(s.idx === s0.idx && s.url === '/' && s.doc === s0.doc, 'a) Leave goes back through the entries to the opening', { idx: [s0.idx, before.idx, s.idx], url: s.url });
     expect(s.focus === 'Explore the lab (enter link)', 'a) focus returns to "Explore the lab"', s.focus);
     expect(s.y === 150, 'a) page scroll restored to 150', s.y);
     await page.mouse.move(700, 450);
@@ -333,7 +333,7 @@ async function c3(browser) {
   // b) opened directly: Leave replaces the entry.
   {
     const { ctx, page } = await mk(browser);
-    await page.goto(BASE + '/prototype/?computer=about', { waitUntil: 'load' });
+    await page.goto(BASE + '/?computer=about', { waitUntil: 'load' });
     await waitRead(page, 'about');
     const s0 = await S(page);
     L('b) opened directly at ?computer=about', s0);
@@ -341,7 +341,7 @@ async function c3(browser) {
     await waitClosed(page);
     const s = await S(page);
     L('b) after Leave computer', s);
-    expect(s.url === '/prototype/' && s.idx === s0.idx && s.n === s0.n && s.len === s0.len, 'b) Leave replaces the entry (no new entry, same index)', { url: s.url, idx: [s0.idx, s.idx], n: [s0.n, s.n] });
+    expect(s.url === '/' && s.idx === s0.idx && s.n === s0.n && s.len === s0.len, 'b) Leave replaces the entry (no new entry, same index)', { url: s.url, idx: [s0.idx, s.idx], n: [s0.n, s.n] });
     expect(s.focus === 'Explore the lab (enter link)', 'b) focus on the enter link', s.focus);
     expect(s.y === 0 && s.ovf !== 'hidden', 'b) page at its top and unlocked', { y: s.y, ovf: s.ovf });
     await ctx.close();
@@ -349,7 +349,7 @@ async function c3(browser) {
   // c) entered by clicking the monitor.
   {
     const { ctx, page } = await mk(browser);
-    await page.goto(BASE + '/prototype/?probe', { waitUntil: 'load' });
+    await page.goto(BASE + '/?probe', { waitUntil: 'load' });
     await drawn(page);
     await page.waitForTimeout(800);
     const q = await page.evaluate(() => (window.__lab.stats(), window.__lab.quad()));
@@ -373,7 +373,7 @@ async function c3(browser) {
   // d) opened directly, then another page, then Leave: what is left behind the opening.
   {
     const { ctx, page } = await mk(browser);
-    await page.goto(BASE + '/prototype/?computer=about', { waitUntil: 'load' });
+    await page.goto(BASE + '/?computer=about', { waitUntil: 'load' });
     await waitRead(page, 'about');
     const s0 = await S(page);
     await go(page, 'contact');
@@ -383,7 +383,7 @@ async function c3(browser) {
     await waitClosed(page);
     const s = await S(page);
     L('d) after Leave computer', { ...s, entries: await entries(page) });
-    expect(s.url === '/prototype/' && s.pc === null, 'd) Leave returns to the opening', { url: s.url, idx: [s0.idx, s1.idx, s.idx] });
+    expect(s.url === '/' && s.pc === null, 'd) Leave returns to the opening', { url: s.url, idx: [s0.idx, s1.idx, s.idx] });
     await clearSeq(page);
     await page.goBack();
     await page.waitForTimeout(3500);
@@ -397,7 +397,7 @@ async function c4(browser) {
   for (const where of ['frame', 'parent']) {
     for (const deep of [false, true]) {
       const { ctx, page } = await mk(browser);
-      await page.goto(BASE + '/prototype/', { waitUntil: 'load' });
+      await page.goto(BASE + '/', { waitUntil: 'load' });
       await drawn(page);
       const s0 = await S(page);
       await enter(page);
@@ -411,7 +411,7 @@ async function c4(browser) {
       await page.waitForTimeout(1500); // a second traversal, if any, would land in this time
       const s = await S(page);
       L(`Escape (${tag}): after`, s);
-      expect(s.idx === s0.idx && s.url === '/prototype/' && s.doc === s0.doc, `Escape (${tag}) returns to the opening entry, no further`, { idx: [s0.idx, before.idx, s.idx], url: s.url, doc: s.doc === s0.doc });
+      expect(s.idx === s0.idx && s.url === '/' && s.doc === s0.doc, `Escape (${tag}) returns to the opening entry, no further`, { idx: [s0.idx, before.idx, s.idx], url: s.url, doc: s.doc === s0.doc });
       expect(s.focus === 'Explore the lab (enter link)', `Escape (${tag}): focus on "Explore the lab"`, s.focus);
       await ctx.close();
     }
@@ -419,7 +419,7 @@ async function c4(browser) {
   // Two Escapes in quick succession, focus in the parent (Chrome may force-close the dialog).
   {
     const { ctx, page } = await mk(browser);
-    await page.goto(BASE + '/prototype/', { waitUntil: 'load' });
+    await page.goto(BASE + '/', { waitUntil: 'load' });
     await drawn(page);
     const s0 = await S(page);
     await enter(page);
@@ -431,7 +431,7 @@ async function c4(browser) {
     await page.waitForTimeout(1500);
     const s = await S(page);
     L('two quick Escapes in the parent, two entries in', s);
-    expect(s.idx === s0.idx && s.url === '/prototype/', 'two quick Escapes land on the opening entry', { idx: [s0.idx, s.idx], url: s.url });
+    expect(s.idx === s0.idx && s.url === '/', 'two quick Escapes land on the opening entry', { idx: [s0.idx, s.idx], url: s.url });
     await ctx.close();
   }
 }
@@ -440,7 +440,7 @@ async function c5(browser) {
   // Reload inside the computer, reached by entering and moving to About.
   {
     const { ctx, page } = await mk(browser);
-    await page.goto(BASE + '/prototype/', { waitUntil: 'load' });
+    await page.goto(BASE + '/', { waitUntil: 'load' });
     await drawn(page);
     const s0 = await S(page);
     await enter(page);
@@ -456,7 +456,7 @@ async function c5(browser) {
     const s = await S(page);
     const pcSeq = await seq(page);
     L('after reload', { ...s, pcSeq });
-    expect(s.url === '/prototype/?computer=resume' && s.frame?.path === '/computer/resume/', 'reload: same page in the computer', { url: s.url, frame: s.frame?.path });
+    expect(s.url === '/?computer=resume' && s.frame?.path === '/computer/resume/', 'reload: same page in the computer', { url: s.url, frame: s.frame?.path });
     expect(!pcSeq.includes('fade') && !pcSeq.includes('fly'), 'reload: opens flat, no camera flight (no fade/fly state)', pcSeq);
     expect(s.len === before.len && s.idx === before.idx, 'reload: no history change', { len: [before.len, s.len], idx: [before.idx, s.idx] });
     expect(s.frame?.y === y, 'reload: the frame page keeps its scroll (computer.ts:98 says remember() is for "Back and Forward (and a reload)")', { before: y, afterReload: s.frame?.y, state: s.state });
@@ -465,7 +465,7 @@ async function c5(browser) {
     await page.waitForTimeout(4000);
     const left = await S(page);
     L('reload, then Leave computer', { ...left, pcSeq: await seq(page) });
-    expect(left.url === '/prototype/' && left.pc === null, 'reload, then Leave: back at the opening', { url: left.url, pc: left.pc, idx: [s0.idx, left.idx] });
+    expect(left.url === '/' && left.pc === null, 'reload, then Leave: back at the opening', { url: left.url, pc: left.pc, idx: [s0.idx, left.idx] });
     expect(left.doc === s.doc, 'reload, then Leave: without loading the page again', { reloaded: s.doc, afterLeave: left.doc });
     expect(left.focus === 'Explore the lab (enter link)', 'reload, then Leave: focus on the enter link', left.focus);
     await ctx.close();
@@ -473,7 +473,7 @@ async function c5(browser) {
   // A direct reload of a directly opened page.
   {
     const { ctx, page } = await mk(browser);
-    await page.goto(BASE + '/prototype/?computer=about', { waitUntil: 'load' });
+    await page.goto(BASE + '/?computer=about', { waitUntil: 'load' });
     await waitRead(page, 'about');
     await page.reload({ waitUntil: 'load' });
     await waitRead(page, 'about');
@@ -486,18 +486,18 @@ async function c5(browser) {
   for (const p of ['work', 'work/cucadence', 'about', 'resume', 'contact']) {
     const { ctx, page } = await mk(browser);
     const t = Date.now();
-    await page.goto(BASE + '/prototype/?computer=' + p, { waitUntil: 'load' });
+    await page.goto(BASE + '/?computer=' + p, { waitUntil: 'load' });
     await waitRead(page, p);
     const s = await S(page);
     const pcSeq = await seq(page);
-    L(`direct /prototype/?computer=${p}`, { ...s, pcSeq, msToReading: Date.now() - t });
-    expect(s.url === `/prototype/?computer=${p}` && s.frame?.path === `/computer/${p}/` && !pcSeq.includes('fly') && s.state?.back === 0, `direct ${p}: opens on it, flat, back 0`, { url: s.url, frame: s.frame?.path, pcSeq, state: s.state });
+    L(`direct /?computer=${p}`, { ...s, pcSeq, msToReading: Date.now() - t });
+    expect(s.url === `/?computer=${p}` && s.frame?.path === `/computer/${p}/` && !pcSeq.includes('fly') && s.state?.back === 0, `direct ${p}: opens on it, flat, back 0`, { url: s.url, frame: s.frame?.path, pcSeq, state: s.state });
     await ctx.close();
   }
   // Invalid values.
   for (const q of ['bogus', 'work/nope', '', 'work/', '/about/']) {
     const { ctx, page } = await mk(browser);
-    await page.goto(BASE + '/prototype/?computer=' + q, { waitUntil: 'load' });
+    await page.goto(BASE + '/?computer=' + q, { waitUntil: 'load' });
     await drawn(page);
     await page.waitForTimeout(1000);
     const s = await S(page);
@@ -505,7 +505,7 @@ async function c5(browser) {
     L(`invalid ?computer=${q}`, { ...s, pcSeq: await seq(page), opening: vis });
     if (q === 'work/') expect(s.pc === 'read' && s.frame?.path === '/computer/work/', 'a trailing slash is trimmed: ?computer=work/ opens Work', { url: s.url, pc: s.pc });
     else if (q === '/about/') expect(s.pc === 'read' && s.frame?.path === '/computer/about/', 'slashes are trimmed: ?computer=/about/ opens About', { url: s.url, pc: s.pc });
-    else expect(s.pc === null && !s.dialog && s.url === '/prototype/', `?computer=${q}: falls back to the opening, the address cleaned to /prototype/`, { url: s.url, pc: s.pc });
+    else expect(s.pc === null && !s.dialog && s.url === '/', `?computer=${q}: falls back to the opening, the address cleaned to /`, { url: s.url, pc: s.pc });
     await ctx.close();
   }
   // A frame page opened on its own.
@@ -521,15 +521,15 @@ async function c5(browser) {
 
 async function c6(browser) {
   const cases = [
-    ['about', '/prototype/#about', 'about'],
-    ['work/cucadence', '/prototype/work/cucadence/', null],
-    ['work', '/prototype/#work', 'work'],
-    ['resume', '/prototype/#resume', 'resume'],
-    ['contact', '/prototype/#contact', 'contact'],
+    ['about', '/#about', 'about'],
+    ['work/cucadence', '/projects/cucadence/', null],
+    ['work', '/#work', 'work'],
+    ['resume', '/#resume', 'resume'],
+    ['contact', '/#contact', 'contact'],
   ];
   for (const [p, want, id] of cases) {
     const { ctx, page } = await mk(browser);
-    await page.goto(BASE + '/prototype/', { waitUntil: 'load' });
+    await page.goto(BASE + '/', { waitUntil: 'load' });
     await drawn(page);
     await enter(page);
     if (p !== 'work') await go(page, p);
@@ -563,16 +563,16 @@ async function c7(browser) {
     [390, 844, true],
   ]) {
     for (const [p, want] of [
-      ['about', '/prototype/#about'],
-      ['work/cucadence', '/prototype/work/cucadence/'],
-      ['work', '/prototype/#work'],
-      ['resume', '/prototype/#resume'],
-      ['contact', '/prototype/#contact'],
+      ['about', '/#about'],
+      ['work/cucadence', '/projects/cucadence/'],
+      ['work', '/#work'],
+      ['resume', '/#resume'],
+      ['contact', '/#contact'],
     ]) {
       const { ctx, page } = await mk(browser, { width: w, height: h, mobile });
       const navs = [];
       page.on('framenavigated', (f) => f === page.mainFrame() && navs.push(new URL(f.url()).pathname + new URL(f.url()).search + new URL(f.url()).hash));
-      await page.goto(BASE + '/prototype/?computer=' + p, { waitUntil: 'load' });
+      await page.goto(BASE + '/?computer=' + p, { waitUntil: 'load' });
       await page.waitForTimeout(1200);
       const s = await S(page);
       const hops = await page.evaluate(() => JSON.parse(sessionStorage.getItem('__hops') || '[]'));
@@ -597,7 +597,7 @@ async function c7(browser) {
 
 async function c8(browser) {
   const { ctx, page } = await mk(browser, { clipboard: true });
-  await page.goto(BASE + '/prototype/', { waitUntil: 'load' });
+  await page.goto(BASE + '/', { waitUntil: 'load' });
   await drawn(page);
   await enter(page);
   const projects = await page.evaluate(() => JSON.parse(document.querySelector('[data-pc-dialog]').dataset.projects));
@@ -615,13 +615,13 @@ async function c8(browser) {
         const pathOf = (u) => {
           if (u.origin !== location.origin) return null;
           const p = u.pathname;
-          if (p === '/prototype/' || p === '/prototype') {
+          if (p === '/') {
             const q = u.searchParams.get('computer');
             if (q) return q;
             const h = u.hash.slice(1);
             return PAGES.includes(h) ? h : null;
           }
-          const m = p.match(/^\/(?:computer|prototype)\/(work\/[\w-]+|work|about|resume|contact)\/?$/) ?? p.match(/^\/projects\/([\w-]+)\/?$/);
+          const m = p.match(/^\/computer\/(work\/[\w-]+|work|about|resume|contact)\/?$/) ?? p.match(/^\/projects\/([\w-]+)\/?$/);
           if (!m) return null;
           return p.startsWith('/projects/') ? `work/${m[1]}` : m[1];
         };
@@ -709,7 +709,7 @@ async function c8(browser) {
   // Phone numbers on the served pages and in the PDF (counts only).
   const PHONE = /(?:\+?1[\s.-]?)?(?:\(\d{3}\)|\b\d{3})[\s.-]\d{3}[\s.-]\d{4}\b/g;
   const scan = {};
-  for (const p of ['/prototype/', '/computer/work/', '/computer/about/', '/computer/resume/', '/computer/contact/', '/computer/work/cucadence/', '/prototype/work/cucadence/', '/']) {
+  for (const p of ['/computer/work/', '/computer/about/', '/computer/resume/', '/computer/contact/', '/computer/work/cucadence/', '/projects/cucadence/', '/']) {
     const t = await (await page.request.get(BASE + p)).text();
     scan[p] = { tel: (t.match(/tel:/gi) || []).length, phoneLike: (t.match(PHONE) || []).length };
   }
@@ -747,7 +747,7 @@ async function c9(browser, label) {
   {
     const { ctx, page } = await mk(browser, { route: withRoute });
     const notUsed = await cdpWatch(page);
-    await page.goto(BASE + '/prototype/?computer=about', { waitUntil: 'load' });
+    await page.goto(BASE + '/?computer=about', { waitUntil: 'load' });
     await waitRead(page, 'about');
     const s0 = await S(page);
     await page.goto(BASE + '/', { waitUntil: 'load' });
@@ -759,14 +759,14 @@ async function c9(browser, label) {
     L(`[${label}] a) ?computer=about -> / -> Back`, { ...s, msAfterBack: Date.now() - t0, pageshows: shows, bfcacheNotUsed: notUsed });
     const last = shows[shows.length - 1];
     expect(last?.persisted === true && s.doc === s0.doc, `[${label}] a) restored from the back-forward cache (pageshow persisted, same document)`, { persisted: last?.persisted, sameDoc: s.doc === s0.doc, notUsed });
-    expect(last?.pc === 'read' && last?.frame === '/computer/about/' && s.url === '/prototype/?computer=about', `[${label}] a) at pageshow the lab already reads About`, last);
+    expect(last?.pc === 'read' && last?.frame === '/computer/about/' && s.url === '/?computer=about', `[${label}] a) at pageshow the lab already reads About`, last);
     await ctx.close();
   }
   // b) the lab opened from the opening, then Contact; the top page to /; Back.
   {
     const { ctx, page } = await mk(browser, { route: withRoute });
     const notUsed = await cdpWatch(page);
-    await page.goto(BASE + '/prototype/', { waitUntil: 'load' });
+    await page.goto(BASE + '/', { waitUntil: 'load' });
     await drawn(page);
     const s0 = await S(page);
     await enter(page);
@@ -777,20 +777,20 @@ async function c9(browser, label) {
     let s = await S(page);
     let shows = await page.evaluate(() => window.__shows);
     L(`[${label}] b) opening -> work -> contact -> / -> Back`, { ...s, lastPageshow: shows[shows.length - 1], bfcacheNotUsed: notUsed });
-    expect(s.url === '/prototype/?computer=contact' && shows[shows.length - 1]?.frame === '/computer/contact/' && s.pc === 'read', `[${label}] b) restored on Contact, matching the address`, { url: s.url, pageshow: shows[shows.length - 1] });
+    expect(s.url === '/?computer=contact' && shows[shows.length - 1]?.frame === '/computer/contact/' && s.pc === 'read', `[${label}] b) restored on Contact, matching the address`, { url: s.url, pageshow: shows[shows.length - 1] });
     // Now skip two entries at once, to the opening: a restore whose document is reading, at an address
     // that isn't.
     await page.goto(BASE + '/', { waitUntil: 'load' });
     await clearSeq(page).catch(() => {});
     await page.evaluate(() => history.go(-3));
-    await page.waitForURL((u) => u.pathname === '/prototype/' && !u.search, { timeout: 15000, waitUntil: 'commit' });
+    await page.waitForURL((u) => u.pathname === '/' && !u.search, { timeout: 15000, waitUntil: 'commit' });
     await page.waitForTimeout(100);
     const s100 = await S(page);
     await page.waitForTimeout(2500);
     s = await S(page);
     shows = await page.evaluate(() => window.__shows);
     L(`[${label}] b) then / and history.go(-3) straight to the opening (a jump to another entry of the cached document; see bfcacheNotUsed for whether Chrome restored it)`, { at100ms: { pc: s100.pc, dialog: s100.dialog }, ...s, lastPageshow: shows[shows.length - 1], pcSeq: await seq(page), bfcacheNotUsed: notUsed });
-    expect(s.url === '/prototype/' && s.pc === null && !s.dialog, `[${label}] b) restored at the opening: the lab closes`, { url: s.url, pc: s.pc, dialog: s.dialog });
+    expect(s.url === '/' && s.pc === null && !s.dialog, `[${label}] b) restored at the opening: the lab closes`, { url: s.url, pc: s.pc, dialog: s.dialog });
     expect(!(await seq(page)).includes('return'), `[${label}] b) closed at once (no return flight)`, await seq(page));
     await ctx.close();
   }
@@ -798,7 +798,7 @@ async function c9(browser, label) {
 
 async function c10(browser) {
   const { ctx, page } = await mk(browser);
-  await page.goto(BASE + '/prototype/?probe', { waitUntil: 'load' });
+  await page.goto(BASE + '/?probe', { waitUntil: 'load' });
   await drawn(page);
   await enter(page);
   const fr = await frameOf(page);
@@ -855,7 +855,7 @@ async function c10(browser) {
       expect(!a.full && a.pc === 'read' && a.maxCornerDevPx != null && a.maxCornerDevPx <= 2, `${w}x${h}: frame back on the monitor screen (corner deviation <= 2 px)`, { full: a.full, dev: a.maxCornerDevPx, rect: a.frameRect });
       if (run === 1 && w === 1920) await shot(page, 'c10-1920x1080-reading-after-resize');
     }
-    expect(a.url === '/prototype/?computer=work' && a.framePath === '/computer/work/' && a.dialog, `${w}x${h}: address, frame page and dialog unchanged`, { url: a.url, frame: a.framePath, frameY: a.frameY, dialog: a.dialog });
+    expect(a.url === '/?computer=work' && a.framePath === '/computer/work/' && a.dialog, `${w}x${h}: address, frame page and dialog unchanged`, { url: a.url, frame: a.framePath, frameY: a.frameY, dialog: a.dialog });
   }
   // Leave at 1920x1080: the opening at its new size.
   await barClick(page, '[data-leave]');
@@ -878,7 +878,7 @@ async function c10(browser) {
   expect(s2.pc === null && !s2.full && !s2.url.includes('computer=') && s2.ovf !== 'hidden', 'leaving below the gate: closed, full flag cleared, page unlocked', { pc: s2.pc, full: s2.full, url: s2.url, ovf: s2.ovf, focus: s2.focus });
   // A directly opened lab, resized.
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto(BASE + '/prototype/?probe&computer=about', { waitUntil: 'load' });
+  await page.goto(BASE + '/?probe&computer=about', { waitUntil: 'load' });
   await waitRead(page, 'about');
   await page.waitForTimeout(2500);
   const d0 = await align();
@@ -892,7 +892,7 @@ async function c10(browser) {
 
 async function c11(browser) {
   const { ctx, page } = await mk(browser);
-  await page.goto(BASE + '/prototype/', { waitUntil: 'load' });
+  await page.goto(BASE + '/', { waitUntil: 'load' });
   await drawn(page);
   const path0 = [];
   for (let i = 0; i < 30; i++) {
@@ -948,7 +948,7 @@ async function c11(browser) {
   await waitRead(page, 'about');
   const s2 = await S(page);
   L('Enter on About in the bar', s2);
-  expect(s2.focus === 'iframe.pc-frame' && s2.url === '/prototype/?computer=about', 'after a keyboard move to About, the focus stays in the frame', { focus: s2.focus, frameFocus: s2.frame?.focus });
+  expect(s2.focus === 'iframe.pc-frame' && s2.url === '/?computer=about', 'after a keyboard move to About, the focus stays in the frame', { focus: s2.focus, frameFocus: s2.frame?.focus });
   const fr2 = await frameOf(page);
   await page.keyboard.press('Tab');
   const first = await fr2.evaluate(() => (document.activeElement.getAttribute('aria-label') || document.activeElement.textContent).trim());

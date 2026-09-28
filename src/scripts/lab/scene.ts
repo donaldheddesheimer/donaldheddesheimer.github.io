@@ -1,13 +1,11 @@
-// PROTOTYPE (lab-cinematic, 2026-09-28; first pass lab-prototype, 2026-09-27): the robotics lab of
-// /prototype/, where the computer on the desk holds the portfolio. Forked from src/scripts/robot-scene.ts
-// (the released opening), which is left as it is; the rig and the routine are the same. What is new: a
-// room (a concrete floor with the dance area taped out, a block wall with a high window, a workbench
-// under a pendant, an unfinished robot on a service stand), two props (a task chair pushed aside, a tool
-// cart), a tripod work light as the key, the three dancers given characters through proportion, timing,
-// where they stand and how they answer each other, and two camera views: the opening, which the pointer
-// may look around a little (lookAround), and reading, square on to the monitor, whose screen the page
-// covers with real HTML (computer.ts). One flight joins them. Simple geometry throughout: final models
-// and choreography are deferred.
+// The robotics lab of the homepage's opening (/), where the computer on the desk holds the portfolio. It
+// began as a fork of the first homepage's robot stage; the rig and the routine are the same. The room: a
+// concrete floor with the dance area taped out, a block wall with a high window, a workbench under a
+// pendant, an unfinished robot on a service stand, two props (a task chair pushed aside, a tool cart), a
+// tripod work light as the key, and the three dancers, given characters through proportion, timing,
+// where they stand and how they answer each other. Two camera views: the opening, which the pointer may
+// look around a little (lookAround), and reading, square on to the monitor, whose screen the page covers
+// with real HTML (computer.ts). One flight joins them. Simple geometry throughout.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -38,8 +36,9 @@ function rng(seed: number) {
   };
 }
 
-// --- Choreography (as robot-scene.ts, with each persona's timing) ------------------------------
+// --- Choreography (with each persona's timing) --------------------------------------------------
 const CH = [
+  'turn',
   'px', 'py', 'pz', 'pYaw', 'pPitch', 'pRoll',
   'cYaw', 'cPitch', 'cRoll',
   'hYaw', 'hPitch', 'hRoll',
@@ -114,6 +113,9 @@ interface Persona {
   hop: number;
   /** Looks around between moves: 0 to 1. */
   curious: number;
+  /** Keeps its arms close, 0 to 1: raised straight up rather than out, and swung past the shoulder in
+   *  front, elbows bent. */
+  close: number;
 }
 
 function groove(o: Pose, g: number, p: Persona, k = 1) {
@@ -306,10 +308,11 @@ interface Build {
   persona: Persona;
 }
 
-const STILL: Persona = { lag: 0, canon: 0, sway: 0, bounce: 0, arm: 0, twist: 0, tilt: 0, look: 0, dir: 1, groove: 1, dip: 1, pace: 1, low: 0, hop: 1, curious: 0 };
+const STILL: Persona = { lag: 0, canon: 0, sway: 0, bounce: 0, arm: 0, twist: 0, tilt: 0, look: 0, dir: 1, groove: 1, dip: 1, pace: 1, low: 0, hop: 1, curious: 0, close: 0 };
 
 // Graphite: heavy, grounded, deliberate. The broadest build, thick limbs and a wide low stance; it
-// sways at half time, bounces every other beat and arrives late on every arm move. It keeps to the
+// sways at half time, bounces every other beat and arrives late on every arm move, and keeps its arms
+// close (clear of the opening's text beside it). It keeps to the
 // workstation's side of the floor.
 // Ivory: precise, curious, attentive. Tall, slim and long-necked; snaps to each arm key and looks
 // around (and tilts its head) between moves. It stands back by the service stand, and leaves the step
@@ -342,11 +345,11 @@ const BUILDS: Build[] = [
     head: 'dome',
     headSize: [0.4, 0.26, 0.33],
     pads: true,
-    persona: { lag: 0.12, canon: 0, sway: 0.05, bounce: 0.05, arm: 0.7, twist: 1.2, tilt: 0.3, look: 0.12, dir: 1, groove: 0.5, dip: 0.5, pace: 1.9, low: 0.06, hop: 0.5, curious: 0 },
+    persona: { lag: 0.12, canon: 0, sway: 0.05, bounce: 0.05, arm: 0.7, twist: 1.2, tilt: 0.3, look: 0.12, dir: 1, groove: 0.5, dip: 0.5, pace: 1.9, low: 0.06, hop: 0.5, curious: 0, close: 1 },
   },
   {
     name: 'ivory',
-    at: [1.0, -1.85, 0.25],
+    at: [0.85, -1.55, 0.25],
     paint: 0xdcd5c6,
     trim: 0x2a2d33,
     eye: 0xffb561,
@@ -367,7 +370,7 @@ const BUILDS: Build[] = [
     head: 'box',
     headSize: [0.34, 0.27, 0.28],
     antenna: true,
-    persona: { lag: 0, canon: 1, sway: 0.05, bounce: 0.05, arm: 0.95, twist: 0.8, tilt: 0.9, look: 0, dir: -1, groove: 1, dip: 1, pace: 0.5, low: 0, hop: 1, curious: 1 },
+    persona: { lag: 0, canon: 1, sway: 0.05, bounce: 0.05, arm: 0.95, twist: 0.8, tilt: 0.9, look: 0, dir: -1, groove: 1, dip: 1, pace: 0.5, low: 0, hop: 1, curious: 1, close: 0 },
   },
   {
     name: 'terracotta',
@@ -391,7 +394,7 @@ const BUILDS: Build[] = [
     neck: 0.05,
     head: 'ball',
     headSize: [0.37, 0.37, 0.37],
-    persona: { lag: -0.05, canon: 2, sway: 0.085, bounce: 0.05, arm: 1.45, twist: 0.9, tilt: 1.6, look: -0.12, dir: 1, groove: 1, dip: 2, pace: 0.8, low: 0.02, hop: 2.4, curious: 0.3 },
+    persona: { lag: -0.05, canon: 2, sway: 0.085, bounce: 0.05, arm: 1.45, twist: 0.9, tilt: 1.6, look: -0.12, dir: 1, groove: 1, dip: 2, pace: 0.8, low: 0.02, hop: 2.4, curious: 0.3, close: 0 },
   },
 ];
 
@@ -426,19 +429,34 @@ const PROTO: Build = {
 // A few restrained exchanges over the routine, on its beats (32 to a loop, about 17 s):
 // - Terracotta turns to Graphite and waves (beats 3 to 6.5); Graphite turns, slowly, and nods once (5.5
 //   to 9.4).
-// - Between the gestures and the canon, Terracotta shimmies at Ivory (14.3 to 16.4); Ivory glances over.
+// - Between the gestures and the canon, Terracotta hops round to Ivory, behind it (13.8 to 14.8), shimmies
+//   at it and hops back (15.9 to 16.9); Ivory glances over.
 // - Late in the travel, Ivory leaves the step to inspect the unfinished robot on its stand (25.6 to 31.8):
 //   it turns to it, leans in, head tilted, one hand raised to its chin.
 const spot = (name: string) => BUILDS.find((b) => b.name === name)!.at;
 
+/** How far round a robot on its spot, facing its own way, would turn to face a point on the floor. */
+function bearing(at: Build['at'], x: number, z: number) {
+  const a = Math.atan2(x - at[0], z - at[1]) - at[2];
+  return Math.atan2(Math.sin(a), Math.cos(a));
+}
+
 /** Turn toward a point on the floor by `k` (0 to 1): the head most of the way, the body the rest. */
 function face(o: Pose, at: Build['at'], x: number, z: number, k: number, body = 0.4) {
   if (k <= 0) return;
-  let a = Math.atan2(x - at[0], z - at[1]) - at[2];
+  let a = bearing(at, x, z) - o.turn;
   a = Math.atan2(Math.sin(a), Math.cos(a));
   o.hYaw = lerp(o.hYaw, Math.max(-0.95, Math.min(0.95, a * (1 - body))), k);
   o.cYaw += a * body * 0.6 * k;
   o.pYaw += a * body * 0.4 * k;
+}
+
+/** Two hops over beats `a` to `b`: how far round (0 to 1, turning only while off the floor) and how high. */
+function hops(beat: number, a: number, b: number): [round: number, lift: number] {
+  const u = clamp01((beat - a) / (b - a)) * 2;
+  const i = Math.min(1, Math.floor(u));
+  const f = u - i;
+  return [(i + smooth(0, 1, f)) / 2, Math.sin(Math.PI * f)];
 }
 
 const WAVE: Arm = [0.35, 2.3, 0, 0.55, 0];
@@ -455,9 +473,19 @@ function react(o: Pose, b: Build, beat: number) {
     blendArm(o, 'r', WAVE, call);
     o.rE += Math.sin(TAU * (beat - 3)) * 0.4 * call;
     o.cRoll -= call * 0.05;
+    // Ivory is behind it, too far round for a look over the shoulder: it turns on its spot most of the
+    // way, in hops, and the head and chest do the rest.
     const iv = spot('ivory');
-    const nudge = win(beat, 14.3, 14.7, 15.9, 16.4);
-    face(o, at, iv[0], iv[1], nudge, 0.35);
+    const [there, up] = hops(beat, 13.8, 14.8);
+    const [back, down] = hops(beat, 15.9, 16.9);
+    const round = there * (1 - back);
+    o.turn = bearing(at, iv[0], iv[1]) * 0.85 * round;
+    face(o, at, iv[0], iv[1], round, 0.35);
+    const lift = (up + down) * 0.12;
+    o.lfy += lift;
+    o.rfy += lift;
+    o.py -= lift;
+    const nudge = win(beat, 14.7, 14.95, 15.75, 16);
     o.cRoll += Math.sin(TAU * beat * 2) * 0.09 * nudge;
     o.cYaw += Math.sin(TAU * beat * 2 + 0.6) * 0.07 * nudge;
   } else if (b.name === 'graphite') {
@@ -469,7 +497,7 @@ function react(o: Pose, b: Build, beat: number) {
     o.cPitch += nod * 0.07;
   } else if (b.name === 'ivory') {
     const t = spot('terracotta');
-    face(o, at, t[0], t[1], win(beat, 14.8, 15.2, 16.2, 16.7), 0.2);
+    face(o, at, t[0], t[1], win(beat, 14.5, 14.9, 16, 16.5), 0.2);
     const look = win(beat, 25.6, 26.6, 30.8, 31.8);
     if (look > 0) {
       // Out of the step: feet back under it, the travel's drift gone, arms easing down.
@@ -698,6 +726,18 @@ class Robot {
     }
   }
 
+  /** The outer corners (top-left and bottom-left) of each elbow and hand as posed now, in the room. */
+  reach() {
+    this.root.updateMatrixWorld(true);
+    const r = this.b.armR * 2.2;
+    return this.arms.flatMap(({ elbow, hand }) =>
+      [elbow.getWorldPosition(new THREE.Vector3()), hand.localToWorld(new THREE.Vector3(0, -this.b.armR * 1.3, 0))].flatMap((p) => [
+        p.clone().add(new THREE.Vector3(-r, r, 0)),
+        p.add(new THREE.Vector3(-r, -r, 0)),
+      ]),
+    );
+  }
+
   /** `rest` (0 to 1) eases every joint to standing still, arms down: the robots quiet while reading. */
   update(beat: number, time: number, rest = 0) {
     const b = this.b;
@@ -720,8 +760,18 @@ class Robot {
         o.hRoll += roll * p.curious * between;
       }
       react(o, b, beat % BEATS);
+      if (p.close)
+        for (const s of ['l', 'r'] as const) {
+          const A = ch(s, 'A');
+          o[A] += (Math.PI - 0.12 - o[A]) * 0.7 * p.close * smooth(1.6, 2.4, o[A]);
+          const level = Math.max(0, Math.sin(o[A])) ** 2;
+          o[ch(s, 'E')] = Math.max(o[ch(s, 'E')], 1.4 * p.close * level);
+          o[ch(s, 'F')] = Math.max(o[ch(s, 'F')], 0.9 * p.close * level);
+        }
     }
     if (rest > 0) for (const c of CH) o[c] *= 1 - smooth(0, 1, rest);
+    // The whole robot turns about its spot (the unfinished one is held by its stand).
+    if (!b.schematic) this.root.rotation.y = b.at[2] + o.turn;
     const L = this.L;
     this.pelvis.position.set(o.px * L, this.hipY - o.py * L, o.pz * L);
     this.pelvis.rotation.set(o.pPitch, o.pYaw, o.pRoll, 'YXZ');
@@ -1561,8 +1611,17 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
     new THREE.Vector3(STAND.x - 0.35, 2.05, STAND.z),
     new THREE.Vector3(STAND.x + 0.4, 0, STAND.z),
   ];
-  // What keeps clear of the opening's text: the top-left of each dancer's reach, and of the monitor.
+  // What keeps clear of the opening's text: the top-left of each dancer's head and of the monitor, and
+  // (reachPoints) the dancers' elbows and hands wherever the routine takes them, sampled over one loop.
   const clearPoints = [...robots.map((r) => new THREE.Vector3(r.root.position.x - 0.6, 2.05, r.root.position.z)), desk.group.localToWorld(new THREE.Vector3(-0.4, 1.4, -0.15))];
+  const reachPoints: THREE.Vector3[] = [];
+  for (let i = 0; i < 64; i++) {
+    const beat = (i / 64) * BEATS;
+    for (const r of robots) {
+      r.update(beat, (beat * 60) / BPM);
+      reachPoints.push(...r.reach());
+    }
+  }
 
   // Dust in the work light's beam.
   const DUST = 120;
@@ -1631,7 +1690,8 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
 
   // The opening's distance: the nearest at which every fit point is inside the safe part of the frame
   // (clear of the bar at the top and the controls at the bottom) and, where the text lies over the
-  // picture, the top-left of each dancer's reach and of the monitor is right of the text or below it.
+  // picture, the top-left of each dancer's head and of the monitor is right of the text or below it, and
+  // no elbow or hand comes within 16 px of a line of it or a link (an arm may reach beside a shorter line).
   // For that the picture may slide right and down (an off-centre view, the same lens and angle), and
   // takes whichever slide keeps the room largest; failing that it shrinks, by no more than a quarter.
   function fitHero(box: DOMRect) {
@@ -1654,6 +1714,7 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
       a.height = Math.max(...parts.map((r) => r.bottom)) - a.y;
     }
     const text = a?.width && a.right > box.left && a.left < box.right && a.bottom > box.top && a.top < box.bottom ? { r: a.right - box.left + 16, b: a.bottom - box.top + 16 } : null;
+    const lines = parts.map((r) => [r.left - box.left - 16, r.top - box.top - 16, r.right - box.left + 16, r.bottom - box.top + 16]);
     let sx = 0;
     let sy = 0;
     const at = (p: THREE.Vector3) => {
@@ -1669,10 +1730,13 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
         const q = at(p);
         return !!q && q[0] >= fw * 0.015 && q[0] <= fw * 0.985 && q[1] >= fh * 0.09 && q[1] <= fh * 0.95;
       });
-      return framed && (!clear || !text || clearPoints.every((p) => {
+      return framed && (!clear || !text || (clearPoints.every((p) => {
         const q = at(p);
         return !!q && (q[0] >= text.r || q[1] >= text.b);
-      }));
+      }) && reachPoints.every((p) => {
+        const q = at(p);
+        return !!q && !lines.some(([l, t, r, b]) => q[0] > l && q[0] < r && q[1] > t && q[1] < b);
+      })));
     };
     const nearest = (clear: boolean) => {
       let lo = 5;

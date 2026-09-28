@@ -1,4 +1,4 @@
-// Per-state rendering cost of /prototype/, measured from outside the code. Before the page loads, the
+// Per-state rendering cost of /, measured from outside the code. Before the page loads, the
 // WebGL draw calls are wrapped (calls and triangles, shadow pass included) and so is requestAnimationFrame
 // (how long each frame's callbacks run on the main thread, and the interval between frames). For each
 // state it reports the frames the scene drew in a fixed window, the frame interval (p50, p95, max, and how
@@ -9,7 +9,7 @@
 // W=1440x900 DPR=1 WINDOW=5000 REDUCE=1 BASE=... NODE_PATH=<dir with playwright> node measure.cjs
 const { chromium } = require('playwright');
 const os = require('os');
-const BASE = process.env.BASE || 'http://127.0.0.1:4321/prototype/';
+const BASE = process.env.BASE || 'http://127.0.0.1:4322/';
 const [width, height] = (process.env.W || '1440x900').split('x').map(Number);
 const dpr = +(process.env.DPR || 1);
 const WINDOW = +(process.env.WINDOW || 5000);

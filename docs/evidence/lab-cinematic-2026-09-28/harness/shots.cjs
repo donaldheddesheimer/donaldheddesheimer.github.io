@@ -1,11 +1,14 @@
-// Screenshots of /prototype/ for review, from a running `npm run preview -- --host 127.0.0.1 --port 4321`.
+// Screenshots of / for review, from a running `npm run preview -- --host 127.0.0.1 --port 4321`.
 // STEPS picks what to take, at each size in W:
 //   hero      the opening, 1.5 s after the room has drawn (the dance is not frozen: poses vary a little run to run)
 //   look      the opening dragged to each limit of the look-around (left, right, up, down)
 //   read      "Explore the lab", then the computer's Work page, flat
 //   about, resume, contact, case   the computer's other pages (a case study: cuCadence)
 //   work      the ordinary page's Work section (stacked windows)
-// REDUCE=1 emulates reduced motion. OUT is the folder, EXT png or jpg, TAG a file-name prefix.
+//   settings  the header's Settings open (the Motion switch), on the opening
+//   project   a case study's own page (/projects/cucadence/)
+// REDUCE=1 emulates reduced motion. FONTS=1 lets the page's web fonts load (by default they're aborted,
+// offline, and the text is set in a fallback face). OUT is the folder, EXT png or jpg, TAG a file-name prefix.
 // NODE_PATH=$(npm root -g) node shots.cjs
 const { chromium } = require('playwright');
 const BASE = process.env.BASE || 'http://127.0.0.1:4321';
@@ -15,13 +18,14 @@ const out = process.env.OUT || '.';
 const ext = process.env.EXT || 'png';
 const tag = process.env.TAG || '';
 const reduce = process.env.REDUCE === '1';
+const fonts = process.env.FONTS === '1';
 (async () => {
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   for (const wh of sizes) {
     const [width, height] = wh.split('x').map(Number);
     const phone = width < 600;
     const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: reduce ? 'reduce' : 'no-preference', deviceScaleFactor: phone ? 2 : 1, isMobile: phone, hasTouch: phone });
-    await ctx.route(/^https:\/\/fonts\./, (r) => r.abort());
+    if (!fonts) await ctx.route(/^https:\/\/fonts\./, (r) => r.abort());
     const page = await ctx.newPage();
     page.on('pageerror', (e) => console.log('pageerror', e.message));
     const shot = async (name) => {
@@ -29,8 +33,9 @@ const reduce = process.env.REDUCE === '1';
       await page.screenshot({ path: file, ...(ext === 'jpg' ? { type: 'jpeg', quality: 86 } : {}) });
       console.log(file);
     };
-    await page.goto(BASE + '/prototype/?probe', { waitUntil: 'load' });
+    await page.goto(BASE + '/?probe', { waitUntil: 'load' });
     await page.waitForSelector('[data-lab-root][data-drawn], [data-lab-root][data-failed]', { timeout: 90000 });
+    if (fonts) await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(1500);
     const roomy = await page.evaluate(() => document.documentElement.hasAttribute('data-pc-able'));
     for (const step of steps) {
@@ -58,10 +63,23 @@ const reduce = process.env.REDUCE === '1';
         await shot('reading-work');
       } else if (['about', 'resume', 'contact', 'case'].includes(step) && roomy) {
         const path = step === 'case' ? 'work/cucadence' : step;
-        await page.goto(`${BASE}/prototype/?probe&computer=${path}`, { waitUntil: 'load' });
+        await page.goto(`${BASE}/?probe&computer=${path}`, { waitUntil: 'load' });
         await page.waitForSelector('html[data-pc="read"]', { timeout: 30000 });
         await page.waitForTimeout(2500);
         await shot(`reading-${step}`);
+      } else if (step === 'settings') {
+        await page.goto(BASE + '/?probe', { waitUntil: 'load' });
+        await page.waitForSelector('[data-lab-root][data-drawn], [data-lab-root][data-failed]', { timeout: 90000 });
+        if (fonts) await page.evaluate(() => document.fonts.ready);
+        await page.click('[data-settings-toggle]');
+        await page.waitForTimeout(600);
+        await shot('settings');
+        await page.click('[data-settings-toggle]');
+      } else if (step === 'project') {
+        await page.goto(BASE + '/projects/cucadence/', { waitUntil: 'load' });
+        if (fonts) await page.evaluate(() => document.fonts.ready);
+        await page.waitForTimeout(800);
+        await shot('project');
       } else if (step === 'work') {
         await page.evaluate(() => document.getElementById('work').scrollIntoView());
         await page.waitForTimeout(800);

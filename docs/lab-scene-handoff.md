@@ -1,8 +1,192 @@
 # Robotics lab implementation handoff
 
-## Current checkpoint: cinematic lab prototype, 2026-09-28 (Claude)
+## Current checkpoint: the lab becomes the homepage, 2026-09-28 (Claude)
 
-**Status: validated; waiting for review.** Local commits only. Nothing here is pushed, merged or deployed.
+**Status: validated; in a pull request against `main`.** Not merged or deployed (`deploy.yml` deploys only on a push to `main`).
+
+- **Branch:** `cinematic-lab-homepage`, from `cinematic-lab-prototype` at `b7800f0`. `origin/main` was still `cc1a6c4` when the branch was pushed, so it merges without conflicts.
+- **Commit:** the one that adds this section (`git log -1 -- docs/lab-scene-handoff.md`).
+- **Brief:** "Finish the cinematic lab and make it the homepage". It's a polish and release pass on the prototype below, with no redesign. The monitor's brightness, the computer's pages, the room and the robots' designs are unchanged.
+- **What to judge:** `docs/evidence/lab-homepage-2026-09-28/screens/`. These are rendered on a real GPU (Apple M5 Pro, ANGLE Metal, headless Chrome 153) with the page's own web fonts. The earlier checkpoint's screens were set in the fallback font.
+
+### What changed
+
+1. **The robots** (`src/scripts/lab/scene.ts`):
+   - **Graphite's arm keeps clear of the introduction and its links.**
+     - `reach()` gives the outer corners of Graphite's elbows and hands as posed.
+     - `fitHero()` also fits those points, for the whole dance, 16 px clear of every text line and link of `[data-lab-avoid]`.
+     - Graphite keeps its arms close (a new persona trait, `close: 1`): raised arms go straight up rather than out, with the elbows bent.
+   - **Ivory stands clear of the service stand:** `at: [0.85, -1.55, 0.25]`.
+   - **Terracotta turns to face Ivory for its reaction:** a `turn` channel, `hops()` and `bearing()`. It hops round, shimmies facing Ivory, and hops back.
+2. **Settings** (`src/layouts/Base.astro`):
+   - The header's Motion switch is now inside a small Settings disclosure: an icon button (`aria-expanded`, `aria-controls`) over a panel.
+   - The panel closes on Escape (focus returns to the button), when focus leaves it, and on a click outside.
+   - The footer's switch stays, and both switches agree.
+   - The note under the switch says what it covers, and that the room holds still while the system asks for reduced motion.
+   - Without JavaScript, Settings and the footer's switch aren't shown, because nothing can work them.
+3. **The cutover.**
+   - `src/pages/prototype.astro` is now `src/pages/index.astro`: the lab is `/`, indexable, with canonical and `og:url` set to itself. Its title is "Donald Heddesheimer · Systems and GPU software engineer".
+   - The scripts moved from `src/scripts/lab-prototype/` to `src/scripts/lab/`.
+   - Every page has the lab's header: the mark, the section links (Work, About, Résumé, Contact) and Settings. The phone tab bar has Home and the same four, and the search list (⌘K or `/`) has the sections and the case studies.
+   - There's no "Systems map" anywhere.
+   - The link preview is a new `public/og.jpg` (1200×630): the opening itself, with the fonts, under reduced motion. `harness/og.cjs` in the new evidence folder remakes it. It replaces `og.png`, the console card.
+   - `/computer/…` stays the frame's own: `noindex`, canonical to the ordinary page. Opened on its own, each page goes to the lab reading it, or to the ordinary page in a window the lab doesn't open in.
+4. **The dashboard is retired.**
+   - **Deleted:**
+     - the Rover Autonomy mission and simulation (`rover-sim.ts`, `rover-render.ts`, `MissionCanvas`);
+     - the systems map and console (`Overview`, `Stage`, `SystemsMap`, `Inspector`, `Evidence`, `EntityShape`, `lib/model.ts`, `lib/layout.ts`, `selection.ts`);
+     - the old homepage (`HomeSections`, `Section`, `Panel`, `Timeline`, `lib/timeline.ts`);
+     - the first lab (`RobotStage`, `robot-scene.ts`, `lab.ts`);
+     - `site.ts`'s `mission` and `skillAliases`;
+     - about 1,550 lines of `global.css` that served only them.
+   - **Case studies** (`CaseStudy.astro`) read as the computer shows them, with no project codes, "Featured" badge, "Show on map" or Connections graph. Their "Related work" list stays.
+   - **Genuine rover content is kept:**
+     - the RoboJackets RoboNav / University Rover Challenge role in About and Résumé;
+     - the introduction's rover-autonomy lines;
+     - the project write-ups.
+5. **Old addresses forward** (the table below).
+   - GitHub Pages can't redirect on the server, so each old address is a small static page (`src/layouts/Redirect.astro`) with:
+     - `location.replace` (no history entry);
+     - a `<noscript>` meta refresh;
+     - `noindex`;
+     - a canonical link to the replacement.
+   - **Selections** (`src/components/LegacySel.astro`) are matched against the list of project ids built with the site:
+     - `^project:([\w-]+)$` with a known id makes `/projects/<id>/`;
+     - any other selection goes to `/#work`.
+     - Nothing else from the query reaches an address.
+6. **Docs:**
+   - `README.md` is rewritten for the new site: its addresses, where to edit content, and the layout.
+   - `docs/lab-cinematic-status.md` points here.
+7. **Harness:**
+   - the existing scripts are pointed at `/` and at Settings (`fallbacks-motion.cjs` opens the disclosure to reach the switch);
+   - `shots.cjs` gains `FONTS=1`, `settings` and `project`;
+   - `robots-dance.cjs` measures text clearance and the stand's parts;
+   - a new `homepage.cjs` checks redirects, metadata, links, Settings and plain pages.
+
+### Addresses
+
+| Address | Now |
+|---|---|
+| `/` | The lab (roomy windows) over Work, About, Résumé and Contact. Indexable. |
+| `/?computer=<path>` | The lab reading that page. A window the lab doesn't open in goes to the ordinary page (`/projects/<id>/` or `/#<section>`). An unknown path is dropped from the address. |
+| `/projects/<id>/` | Unchanged address. The case study, indexable. |
+| `/computer/<path>/` | The frame's page. `noindex`. On its own, it goes to `/?computer=<path>` or the ordinary page. |
+| `/prototype/` | → `/`, keeping the query (`?computer=`) and the `#section`. |
+| `/prototype/work/<id>/` | → `/projects/<id>/`, keeping the query and anchor. |
+| `/systems/`, `/systems/screen/` | With `?sel=project:<known id>` → `/projects/<id>/`. With any other `?sel=` → `/#work`. Bare (or `?sel=` empty) → `/`. |
+| `/?sel=…` | The same rule as `/systems/`. An empty `?sel=` stays on `/`. |
+| Unknown | The 404 page: the header, links home, and a few case studies. |
+
+### Validation on the final build
+
+- **Machine:** Apple M5 Pro (18 cores, 24 GB), Darwin 25.5.0.
+- **Browser:** headless Chrome 153.0.8010.54 through Playwright.
+  - **"GPU"** below means WebGL through ANGLE Metal on the Mac's GPU. Each log's first line names the renderer.
+  - **"SwiftShader"** means Chrome's software WebGL. It's used only where no frame rate or pose is read: redirects, metadata, links, Settings.
+- **Server:** this branch's `npm run build`, served by `npm run preview` on :4322.
+- **Build:** `npm run build` gives 42 pages. Only the three.js chunk-size warning, which is older than this pass.
+- **Type check:** `tsc --noEmit -p .` (tsc 5.9.3) gives only the two old `src/lib/build.ts` errors: no Node types (`logs/tsc.log`).
+- **Measured vs inferred:** everything below is measured unless it says otherwise.
+- **Logs** are in `docs/evidence/lab-homepage-2026-09-28/logs/`. The existing scripts are in `docs/evidence/lab-cinematic-2026-09-28/harness/`, the new ones in `…/lab-homepage-2026-09-28/harness/`.
+- **Last source changes:** two edits followed the GPU runs of navigation, click versus drag, look limits and the fallbacks:
+  - a comment in `scene.ts`;
+  - the `scripting: none` rule in `Base.astro`.
+  - After the rebuild, every built JavaScript file is byte-identical (SHA-256), and only the stylesheet changed. So those runs stand for the final build.
+  - `homepage.cjs`, the robots and the screenshots ran on the final build itself.
+
+| Area | Result | Log |
+|---|---|---|
+| Legacy redirects (SwiftShader) | 26/26 with JavaScript: every row of the table above, with the query and anchor kept where it says so. None adds a history entry (`history.length` unchanged). Hostile selections (`project:fluxion/../../evil`, `project:fluxion?x=//evil.example`, `<script>`, `javascript:alert(1)`, `//evil.example`, `org:`, `cap:`, `hobby:`, unknown ids) all go to `/#work`. 4/4 without JavaScript: the meta refresh goes to the fixed replacement. | `homepage.log` |
+| Indexing and canonical (SwiftShader, every built page) | The only indexable pages are `/` and the 11 case studies, each with canonical and `og:url` set to itself and `og:image` `/og.jpg`. The 12 indexable titles are unique. The `/computer/…` pages are `noindex`, with canonical set to the ordinary page. The `/prototype/…` and `/systems/…` pages are `noindex`, with canonical set to their replacement. The 404 page is `noindex`. `/og.jpg` is a 1200×630 JPEG; `/og.png` is 404. 59/59. | `homepage.log` |
+| No leftover entry points | No built page outside the retired ones links to `/prototype`, `/systems` or `?sel=`. That covers the header, tab bar, footer, search list (20 entries) and the case studies. | `homepage.log` |
+| Settings (SwiftShader, 1440×900 and 390×844) | 19/19. Tab reaches it with a visible focus ring. Enter or Space opens it, with the focus kept on the button. Tab moves into the panel. Space on the switch turns Motion off: it's stored, both switches uncheck, and the frame loop stops (1 frame in 2 s). Escape closes it and returns focus without touching the lab. Tabbing out or clicking elsewhere closes it. The setting persists across a reload, and the footer's switch agrees. On a phone the button is 44×44 and the panel opens inside the window. Without JavaScript, Settings and the footer switch aren't shown. | `homepage.log`, `screens/settings-open-*-nofonts.png` |
+| Reduced motion (GPU and SwiftShader) | Motion starts off with nothing stored. The room is one still frame (0 differing pixels 2 s apart). There's no look-around and no idle hint, and the computer opens with a cut. Turned on in Settings, the choice is stored and the page's transitions come back (the frame fades in), but the room still holds still: the system setting wins in the lab, as before this pass. | `fallbacks-motion.log`, `homepage.log` |
+| Motion switch (GPU) | Tab ×8 goes Settings, then (Enter), then the switch. Space and Enter toggle it, and the choice persists across reloads. Switched off mid-dance at 2 s and at 5 s, the room matches a page loaded with Motion off (0 differing pixels, 2 runs). Switched off mid-look, the view returns to rest. | `fallbacks-motion.log` |
+| Click versus drag (GPU) | 18/18, as in the prototype pass. A click on the monitor enters, even with 4–5 px of movement. Drags don't enter (8 px or 30 px ending on the monitor, 150 px away from it, or starting in the room and ending on it). Drags starting on links don't turn the view. "Explore the lab" enters by click and by Tab + Enter. A pen drags like a mouse. | `look-click-input.log` |
+| Look limits (GPU) | PASS at 1280×800, 1440×900 and 1920×1080, six drags each (four sides and both corners toward the monitor): the whole screen stays in the window, and the view eases back in 1.4–3.1 s. The nearest edge is 31.6 px (1440×900, a full leftward drag). | `look-click-limits.log` |
+| Navigation (GPU) | 11 checks × 2 runs, 276/276. They cover entries and addresses from `/`, Back and Forward with the scroll restored per entry, "Leave computer", Escape (in the frame and outside it) with focus back on "Explore the lab", reload, direct and invalid `?computer=` links, "Open ordinary page", the redirect for windows the lab doesn't open in, links out, the résumé PDF, copy-email, the back-forward cache, resizing while reading, and the keyboard. | `navigation.log` |
+| Mobile and stacked (GPU) | At 390×844 (DPR 3) and 360×640 (DPR 2) with touch: no horizontal overflow, touch scrolls without turning the view, and a tap on the monitor or "See the work" goes to `#work`. Text is 14 px or larger. `?computer=about` goes to `/#about`, `?computer=work/cucadence` to `/projects/cucadence/`, and `/computer/resume/` to `/#resume`. At 1024×768 with a mouse, drags don't navigate. A 1440→1024→1440 resize while reading works. The computer's bar keeps "Leave" in view at 800, 600 and 390 px. | `fallbacks-phone.log` |
+| No WebGL and no JavaScript (GPU browser) | With the context refused, or with `--disable-webgl`: `data-failed`, the still, and "See the work" to `#work`. A shared `?computer=about` opens the page flat in the frame, and Escape goes back to `/`. The only console errors are three.js's context errors. Without JavaScript, at 1440 and 390: the still, all four sections, and "See the work" to `/#work`; `/projects/cucadence/` reads. Save-Data: the scene waits for "Explore the lab", then loads and reaches reading in 2.4 s. | `fallbacks-nogl.log`, `homepage.log` |
+
+**Robots (GPU, the page's own fonts).** `robots-dance.cjs` ran with `QUICK=1 LOOPS=3` on a paused fake clock, so each size has 1,612 samples: every 32 ms of scene time over three loops. `logs/robots-dance-<size>.log`.
+
+| Size | Camera distance | Graphite's closest approach to the introduction | Ivory and Terracotta |
+|---|---|---|---|
+| 1280×720 | 7.157 (+5.2%) | 11.9 px, to "Contact" (beat 15.63) | 368 and 280 px |
+| 1280×800 | 7.728 (+8.7%) | 9.0 px, to "Contact" (beat 15.57) | 372 and 306 px |
+| 1440×900 | 7.110 (unchanged) | 33.9 px, to "Contact" (beat 15.63) | 484 and 394 px |
+| 1920×1080 | 6.805 (unchanged) | 168.8 px | 730 and 631 px |
+| 2560×1440 | 6.805 (unchanged) | 38.0 px | 606 and 512 px |
+
+- **The introduction:**
+  - No robot's projected mesh enters any text line or link of the introduction at any sample, at any size.
+  - The fit keeps 16 px from the arm's outer corners. The whole mesh comes a little closer (9–12 px at the 1280 widths), because the corners approximate it.
+  - The camera distance is compared with the fit before this pass's reach clearance, with the real fonts. Keeping Graphite's reach clear pulls the camera back only at the two 1280 widths.
+- **Ivory:**
+  - Against the stand's parts (plate, mast, arm, casters, cable), vertex by vertex: 0/1612 at every size, down from 87 of 541 samples, up to 100 mm, before.
+  - Against the unfinished robot: 0/1612.
+- **Terracotta faces Ivory** (head within 20°) in beats 14.55–16.16 of each loop, around its shimmy (chest roll std 0.057 rad in beats 14.95–15.75, against 0.036 before it). Before this pass, it didn't face Ivory in that window.
+- **Graphite and Terracotta** still touch, as before this pass: 14/1612 samples, up to 38 mm, at beats 3.26–3.32 and 5.35–5.53, during their greeting (Terracotta's wave, beats 3–6.6 in the code). It reads as a tap and wasn't in the brief.
+- **The draw budget at the opening:** 300 draw calls and 97,084 triangles at 1440×900, the same as the prototype. It's 302–311 calls and 97,856–100,152 triangles at the other sizes: the view takes in more or less of the room. Frame rate and frame time weren't measured again. The scene's per-frame work is unchanged apart from the poses, so the prototype's performance table below is expected to hold (inferred, not measured).
+
+**Screens** (GPU, the page's own fonts, JPEG 86%): `docs/evidence/lab-homepage-2026-09-28/screens/`:
+- `opening-{1280x800,1440x900,1920x1080}`;
+- `settings-1440x900`;
+- `reading-{work,about,case}-1440x900`;
+- `project-1440x900`;
+- `phone-{opening,page-work,project}-390x844`.
+
+The two `settings-open-*-nofonts.png` clips are from `homepage.cjs` (SwiftShader, fallback font). 1.5 MB in all, and no recording.
+
+### Known limitations
+
+1. **Coverage:**
+   - headless Chrome on one Mac only;
+   - no Safari, Firefox, Playwright WebKit, real phone or screen-reader pass;
+   - GPU numbers are for the Apple M5 Pro only.
+2. **Redirects need JavaScript to be exact.** GitHub Pages can't redirect on the server.
+   - Without JavaScript, the `<noscript>` meta refresh goes to the fixed replacement. It drops the selection and the prototype's query: `/systems/?sel=project:fluxion` goes to `/`, not the case study.
+   - Search engines see `noindex` and the canonical link.
+3. **Reduced motion wins in the lab.** With the system setting on, turning Motion on in Settings brings back the page's transitions, but the robots and camera stay still. This is the prototype's behavior, kept as the brief asked, and the note under the switch says so.
+4. **Robots:** the Graphite–Terracotta tap above, and the 1280-wide framing that sits 5–9% further back.
+5. **Case studies change on the released site:**
+   - `/projects/<id>/` loses the map's project codes, "Featured" badge, "Show on map" button and Connections graph;
+   - "Related work" stays;
+   - their write-ups are unchanged.
+6. **The site header is the lab's on every page.** The released case studies' header had a Search button and a Résumé (PDF) button, and neither is kept.
+   - Search opens with ⌘K / Ctrl+K or `/`. `[data-cmdk-open]` is still wired, but nothing on the page uses it: the prototype's design had no button.
+   - The PDF is linked from the opening's Resume button and the Résumé section.
+7. **Carried over from the prototype:**
+   - the redirect for windows the lab doesn't open in can paint once before it goes;
+   - the computer's bar scrolls 32 px at 320 px;
+   - the reduced-motion cut draws about twice in one tick;
+   - the 1920×1080 @2x fly-out interval;
+   - the back-forward cache was exercised in Chrome only;
+   - the two `src/lib/build.ts` type errors;
+   - the chunk-size warning.
+
+### Commands (from the repository root)
+
+```sh
+npm run build                          # 42 pages
+git diff --check
+tsc --noEmit -p .                      # only the two src/lib/build.ts errors (logs/tsc.log)
+npm run preview -- --host 127.0.0.1 --port 4322
+
+# Playwright isn't a dependency: NODE_PATH=<a directory with it>. The scripts launch SwiftShader;
+# the GPU runs pointed the launch at ANGLE Metal instead.
+H=docs/evidence/lab-cinematic-2026-09-28/harness; E=docs/evidence/lab-homepage-2026-09-28
+DIST=$PWD/dist LOG=$PWD/$E/logs/homepage.log node $E/harness/homepage.cjs
+BASE=http://127.0.0.1:4322 OUT=public/og.jpg node $E/harness/og.cjs
+W=1280 H=800 QUICK=1 LOOPS=3 OUT=<scratch> LOG=$E/logs/robots-dance-1280x800.log node $H/robots-dance.cjs
+FONTS=1 EXT=jpg OUT=$E/screens W=1440x900 STEPS=hero,settings,read,about,case,project node $H/shots.cjs
+RUNS=2 LOG=$E/logs/navigation.log node $H/navigation.cjs
+LOG=$E/logs/look-click-input.log node $H/look-click-input.cjs     # likewise look-click-limits, fallbacks-{motion,nogl,phone}
+```
+
+## Earlier checkpoint: cinematic lab prototype, `b7800f0` (Claude)
+
+**Superseded by the homepage cutover above.** Its addresses (`/prototype/…`) now forward, and the cutover pointed its harness scripts at `/`, so the commands at the end of this section are as they were run then.
 
 - **Branch:** `cinematic-lab-prototype`, from `origin/main` at `cc1a6c4` (the merge of PR #2, which contains `796f421`).
 - **Commits:**
@@ -199,7 +383,7 @@ No recording is committed.
    - The two `src/lib/build.ts` type errors: no Node types, because `@types/node` isn't installed (TS2307 and TS2580 with tsc 5.9.3, `logs/tsc.log`).
    - The existing chunk-size warning.
 
-### Legacy to retire at the homepage cutover (not removed now)
+### Legacy to retire at the homepage cutover (retired in the checkpoint above)
 
 - **Pages:** `src/pages/systems.astro` (`/systems/`) and `src/pages/systems/screen.astro` (`/systems/screen/`).
 - **Components:** `Overview` → `Stage` → `MissionCanvas`, `SystemsMap`, `Inspector`, `Evidence`, and the released lab's `RobotStage` and `Panel`.

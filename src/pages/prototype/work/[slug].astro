@@ -1,29 +1,14 @@
 ---
-// PROTOTYPE (lab-cinematic, 2026-09-28). A case study as the lab proposes it outside the computer: the
-// ordinary page for /prototype/?computer=work/<id> (phones, and "Open ordinary page"). The same
-// CaseStudy as /projects/<id>/, plain, under the prototype's header. Not linked from the site.
-import { getCollection, type CollectionEntry } from 'astro:content';
-import Base from '../../../layouts/Base.astro';
-import CaseStudy from '../../../components/CaseStudy.astro';
-import { profile } from '../../../data/site';
+// A case study's prototype address, before the lab became the homepage: forwards to /projects/<id>/.
+import { getCollection } from 'astro:content';
+import Redirect from '../../../layouts/Redirect.astro';
 
 export async function getStaticPaths() {
-  const projects = (await getCollection('projects')).sort((a, b) => a.data.code.localeCompare(b.data.code));
-  return projects.map((p, i) => ({
-    params: { slug: p.id },
-    props: { project: p, prev: projects[i - 1], next: projects[i + 1] },
-  }));
+  return (await getCollection('projects')).map((p) => ({ params: { slug: p.id }, props: { title: p.data.title } }));
 }
 
-interface Props {
-  project: CollectionEntry<'projects'>;
-  prev?: CollectionEntry<'projects'>;
-  next?: CollectionEntry<'projects'>;
-}
-const { project } = Astro.props;
-const d = project.data;
+const { slug } = Astro.params;
+const { title } = Astro.props;
 ---
 
-<Base title={`${d.title} · ${profile.name}`} description={d.summary} section="work" story lab noindex>
-  <CaseStudy {...Astro.props} plain projectHref={(id) => `/prototype/work/${id}/`} indexHref="/prototype/#work" />
-</Base>
+<Redirect to={`/projects/${slug}/`} title={title} keep />

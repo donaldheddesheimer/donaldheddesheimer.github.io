@@ -1,8 +1,8 @@
-// Shared helpers for the look-click-*.cjs harnesses (look-around and click versus drag on /prototype/'s
+// Shared helpers for the look-click-*.cjs harnesses (look-around and click versus drag on the homepage's
 // opening). Not run on its own. Each harness requires it next to itself:
 //   const L = require('./look-click-lib.cjs');
 // It gives: a browser launch (SwiftShader flags, as the other harnesses; a GPU shim on NODE_PATH may swap
-// them), a page on /prototype/?probe with fonts aborted (offline), the page's own WebGL renderer string,
+// them), a page on /?probe with fonts aborted (offline), the page's own WebGL renderer string,
 // a log that starts with a header line (ISO time, renderer, server) and is written without trailing
 // whitespace, the look state (window.__lab stats() and quad(), the cursor), the screen quad's margins to
 // the window with the bezel allowed for, and a copy of a screenshot with the quad drawn on it.
@@ -25,7 +25,7 @@ async function open(browser, { width, height, query = '?probe', wait = true, ...
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push('pageerror ' + e.message));
-  await page.goto(BASE + '/prototype/' + query, { waitUntil: 'load' });
+  await page.goto(BASE + '/' + query, { waitUntil: 'load' });
   if (wait) {
     await page.waitForSelector('[data-lab-root][data-drawn], [data-lab-root][data-failed]', { timeout: 90000 });
     await page.waitForFunction(() => !!window.__lab, null, { timeout: 30000 }).catch(() => {});

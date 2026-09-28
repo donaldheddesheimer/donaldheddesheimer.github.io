@@ -1,5 +1,5 @@
-// The three dancers on /prototype/'s opening over one loop of the routine (32 beats at 112 BPM, 17.14 s),
-// at 1440x900, DPR 1. The page's clock is Playwright's fake clock, paused before load, so the scene's time
+// The three dancers on the homepage's opening (/; PAGE overrides it) over one loop of the routine (32 beats
+// at 112 BPM, 17.14 s), at 1440x900 (W and H override it), DPR 1. The page's clock is Playwright's fake clock, paused before load, so the scene's time
 // `t` is known exactly: it is the fake performance.now() of the last animation frame minus the frozen time
 // at which the loop started (every frame is 16 ms of fake time, under the scene's 0.1 s dt cap). The idle
 // hint is cancelled with a Shift keypress first, so the monitor does not brighten mid-loop.
@@ -7,10 +7,13 @@
 // the scene, and the camera of each draw. From them, every 32 ms of scene time, it logs for each robot:
 // - where it is on screen (the projected vertices of its meshes, contact shadows left out), and whether any
 //   of them fall inside the opening's text (the text-node and button rects of [data-lab-avoid], as fitHero
-//   measures it) or the monitor's screen (__lab.quad(), and that quad grown 6% for the bezel);
+//   measures it) or the monitor's screen (__lab.quad(), and that quad grown 6% for the bezel); and its
+//   closest approach to each of those text rects, in CSS px;
 // - the smallest gap between its meshes' world boxes and another robot's (and Ivory's to the unfinished
 //   robot and its stand): a negative gap means the boxes overlap, and is then checked vertex by vertex
-//   against the other mesh's own shape (sphere, capsule, cylinder, else its oriented box), with the depth;
+//   against the other mesh's own shape (sphere, capsule, cylinder, else its oriented box), with the depth
+//   (Ivory against the unfinished robot, and against the stand's parts: its plate, mast, arm, casters and
+//   cable, both ways);
 // - the lowest point of each foot (the floor is y = 0; the stand's plate top y = 0.135);
 // - pelvis, head and hands, the head's heading, and what it points at (within 20 degrees): the camera,
 //   another robot, the stand.
@@ -19,7 +22,10 @@
 // 30 consecutive 60 Hz frames (PNG) for the flicker check on the unfinished robot (robots-flicker.cjs reads
 // them), and 30 more with the unfinished robot alone (dancers and dust hidden), each also drawn without its
 // construction lines. RUN names the run's folder (run1, run2): two runs of the fake clock should measure
-// the same.
+// the same. QUICK=1 measures only: no screenshots, flicker frames or contact sheets. LOOPS=n measures n loops
+// (the camera's slow drift is about 48 s). The page's web fonts load (NOFONTS=1 blocks them, for offline
+// runs; the text is then set in a fallback face, and the opening frames around that instead).
+// The robots are found by their paint, not their floor spots, so the script follows them if they move.
 // NODE_PATH=<playwright shim or $(npm root -g)> BASE=http://127.0.0.1:4322 OUT=<scratch dir> RUN=run1 \
 //   LOG=../logs/robots-dance.log node robots-dance.cjs
 const { chromium } = require('playwright');
@@ -30,8 +36,11 @@ const BASE = process.env.BASE || 'http://127.0.0.1:4322';
 const RUN = process.env.RUN || 'run1';
 const OUT = path.join(process.env.OUT || path.join(__dirname, 'robots-out'), RUN);
 const LOG = process.env.LOG || path.join(__dirname, '../logs/robots-dance.log');
-const W = 1440;
-const H = 900;
+const W = +process.env.W || 1440;
+const H = +process.env.H || 900;
+const PAGE = process.env.PAGE || '/';
+const QUICK = !!process.env.QUICK;
+const LOOPS = +process.env.LOOPS || 1;
 const BPM = 112;
 const BEATS = 32;
 const LOOP = (BEATS * 60) / BPM;
@@ -57,8 +66,9 @@ const REACT = {
   'T waves at G': [3, 3.5, 6, 6.6],
   'G turns to T': [5.4, 6.3, 8.4, 9.4],
   'G nods': [6.5, 7, 7.5, 8.2],
-  'T shimmies at I': [14.3, 14.7, 15.9, 16.4],
-  'I glances at T': [14.8, 15.2, 16.2, 16.7],
+  'T hops round to I': [13.8, 14.8, 15.9, 16.9],
+  'T shimmies at I': [14.7, 14.95, 15.75, 16],
+  'I glances at T': [14.5, 14.9, 16, 16.5],
   'I inspects stand': [25.6, 26.6, 30.8, 31.8],
   'I hand to chin': [26.4, 27.2, 30.2, 31.2],
 };
@@ -72,13 +82,20 @@ const activeReacts = (b) =>
 function installProbe() {
   const S = window.__obs.scene;
   const near = (a, b) => Math.abs(a - b) < 1e-4;
-  const BUILDS = { graphite: [-0.75, 0.45], ivory: [1.0, -1.85], terracotta: [0.6, 0.8] };
+  // A dancer is a group on the floor with a pelvis and two feet, painted its build's colour.
+  const PAINT = { graphite: 0x464c54, ivory: 0xdcd5c6, terracotta: 0xb86a4e };
   const roots = {};
   let stand = null;
   for (const c of S.children) {
-    for (const [n, [x, z]] of Object.entries(BUILDS)) if (c.type === 'Group' && near(c.position.x, x) && near(c.position.z, z) && near(c.position.y, 0)) roots[n] = c;
+    const legs = c.type === 'Group' && near(c.position.y, 0) && c.children.filter((k) => k.type === 'Group').length >= 3;
+    for (const [n, hex] of Object.entries(PAINT)) {
+      let painted = false;
+      if (legs) c.traverse((o) => o.isMesh && o.material.color && o.material.color.getHex() === hex && (painted = true));
+      if (painted) roots[n] = c;
+    }
     if (near(c.position.x, 1.75) && near(c.position.z, -2.0)) stand = c;
   }
+  window.__rbRoots = ['graphite', 'ivory', 'terracotta'].map((n) => roots[n]);
   roots.proto = stand.children.find((k) => k.type === 'Group' && near(k.position.y, 0.135));
   const standMeshes = stand.children.filter((k) => k.isMesh);
   const rig = {};
@@ -176,41 +193,112 @@ function installProbe() {
   const rel = new M4();
   // Vertices of mesh a inside mesh b's own shape (a sphere, capsule or cylinder as such; anything else as its
   // local bounding box), shrunk by 2 mm, and how deep the deepest one is (metres).
-  const inside = (a, b) => {
+  // How deep the point (x, y, z), in mesh b's own frame, is inside b's shape (negative: outside).
+  const depthIn = (b, x, y, z) => {
     const g = b.geometry;
     const P = g.parameters || {};
     if (!g.boundingBox) g.computeBoundingBox();
     const { min, max } = g.boundingBox;
-    const e = rel.multiplyMatrices(inv.copy(b.matrixWorld).invert(), a.matrixWorld).elements;
-    const p = a.geometry.attributes.position.array;
-    const k = 0.002;
+    if (g.type === 'SphereGeometry') return P.radius - Math.hypot(x, y, z);
+    if (g.type === 'CapsuleGeometry') {
+      const L = (P.height ?? P.length) / 2;
+      return P.radius - Math.hypot(x, Math.max(0, Math.abs(y) - L), z);
+    }
+    if (g.type === 'CylinderGeometry') {
+      const h = P.height / 2;
+      const r = P.radiusBottom + ((P.radiusTop - P.radiusBottom) * (y + h)) / (2 * h);
+      return Math.min(r - Math.hypot(x, z), h - Math.abs(y));
+    }
+    return Math.min(x - min.x, max.x - x, y - min.y, max.y - y, z - min.z, max.z - z);
+  };
+  // Of the points p (a flat xyz array) under the matrix e, how many are inside mesh b (shrunk by 2 mm), and
+  // how deep the deepest is.
+  const pointsIn = (p, e, b) => {
     let n = 0;
     let deep = 0;
     for (let i = 0; i < p.length; i += 3) {
       const x = e[0] * p[i] + e[4] * p[i + 1] + e[8] * p[i + 2] + e[12];
       const y = e[1] * p[i] + e[5] * p[i + 1] + e[9] * p[i + 2] + e[13];
       const z = e[2] * p[i] + e[6] * p[i + 1] + e[10] * p[i + 2] + e[14];
-      let d = -1;
-      if (g.type === 'SphereGeometry') d = P.radius - Math.hypot(x, y, z);
-      else if (g.type === 'CapsuleGeometry') {
-        const L = (P.height ?? P.length) / 2;
-        d = P.radius - Math.hypot(x, Math.max(0, Math.abs(y) - L), z);
-      } else if (g.type === 'CylinderGeometry') {
-        const h = P.height / 2;
-        const r = P.radiusBottom + ((P.radiusTop - P.radiusBottom) * (y + h)) / (2 * h);
-        d = Math.min(r - Math.hypot(x, z), h - Math.abs(y));
-      } else d = Math.min(x - min.x, max.x - x, y - min.y, max.y - y, z - min.z, max.z - z);
-      if (d > k) {
+      const d = depthIn(b, x, y, z);
+      if (d > 0.002) {
         n++;
         if (d > deep) deep = d;
       }
     }
     return [n, deep];
   };
+  const inside = (a, b) => pointsIn(a.geometry.attributes.position.array, rel.multiplyMatrices(inv.copy(b.matrixWorld).invert(), a.matrixWorld).elements, b);
+  // The stand's meshes are merged into one per material, so their shapes are lost: it is checked against its
+  // parts as buildStand (scene.ts) makes them, in the stand's frame: boxes [x, y, z, width, height, depth],
+  // with the casters as the boxes around them and the cable as a chain of 2 cm boxes along its curve. Ivory's
+  // vertices are tested inside each part, and each part's surface (sampled every 2 cm) inside Ivory's meshes.
+  const standParts = [
+    [0, 0.09, 0, 0.8, 0.06, 0.8],
+    [0, 0.125, 0, 0.84, 0.02, 0.84],
+    [0, 1.08, -0.34, 0.07, 1.9, 0.07],
+    [0, 1.22, -0.2, 0.07, 0.07, 0.3],
+    [0, 1.22, -0.06, 0.36, 0.05, 0.05],
+    [0, 1.62, -0.3, 0.12, 0.12, 0.04],
+    ...[-1, 1].flatMap((sx) => [-1, 1].map((sz) => [sx * 0.34, 0.035, sz * 0.34, 0.03, 0.07, 0.07])),
+  ];
+  {
+    const V = S.position.constructor;
+    const C = [new V(0, 1.62, -0.3), new V(0.12, 1.3, -0.24), new V(0.08, 1.05, -0.14)];
+    for (let i = 0; i <= 16; i++) {
+      const t = i / 16;
+      const [a, b] = t < 0.5 ? [C[0], C[1]] : [C[1], C[2]];
+      const u = t < 0.5 ? t * 2 : t * 2 - 1;
+      standParts.push([a.x + (b.x - a.x) * u, a.y + (b.y - a.y) * u, a.z + (b.z - a.z) * u, 0.02, 0.02, 0.02]);
+    }
+  }
+  const standSurface = standParts.map(([cx, cy, cz, w, h, d]) => {
+    const pts = [];
+    const steps = (s) => Math.max(1, Math.ceil(s / 0.02));
+    const [nx, ny, nz] = [steps(w), steps(h), steps(d)];
+    for (let i = 0; i <= nx; i++)
+      for (let j = 0; j <= ny; j++)
+        for (let k = 0; k <= nz; k++)
+          if (i === 0 || i === nx || j === 0 || j === ny || k === 0 || k === nz) pts.push(cx + w * (i / nx - 0.5), cy + h * (j / ny - 0.5), cz + d * (k / nz - 0.5));
+    return pts;
+  });
+  const standVsIvory = (ivory) => {
+    let hits = 0;
+    let depth = 0;
+    const what = [];
+    const toStand = inv.copy(stand.matrixWorld).invert();
+    for (const a of ivory) {
+      const e = rel.multiplyMatrices(toStand, a.m.matrixWorld).elements;
+      const p = a.m.geometry.attributes.position.array;
+      const back = new M4().copy(a.m.matrixWorld).invert().multiply(stand.matrixWorld).elements;
+      standParts.forEach(([cx, cy, cz, w, h, d], i) => {
+        let n = 0;
+        let deep = 0;
+        for (let v = 0; v < p.length; v += 3) {
+          const x = e[0] * p[v] + e[4] * p[v + 1] + e[8] * p[v + 2] + e[12];
+          const y = e[1] * p[v] + e[5] * p[v + 1] + e[9] * p[v + 2] + e[13];
+          const z = e[2] * p[v] + e[6] * p[v + 1] + e[10] * p[v + 2] + e[14];
+          const dd = Math.min(w / 2 - Math.abs(x - cx), h / 2 - Math.abs(y - cy), d / 2 - Math.abs(z - cz));
+          if (dd > 0.002) {
+            n++;
+            if (dd > deep) deep = dd;
+          }
+        }
+        const [n2, d2] = pointsIn(standSurface[i], back, a.m);
+        if (n + n2) {
+          hits += n + n2;
+          depth = Math.max(depth, deep, d2);
+          what.push(`${tag(a.m)}~part${i}:${n + n2}/${Math.round(Math.max(deep, d2) * 1000)}mm`);
+        }
+      });
+    }
+    what.sort((p, q) => +q.split('/')[1].replace('mm', '') - +p.split('/')[1].replace('mm', ''));
+    return { hits, depth, what: what.slice(0, 4) };
+  };
   const tag = (m) => `${m.geometry.type.replace('Geometry', '')}#${m.material.color ? m.material.color.getHexString() : ''}`;
   window.__rb = {
     info() {
-      return { found: Object.keys(rig), textBox: textBox.map((v) => Math.round(v)), textRects: textRects.length, standMeshes: standMeshes.length, verts: Object.fromEntries(Object.entries(rig).map(([n, r]) => [n, r.verts])), lineSegs: Object.fromEntries(Object.entries(rig).map(([n, r]) => [n, r.lineSegs])) };
+      return { labels: textLabels, rects: textRects.map((r) => r.map(Math.round)), found: Object.keys(rig), roots: Object.fromEntries(Object.entries(rig).map(([n, r]) => { const e = r.root.matrixWorld.elements; return [n, [e[12], e[14]]]; })), textBox: textBox.map((v) => Math.round(v)), textRects: textRects.length, standMeshes: standMeshes.length, verts: Object.fromEntries(Object.entries(rig).map(([n, r]) => [n, r.verts])), lineSegs: Object.fromEntries(Object.entries(rig).map(([n, r]) => [n, r.lineSegs])) };
     },
     measure() {
       const cam = window.__obs.camera;
@@ -226,6 +314,8 @@ function installProbe() {
         let sx0 = Infinity, sy0 = Infinity, sx1 = -Infinity, sy1 = -Infinity, ymin = Infinity;
         const textHit = {};
         let inText = 0, inTextBox = 0, inScreen = 0, inBezel = 0, onScreenPx = 0, offFrame = 0, n0 = 0;
+        // Closest approach to each text rect (CSS px; 0 inside it).
+        const closest = textRects.map(() => Infinity);
         const mb = [];
         for (const m of r.parts) {
           const e = m.matrixWorld.elements;
@@ -253,6 +343,11 @@ function installProbe() {
             if (py < sy0) sy0 = py;
             if (px > sx1) sx1 = px;
             if (py > sy1) sy1 = py;
+            for (let ti = 0; ti < textRects.length; ti++) {
+              const q = textRects[ti];
+              const d = Math.hypot(Math.max(q[0] - px, 0, px - q[2]), Math.max(q[1] - py, 0, py - q[3]));
+              if (d < closest[ti]) closest[ti] = d;
+            }
             if (px >= textBox[0] && px <= textBox[2] + 16 && py >= textBox[1] && py <= textBox[3] + 16) {
               inTextBox++;
               for (let ti = 0; ti < textRects.length; ti++) {
@@ -286,6 +381,7 @@ function installProbe() {
           verts: n0,
           offFrame,
           inText,
+          closest,
           textHit: Object.entries(textHit).map(([i, c]) => ({ rect: textRects[i].map(Math.round), label: textLabels[i], n: c })),
           inTextBox,
           inScreen,
@@ -335,6 +431,7 @@ function installProbe() {
         what.sort((p, q) => +q.split('/')[1].replace('mm', '') - +p.split('/')[1].replace('mm', ''));
         out.obb[`${x}-${y}`] = { hits, depth, what: what.slice(0, 4) };
       }
+      out.obb['ivory-stand'] = standVsIvory(solids.ivory);
       return out;
     },
   };
@@ -344,7 +441,7 @@ function installProbe() {
 (async () => {
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
-  await ctx.route(/^https:\/\/fonts\./, (r) => r.abort());
+  if (process.env.NOFONTS) await ctx.route(/^https:\/\/fonts\./, (r) => r.abort());
   await ctx.addInitScript(() => {
     window.__THREE_DEVTOOLS__ = new EventTarget();
     window.__obs = { renders: 0 };
@@ -367,7 +464,8 @@ function installProbe() {
   page.on('pageerror', (e) => errors.push(e.message));
   await page.clock.install({ time: new Date('2026-09-27T12:00:00Z') });
   await page.clock.pauseAt(new Date('2026-09-27T12:00:01Z'));
-  await page.goto(BASE + '/prototype/?probe', { waitUntil: 'load' });
+  await page.goto(BASE + PAGE + '?probe', { waitUntil: 'load' });
+  await page.evaluate(() => document.fonts.ready); // the text as it is set (Inter), which the opening frames around
   const renderer = await page.evaluate(() => {
     const g = document.createElement('canvas').getContext('webgl');
     const d = g && g.getExtension('WEBGL_debug_renderer_info');
@@ -432,6 +530,7 @@ function installProbe() {
   const series = [];
   let mi = 0;
   const shoot = async (label, t) => {
+    if (QUICK) return;
     const b = beatOf(t);
     const name = label === 'f' ? `f${String(frames.filter((f) => f.label === 'f').length).padStart(2, '0')}` : `k-${label}${label === 'text' || label === 'touch' ? '-' + t.toFixed(3) : ''}`;
     const file = path.join(OUT, `${name}.jpg`);
@@ -455,7 +554,7 @@ function installProbe() {
   // t = 0: the frame drawn at mount.
   let t = await sample();
   while (mi < marks.length && marks[mi][0] <= t + 0.008) await shoot(marks[mi++][1], t);
-  const END = LOOP + 0.1;
+  const END = LOOP * LOOPS + 0.1;
   while (t < END) {
     await page.clock.runFor(32);
     t = await sample();
@@ -464,6 +563,7 @@ function installProbe() {
   log(`samples ${series.length} (every 32 ms of scene time, t 0 to ${r2(t)} s), frames ${frames.length}, rAF calls ${await page.evaluate(() => window.__raf.n)}`);
 
   // 30 consecutive 60 Hz frames (PNG) for the flicker check, from t about 17.3 s (beat 0.3, warm-up).
+  if (!QUICK) {
   const flick = [];
   for (let i = 0; i < 30; i++) {
     await page.clock.runFor(16);
@@ -495,9 +595,7 @@ function installProbe() {
   // (iso-nl-XX.png, one extra draw through __lab.stats()), which marks the line pixels frame by frame.
   await page.evaluate(() => {
     const S = window.__obs.scene;
-    const near = (a, b) => Math.abs(a - b) < 1e-4;
-    const spots = [[-0.75, 0.45], [1.0, -1.85], [0.6, 0.8]];
-    for (const c of S.children) if (c.type === 'Group' && near(c.position.y, 0) && spots.some(([x, z]) => near(c.position.x, x) && near(c.position.z, z))) c.visible = false;
+    window.__rbRoots.forEach((c) => (c.visible = false));
     S.traverse((o) => o.isPoints && (o.material.visible = false));
   });
   const iso = [];
@@ -518,6 +616,7 @@ function installProbe() {
   fs.writeFileSync(path.join(OUT, 'iso.json'), JSON.stringify(iso));
   fs.writeFileSync(path.join(OUT, 'series.json'), JSON.stringify({ T0, series, frames, info }));
   log(`flicker frames ${flick.length} t ${r2(flick[0].t)} to ${r2(flick[flick.length - 1].t)} s -> ${path.join(OUT, 'flicker.json')}`);
+  } else fs.writeFileSync(path.join(OUT, 'series.json'), JSON.stringify({ T0, series, frames, info }));
   log(`page errors ${JSON.stringify(errors)}`);
 
   // --- Per-frame table ------------------------------------------------------------------------------
@@ -596,9 +695,24 @@ function installProbe() {
     const hit = series.filter((x) => x.m.robots[n].inText);
     if (hit.length) log(`text overlap ${n}: ${hit.map((x) => `t=${r2(x.t, 3)} beat ${r2(x.beat, 2)} ${x.m.robots[n].textHit.map((h) => `${h.n} vertices in ${h.label} ${JSON.stringify(h.rect)}`).join('; ')} (robot box ${JSON.stringify(x.m.robots[n].screen)})`).join(' | ')}`);
   }
+  // How close each dancer comes to the opening's text: every text rect, and the Contact link on its own.
+  for (const n of ['graphite', 'ivory', 'terracotta']) {
+    const worst = (only) => {
+      let best = Infinity;
+      let bi = -1;
+      let bs = null;
+      for (const x of series)
+        x.m.robots[n].closest.forEach((d, i) => {
+          if ((only == null || i === only) && d < best) [best, bi, bs] = [d, i, x];
+        });
+      return `${r2(best, 1)} px to ${info.labels[bi]} ${JSON.stringify(info.rects[bi])} at t=${r2(bs.t, 3)} beat ${r2(bs.beat, 2)}`;
+    };
+    const contact = info.labels.findIndex((l) => /^a: Contact/.test(l));
+    log(`text clearance ${n.padEnd(10)} closest ${worst()}${contact >= 0 ? `; Contact link ${worst(contact)}` : ''}`);
+  }
   // Depth from the camera (root positions), and floor positions.
   const cam = series[0].m.cam;
-  const roots = { graphite: [-0.75, 0.45], ivory: [1.0, -1.85], terracotta: [0.6, 0.8], proto: [1.75, -2.0] };
+  const roots = info.roots;
   log(`camera at t=0 ${JSON.stringify(cam.map((v) => r2(v, 2)))}; distance to each robot's floor spot: ${Object.entries(roots).map(([n, [x, z]]) => `${n} ${r2(Math.hypot(x - cam[0], z - cam[2]), 2)} m`).join(', ')}`);
 
   // --- Motion, per robot ------------------------------------------------------------------------------
@@ -763,13 +877,13 @@ function installProbe() {
     const [v, b] = maxIn(6.3, 8.4, (s) => s.m.robots.graphite.pose.hPitch);
     log(`G nod: head pitch max ${r2(v, 3)} rad at beat ${r2(b, 2)} (code adds 0.34 at 7-7.5), vs ${r2(Math.max(...base), 3)} just before (beats 5.8-6.4)`);
   }
-  log(`T faces I (head within 20 deg): beats ${spanWhere((s) => angTo(s, 'terracotta', 'ivory') < 20)}   [code: 14.3-16.4, full 14.7-15.9]`);
+  log(`T faces I (head within 20 deg): beats ${spanWhere((s) => angTo(s, 'terracotta', 'ivory') < 20)}   [code: hops round 13.8-14.8, back 15.9-16.9]`);
   {
-    const inW = series.filter((s) => s.beat > 14.7 && s.beat < 15.9).map((s) => s.m.robots.terracotta.pose.cRoll);
-    const outW = series.filter((s) => s.beat > 12.5 && s.beat < 14.1).map((s) => s.m.robots.terracotta.pose.cRoll);
-    log(`T shimmy: chest roll std ${r2(std(inW), 3)} rad in beats 14.7-15.9 vs ${r2(std(outW), 3)} in 12.5-14.1`);
+    const inW = series.filter((s) => s.beat > 14.95 && s.beat < 15.75).map((s) => s.m.robots.terracotta.pose.cRoll);
+    const outW = series.filter((s) => s.beat > 12.5 && s.beat < 13.7).map((s) => s.m.robots.terracotta.pose.cRoll);
+    log(`T shimmy: chest roll std ${r2(std(inW), 3)} rad in beats 14.95-15.75 vs ${r2(std(outW), 3)} in 12.5-13.7`);
   }
-  log(`I faces T (head within 20 deg): beats ${spanWhere((s) => angTo(s, 'ivory', 'terracotta') < 20)}   [code: 14.8-16.7, full 15.2-16.2]`);
+  log(`I faces T (head within 20 deg): beats ${spanWhere((s) => angTo(s, 'ivory', 'terracotta') < 20)}   [code: 14.5-16.5, full 14.9-16]`);
   log(`I faces the stand (head within 20 deg): beats ${spanWhere((s) => angTo(s, 'ivory', 'stand') < 20)}   [code: 25.6-31.8, full 26.6-30.8]`);
   {
     const d = (s) => {
@@ -812,6 +926,12 @@ function installProbe() {
   }
 
   // --- Contact sheets -------------------------------------------------------------------------------
+  if (QUICK) {
+    fs.mkdirSync(path.dirname(LOG), { recursive: true });
+    fs.writeFileSync(LOG, lines.join('\n') + '\n');
+    await browser.close();
+    return;
+  }
   const sheetPage = await ctx.newPage();
   // Served from one made-up origin, so the canvas is not tainted and can be exported.
   await sheetPage.route('http://sheet.local/**', (r) => {

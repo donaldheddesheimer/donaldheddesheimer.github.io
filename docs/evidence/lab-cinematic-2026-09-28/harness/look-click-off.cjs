@@ -1,4 +1,4 @@
-// Where the look-around must be off on /prototype/'s opening, each on a fresh page; in each a mouse
+// Where the look-around must be off on the homepage's opening, each on a fresh page; in each a mouse
 // hover across the stage and a 12 x 30 px drag from the room (ending short of the monitor) must leave lookAz/lookEl at 0 and the
 // drawn view where it was (__lab.quad() read without stats(), so no extra frame is drawn), with no
 // 'grab' cursor:

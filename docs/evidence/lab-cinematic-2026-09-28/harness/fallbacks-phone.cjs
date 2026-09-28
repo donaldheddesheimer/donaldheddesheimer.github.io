@@ -1,4 +1,4 @@
-// /prototype/ on phones and in the stacked layout. Checks, at 390x844 (DPR 3) and 360x640 (DPR 2), both
+// The homepage on phones and in the stacked layout. Checks, at 390x844 (DPR 3) and 360x640 (DPR 2), both
 // isMobile + hasTouch: the page scrolls by touch (CDP touch drags, started on the room and on the text,
 // and a synthesized touch scroll gesture), no camera gesture follows a touch (__lab look stays 0,
 // dragged() false), no horizontal overflow (scrollWidth <= innerWidth, plus the elements whose boxes pass
@@ -51,7 +51,7 @@ async function phone(browser, width, height, dpr) {
     window.__ptr = [];
     addEventListener('pointerdown', (e) => window.__ptr.push(e.pointerType), true);
   });
-  await page.goto(`${C.SERVER}/prototype/?probe`, { waitUntil: 'load' });
+  await page.goto(`${C.SERVER}/?probe`, { waitUntil: 'load' });
   await waitRoom(page);
   await page.waitForTimeout(1500);
   const r = await C.rendererOf(page);
@@ -118,7 +118,7 @@ async function phone(browser, width, height, dpr) {
       log(`tap on the monitor run ${run} at (${Math.round(cx)},${Math.round(cy)})`, { pickHit: picked, ...(await page.evaluate(() => ({ url: location.pathname + location.search + location.hash, y: Math.round(scrollY), workTop: Math.round(document.getElementById('work').getBoundingClientRect().top), dialogOpen: document.querySelector('[data-pc-dialog]').open, pc: document.documentElement.dataset.pc ?? null }))) });
     }
     await page.evaluate(() => {
-      history.replaceState(null, '', '/prototype/?probe');
+      history.replaceState(null, '', '/?probe');
       scrollTo(0, 0);
     });
     await page.waitForTimeout(500);
@@ -161,7 +161,7 @@ async function phone(browser, width, height, dpr) {
   log('overflow, whole page', await overflow(page));
 
   // The computer's addresses, on a phone: the ordinary page with the same content.
-  for (const u of ['/prototype/?computer=about', '/prototype/?computer=work/cucadence', '/computer/resume/', '/computer/work/cucadence/']) {
+  for (const u of ['/?computer=about', '/?computer=work/cucadence', '/computer/resume/', '/computer/work/cucadence/']) {
     await page.goto(C.SERVER + u, { waitUntil: 'load' });
     await page.waitForTimeout(800);
     log(`address ${u} ->`, await page.evaluate(() => ({ url: location.pathname + location.search + location.hash, y: Math.round(scrollY), pc: document.documentElement.dataset.pc ?? null, sw: document.documentElement.scrollWidth, iw: innerWidth })));
@@ -177,7 +177,7 @@ async function stacked(browser) {
   const ctx = await C.newCtx(browser, { viewport: { width: 1024, height: 768 } });
   const page = await ctx.newPage();
   const w = C.watch(page, tag);
-  await page.goto(`${C.SERVER}/prototype/?probe`, { waitUntil: 'load' });
+  await page.goto(`${C.SERVER}/?probe`, { waitUntil: 'load' });
   await waitRoom(page);
   await page.waitForTimeout(1500);
   const r = await C.rendererOf(page);
@@ -228,7 +228,7 @@ async function stacked(browser) {
 
   for (let run = 1; run <= 2; run++) {
     await page.evaluate(() => {
-      history.replaceState(null, '', '/prototype/?probe');
+      history.replaceState(null, '', '/?probe');
       scrollTo(0, 0);
     });
     await page.waitForTimeout(400);
@@ -236,7 +236,7 @@ async function stacked(browser) {
     await page.waitForTimeout(1200);
     log(`click on the enter link run ${run}`, await C.labState(page), await page.evaluate(() => ({ workTop: Math.round(document.getElementById('work').getBoundingClientRect().top) })));
     await page.evaluate(() => {
-      history.replaceState(null, '', '/prototype/?probe');
+      history.replaceState(null, '', '/?probe');
       scrollTo(0, 0);
     });
     await page.waitForTimeout(600);
@@ -250,7 +250,7 @@ async function stacked(browser) {
     await page.waitForTimeout(1500);
     log(`click on the monitor run ${run} at (${Math.round(cx)},${Math.round(cy)})`, { cursorOver: cursor, ...(await C.labState(page)), workTop: await page.evaluate(() => Math.round(document.getElementById('work').getBoundingClientRect().top)) });
   }
-  for (const u of ['/prototype/?computer=about', '/prototype/?computer=work/cucadence', '/computer/contact/']) {
+  for (const u of ['/?computer=about', '/?computer=work/cucadence', '/computer/contact/']) {
     await page.goto(C.SERVER + u, { waitUntil: 'load' });
     await page.waitForTimeout(800);
     log(`address ${u} ->`, await page.evaluate(() => ({ url: location.pathname + location.search + location.hash, y: Math.round(scrollY), pc: document.documentElement.dataset.pc ?? null, dialogOpen: document.querySelector('[data-pc-dialog]')?.open ?? null })));
@@ -270,7 +270,7 @@ async function stacked(browser) {
     return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height), opacity: getComputedStyle(f).opacity };
   });
   for (let run = 1; run <= 2; run++) {
-    await p2.goto(`${C.SERVER}/prototype/?computer=about&probe`, { waitUntil: 'load' });
+    await p2.goto(`${C.SERVER}/?computer=about&probe`, { waitUntil: 'load' });
     await p2.waitForSelector('html[data-pc="read"]', { timeout: 30000 });
     await p2.waitForTimeout(2500);
     log(`run ${run} at 1440x900`, await C.labState(p2), { frame: await frameBox() });
@@ -291,7 +291,7 @@ async function stacked(browser) {
   for (let run = 1; run <= 2; run++) {
     for (const path of ['about', 'work/cucadence']) {
       await p2.setViewportSize({ width: 1440, height: 900 });
-      await p2.goto(`${C.SERVER}/prototype/?computer=${path}&probe`, { waitUntil: 'load' });
+      await p2.goto(`${C.SERVER}/?computer=${path}&probe`, { waitUntil: 'load' });
       await p2.waitForSelector('html[data-pc="read"]', { timeout: 30000 });
       await p2.waitForTimeout(1500);
       for (const [vw, vh] of [

@@ -1,0 +1,141 @@
+# homepage.cjs 2026-09-28T20:49:33.112Z · Chrome 153.0.8010.54 (headless, Playwright, SwiftShader) · server: http://127.0.0.1:4322 · checks: redirects,metadata,links,settings,plain
+
+== redirects (JavaScript on, 1440x900) ==
+history.length after opening an address that stays put (the baseline) 2
+PASS /prototype/ -> /, no history entry added {"at":"/","len":2}
+PASS /prototype/#about -> /#about, no history entry added {"at":"/#about","len":2}
+PASS /prototype/?computer=about -> /?computer=about, no history entry added {"at":"/?computer=about","len":2}
+PASS /prototype/?computer=work/fluxion -> /?computer=work/fluxion, no history entry added {"at":"/?computer=work/fluxion","len":2}
+PASS /prototype/?computer=about#contact -> /?computer=about#contact, no history entry added {"at":"/?computer=about#contact","len":2}
+PASS /prototype/work/fluxion/ -> /projects/fluxion/, no history entry added {"at":"/projects/fluxion/","len":2}
+PASS /prototype/work/cucadence/?ref=x#results -> /projects/cucadence/?ref=x#results, no history entry added {"at":"/projects/cucadence/?ref=x#results","len":2}
+PASS /systems/ -> /, no history entry added {"at":"/","len":2}
+PASS /systems/?sel=project:fluxion -> /projects/fluxion/, no history entry added {"at":"/projects/fluxion/","len":2}
+PASS /systems/?sel=project:swerve-drive&x=1#y -> /projects/swerve-drive/, no history entry added {"at":"/projects/swerve-drive/","len":2}
+PASS /systems/?sel=org:gt -> /#work, no history entry added {"at":"/#work","len":2}
+PASS /systems/?sel=cap:cuda -> /#work, no history entry added {"at":"/#work","len":2}
+PASS /systems/?sel=project:nope -> /#work, no history entry added {"at":"/#work","len":2}
+PASS /systems/?sel=project:fluxion/../../evil -> /#work, no history entry added {"at":"/#work","len":2}
+PASS /systems/?sel=project%3Afluxion%3Fx%3D%2F%2Fevil.example -> /#work, no history entry added {"at":"/#work","len":2}
+PASS /systems/?sel=%3Cscript%3Ealert(1)%3C%2Fscript%3E -> /#work, no history entry added {"at":"/#work","len":2}
+PASS /systems/?sel=javascript%3Aalert(1) -> /#work, no history entry added {"at":"/#work","len":2}
+PASS /systems/?sel=%2F%2Fevil.example -> /#work, no history entry added {"at":"/#work","len":2}
+PASS /systems/?sel= -> /, no history entry added {"at":"/","len":2}
+PASS /systems/screen/ -> /, no history entry added {"at":"/","len":2}
+PASS /systems/screen/?sel=project:cucadence -> /projects/cucadence/, no history entry added {"at":"/projects/cucadence/","len":2}
+PASS /systems/screen/?sel=hobby:climbing -> /#work, no history entry added {"at":"/#work","len":2}
+PASS /?sel=project:fluxion -> /projects/fluxion/, no history entry added {"at":"/projects/fluxion/","len":2}
+PASS /?sel=org:gt -> /#work, no history entry added {"at":"/#work","len":2}
+PASS /?sel=project:fluxion&computer=about -> /projects/fluxion/, no history entry added {"at":"/projects/fluxion/","len":2}
+PASS /?sel= -> /?sel=, no history entry added {"at":"/?sel=","len":2}
+
+== redirects without JavaScript (the meta refresh inside <noscript>) ==
+PASS no JS: /prototype/?computer=about -> / {"at":"/","len":2}
+PASS no JS: /prototype/work/fluxion/ -> /projects/fluxion/ {"at":"/projects/fluxion/","len":2}
+PASS no JS: /systems/?sel=project:fluxion -> / {"at":"/","len":2}
+PASS no JS: /systems/screen/ -> / {"at":"/","len":2}
+
+== metadata on every built page ==
+PASS indexable pages are exactly / and the 11 case studies ["/","/projects/bytefight/","/projects/claude-status/","/projects/cucadence/","/projects/fluxion/","/projects/nn-mnist/","/projects/skyblock-bazaar/","/projects/smart-bin/","/projects/swerve-drive/","/projects/traffic-ops-center/","/projects/travelmate/","/projects/useless-machine/"]
+PASS /: canonical and og:url are itself, og:image /og.jpg, has a description {"title":"Donald Heddesheimer · Systems and GPU software engineer","description":"I build real-time software that senses, simulates, and decid…"}
+PASS /404.html: noindex (not-found page), canonical none {"title":"Not found · Donald Heddesheimer"}
+PASS /computer/about/: noindex (computer page), canonical /#about {"title":"About · Donald Heddesheimer"}
+PASS /computer/contact/: noindex (computer page), canonical /#contact {"title":"Contact · Donald Heddesheimer"}
+PASS /computer/resume/: noindex (computer page), canonical /#resume {"title":"Résumé · Donald Heddesheimer"}
+PASS /computer/work/: noindex (computer page), canonical /#work {"title":"Work · Donald Heddesheimer"}
+PASS /computer/work/bytefight/: noindex (computer page), canonical /projects/bytefight/ {"title":"Bytefight · Donald Heddesheimer"}
+PASS /computer/work/claude-status/: noindex (computer page), canonical /projects/claude-status/ {"title":"claude-status · Donald Heddesheimer"}
+PASS /computer/work/cucadence/: noindex (computer page), canonical /projects/cucadence/ {"title":"cuCadence · Donald Heddesheimer"}
+PASS /computer/work/fluxion/: noindex (computer page), canonical /projects/fluxion/ {"title":"Fluxion · Donald Heddesheimer"}
+PASS /computer/work/nn-mnist/: noindex (computer page), canonical /projects/nn-mnist/ {"title":"nn: MNIST three ways · Donald Heddesheimer"}
+PASS /computer/work/skyblock-bazaar/: noindex (computer page), canonical /projects/skyblock-bazaar/ {"title":"Skyblock Bazaar Model · Donald Heddesheimer"}
+PASS /computer/work/smart-bin/: noindex (computer page), canonical /projects/smart-bin/ {"title":"Smart Bin · Donald Heddesheimer"}
+PASS /computer/work/swerve-drive/: noindex (computer page), canonical /projects/swerve-drive/ {"title":"Swerve Drive · Donald Heddesheimer"}
+PASS /computer/work/traffic-ops-center/: noindex (computer page), canonical /projects/traffic-ops-center/ {"title":"Traffic Operations Center · Donald Heddesheimer"}
+PASS /computer/work/travelmate/: noindex (computer page), canonical /projects/travelmate/ {"title":"TravelMate · Donald Heddesheimer"}
+PASS /computer/work/useless-machine/: noindex (computer page), canonical /projects/useless-machine/ {"title":"Useless Machine · Donald Heddesheimer"}
+PASS /projects/bytefight/: canonical and og:url are itself, og:image /og.jpg, has a description {"title":"Bytefight · Donald Heddesheimer","description":"A game-playing agent for Georgia Tech's CS 3600 tournament t…"}
+PASS /projects/claude-status/: canonical and og:url are itself, og:image /og.jpg, has a description {"title":"claude-status · Donald Heddesheimer","description":"A floating macOS desktop pet that shows what Claude Code is …"}
+PASS /projects/cucadence/: canonical and og:url are itself, og:image /og.jpg, has a description {"title":"cuCadence · Donald Heddesheimer","description":"A header-only C++17/CUDA profiler that lives inside your bin…"}
+PASS /projects/fluxion/: canonical and og:url are itself, og:image /og.jpg, has a description {"title":"Fluxion · Donald Heddesheimer","description":"A top-down simulation game in C++ for learning game loops, d…"}
+PASS /projects/nn-mnist/: canonical and og:url are itself, og:image /og.jpg, has a description {"title":"nn: MNIST three ways · Donald Heddesheimer","description":"The same neural network in NumPy, a C++ CPU baseline, and CU…"}
+PASS /projects/skyblock-bazaar/: canonical and og:url are itself, og:image /og.jpg, has a description {"title":"Skyblock Bazaar Model · Donald Heddesheimer","description":"Forecasting whether in-game commodity prices will rise, fall…"}
+PASS /projects/smart-bin/: canonical and og:url are itself, og:image /og.jpg, has a description {"title":"Smart Bin · Donald Heddesheimer","description":"A deep learning classifier that sorts waste into six categor…"}
+PASS /projects/swerve-drive/: canonical and og:url are itself, og:image /og.jpg, has a description {"title":"Swerve Drive · Donald Heddesheimer","description":"FRC robot code that turns an Xbox controller into independen…"}
+PASS /projects/traffic-ops-center/: canonical and og:url are itself, og:image /og.jpg, has a description {"title":"Traffic Operations Center · Donald Heddesheimer","description":"A city can't A/B test an emergency. This one rehearses every…"}
+PASS /projects/travelmate/: canonical and og:url are itself, og:image /og.jpg, has a description {"title":"TravelMate · Donald Heddesheimer","description":"A Django trip planner with live weather, generated packing l…"}
+PASS /projects/useless-machine/: canonical and og:url are itself, og:image /og.jpg, has a description {"title":"Useless Machine · Donald Heddesheimer","description":"A wooden box with a switch. Flip it, the lid opens, and a li…"}
+PASS /prototype/: noindex (retired address), canonical / {"title":"The lab · Donald Heddesheimer"}
+PASS /prototype/work/bytefight/: noindex (retired address), canonical /projects/bytefight/ {"title":"Bytefight · Donald Heddesheimer"}
+PASS /prototype/work/claude-status/: noindex (retired address), canonical /projects/claude-status/ {"title":"claude-status · Donald Heddesheimer"}
+PASS /prototype/work/cucadence/: noindex (retired address), canonical /projects/cucadence/ {"title":"cuCadence · Donald Heddesheimer"}
+PASS /prototype/work/fluxion/: noindex (retired address), canonical /projects/fluxion/ {"title":"Fluxion · Donald Heddesheimer"}
+PASS /prototype/work/nn-mnist/: noindex (retired address), canonical /projects/nn-mnist/ {"title":"nn: MNIST three ways · Donald Heddesheimer"}
+PASS /prototype/work/skyblock-bazaar/: noindex (retired address), canonical /projects/skyblock-bazaar/ {"title":"Skyblock Bazaar Model · Donald Heddesheimer"}
+PASS /prototype/work/smart-bin/: noindex (retired address), canonical /projects/smart-bin/ {"title":"Smart Bin · Donald Heddesheimer"}
+PASS /prototype/work/swerve-drive/: noindex (retired address), canonical /projects/swerve-drive/ {"title":"Swerve Drive · Donald Heddesheimer"}
+PASS /prototype/work/traffic-ops-center/: noindex (retired address), canonical /projects/traffic-ops-center/ {"title":"Traffic Operations Center · Donald Heddesheimer"}
+PASS /prototype/work/travelmate/: noindex (retired address), canonical /projects/travelmate/ {"title":"TravelMate · Donald Heddesheimer"}
+PASS /prototype/work/useless-machine/: noindex (retired address), canonical /projects/useless-machine/ {"title":"Useless Machine · Donald Heddesheimer"}
+PASS /systems/: noindex (retired address), canonical / {"title":"The systems map · Donald Heddesheimer"}
+PASS /systems/screen/: noindex (retired address), canonical / {"title":"The systems map · Donald Heddesheimer"}
+PASS indexable titles are unique 12
+PASS /prototype/: canonical is its replacement https://donaldheddesheimer.github.io/
+PASS /prototype/work/bytefight/: canonical is its replacement https://donaldheddesheimer.github.io/projects/bytefight/
+PASS /prototype/work/claude-status/: canonical is its replacement https://donaldheddesheimer.github.io/projects/claude-status/
+PASS /prototype/work/cucadence/: canonical is its replacement https://donaldheddesheimer.github.io/projects/cucadence/
+PASS /prototype/work/fluxion/: canonical is its replacement https://donaldheddesheimer.github.io/projects/fluxion/
+PASS /prototype/work/nn-mnist/: canonical is its replacement https://donaldheddesheimer.github.io/projects/nn-mnist/
+PASS /prototype/work/skyblock-bazaar/: canonical is its replacement https://donaldheddesheimer.github.io/projects/skyblock-bazaar/
+PASS /prototype/work/smart-bin/: canonical is its replacement https://donaldheddesheimer.github.io/projects/smart-bin/
+PASS /prototype/work/swerve-drive/: canonical is its replacement https://donaldheddesheimer.github.io/projects/swerve-drive/
+PASS /prototype/work/traffic-ops-center/: canonical is its replacement https://donaldheddesheimer.github.io/projects/traffic-ops-center/
+PASS /prototype/work/travelmate/: canonical is its replacement https://donaldheddesheimer.github.io/projects/travelmate/
+PASS /prototype/work/useless-machine/: canonical is its replacement https://donaldheddesheimer.github.io/projects/useless-machine/
+PASS /systems/: canonical is its replacement https://donaldheddesheimer.github.io/
+PASS /systems/screen/: canonical is its replacement https://donaldheddesheimer.github.io/
+PASS /og.jpg is served, a 1200x630 JPEG {"status":200,"type":"image/jpeg","bytes":89316,"dims":{"h":630,"w":1200}}
+the old /og.png 404
+
+== links to retired addresses in the built HTML ==
+PASS no page outside the retired ones links to /prototype, /systems or ?sel= []
+links on the retired pages themselves 0
+/ header ["#top","#work","#about","#resume","#contact","/resume.pdf"] tab bar ["#top","#work","#about","#resume","#contact"] footer ["https://github.com/donaldheddesheimer/donaldheddesheimer.github.io"] search (20) ["/#top","/#work","/#about","/#resume","/#contact","/projects/traffic-ops-center/","/projects/fluxion/","/projects/cucadence/"]
+PASS /: no navigation to /prototype, /systems or ?sel= 32
+/projects/fluxion/ header ["/","/#work","/#about","/#resume","/#contact","/#work","https://github.com/donaldheddesheimer/fluxion"] tab bar ["/#top","/#work","/#about","/#resume","/#contact"] footer ["https://github.com/donaldheddesheimer/donaldheddesheimer.github.io"] search (20) ["/#top","/#work","/#about","/#resume","/#contact","/projects/traffic-ops-center/","/projects/fluxion/","/projects/cucadence/"]
+PASS /projects/fluxion/: no navigation to /prototype, /systems or ?sel= 33
+
+== Settings disclosure, 1440x900, no motion preference ==
+button {"name":"Settings","controls":"settings","w":32,"h":32,"inHeader":true} accessible tree - button "Settings"
+PASS at load: closed, Motion on, both switches checked {"expanded":"false","open":false,"focus":"Skip to contentDonald Heddeshe","focusVisible":false,"motion":"on","stored":null,"checked":["true","true"],"running":"true"}
+PASS Tab x7 reaches Settings, focus visible ["Skip to content","Donald Heddesheimer, back to t","Work","About","Résumé","Contact","settings button"]
+PASS Enter opens it; the focus stays on the button {"expanded":"true","open":true,"focus":"settings button","focusVisible":true,"motion":"on","stored":null,"checked":["true","true"],"running":"true"}
+PASS Tab moves into the panel, to the Motion switch header switch
+PASS Space turns Motion off: stored, both switches unchecked, the frame loop stops {"expanded":"true","open":true,"focus":"header switch","focusVisible":true,"motion":"off","stored":"off","checked":["false","false"],"running":"false","framesOver2s":1,"framesBefore":2}
+PASS Escape closes it and puts the focus back on its button {"expanded":"false","open":false,"focus":"settings button","focusVisible":true,"motion":"off","stored":"off","checked":["false","false"],"running":"false"}
+PASS Escape in Settings does nothing to the lab null
+PASS Space on the button opens it too true
+PASS Tab out of the panel closes it (focus now: Explore the labSee the work) {"expanded":"false","open":false,"focus":"Explore the labSee the work","focusVisible":true,"motion":"off","stored":"off","checked":["false","false"],"running":"false"}
+PASS a click opens it true
+switch description The lab's robots and camera, and the page's transitions. It starts off if your system asks for reduced motion, and the robots and camera then stay still.
+PASS a click elsewhere closes it {"expanded":"false","open":false,"focus":"Skip to contentDonald Heddeshe","focusVisible":false,"motion":"off","stored":"off","checked":["false","false"],"running":"false"}
+PASS after a reload Motion is still off and the room holds still {"expanded":"false","open":false,"focus":"Skip to contentDonald Heddeshe","focusVisible":false,"motion":"off","stored":"off","checked":["false","false"],"running":"false","framesOver2s":1}
+PASS the footer's switch turns it back on, and the header's follows {"expanded":"false","open":false,"focus":"footer switch","focusVisible":false,"motion":"on","stored":"on","checked":["true","true"],"running":"false"}
+PASS the footer's switch is a switch switch
+PASS no page errors []
+
+== reduced motion (prefers-reduced-motion: reduce), nothing stored ==
+PASS Motion starts off, nothing stored {"expanded":"false","open":false,"focus":"Skip to contentDonald Heddeshe","focusVisible":false,"motion":"off","stored":null,"checked":["false","false"],"running":"false"}
+PASS turned on in Settings: stored on, and the room still holds (the system preference wins in the lab) {"expanded":"true","open":true,"focus":"header switch","focusVisible":false,"motion":"on","stored":"on","checked":["true","true"],"running":"false","framesOver1_5s":1}
+
+== Settings on a phone, 390x844 (touch) ==
+PASS the button is at least 44x44 and in view {"x":330,"y":6,"w":44,"h":44}
+PASS the panel opens inside the view {"x":102,"right":374,"y":58,"h":158}
+
+== without JavaScript ==
+PASS /: Work, About, Résumé and Contact all show [{"id":"work","present":true,"visible":true,"heading":"Work","links":11},{"id":"about","present":true,"visible":true,"heading":"About","links":0},{"id":"resume","present":true,"visible":true,"heading":"Résumé","links":1},{"id":"contact","present":true,"visible":true,"heading":"Contact","links":4}]
+PASS /: the lab's still stands in 720
+PASS /: Settings and the footer's Motion switch, which need JavaScript, aren't shown [{"s":"[data-settings-toggle]","shown":false},{"s":".home-foot [data-motion-toggle]","shown":false}]
+PASS /projects/fluxion/: the case study reads {"h1":"Fluxion","words":169}
+
+115 passed, 0 failed

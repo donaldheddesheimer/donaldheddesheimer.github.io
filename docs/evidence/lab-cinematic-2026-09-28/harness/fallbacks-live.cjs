@@ -3,9 +3,9 @@
 // the origin/main cc1a6c4 baseline, each scrolled to its end so lazy content loads: page errors,
 // console.error, 4xx/5xx responses (the 404 page's own 404 excepted) and failed requests, plus the
 // document's width against the window's. A sanity check, not the pixel diff. (2) Every computer page on
-// this branch: read in the lab at 1440x900 (/prototype/?computer=<path>, frame loaded and scrolled to its
+// this branch: read in the lab at 1440x900 (/?computer=<path>, frame loaded and scrolled to its
 // end), opened directly at 1440x900 and 390x844 (/computer/<path>/, which sends a window to the lab or to
-// the ordinary page), and every ordinary case study (/prototype/work/<id>/) at both sizes.
+// the ordinary page), and every ordinary case study (/projects/<id>/) at both sizes.
 // NODE_PATH=<dir with the playwright shim> node fallbacks-live.cjs
 // (BASE, default http://127.0.0.1:4322, is this branch; MAIN, default http://127.0.0.1:4330, the baseline.)
 const { chromium } = require('playwright');
@@ -67,7 +67,7 @@ async function computer(browser) {
   log('\n== computer pages (branch) ==');
   const ctx = await C.newCtx(browser, SIZES[1][1]);
   const page = await ctx.newPage();
-  await page.goto(`${C.SERVER}/prototype/`, { waitUntil: 'load' });
+  await page.goto(`${C.SERVER}/`, { waitUntil: 'load' });
   const projects = await page.evaluate(() => JSON.parse(document.querySelector('[data-pc-dialog]').dataset.projects));
   await page.close();
   log('projects', projects);
@@ -77,7 +77,7 @@ async function computer(browser) {
   for (const path of paths) {
     const p = await ctx.newPage();
     const w = C.watch(p, path);
-    await p.goto(`${C.SERVER}/prototype/?computer=${path}`, { waitUntil: 'load' });
+    await p.goto(`${C.SERVER}/?computer=${path}`, { waitUntil: 'load' });
     await p.waitForSelector('html[data-pc="read"]', { timeout: 30000 });
     await p.waitForFunction(() => getComputedStyle(document.querySelector('.pc-frame')).opacity === '1', null, { timeout: 30000 });
     const f = p.frames().find((fr) => fr.url().includes('/computer/'));
@@ -93,7 +93,7 @@ async function computer(browser) {
   // Opened directly, and the ordinary case studies.
   for (const [size, opts] of SIZES) {
     const c2 = await C.newCtx(browser, opts);
-    for (const u of [...paths.map((p) => `/computer/${p}/`), ...projects.map((p) => `/prototype/work/${p}/`)]) {
+    for (const u of [...paths.map((p) => `/computer/${p}/`), ...projects.map((p) => `/projects/${p}/`)]) {
       const p = await c2.newPage();
       const w = C.watch(p, u);
       await p.goto(C.SERVER + u, { waitUntil: 'load' });

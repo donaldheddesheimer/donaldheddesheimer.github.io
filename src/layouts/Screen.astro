@@ -1,20 +1,21 @@
 ---
-// PROTOTYPE (lab-cinematic, 2026-09-28). The lab computer's screen: one page of the portfolio (Work, a
-// case study, About, Résumé or Contact) as the monitor shows it in /prototype/, in the frame
-// src/scripts/lab-prototype/computer.ts lays over the screen. The content is the site's own
-// (src/components/Folio*.astro, CaseStudy.astro); this layout gives it the computer's one slim bar.
+// The lab computer's screen: one page of the portfolio (Work, a case study, About, Résumé or Contact) as
+// the monitor on the homepage shows it, in the frame src/scripts/lab/computer.ts lays over the screen.
+// The content is the site's own (src/components/Folio*.astro, CaseStudy.astro); this layout gives it the
+// computer's one slim bar.
 //
-// The lab owns the address (/prototype/?computer=<path>) and the history; this page never navigates
-// itself. A plain click on a link to another page the computer has asks the lab to go there (pc:go);
-// a modified click opens that page's own address in a new tab. Links the computer has no page for open
-// in a new tab, so the lab stays; downloads and mail links do what they do. "Leave computer" and Escape
-// ask the lab to close (pc:leave, pc:escape); "Open ordinary page" leaves the lab for the page with the
-// same content. Opened on its own (a copied frame address), a page goes to the lab reading it, or to
-// its ordinary page in a window the lab doesn't open in.
+// The lab owns the address (/?computer=<path>) and the history; this page never navigates itself. A
+// plain click on a link to another page the computer has asks the lab to go there (pc:go); a modified
+// click opens that page's own address in a new tab. Links the computer has no page for open in a new
+// tab, so the lab stays; downloads and mail links do what they do. "Leave computer" and Escape ask the
+// lab to close (pc:leave, pc:escape); "Open ordinary page" leaves the lab for the page with the same
+// content. These pages are the frame's, not addresses of their own (noindex, canonical to the ordinary
+// page): opened on their own (a copied frame address), each goes to the lab reading it, or to its
+// ordinary page in a window the lab doesn't open in.
 import '../styles/global.css';
 import Mark from '../components/Mark.astro';
 import { profile } from '../data/site';
-import { labHref, ordinaryHref } from '../scripts/lab-prototype/routes';
+import { labHref, ordinaryHref } from '../scripts/lab/routes';
 
 interface Props {
   title: string;
@@ -89,7 +90,7 @@ const nav = [
     </main>
 
     <script>
-      import { pathOf } from '../scripts/lab-prototype/routes';
+      import { pathOf } from '../scripts/lab/routes';
 
       const html = document.documentElement;
       const here = document.body.dataset.path!;

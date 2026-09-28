@@ -1,0 +1,57 @@
+---
+// A retired address that forwards to its replacement at once, without a history entry, and stays out
+// of search results. `keep` carries the query and anchor across (the prototype's addresses, whose
+// ?computer= and #sections mean the same on /). A page that decides the address itself (from the
+// query) passes its own script in the `resolve` slot. Without JavaScript, the meta refresh goes to `to`.
+import { profile } from '../data/site';
+
+interface Props {
+  to: string;
+  title: string;
+  keep?: boolean;
+}
+const { to, title, keep = false } = Astro.props;
+const resolved = Astro.slots.has('resolve');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · {profile.name}</title>
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#131211" />
+    <link rel="canonical" href={new URL(to, Astro.site).href} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {
+      resolved ? (
+        <slot name="resolve" />
+      ) : (
+        <script is:inline define:vars={{ to, keep }}>
+          location.replace(keep ? to + location.search + location.hash : to);
+        </script>
+      )
+    }
+    <noscript><meta http-equiv="refresh" content={`0; url=${to}`} /></noscript>
+    <style>
+      html {
+        color-scheme: dark;
+        background: #131211;
+        color: #f5f2ed;
+        font: 1rem/1.5 system-ui, sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 3rem 1rem;
+        text-align: center;
+      }
+      a {
+        color: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <p>{title} has moved. <a href={to}>Continue</a></p>
+  </body>
+</html>

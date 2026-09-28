@@ -1,13 +1,11 @@
 ---
-// PROTOTYPE (lab-cinematic, 2026-09-28; first pass lab-prototype, 2026-09-27): the opening of
-// /prototype/, a robotics lab after hours with the portfolio on the desk's computer. Forked from
-// RobotStage.astro (the released opening), which is left as it is. The figure holds the scene
-// (src/scripts/lab-prototype/scene.ts) over a composed SVG still of the robots, which renders with the
-// page and stays as the fallback (no JS, no WebGL). The dialog is the lab once entered: nothing but the
-// frame the portfolio reads in (src/scripts/lab-prototype/computer.ts); the way out is on the computer.
+// The homepage's opening (/): a robotics lab after hours with the portfolio on the desk's computer. The
+// figure holds the scene (src/scripts/lab/scene.ts) over a composed SVG still of the robots, which renders
+// with the page and stays as the fallback (no JS, no WebGL). The dialog is the lab once entered: nothing
+// but the frame the portfolio reads in (src/scripts/lab/computer.ts); the way out is on the computer.
 // Save-Data leaves the scene unloaded until the lab is entered (the still stands in). Reduced motion (or
-// Motion off, in the page's bar) loads it and holds one composed moment, with no looking around; going
-// in cuts rather than flies.
+// Motion off, in the page's settings or its footer) loads it and holds one composed moment, with no
+// looking around; going in cuts rather than flies.
 import { profile } from '../data/site';
 import { workLede, workMeta, workProjects } from '../lib/folio';
 
@@ -52,7 +50,7 @@ const projects = [...lead, ...rest].map(({ p }) => p.id);
           <stop offset="1" stop-color="#8c4c37" />
         </linearGradient>
       </defs>
-      <!-- The three robots of RobotStage.astro's still, without its desk. -->
+      <!-- The three dancers, as a still. -->
       <ellipse cx="310" cy="382" rx="270" ry="42" fill="url(#ls-pool)" />
       <ellipse cx="150" cy="373" rx="70" ry="10" fill="url(#ls-shadow)" />
       <ellipse cx="488" cy="379" rx="48" ry="8" fill="url(#ls-shadow)" />
@@ -124,8 +122,8 @@ const projects = [...lead, ...rest].map(({ p }) => p.id);
 <dialog class="pc" data-pc-dialog aria-label="Portfolio, on the lab's computer" tabindex="-1" data-projects={JSON.stringify(projects)}></dialog>
 
 <script>
-  import type { LabScene, ScreenData } from '../scripts/lab-prototype/scene';
-  import { initComputer } from '../scripts/lab-prototype/computer';
+  import type { LabScene, ScreenData } from '../scripts/lab/scene';
+  import { initComputer } from '../scripts/lab/computer';
 
   const root = document.querySelector<HTMLElement>('[data-lab-root]');
   const dialog = document.querySelector<HTMLDialogElement>('[data-pc-dialog]');
@@ -138,11 +136,11 @@ const projects = [...lead, ...rest].map(({ p }) => p.id);
     } catch {}
     const saveData = !!(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
     const load = () =>
-      (loading ??= import('../scripts/lab-prototype/scene')
+      (loading ??= import('../scripts/lab/scene')
         .then((m) => {
           scene = m.mountLab(root, { screen, avoid: document.querySelector<HTMLElement>('[data-lab-avoid]') });
           if (!scene) root.setAttribute('data-failed', '');
-          // For the review's measurements (docs/evidence/lab-cinematic-2026-09-28): /prototype/?probe.
+          // For the review's measurements (docs/evidence/lab-cinematic-2026-09-28): /?probe.
           if (new URLSearchParams(location.search).has('probe')) Object.assign(window, { __lab: scene });
           return scene;
         })

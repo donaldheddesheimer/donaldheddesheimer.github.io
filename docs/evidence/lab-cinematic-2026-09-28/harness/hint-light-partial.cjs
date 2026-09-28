@@ -10,7 +10,7 @@ const BASE = process.env.BASE || 'http://127.0.0.1:4322';
     const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
     await ctx.route((u) => /^fonts\./.test(u.hostname), (r) => r.abort());
     const page = await ctx.newPage();
-    await page.goto(BASE + '/prototype/?probe', { waitUntil: 'load' });
+    await page.goto(BASE + '/?probe', { waitUntil: 'load' });
     await page.waitForSelector('[data-lab-root][data-drawn]');
     if (run === 1) console.log(`# hint-light-partial ${new Date().toISOString()} renderer: ${await page.evaluate(() => { const g = document.createElement('canvas').getContext('webgl'); return g ? g.getParameter(g.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL) : 'none'; })} browser ${b.version()} server: ${BASE} viewport 1440x900`);
     await page.evaluate(() => {

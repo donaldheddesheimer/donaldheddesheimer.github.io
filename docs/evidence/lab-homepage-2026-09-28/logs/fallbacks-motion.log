@@ -1,0 +1,50 @@
+# fallbacks-motion 2026-09-28T20:43:20.962Z renderer="scene: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)" server=http://127.0.0.1:4322
+
+== reduced motion (reducedMotion reduce), 1440x900 ==
+renderer scene: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+matchMedia reduce true pref {"motion":"off","stored":null} switches [{"where":"header","role":"switch","ariaChecked":"false","ariaPressed":null,"shown":false},{"where":"footer","role":"switch","ariaChecked":"false","ariaPressed":null,"shown":true}]
+state {"url":"/?probe","y":0,"pc":null,"pcAble":true,"pcFull":false,"motion":"off","mounted":true,"drawn":true,"failed":false,"running":"false","hint":null,"enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false}
+frame loop run 1 {"frames":1,"ms":3000,"running":"false"} screenshot 2 s apart {"w":1440,"h":900,"differing":0,"over32":0,"maxChannelDiff":0}
+frame loop run 2 {"frames":1,"ms":3000,"running":"false"} screenshot 2 s apart {"w":1440,"h":900,"differing":0,"over32":0,"maxChannelDiff":0}
+idle hint after ~10 s untouched {"hint":null,"hintTrace":[]}
+mouse drag run 1 (12 x 60px) {"az":0,"el":0,"cursor":""}
+mouse drag run 2 (12 x 60px) {"az":0,"el":0,"cursor":""}
+in and out {"how":"link","out":"escape","readAtMs":105,"frameOpacityAt0_100_400ms":["1","1","1"],"pcTraceIn":[[56,"pc","read"],[56,"pc","read"]],"stateIn":{"url":"/?computer=work","pc":"read","running":"false"},"frame":{"x":115,"y":72,"w":1210,"h":756,"focused":"pc-frame"},"closedAtMs":37,"pcTraceOut":[[28,"pc",null]],"after":{"url":"/?probe","y":0,"pc":null,"pcAble":true,"pcFull":false,"motion":"off","mounted":true,"drawn":true,"failed":false,"running":"false","hint":"cancelled","enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false},"active":"[data-lab-enter]"}
+in and out {"how":"monitor","out":"button","readAtMs":54,"frameOpacityAt0_100_400ms":["1","1","1"],"pcTraceIn":[[44,"pc","read"],[44,"pc","read"]],"stateIn":{"url":"/?computer=work","pc":"read","running":"false"},"frame":{"x":115,"y":72,"w":1210,"h":756,"focused":"pc-frame"},"closedAtMs":75,"pcTraceOut":[[73,"pc",null]],"after":{"url":"/?probe","y":0,"pc":null,"pcAble":true,"pcFull":false,"motion":"off","mounted":true,"drawn":true,"failed":false,"running":"false","hint":"cancelled","enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false},"active":"[data-lab-enter]"}
+in and out {"how":"link","out":"button","readAtMs":47,"frameOpacityAt0_100_400ms":["1","1","1"],"pcTraceIn":[[38,"pc","read"],[38,"pc","read"]],"stateIn":{"url":"/?computer=work","pc":"read","running":"false"},"frame":{"x":115,"y":72,"w":1210,"h":756,"focused":"pc-frame"},"closedAtMs":77,"pcTraceOut":[[75,"pc",null]],"after":{"url":"/?probe","y":0,"pc":null,"pcAble":true,"pcFull":false,"motion":"off","mounted":true,"drawn":true,"failed":false,"running":"false","hint":"cancelled","enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false},"active":"[data-lab-enter]"}
+
+-- reduced motion, Motion switch turned on --
+pref {"motion":"on","stored":"on"} switches [{"where":"header","role":"switch","ariaChecked":"true","ariaPressed":null,"shown":false},{"where":"footer","role":"switch","ariaChecked":"true","ariaPressed":null,"shown":true}] state {"url":"/?probe","y":0,"pc":null,"pcAble":true,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"false","hint":"cancelled","enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false}
+frame loop {"frames":1,"ms":2000,"running":"false"} screenshot 2 s apart {"w":1440,"h":900,"differing":0,"over32":0,"maxChannelDiff":0}
+after reload, 7.5 s untouched pref {"motion":"on","stored":"on"} switches [{"where":"header","role":"switch","ariaChecked":"true","ariaPressed":null,"shown":false},{"where":"footer","role":"switch","ariaChecked":"true","ariaPressed":null,"shown":true}] state {"url":"/?probe","y":0,"pc":null,"pcAble":true,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"false","hint":null,"enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false} hintTrace []
+frame loop {"frames":1,"ms":2000,"running":"false"}
+mouse drag {"az":0,"el":0,"cursor":""}
+in and out {"how":"link","out":"escape","readAtMs":56,"frameOpacityAt0_100_400ms":["0","0.459988","1"],"pcTraceIn":[[48,"pc","read"],[48,"pc","read"]],"stateIn":{"url":"/?computer=work","pc":"read","running":"false"},"frame":{"x":115,"y":72,"w":1210,"h":756,"focused":"pc-frame"},"closedAtMs":28,"pcTraceOut":[[25,"pc",null]],"after":{"url":"/?probe","y":0,"pc":null,"pcAble":true,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"false","hint":"cancelled","enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false},"active":"[data-lab-enter]"}
+errors {"pageerrors":[],"consoleErrors":[],"badResponses":[],"failed":[],"fontsAborted":7,"fontsConsole":7,"mediaAborted":[],"expected":[]}
+
+== Motion switch, no motion preference, 1440x900 ==
+renderer scene: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+pref {"motion":"on","stored":null} switches [{"where":"header","role":"switch","ariaChecked":"true","ariaPressed":null,"shown":false},{"where":"footer","role":"switch","ariaChecked":"true","ariaPressed":null,"shown":true}]
+frame loop, motion on {"frames":121,"ms":2000,"running":"true"}
+aria snapshot, header switch - switch "Motion" [checked]
+getByRole(switch, name Motion) count 2 accessible description (title) null
+Tab x8 reaches the header switch {"order":["Skip to content","Donald Heddesheimer, back to t","Work","About","Résumé","Contact","Settings","(Enter)","Motion"],"focusVisible":true}
+cycle 1: Space pref {"motion":"off","stored":"off"} switches [{"where":"header","role":"switch","ariaChecked":"false","ariaPressed":null,"shown":true},{"where":"footer","role":"switch","ariaChecked":"false","ariaPressed":null,"shown":true}] loop {"frames":1,"ms":2000,"running":"false"} screenshot 2 s apart {"w":1440,"h":900,"differing":0,"over32":0,"maxChannelDiff":0}
+cycle 1: after reload pref {"motion":"off","stored":"off"} switches [{"where":"header","role":"switch","ariaChecked":"false","ariaPressed":null,"shown":false},{"where":"footer","role":"switch","ariaChecked":"false","ariaPressed":null,"shown":true}] loop {"frames":1,"ms":2000,"running":"false"} state {"url":"/?probe","y":0,"pc":null,"pcAble":true,"pcFull":false,"motion":"off","mounted":true,"drawn":true,"failed":false,"running":"false","hint":null,"enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false}
+cycle 1: Enter pref {"motion":"on","stored":"on"} switches [{"where":"header","role":"switch","ariaChecked":"true","ariaPressed":null,"shown":true},{"where":"footer","role":"switch","ariaChecked":"true","ariaPressed":null,"shown":true}] loop {"frames":122,"ms":2000,"running":"true"}
+cycle 2: Space pref {"motion":"off","stored":"off"} switches [{"where":"header","role":"switch","ariaChecked":"false","ariaPressed":null,"shown":true},{"where":"footer","role":"switch","ariaChecked":"false","ariaPressed":null,"shown":true}] loop {"frames":1,"ms":2000,"running":"false"} screenshot 2 s apart {"w":1440,"h":900,"differing":0,"over32":0,"maxChannelDiff":0}
+cycle 2: after reload pref {"motion":"off","stored":"off"} switches [{"where":"header","role":"switch","ariaChecked":"false","ariaPressed":null,"shown":false},{"where":"footer","role":"switch","ariaChecked":"false","ariaPressed":null,"shown":true}] loop {"frames":1,"ms":2000,"running":"false"} state {"url":"/?probe","y":0,"pc":null,"pcAble":true,"pcFull":false,"motion":"off","mounted":true,"drawn":true,"failed":false,"running":"false","hint":null,"enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false}
+cycle 2: Enter pref {"motion":"on","stored":"on"} switches [{"where":"header","role":"switch","ariaChecked":"true","ariaPressed":null,"shown":true},{"where":"footer","role":"switch","ariaChecked":"true","ariaPressed":null,"shown":true}] loop {"frames":121,"ms":2000,"running":"true"}
+switched off mid-look {"lookAzBefore":0.058705366588230126,"after":{"az":0,"el":0},"loop":{"frames":1,"ms":1500,"running":"false"}}
+errors {"pageerrors":[],"consoleErrors":[],"badResponses":[],"failed":[],"fontsAborted":4,"fontsConsole":4,"mediaAborted":[],"expected":[]}
+
+== pose held with Motion off: switched off mid-dance vs loaded off ==
+run 1 reload with Motion off {"motion":"off","stored":"off"} false
+run 2 reload with Motion off {"motion":"off","stored":"off"} false
+pxdiff loaded-off-run1 vs loaded-off-run2 {"w":1440,"h":900,"differing":0,"over32":0,"maxChannelDiff":0}
+pxdiff off-at-2s-run1 vs loaded-off-run1 {"w":1440,"h":900,"differing":0,"over32":0,"maxChannelDiff":0}
+pxdiff off-at-5s-run1 vs loaded-off-run1 {"w":1440,"h":900,"differing":0,"over32":0,"maxChannelDiff":0}
+pxdiff off-at-2s-run1 vs off-at-5s-run1 {"w":1440,"h":900,"differing":0,"over32":0,"maxChannelDiff":0}
+pxdiff off-at-2s-run2 vs loaded-off-run2 {"w":1440,"h":900,"differing":0,"over32":0,"maxChannelDiff":0}
+pxdiff off-at-5s-run2 vs loaded-off-run2 {"w":1440,"h":900,"differing":0,"over32":0,"maxChannelDiff":0}
+errors {"pageerrors":[],"consoleErrors":[],"badResponses":[],"failed":[],"fontsAborted":6,"fontsConsole":6,"mediaAborted":[],"expected":[]}

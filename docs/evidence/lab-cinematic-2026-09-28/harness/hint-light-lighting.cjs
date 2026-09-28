@@ -1,4 +1,4 @@
-// The monitor's lighting close up on /prototype/?probe (scene.ts light(), SCREEN_LIT, GLOW, the additive
+// The monitor's lighting close up on /?probe (scene.ts light(), SCREEN_LIT, GLOW, the additive
 // `lift` plane), at 1440x900 with deviceScaleFactor 2, from a running build (BASE, default :4322).
 // Each run (RUNS, default 2) takes a clip round the monitor (__lab.quad() plus a margin) in four states:
 //   rest       1.5 s after the room drew, nothing touched (before the idle hint)
@@ -62,7 +62,7 @@ async function renderer(page) {
 async function open(ctx) {
   const page = await ctx.newPage();
   page.on('pageerror', (e) => log('pageerror ' + e.message));
-  await page.goto(BASE + '/prototype/?probe', { waitUntil: 'load' });
+  await page.goto(BASE + '/?probe', { waitUntil: 'load' });
   await page.waitForSelector('[data-lab-root][data-drawn], [data-lab-root][data-failed]', { timeout: 60000 });
   return page;
 }

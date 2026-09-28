@@ -23,12 +23,12 @@ const projects = defineCollection({
     featured: z.boolean().default(false),
     cover: z.string().optional(), // path under public/, e.g. "/projects/traffic-ops.jpg"
     coverAlt: z.string().optional(),
-    // A still frame for places that shouldn't animate (cards, the systems map console). Use it when the cover is a GIF.
+    // A still frame for places that shouldn't animate (the Work cards, and the lab monitor's picture of them). Use it when the cover is a GIF.
     poster: z.string().optional(),
     // How the card frames the still: photos and UI crop to fill; reports, diagrams, and pixel art are
     // shown whole ("contain") so nothing is cut off.
     cardFit: z.enum(['cover', 'contain']).default('cover'),
-    // Real screenshots, diagrams, traces, photos, or video from the project, shown as evidence on the systems map.
+    // Real screenshots, diagrams, traces, photos, or video from the project, captioned in the write-up (src/lib/figures.ts).
     evidence: z
       .array(
         z.object({

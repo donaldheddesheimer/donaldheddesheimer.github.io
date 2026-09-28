@@ -1,4 +1,4 @@
-// The look-around's limits on /prototype/'s opening, at each size in W (default 1280x800, 1440x900,
+// The look-around's limits on the homepage's opening, at each size in W (default 1280x800, 1440x900,
 // 1920x1080): from the room at 62%/72% of [data-lab-root], a mouse drag of 12 moves of 60 px (sideways) or
 // 30 px (up/down) in each direction, and two diagonals toward the monitor's corner of the frame (left+down,
 // left+up), held 2.5 s. At each limit it logs __lab.stats() lookAz/lookEl/lookAzMax, __lab.quad() (the

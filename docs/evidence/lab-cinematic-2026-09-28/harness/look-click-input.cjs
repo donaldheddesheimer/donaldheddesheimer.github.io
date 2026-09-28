@@ -1,4 +1,4 @@
-// Pointer input on /prototype/'s opening, at W (default 1440x900), each case on a fresh page:
+// Pointer input on the homepage's opening, at W (default 1440x900), each case on a fresh page:
 //   parallax   the mouse moved across the stage with no button held turns the view a little (|lookAz| <=
 //              0.03, |lookEl| <= 0.015) and doesn't count as a drag
 //   cursor     'grab' over the room, 'pointer' over the monitor, 'grabbing' while dragging, back to 'grab'

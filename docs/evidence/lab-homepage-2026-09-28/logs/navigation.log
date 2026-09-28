@@ -1,0 +1,553 @@
+# 2026-09-28T20:33:27.473Z · navigation.cjs · renderer: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version) · Chrome 153.0.8010.54 (headless, Playwright, back-forward cache enabled) · server: http://127.0.0.1:4322 · 1440x900 unless stated · runs: 2 · checks: 1,2,3,4,5,6,7,8,9,10,11
+[run 1] [c1] --- start
+[run 1] [c1] opening {"url":"/","doc":"jntnny","len":2,"idx":0,"n":1,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible"}
+[run 1] [c1] entered with "Explore the lab" {"url":"/?computer=work","doc":"jntnny","len":3,"idx":1,"n":2,"state":{"pc":"work","back":1,"k":"eqi3j1b4"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":[null,"fade","fly","read"]}
+[run 1] [c1] PASS entering adds exactly one entry {"idx":[0,1],"n":[1,2],"len":[2,3]}
+[run 1] [c1] PASS address is /?computer=work "/?computer=work"
+[run 1] [c1] PASS top page did not load a new document ["jntnny","jntnny"]
+[run 1] [c1] inside the computer -> work/cucadence {"url":"/?computer=work/cucadence","doc":"jntnny","len":4,"idx":2,"n":3,"state":{"pc":"work/cucadence","back":2,"k":"sgp3dgau"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/cucadence/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c1] PASS -> work/cucadence: one entry {"idx":[1,2],"n":[2,3],"len":[3,4]}
+[run 1] [c1] PASS -> work/cucadence: address follows "/?computer=work/cucadence"
+[run 1] [c1] PASS -> work/cucadence: the frame changed, the top page did not navigate {"frame":"/computer/work/cucadence/","doc":"jntnny"}
+[run 1] [c1] PASS -> work/cucadence: history.state {pc, back+1} {"pc":"work/cucadence","back":2,"k":"sgp3dgau"}
+[run 1] [c1] inside the computer -> about {"url":"/?computer=about","doc":"jntnny","len":5,"idx":3,"n":4,"state":{"pc":"about","back":3,"k":"hplffq2s"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c1] PASS -> about: one entry {"idx":[2,3],"n":[3,4],"len":[4,5]}
+[run 1] [c1] PASS -> about: address follows "/?computer=about"
+[run 1] [c1] PASS -> about: the frame changed, the top page did not navigate {"frame":"/computer/about/","doc":"jntnny"}
+[run 1] [c1] PASS -> about: history.state {pc, back+1} {"pc":"about","back":3,"k":"hplffq2s"}
+[run 1] [c1] inside the computer -> resume {"url":"/?computer=resume","doc":"jntnny","len":6,"idx":4,"n":5,"state":{"pc":"resume","back":4,"k":"zpzsg01r"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/resume/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c1] PASS -> resume: one entry {"idx":[3,4],"n":[4,5],"len":[5,6]}
+[run 1] [c1] PASS -> resume: address follows "/?computer=resume"
+[run 1] [c1] PASS -> resume: the frame changed, the top page did not navigate {"frame":"/computer/resume/","doc":"jntnny"}
+[run 1] [c1] PASS -> resume: history.state {pc, back+1} {"pc":"resume","back":4,"k":"zpzsg01r"}
+[run 1] [c1] inside the computer -> contact {"url":"/?computer=contact","doc":"jntnny","len":7,"idx":5,"n":6,"state":{"pc":"contact","back":5,"k":"acqcfbqp"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c1] PASS -> contact: one entry {"idx":[4,5],"n":[5,6],"len":[6,7]}
+[run 1] [c1] PASS -> contact: address follows "/?computer=contact"
+[run 1] [c1] PASS -> contact: the frame changed, the top page did not navigate {"frame":"/computer/contact/","doc":"jntnny"}
+[run 1] [c1] PASS -> contact: history.state {pc, back+1} {"pc":"contact","back":5,"k":"acqcfbqp"}
+[run 1] [c1] PASS a link to the page already shown adds no entry {"idx":[5,5],"n":[6,6]}
+[run 1] [c1] navigation.entries() ["/","/?computer=work","/?computer=work/cucadence","/?computer=about","/?computer=resume","/?computer=contact"]
+[run 1] [c1] PASS no two neighbouring entries are the same 6
+[run 1] [c1] iframe src attribute (the frame navigates with location.replace, the attribute keeps the first page) "/computer/work/"
+[run 1] [c2] --- start
+[run 1] [c2] at contact after work -> case -> about -> resume -> contact {"url":"/?computer=contact","doc":"3s5do3","len":7,"idx":5,"n":6,"state":{"pc":"contact","back":5,"k":"jshmxm0l"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c2] Back -> resume {"url":"/?computer=resume","doc":"3s5do3","len":7,"idx":4,"n":6,"state":{"pc":"resume","back":4,"k":"ep1w97aq","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/resume/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c2] PASS Back -> resume: address, frame and lab agree {"url":"/?computer=resume","frame":"/computer/resume/","pc":"read"}
+[run 1] [c2] Back -> about {"url":"/?computer=about","doc":"3s5do3","len":7,"idx":3,"n":6,"state":{"pc":"about","back":3,"k":"kd7twsjv","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c2] PASS Back -> about: address, frame and lab agree {"url":"/?computer=about","frame":"/computer/about/","pc":"read"}
+[run 1] [c2] Back -> work/cucadence {"url":"/?computer=work/cucadence","doc":"3s5do3","len":7,"idx":2,"n":6,"state":{"pc":"work/cucadence","back":2,"k":"1fl488xn","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/cucadence/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c2] PASS Back -> work/cucadence: address, frame and lab agree {"url":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","pc":"read"}
+[run 1] [c2] Back -> work {"url":"/?computer=work","doc":"3s5do3","len":7,"idx":1,"n":6,"state":{"pc":"work","back":1,"k":"zf0pfmx1","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c2] PASS Back -> work: address, frame and lab agree {"url":"/?computer=work","frame":"/computer/work/","pc":"read"}
+[run 1] [c2] Back -> opening {"url":"/","doc":"3s5do3","len":7,"idx":0,"n":6,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 1] [c2] PASS Back -> the opening: lab closed, same document {"url":"/","pc":null,"idx":0,"doc":"3s5do3"}
+[run 1] [c2] Forward -> work {"url":"/?computer=work","doc":"3s5do3","len":7,"idx":1,"n":6,"state":{"pc":"work","back":1,"k":"zf0pfmx1","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":[null,"fade","fly","read"]}
+[run 1] [c2] PASS Forward -> work: address and frame agree {"url":"/?computer=work","frame":"/computer/work/"}
+[run 1] [c2] Forward -> work/cucadence {"url":"/?computer=work/cucadence","doc":"3s5do3","len":7,"idx":2,"n":6,"state":{"pc":"work/cucadence","back":2,"k":"1fl488xn","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/cucadence/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c2] PASS Forward -> work/cucadence: address and frame agree {"url":"/?computer=work/cucadence","frame":"/computer/work/cucadence/"}
+[run 1] [c2] Forward -> about {"url":"/?computer=about","doc":"3s5do3","len":7,"idx":3,"n":6,"state":{"pc":"about","back":3,"k":"kd7twsjv","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c2] PASS Forward -> about: address and frame agree {"url":"/?computer=about","frame":"/computer/about/"}
+[run 1] [c2] Forward -> resume {"url":"/?computer=resume","doc":"3s5do3","len":7,"idx":4,"n":6,"state":{"pc":"resume","back":4,"k":"ep1w97aq","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/resume/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c2] PASS Forward -> resume: address and frame agree {"url":"/?computer=resume","frame":"/computer/resume/"}
+[run 1] [c2] Forward -> contact {"url":"/?computer=contact","doc":"3s5do3","len":7,"idx":5,"n":6,"state":{"pc":"contact","back":5,"k":"jshmxm0l"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c2] PASS Forward -> contact: address and frame agree {"url":"/?computer=contact","frame":"/computer/contact/"}
+[run 1] [c2] case study scrolled, then About {"caseY":1200,"url":"/?computer=about","doc":"3s5do3","len":5,"idx":3,"n":4,"state":{"pc":"about","back":3,"k":"rshdc6so","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c2] PASS About opens at its top 0
+[run 1] [c2] Back -> case study {"url":"/?computer=work/cucadence","doc":"3s5do3","len":5,"idx":2,"n":4,"state":{"pc":"work/cucadence","back":2,"k":"1fl488xn","y":1200},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/cucadence/","y":1200,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c2] PASS the case study scroll is restored on Back {"saved":1200,"restored":1200,"state":{"pc":"work/cucadence","back":2,"k":"1fl488xn","y":1200}}
+[run 1] [c2] screenshot "<scratch>/final/nav/navigation-c2-back-case-scroll-restored.jpg"
+[run 1] [c2] case study -> Résumé scrolled to 900, Back, Forward {"caseYAfterBack":1200,"resumeYAfterForward":900,"resumeState":{"pc":"resume","back":3,"k":"jjnicyqt","y":900}}
+[run 1] [c2] PASS the case study keeps its scroll on a second Back 1200
+[run 1] [c2] PASS a page left with Back keeps its scroll for Forward {"scrolled":900,"afterForward":900}
+[run 1] [c3] --- start
+[run 1] [c3] a) opening scrolled to 150 {"url":"/","doc":"9p7ern","len":2,"idx":0,"n":1,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":150,"ovf":"visible"}
+[run 1] [c3] a) while reading: scrollTo(0, 600) and a wheel outside the frame leave the page at 150
+[run 1] [c3] PASS a) the page underneath is locked while reading 150
+[run 1] [c3] a) at about, three entries in {"url":"/?computer=about","doc":"9p7ern","len":5,"idx":3,"n":4,"state":{"pc":"about","back":3,"k":"gpfcamtc"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":150,"ovf":"hidden"}
+[run 1] [c3] a) after Leave computer {"url":"/","doc":"9p7ern","len":5,"idx":0,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":150,"ovf":"visible","pcSeq":["read","return",null]}
+[run 1] [c3] PASS a) Leave goes back through the entries to the opening {"idx":[0,3,0],"url":"/"}
+[run 1] [c3] PASS a) focus returns to "Explore the lab" "Explore the lab (enter link)"
+[run 1] [c3] PASS a) page scroll restored to 150 150
+[run 1] [c3] PASS a) page scroll unlocked (wheel moves it) {"overflowY":"visible","afterWheel":550}
+[run 1] [c3] a) entries after Leave (forward entries kept) ["/","/?computer=work","/?computer=work/cucadence","/?computer=about"]
+[run 1] [c3] b) opened directly at ?computer=about {"url":"/?computer=about","doc":"atsx32","len":2,"idx":0,"n":1,"state":{"pc":"about","back":0,"k":"4mwj46iu"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c3] b) after Leave computer {"url":"/","doc":"atsx32","len":2,"idx":0,"n":1,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 1] [c3] PASS b) Leave replaces the entry (no new entry, same index) {"url":"/","idx":[0,0],"n":[1,1]}
+[run 1] [c3] PASS b) focus on the enter link "Explore the lab (enter link)"
+[run 1] [c3] PASS b) page at its top and unlocked {"y":0,"ovf":"visible"}
+[run 1] [c3] c) entered by clicking the monitor at 250,595 {"url":"/?computer=work","doc":"bgmu90","len":3,"idx":1,"n":2,"state":{"pc":"work","back":1,"k":"fih8no6w"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c3] PASS c) the monitor click adds one entry {"idx":[0,1]}
+[run 1] [c3] c) after Leave computer {"url":"/?probe","doc":"bgmu90","len":3,"idx":0,"n":2,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 1] [c3] PASS c) back at the opening, focus on the enter link {"idx":0,"focus":"Explore the lab (enter link)","url":"/?probe"}
+[run 1] [c3] d) direct about -> contact {"url":"/?computer=contact","doc":"rpjm88","len":3,"idx":1,"n":2,"state":{"pc":"contact","back":0,"k":"7aywbqoc"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c3] d) after Leave computer {"url":"/","doc":"rpjm88","len":3,"idx":1,"n":2,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible","entries":["/?computer=about","/"]}
+[run 1] [c3] PASS d) Leave returns to the opening {"url":"/","idx":[0,1,1]}
+[run 1] [c3] d) then Back (the directly opened entry is still behind the opening) {"url":"/?computer=about","doc":"rpjm88","len":3,"idx":0,"n":2,"state":{"pc":"about","back":0,"k":"0n2bwela","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":[null,"fade","fly","read"]}
+[run 1] [c4] --- start
+[run 1] [c4] Escape with focus in the frame: before {"focus":"iframe.pc-frame","frameFocus":"body","idx":1,"url":"/?computer=work"}
+[run 1] [c4] Escape (frame): after {"url":"/","doc":"uaypcu","len":3,"idx":0,"n":2,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 1] [c4] PASS Escape (frame) returns to the opening entry, no further {"idx":[0,1,0],"url":"/","doc":true}
+[run 1] [c4] PASS Escape (frame): focus on "Explore the lab" "Explore the lab (enter link)"
+[run 1] [c4] Escape with focus in the frame, three entries in: before {"focus":"iframe.pc-frame","frameFocus":"body","idx":3,"url":"/?computer=contact"}
+[run 1] [c4] Escape (frame, three entries in): after {"url":"/","doc":"1je5wx","len":5,"idx":0,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 1] [c4] PASS Escape (frame, three entries in) returns to the opening entry, no further {"idx":[0,3,0],"url":"/","doc":true}
+[run 1] [c4] PASS Escape (frame, three entries in): focus on "Explore the lab" "Explore the lab (enter link)"
+[run 1] [c4] Escape with focus in the parent: before {"focus":"dialog.pc \"Portfolio, on the lab's computer\"","frameFocus":"body","idx":1,"url":"/?computer=work"}
+[run 1] [c4] Escape (parent): after {"url":"/","doc":"zkhu7r","len":3,"idx":0,"n":2,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 1] [c4] PASS Escape (parent) returns to the opening entry, no further {"idx":[0,1,0],"url":"/","doc":true}
+[run 1] [c4] PASS Escape (parent): focus on "Explore the lab" "Explore the lab (enter link)"
+[run 1] [c4] Escape with focus in the parent, three entries in: before {"focus":"dialog.pc \"Portfolio, on the lab's computer\"","frameFocus":"body","idx":3,"url":"/?computer=contact"}
+[run 1] [c4] Escape (parent, three entries in): after {"url":"/","doc":"3m2r61","len":5,"idx":0,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 1] [c4] PASS Escape (parent, three entries in) returns to the opening entry, no further {"idx":[0,3,0],"url":"/","doc":true}
+[run 1] [c4] PASS Escape (parent, three entries in): focus on "Explore the lab" "Explore the lab (enter link)"
+[run 1] [c4] two quick Escapes in the parent, two entries in {"url":"/","doc":"ma5kg8","len":4,"idx":0,"n":3,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 1] [c4] PASS two quick Escapes land on the opening entry {"idx":[0,0],"url":"/"}
+[run 1] [c5] --- start
+[run 1] [c5] resume, entered then navigated, frame scrolled to 900 {"url":"/?computer=resume","doc":"5vnluu","len":5,"idx":3,"n":4,"state":{"pc":"resume","back":3,"k":"dlmt4b5e","y":900},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/resume/","y":900,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c5] after reload {"url":"/?computer=resume","doc":"hlk8tj","len":5,"idx":3,"n":4,"state":{"pc":"resume","back":3,"k":"dlmt4b5e","y":900},"pc":"read","full":false,"dialog":true,"src":"/computer/resume/","frame":{"path":"/computer/resume/","y":900,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"]}
+[run 1] [c5] PASS reload: same page in the computer {"url":"/?computer=resume","frame":"/computer/resume/"}
+[run 1] [c5] PASS reload: opens flat, no camera flight (no fade/fly state) ["read"]
+[run 1] [c5] PASS reload: no history change {"len":[5,5],"idx":[3,3]}
+[run 1] [c5] PASS reload: the frame page keeps its scroll (computer.ts:98 says remember() is for "Back and Forward (and a reload)") {"before":900,"afterReload":900,"state":{"pc":"resume","back":3,"k":"dlmt4b5e","y":900}}
+[run 1] [c5] reload, then Leave computer {"url":"/","doc":"hlk8tj","len":5,"idx":0,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible","pcSeq":["read","return",null]}
+[run 1] [c5] PASS reload, then Leave: back at the opening {"url":"/","pc":null,"idx":[0,0]}
+[run 1] [c5] PASS reload, then Leave: without loading the page again {"reloaded":"hlk8tj","afterLeave":"hlk8tj"}
+[run 1] [c5] PASS reload, then Leave: focus on the enter link "Explore the lab (enter link)"
+[run 1] [c5] direct ?computer=about, reloaded {"url":"/?computer=about","doc":"1vuwts","len":2,"idx":0,"n":1,"state":{"pc":"about","back":0,"k":"fct0hrat"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"]}
+[run 1] [c5] PASS direct + reload: flat, state {pc: about, back: 0} {"pc":"about","back":0,"k":"fct0hrat"}
+[run 1] [c5] direct /?computer=work {"url":"/?computer=work","doc":"updhf1","len":2,"idx":0,"n":1,"state":{"pc":"work","back":0,"k":"ptddrwok"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"msToReading":535}
+[run 1] [c5] PASS direct work: opens on it, flat, back 0 {"url":"/?computer=work","frame":"/computer/work/","pcSeq":["read"],"state":{"pc":"work","back":0,"k":"ptddrwok"}}
+[run 1] [c5] direct /?computer=work/cucadence {"url":"/?computer=work/cucadence","doc":"juwved","len":2,"idx":0,"n":1,"state":{"pc":"work/cucadence","back":0,"k":"brh1a22l"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/cucadence/","frame":{"path":"/computer/work/cucadence/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"msToReading":553}
+[run 1] [c5] PASS direct work/cucadence: opens on it, flat, back 0 {"url":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","pcSeq":["read"],"state":{"pc":"work/cucadence","back":0,"k":"brh1a22l"}}
+[run 1] [c5] direct /?computer=about {"url":"/?computer=about","doc":"fq04yr","len":2,"idx":0,"n":1,"state":{"pc":"about","back":0,"k":"7v6qdvfy"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"msToReading":521}
+[run 1] [c5] PASS direct about: opens on it, flat, back 0 {"url":"/?computer=about","frame":"/computer/about/","pcSeq":["read"],"state":{"pc":"about","back":0,"k":"7v6qdvfy"}}
+[run 1] [c5] direct /?computer=resume {"url":"/?computer=resume","doc":"k2q9xu","len":2,"idx":0,"n":1,"state":{"pc":"resume","back":0,"k":"jb9izk4d"},"pc":"read","full":false,"dialog":true,"src":"/computer/resume/","frame":{"path":"/computer/resume/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"msToReading":530}
+[run 1] [c5] PASS direct resume: opens on it, flat, back 0 {"url":"/?computer=resume","frame":"/computer/resume/","pcSeq":["read"],"state":{"pc":"resume","back":0,"k":"jb9izk4d"}}
+[run 1] [c5] direct /?computer=contact {"url":"/?computer=contact","doc":"odb5qi","len":2,"idx":0,"n":1,"state":{"pc":"contact","back":0,"k":"9xhb1nkd"},"pc":"read","full":false,"dialog":true,"src":"/computer/contact/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"msToReading":526}
+[run 1] [c5] PASS direct contact: opens on it, flat, back 0 {"url":"/?computer=contact","frame":"/computer/contact/","pcSeq":["read"],"state":{"pc":"contact","back":0,"k":"9xhb1nkd"}}
+[run 1] [c5] invalid ?computer=bogus {"url":"/","doc":"23zq4e","len":2,"idx":0,"n":1,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible","pcSeq":[],"opening":{"enter":true,"h1":114}}
+[run 1] [c5] PASS ?computer=bogus: falls back to the opening, the address cleaned to / {"url":"/","pc":null}
+[run 1] [c5] invalid ?computer=work/nope {"url":"/","doc":"17fg8o","len":2,"idx":0,"n":1,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible","pcSeq":[],"opening":{"enter":true,"h1":114}}
+[run 1] [c5] PASS ?computer=work/nope: falls back to the opening, the address cleaned to / {"url":"/","pc":null}
+[run 1] [c5] invalid ?computer= {"url":"/","doc":"dez6ts","len":2,"idx":0,"n":1,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible","pcSeq":[],"opening":{"enter":true,"h1":114}}
+[run 1] [c5] PASS ?computer=: falls back to the opening, the address cleaned to / {"url":"/","pc":null}
+[run 1] [c5] invalid ?computer=work/ {"url":"/?computer=work/","doc":"qd2sy1","len":2,"idx":0,"n":1,"state":{"pc":"work","back":0,"k":"vsazwfha"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"opening":{"enter":true,"h1":114}}
+[run 1] [c5] PASS a trailing slash is trimmed: ?computer=work/ opens Work {"url":"/?computer=work/","pc":"read"}
+[run 1] [c5] invalid ?computer=/about/ {"url":"/?computer=/about/","doc":"qqujk1","len":2,"idx":0,"n":1,"state":{"pc":"about","back":0,"k":"qhhcvpq9"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"opening":{"enter":true,"h1":114}}
+[run 1] [c5] PASS slashes are trimmed: ?computer=/about/ opens About {"url":"/?computer=/about/","pc":"read"}
+[run 1] [c5] frame page opened on its own: /computer/about/ {"status":200,"url":"/?computer=about","pc":"read","len":2}
+[run 1] [c5] frame page opened on its own: /computer/work/cucadence/ {"status":200,"url":"/?computer=work/cucadence","pc":"read","len":2}
+[run 1] [c5] frame page opened on its own: /computer/work/nope/ {"status":404,"url":"/computer/work/nope/","pc":null,"len":2}
+[run 1] [c6] --- start
+[run 1] [c6] Open ordinary page from about {"url":"/#about","doc":"8pcch8","len":5,"idx":3,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":2341,"ovf":"visible","target":{"top":128,"text":"About","atPageEnd":false}}
+[run 1] [c6] PASS about -> /#about (top window, one new entry) {"url":"/#about","idx":[2,3],"pc":null}
+[run 1] [c6] PASS about: the section is at the top of the view (or the page is scrolled to its end) {"top":128,"text":"About","atPageEnd":false}
+[run 1] [c6] screenshot "<scratch>/final/nav/navigation-c6-ordinary-about.jpg"
+[run 1] [c6]   then Back {"url":"/?computer=about","pc":"read","frame":"/computer/about/","doc":"same as before","lastPageshow":{"persisted":true,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true}}
+[run 1] [c6] Open ordinary page from work/cucadence {"url":"/projects/cucadence/","doc":"jh3aby","len":5,"idx":3,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible","target":{"top":198,"text":"cuCadence","atPageEnd":false}}
+[run 1] [c6] PASS work/cucadence -> /projects/cucadence/ (top window, one new entry) {"url":"/projects/cucadence/","idx":[2,3],"pc":null}
+[run 1] [c6]   then Back {"url":"/?computer=work/cucadence","pc":"read","frame":"/computer/work/cucadence/","doc":"same as before","lastPageshow":{"persisted":true,"url":"/?computer=work/cucadence","pc":"read","frame":"/computer/work/cucadence/","dialogOpen":true}}
+[run 1] [c6] Open ordinary page from work {"url":"/#work","doc":"sxsfmo","len":4,"idx":2,"n":3,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":772,"ovf":"visible","target":{"top":128,"text":"Work","atPageEnd":false}}
+[run 1] [c6] PASS work -> /#work (top window, one new entry) {"url":"/#work","idx":[1,2],"pc":null}
+[run 1] [c6] PASS work: the section is at the top of the view (or the page is scrolled to its end) {"top":128,"text":"Work","atPageEnd":false}
+[run 1] [c6]   then Back {"url":"/?computer=work","pc":"read","frame":"/computer/work/","doc":"same as before","lastPageshow":{"persisted":true,"url":"/?computer=work","pc":"read","frame":"/computer/work/","dialogOpen":true}}
+[run 1] [c6] Open ordinary page from resume {"url":"/#resume","doc":"vbadfr","len":5,"idx":3,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":3090,"ovf":"visible","target":{"top":128,"text":"Résumé","atPageEnd":false}}
+[run 1] [c6] PASS resume -> /#resume (top window, one new entry) {"url":"/#resume","idx":[2,3],"pc":null}
+[run 1] [c6] PASS resume: the section is at the top of the view (or the page is scrolled to its end) {"top":128,"text":"Résumé","atPageEnd":false}
+[run 1] [c6]   then Back {"url":"/?computer=resume","pc":"read","frame":"/computer/resume/","doc":"same as before","lastPageshow":{"persisted":true,"url":"/?computer=resume","pc":"read","frame":"/computer/resume/","dialogOpen":true}}
+[run 1] [c6] Open ordinary page from contact {"url":"/#contact","doc":"kkek5y","len":5,"idx":3,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":4757,"ovf":"visible","target":{"top":352,"text":"Contact","atPageEnd":true}}
+[run 1] [c6] PASS contact -> /#contact (top window, one new entry) {"url":"/#contact","idx":[2,3],"pc":null}
+[run 1] [c6] PASS contact: the section is at the top of the view (or the page is scrolled to its end) {"top":352,"text":"Contact","atPageEnd":true}
+[run 1] [c6]   then Back {"url":"/?computer=contact","pc":"read","frame":"/computer/contact/","doc":"same as before","lastPageshow":{"persisted":true,"url":"/?computer=contact","pc":"read","frame":"/computer/contact/","dialogOpen":true}}
+[run 1] [c7] --- start
+[run 1] [c7] 1024x768 ?computer=about {"url":"/#about","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=about","/#about"],"unloadedDocs":[{"url":"/?computer=about","paints":[]}]}
+[run 1] [c7] PASS 1024x768 about -> /#about (replace, no extra entry) {"url":"/#about","len":2,"sameOriginEntries":1}
+[run 1] [c7] PASS 1024x768 about: the ?computer= document never painted {"url":"/?computer=about","paints":[]}
+[run 1] [c7] 1024x768 ?computer=work/cucadence {"url":"/projects/cucadence/","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=work/cucadence","/projects/cucadence/"],"unloadedDocs":[{"url":"/?computer=work/cucadence","paints":[]}]}
+[run 1] [c7] PASS 1024x768 work/cucadence -> /projects/cucadence/ (replace, no extra entry) {"url":"/projects/cucadence/","len":2,"sameOriginEntries":1}
+[run 1] [c7] PASS 1024x768 work/cucadence: the ?computer= document never painted {"url":"/?computer=work/cucadence","paints":[]}
+[run 1] [c7] 1024x768 ?computer=work {"url":"/#work","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=work","/#work"],"unloadedDocs":[{"url":"/?computer=work","paints":[]}]}
+[run 1] [c7] PASS 1024x768 work -> /#work (replace, no extra entry) {"url":"/#work","len":2,"sameOriginEntries":1}
+[run 1] [c7] PASS 1024x768 work: the ?computer= document never painted {"url":"/?computer=work","paints":[]}
+[run 1] [c7] 1024x768 ?computer=resume {"url":"/#resume","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=resume","/#resume"],"unloadedDocs":[{"url":"/?computer=resume","paints":[]}]}
+[run 1] [c7] PASS 1024x768 resume -> /#resume (replace, no extra entry) {"url":"/#resume","len":2,"sameOriginEntries":1}
+[run 1] [c7] PASS 1024x768 resume: the ?computer= document never painted {"url":"/?computer=resume","paints":[]}
+[run 1] [c7] 1024x768 ?computer=contact {"url":"/#contact","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=contact","/#contact"],"unloadedDocs":[{"url":"/?computer=contact","paints":[]}]}
+[run 1] [c7] PASS 1024x768 contact -> /#contact (replace, no extra entry) {"url":"/#contact","len":2,"sameOriginEntries":1}
+[run 1] [c7] PASS 1024x768 contact: the ?computer= document never painted {"url":"/?computer=contact","paints":[]}
+[run 1] [c7] 1024x768 /computer/about/ opened on its own {"url":"/#about","unloadedDocs":[{"url":"/computer/about/","paints":[]}]}
+[run 1] [c7] 390x844 ?computer=about {"url":"/#about","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=about","/#about"],"unloadedDocs":[{"url":"/?computer=about","paints":[]}]}
+[run 1] [c7] PASS 390x844 about -> /#about (replace, no extra entry) {"url":"/#about","len":2,"sameOriginEntries":1}
+[run 1] [c7] PASS 390x844 about: the ?computer= document never painted {"url":"/?computer=about","paints":[]}
+[run 1] [c7] 390x844 ?computer=work/cucadence {"url":"/projects/cucadence/","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=work/cucadence","/projects/cucadence/"],"unloadedDocs":[{"url":"/?computer=work/cucadence","paints":[]}]}
+[run 1] [c7] PASS 390x844 work/cucadence -> /projects/cucadence/ (replace, no extra entry) {"url":"/projects/cucadence/","len":2,"sameOriginEntries":1}
+[run 1] [c7] PASS 390x844 work/cucadence: the ?computer= document never painted {"url":"/?computer=work/cucadence","paints":[]}
+[run 1] [c7] screenshot "<scratch>/final/nav/navigation-c7-390x844-case-redirected.jpg"
+[run 1] [c7] 390x844 ?computer=work {"url":"/#work","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=work","/#work"],"unloadedDocs":[{"url":"/?computer=work","paints":[]}]}
+[run 1] [c7] PASS 390x844 work -> /#work (replace, no extra entry) {"url":"/#work","len":2,"sameOriginEntries":1}
+[run 1] [c7] PASS 390x844 work: the ?computer= document never painted {"url":"/?computer=work","paints":[]}
+[run 1] [c7] 390x844 ?computer=resume {"url":"/#resume","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=resume","/#resume"],"unloadedDocs":[{"url":"/?computer=resume","paints":[]}]}
+[run 1] [c7] PASS 390x844 resume -> /#resume (replace, no extra entry) {"url":"/#resume","len":2,"sameOriginEntries":1}
+[run 1] [c7] PASS 390x844 resume: the ?computer= document never painted {"url":"/?computer=resume","paints":[]}
+[run 1] [c7] 390x844 ?computer=contact {"url":"/#contact","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=contact","/#contact"],"unloadedDocs":[{"url":"/?computer=contact","paints":[]}]}
+[run 1] [c7] PASS 390x844 contact -> /#contact (replace, no extra entry) {"url":"/#contact","len":2,"sameOriginEntries":1}
+[run 1] [c7] PASS 390x844 contact: the ?computer= document never painted {"url":"/?computer=contact","paints":[]}
+[run 1] [c7] 390x844 /computer/about/ opened on its own {"url":"/#about","unloadedDocs":[{"url":"/computer/about/","paints":[]}]}
+[run 1] [c8] --- start
+[run 1] [c8] links on the computer pages by what a plain click does {"pc:go":144,"top window (ordinary page)":15,"download":1,"mailto: (default, target _top via <base>)":2,"new tab (target=_blank)":21,"new tab (window.open, external)":3,"new tab (window.open, same-origin page with no computer path)":1}
+[run 1] [c8] PASS no link is swallowed by the frame []
+[run 1] [c8] Contact: GitHub {"newTab":"https://github.com/donaldheddesheimer","topUrl":"/?computer=contact","frame":"/computer/contact/","sameDoc":true,"idx":[2,2]}
+[run 1] [c8] PASS Contact: GitHub: a new tab; the frame and the top page stay {"newTab":"https://github.com/donaldheddesheimer","topUrl":"/?computer=contact","frame":"/computer/contact/","sameDoc":true,"idx":[2,2]}
+[run 1] [c8] Contact: LinkedIn {"newTab":"https://www.linkedin.com/in/donaldheddesheimer/","topUrl":"/?computer=contact","frame":"/computer/contact/","sameDoc":true,"idx":[2,2]}
+[run 1] [c8] PASS Contact: LinkedIn: a new tab; the frame and the top page stay {"newTab":"https://www.linkedin.com/in/donaldheddesheimer/","topUrl":"/?computer=contact","frame":"/computer/contact/","sameDoc":true,"idx":[2,2]}
+[run 1] [c8] Contact: Copy address {"label":"Copied","clipboardMatchesButton":true,"frame":"/computer/contact/","url":"/?computer=contact"}
+[run 1] [c8] PASS Copy address works inside the frame {"label":"Copied","clipboardMatchesButton":true}
+[run 1] [c8] Case study: repository button {"newTab":"https://github.com/donald-heddesheimer/cadence","topUrl":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","sameDoc":true,"idx":[4,4]}
+[run 1] [c8] PASS Case study: repository button: a new tab; the frame and the top page stay {"newTab":"https://github.com/donald-heddesheimer/cadence","topUrl":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","sameDoc":true,"idx":[4,4]}
+[run 1] [c8] Case study: inline external link without target (ui.perfetto.dev) {"newTab":"https://ui.perfetto.dev/","topUrl":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","sameDoc":true,"idx":[4,4]}
+[run 1] [c8] PASS Case study: inline external link without target (ui.perfetto.dev): a new tab; the frame and the top page stay {"newTab":"https://ui.perfetto.dev/","topUrl":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","sameDoc":true,"idx":[4,4]}
+[run 1] [c8] Case study: same-origin image link (/projects/cadence-timeline.png) {"newTab":"http://127.0.0.1:4322/projects/cadence-timeline.png","topUrl":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","sameDoc":true,"idx":[4,4]}
+[run 1] [c8] PASS Case study: same-origin image link (/projects/cadence-timeline.png): a new tab; the frame and the top page stay {"newTab":"http://127.0.0.1:4322/projects/cadence-timeline.png","topUrl":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","sameDoc":true,"idx":[4,4]}
+[run 1] [c8] GET /resume.pdf {"status":200,"type":"application/pdf","bytes":146254}
+[run 1] [c8] PASS the résumé PDF is served (200, application/pdf) {"status":200,"type":"application/pdf"}
+[run 1] [c8] Résumé: Download PDF {"download":{"url":"/resume.pdf","suggested":"Donald-Heddesheimer-Resume.pdf"},"frame":"/computer/resume/","url":"/?computer=resume","pages":1}
+[run 1] [c8] PASS Download PDF downloads; the frame keeps the Résumé page {"download":{"url":"/resume.pdf","suggested":"Donald-Heddesheimer-Resume.pdf"},"frame":"/computer/resume/","url":"/?computer=resume","pages":1}
+[run 1] [c8] phone-number scan (counts only) {"/computer/work/":{"tel":0,"phoneLike":0},"/computer/about/":{"tel":0,"phoneLike":0},"/computer/resume/":{"tel":0,"phoneLike":0},"/computer/contact/":{"tel":0,"phoneLike":0},"/computer/work/cucadence/":{"tel":0,"phoneLike":0},"/projects/cucadence/":{"tel":0,"phoneLike":0},"/":{"tel":0,"phoneLike":0},"/resume.pdf":{"inflatedBytes":341013,"literalTextChars":95625,"wordsReadable":[],"tel":0,"phoneLike":0}}
+[run 1] [c8] PASS no phone number on the served pages (or found in the PDF text layer) {"/computer/work/":0,"/computer/about/":0,"/computer/resume/":0,"/computer/contact/":0,"/computer/work/cucadence/":0,"/projects/cucadence/":0,"/":0,"/resume.pdf":0}
+[run 1] [c8] external requests answered by the stub (hosts) ["github.com","www.linkedin.com","ui.perfetto.dev"]
+[run 1] [c9] --- start
+[run 1] [c9] [routed] a) ?computer=about -> / -> Back {"url":"/?computer=about","doc":"cq1wom","len":3,"idx":0,"n":2,"state":{"pc":"about","back":0,"k":"lahedofe"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","msAfterBack":102,"pageshows":[{"persisted":false,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true},{"persisted":true,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true}],"bfcacheNotUsed":[]}
+[run 1] [c9] PASS [routed] a) restored from the back-forward cache (pageshow persisted, same document) {"persisted":true,"sameDoc":true,"notUsed":[]}
+[run 1] [c9] PASS [routed] a) at pageshow the lab already reads About {"persisted":true,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true}
+[run 1] [c9] [routed] b) opening -> work -> contact -> / -> Back {"url":"/?computer=contact","doc":"wp52ih","len":5,"idx":2,"n":4,"state":{"pc":"contact","back":2,"k":"n3smlno6"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","lastPageshow":{"persisted":true,"url":"/?computer=contact","pc":"read","frame":"/computer/contact/","dialogOpen":true},"bfcacheNotUsed":[]}
+[run 1] [c9] PASS [routed] b) restored on Contact, matching the address {"url":"/?computer=contact","pageshow":{"persisted":true,"url":"/?computer=contact","pc":"read","frame":"/computer/contact/","dialogOpen":true}}
+[run 1] [c9] [routed] b) then / and history.go(-3) straight to the opening (a jump to another entry of the cached document; see bfcacheNotUsed for whether Chrome restored it) {"at100ms":{"pc":null,"dialog":false},"url":"/","doc":"r66ii6","len":5,"idx":0,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible","lastPageshow":{"persisted":false,"url":"/","pc":null,"frame":null,"dialogOpen":false},"pcSeq":[],"bfcacheNotUsed":[["Circumstantial:ConflictingBrowsingInstance","SupportPending:Unknown"]]}
+[run 1] [c9] PASS [routed] b) restored at the opening: the lab closes {"url":"/","pc":null,"dialog":false}
+[run 1] [c9] PASS [routed] b) closed at once (no return flight) []
+[run 1] [c9] [unrouted] a) ?computer=about -> / -> Back {"url":"/?computer=about","doc":"9hzt06","len":3,"idx":0,"n":2,"state":{"pc":"about","back":0,"k":"mcinpg2l"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","msAfterBack":103,"pageshows":[{"persisted":false,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true},{"persisted":true,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true}],"bfcacheNotUsed":[]}
+[run 1] [c9] PASS [unrouted] a) restored from the back-forward cache (pageshow persisted, same document) {"persisted":true,"sameDoc":true,"notUsed":[]}
+[run 1] [c9] PASS [unrouted] a) at pageshow the lab already reads About {"persisted":true,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true}
+[run 1] [c9] [unrouted] b) opening -> work -> contact -> / -> Back {"url":"/?computer=contact","doc":"gwmjym","len":5,"idx":2,"n":4,"state":{"pc":"contact","back":2,"k":"0xl26ms7"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","lastPageshow":{"persisted":true,"url":"/?computer=contact","pc":"read","frame":"/computer/contact/","dialogOpen":true},"bfcacheNotUsed":[]}
+[run 1] [c9] PASS [unrouted] b) restored on Contact, matching the address {"url":"/?computer=contact","pageshow":{"persisted":true,"url":"/?computer=contact","pc":"read","frame":"/computer/contact/","dialogOpen":true}}
+[run 1] [c9] [unrouted] b) then / and history.go(-3) straight to the opening (a jump to another entry of the cached document; see bfcacheNotUsed for whether Chrome restored it) {"at100ms":{"pc":null,"dialog":false},"url":"/","doc":"9emdde","len":5,"idx":0,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible","lastPageshow":{"persisted":false,"url":"/","pc":null,"frame":null,"dialogOpen":false},"pcSeq":[],"bfcacheNotUsed":[["Circumstantial:ConflictingBrowsingInstance","SupportPending:Unknown"]]}
+[run 1] [c9] PASS [unrouted] b) restored at the opening: the lab closes {"url":"/","pc":null,"dialog":false}
+[run 1] [c9] PASS [unrouted] b) closed at once (no return flight) []
+[run 1] [c10] --- start
+[run 1] [c10] 1440x900 reading Work {"viewport":[1440,900],"pc":"read","full":false,"pcAble":true,"frameRect":[115,72,1210,756],"quad":[[115,72],[1325,72],[1325,828],[115,828]],"maxCornerDevPx":0.1,"canvas":[0,0,1440,900],"frameY":300,"framePath":"/computer/work/","url":"/?computer=work","dialog":true,"pageY":0}
+[run 1] [c10] PASS 1440x900: frame on the monitor screen (corner deviation <= 2 px) 0.1
+[run 1] [c10] resized to 1024x768 {"viewport":[1024,768],"pc":"read","full":true,"pcAble":false,"frameRect":[0,0,1024,768],"quad":[[115,72],[1325,72],[1325,828],[115,828]],"maxCornerDevPx":309.5,"canvas":[0,0,1024,768],"frameY":300,"framePath":"/computer/work/","url":"/?computer=work","dialog":true,"pageY":0}
+[run 1] [c10] PASS 1024x768 (below the gate): the page across the window, still reading {"full":true,"rect":[0,0,1024,768],"pc":"read"}
+[run 1] [c10] screenshot "<scratch>/final/nav/navigation-c10-1024x768-reading-full.jpg"
+[run 1] [c10] PASS 1024x768: address, frame page and dialog unchanged {"url":"/?computer=work","frame":"/computer/work/","frameY":300,"dialog":true}
+[run 1] [c10] resized to 1440x900 {"viewport":[1440,900],"pc":"read","full":false,"pcAble":true,"frameRect":[115,72,1210,756],"quad":[[115,72],[1325,72],[1325,828],[115,828]],"maxCornerDevPx":0.1,"canvas":[0,0,1440,900],"frameY":298,"framePath":"/computer/work/","url":"/?computer=work","dialog":true,"pageY":0}
+[run 1] [c10] PASS 1440x900: frame back on the monitor screen (corner deviation <= 2 px) {"full":false,"dev":0.1,"rect":[115,72,1210,756]}
+[run 1] [c10] PASS 1440x900: address, frame page and dialog unchanged {"url":"/?computer=work","frame":"/computer/work/","frameY":298,"dialog":true}
+[run 1] [c10] resized to 1920x1080 {"viewport":[1920,1080],"pc":"read","full":false,"pcAble":true,"frameRect":[157,38,1607,1004],"quad":[[157,38],[1764,38],[1764,1042],[157,1042]],"maxCornerDevPx":0.2,"canvas":[0,0,1920,1080],"frameY":300,"framePath":"/computer/work/","url":"/?computer=work","dialog":true,"pageY":0}
+[run 1] [c10] PASS 1920x1080: frame back on the monitor screen (corner deviation <= 2 px) {"full":false,"dev":0.2,"rect":[157,38,1607,1004]}
+[run 1] [c10] screenshot "<scratch>/final/nav/navigation-c10-1920x1080-reading-after-resize.jpg"
+[run 1] [c10] PASS 1920x1080: address, frame page and dialog unchanged {"url":"/?computer=work","frame":"/computer/work/","frameY":300,"dialog":true}
+[run 1] [c10] left at 1920x1080 {"url":"/?probe","doc":"5c5me6","len":3,"idx":0,"n":2,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible","monitorQuad":[[134,629],[516,610],[527,817],[152,846]]}
+[run 1] [c10] PASS left at 1920x1080: opening with the monitor in frame, focus on the enter link {"pc":null,"focus":"Explore the lab (enter link)"}
+[run 1] [c10] entered at 1440x900, resized to 1024x768, left {"url":"/?probe","doc":"5c5me6","len":3,"idx":0,"n":2,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 1] [c10] PASS leaving below the gate: closed, full flag cleared, page unlocked {"pc":null,"full":false,"url":"/?probe","ovf":"visible","focus":"Explore the lab (enter link)"}
+[run 1] [c10] direct ?probe&computer=about at 1440x900, then 1920x1080 {"at1440":{"viewport":[1440,900],"pc":"read","full":false,"pcAble":true,"frameRect":[115,72,1210,756],"quad":[[115,72],[1325,72],[1325,828],[115,828]],"maxCornerDevPx":0.1,"canvas":[0,0,1440,900],"frameY":0,"framePath":"/computer/about/","url":"/?probe&computer=about","dialog":true,"pageY":0},"at1920":{"viewport":[1920,1080],"pc":"read","full":false,"pcAble":true,"frameRect":[157,38,1607,1004],"quad":[[157,38],[1764,38],[1764,1042],[157,1042]],"maxCornerDevPx":0.2,"canvas":[0,0,1920,1080],"frameY":0,"framePath":"/computer/about/","url":"/?probe&computer=about","dialog":true,"pageY":0}}
+[run 1] [c10] PASS direct link: frame on the screen before and after the resize [0.1,0.2]
+[run 1] [c11] --- start
+[run 1] [c11] Tab from the top of the page to the entry ["a.sr-only \"Skip to content\"","a.home-mark \"Donald Heddesheimer, back to top\"","a \"Work\"","a \"About\"","a \"Résumé\"","a \"Contact\"","button.btn \"Settings\"","Explore the lab (enter link)"]
+[run 1] [c11] Enter on "Explore the lab" {"url":"/?computer=work","doc":"au5q76","len":3,"idx":1,"n":2,"state":{"pc":"work","back":1,"k":"ces5l0jp"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c11] PASS the frame has the focus on arrival {"focus":"iframe.pc-frame","frameFocus":"body"}
+[run 1] [c11] Tab order inside the computer [{"el":"Donald Heddesheimer, work","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[40,6,178,32]},{"el":"Work","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[596,6,53,32]},{"el":"About","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[652,6,59,32]},{"el":"Résumé","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[713,6,72,32]},{"el":"Contact","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[786,6,71,32]},{"el":"Open ordinary page","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[895,6,148,32]},{"el":"Leave computer","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[1046,6,124,32]},{"el":"Traffic Operations Center","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[40,595,272,28]},{"el":"cuCadence","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[619,595,123,28]},{"el":"claude-status","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[40,371,115,21]},{"el":"Smart Bin","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[426,371,81,21]},{"el":"Useless Machine","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[812,371,139,21]}]
+[run 1] [c11] PASS Tab reaches "Open ordinary page" and "Leave computer" {"ordinaryAt":5,"leaveAt":6}
+[run 1] [c11] PASS Tab continues from the bar into the content {"el":"Traffic Operations Center","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[40,595,272,28]}
+[run 1] [c11] PASS every stop shows a visible focus ring (:focus-visible, 2px solid outline) ["true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)"]
+[run 1] [c11] screenshot "<scratch>/final/nav/navigation-c11-focus-ring-leave-computer.jpg"
+[run 1] [c11] Shift+Tab back to "Leave computer"
+[run 1] [c11] Enter on About in the bar {"url":"/?computer=about","doc":"au5q76","len":4,"idx":2,"n":3,"state":{"pc":"about","back":2,"k":"lzxamhe4","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 1] [c11] PASS after a keyboard move to About, the focus stays in the frame {"focus":"iframe.pc-frame","frameFocus":"body"}
+[run 1] [c11] Tab once on About, then Shift+Tab off the first stop {"firstStop":"Donald Heddesheimer, work","topFocus":"iframe.pc-frame","frameFocus":"body"}
+[run 1] [c11] Enter on "Leave computer" {"url":"/","doc":"au5q76","len":4,"idx":0,"n":3,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible","focusVisible":true}
+[run 1] [c11] PASS after leaving by keyboard: focus (visible) on "Explore the lab", at the opening entry {"focus":"Explore the lab (enter link)","focusVisible":true,"idx":[0,0]}
+[run 2] [c1] --- start
+[run 2] [c1] opening {"url":"/","doc":"94ffb4","len":2,"idx":0,"n":1,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible"}
+[run 2] [c1] entered with "Explore the lab" {"url":"/?computer=work","doc":"94ffb4","len":3,"idx":1,"n":2,"state":{"pc":"work","back":1,"k":"kjtr2r2z"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":[null,"fade","fly","read"]}
+[run 2] [c1] PASS entering adds exactly one entry {"idx":[0,1],"n":[1,2],"len":[2,3]}
+[run 2] [c1] PASS address is /?computer=work "/?computer=work"
+[run 2] [c1] PASS top page did not load a new document ["94ffb4","94ffb4"]
+[run 2] [c1] inside the computer -> work/cucadence {"url":"/?computer=work/cucadence","doc":"94ffb4","len":4,"idx":2,"n":3,"state":{"pc":"work/cucadence","back":2,"k":"ur3g51qk"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/cucadence/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c1] PASS -> work/cucadence: one entry {"idx":[1,2],"n":[2,3],"len":[3,4]}
+[run 2] [c1] PASS -> work/cucadence: address follows "/?computer=work/cucadence"
+[run 2] [c1] PASS -> work/cucadence: the frame changed, the top page did not navigate {"frame":"/computer/work/cucadence/","doc":"94ffb4"}
+[run 2] [c1] PASS -> work/cucadence: history.state {pc, back+1} {"pc":"work/cucadence","back":2,"k":"ur3g51qk"}
+[run 2] [c1] inside the computer -> about {"url":"/?computer=about","doc":"94ffb4","len":5,"idx":3,"n":4,"state":{"pc":"about","back":3,"k":"1h3eggj0"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c1] PASS -> about: one entry {"idx":[2,3],"n":[3,4],"len":[4,5]}
+[run 2] [c1] PASS -> about: address follows "/?computer=about"
+[run 2] [c1] PASS -> about: the frame changed, the top page did not navigate {"frame":"/computer/about/","doc":"94ffb4"}
+[run 2] [c1] PASS -> about: history.state {pc, back+1} {"pc":"about","back":3,"k":"1h3eggj0"}
+[run 2] [c1] inside the computer -> resume {"url":"/?computer=resume","doc":"94ffb4","len":6,"idx":4,"n":5,"state":{"pc":"resume","back":4,"k":"hryxjc2e"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/resume/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c1] PASS -> resume: one entry {"idx":[3,4],"n":[4,5],"len":[5,6]}
+[run 2] [c1] PASS -> resume: address follows "/?computer=resume"
+[run 2] [c1] PASS -> resume: the frame changed, the top page did not navigate {"frame":"/computer/resume/","doc":"94ffb4"}
+[run 2] [c1] PASS -> resume: history.state {pc, back+1} {"pc":"resume","back":4,"k":"hryxjc2e"}
+[run 2] [c1] inside the computer -> contact {"url":"/?computer=contact","doc":"94ffb4","len":7,"idx":5,"n":6,"state":{"pc":"contact","back":5,"k":"9iqu78eh"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c1] PASS -> contact: one entry {"idx":[4,5],"n":[5,6],"len":[6,7]}
+[run 2] [c1] PASS -> contact: address follows "/?computer=contact"
+[run 2] [c1] PASS -> contact: the frame changed, the top page did not navigate {"frame":"/computer/contact/","doc":"94ffb4"}
+[run 2] [c1] PASS -> contact: history.state {pc, back+1} {"pc":"contact","back":5,"k":"9iqu78eh"}
+[run 2] [c1] PASS a link to the page already shown adds no entry {"idx":[5,5],"n":[6,6]}
+[run 2] [c1] navigation.entries() ["/","/?computer=work","/?computer=work/cucadence","/?computer=about","/?computer=resume","/?computer=contact"]
+[run 2] [c1] PASS no two neighbouring entries are the same 6
+[run 2] [c1] iframe src attribute (the frame navigates with location.replace, the attribute keeps the first page) "/computer/work/"
+[run 2] [c2] --- start
+[run 2] [c2] at contact after work -> case -> about -> resume -> contact {"url":"/?computer=contact","doc":"an4vy3","len":7,"idx":5,"n":6,"state":{"pc":"contact","back":5,"k":"vheroi0h"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c2] Back -> resume {"url":"/?computer=resume","doc":"an4vy3","len":7,"idx":4,"n":6,"state":{"pc":"resume","back":4,"k":"echblkrx","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/resume/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c2] PASS Back -> resume: address, frame and lab agree {"url":"/?computer=resume","frame":"/computer/resume/","pc":"read"}
+[run 2] [c2] Back -> about {"url":"/?computer=about","doc":"an4vy3","len":7,"idx":3,"n":6,"state":{"pc":"about","back":3,"k":"q6dsukiy","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c2] PASS Back -> about: address, frame and lab agree {"url":"/?computer=about","frame":"/computer/about/","pc":"read"}
+[run 2] [c2] Back -> work/cucadence {"url":"/?computer=work/cucadence","doc":"an4vy3","len":7,"idx":2,"n":6,"state":{"pc":"work/cucadence","back":2,"k":"65spmjsv","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/cucadence/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c2] PASS Back -> work/cucadence: address, frame and lab agree {"url":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","pc":"read"}
+[run 2] [c2] Back -> work {"url":"/?computer=work","doc":"an4vy3","len":7,"idx":1,"n":6,"state":{"pc":"work","back":1,"k":"mjadyrvx","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c2] PASS Back -> work: address, frame and lab agree {"url":"/?computer=work","frame":"/computer/work/","pc":"read"}
+[run 2] [c2] Back -> opening {"url":"/","doc":"an4vy3","len":7,"idx":0,"n":6,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 2] [c2] PASS Back -> the opening: lab closed, same document {"url":"/","pc":null,"idx":0,"doc":"an4vy3"}
+[run 2] [c2] Forward -> work {"url":"/?computer=work","doc":"an4vy3","len":7,"idx":1,"n":6,"state":{"pc":"work","back":1,"k":"mjadyrvx","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":[null,"fade","fly","read"]}
+[run 2] [c2] PASS Forward -> work: address and frame agree {"url":"/?computer=work","frame":"/computer/work/"}
+[run 2] [c2] Forward -> work/cucadence {"url":"/?computer=work/cucadence","doc":"an4vy3","len":7,"idx":2,"n":6,"state":{"pc":"work/cucadence","back":2,"k":"65spmjsv","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/cucadence/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c2] PASS Forward -> work/cucadence: address and frame agree {"url":"/?computer=work/cucadence","frame":"/computer/work/cucadence/"}
+[run 2] [c2] Forward -> about {"url":"/?computer=about","doc":"an4vy3","len":7,"idx":3,"n":6,"state":{"pc":"about","back":3,"k":"q6dsukiy","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c2] PASS Forward -> about: address and frame agree {"url":"/?computer=about","frame":"/computer/about/"}
+[run 2] [c2] Forward -> resume {"url":"/?computer=resume","doc":"an4vy3","len":7,"idx":4,"n":6,"state":{"pc":"resume","back":4,"k":"echblkrx","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/resume/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c2] PASS Forward -> resume: address and frame agree {"url":"/?computer=resume","frame":"/computer/resume/"}
+[run 2] [c2] Forward -> contact {"url":"/?computer=contact","doc":"an4vy3","len":7,"idx":5,"n":6,"state":{"pc":"contact","back":5,"k":"vheroi0h"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c2] PASS Forward -> contact: address and frame agree {"url":"/?computer=contact","frame":"/computer/contact/"}
+[run 2] [c2] case study scrolled, then About {"caseY":1200,"url":"/?computer=about","doc":"an4vy3","len":5,"idx":3,"n":4,"state":{"pc":"about","back":3,"k":"97z1cbiz","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c2] PASS About opens at its top 0
+[run 2] [c2] Back -> case study {"url":"/?computer=work/cucadence","doc":"an4vy3","len":5,"idx":2,"n":4,"state":{"pc":"work/cucadence","back":2,"k":"65spmjsv","y":1200},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/cucadence/","y":1200,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c2] PASS the case study scroll is restored on Back {"saved":1200,"restored":1200,"state":{"pc":"work/cucadence","back":2,"k":"65spmjsv","y":1200}}
+[run 2] [c2] case study -> Résumé scrolled to 900, Back, Forward {"caseYAfterBack":1200,"resumeYAfterForward":900,"resumeState":{"pc":"resume","back":3,"k":"5mkuiz9h","y":900}}
+[run 2] [c2] PASS the case study keeps its scroll on a second Back 1200
+[run 2] [c2] PASS a page left with Back keeps its scroll for Forward {"scrolled":900,"afterForward":900}
+[run 2] [c3] --- start
+[run 2] [c3] a) opening scrolled to 150 {"url":"/","doc":"br7dx0","len":2,"idx":0,"n":1,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":150,"ovf":"visible"}
+[run 2] [c3] a) while reading: scrollTo(0, 600) and a wheel outside the frame leave the page at 150
+[run 2] [c3] PASS a) the page underneath is locked while reading 150
+[run 2] [c3] a) at about, three entries in {"url":"/?computer=about","doc":"br7dx0","len":5,"idx":3,"n":4,"state":{"pc":"about","back":3,"k":"y2peip5l"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":150,"ovf":"hidden"}
+[run 2] [c3] a) after Leave computer {"url":"/","doc":"br7dx0","len":5,"idx":0,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":150,"ovf":"visible","pcSeq":["read","return",null]}
+[run 2] [c3] PASS a) Leave goes back through the entries to the opening {"idx":[0,3,0],"url":"/"}
+[run 2] [c3] PASS a) focus returns to "Explore the lab" "Explore the lab (enter link)"
+[run 2] [c3] PASS a) page scroll restored to 150 150
+[run 2] [c3] PASS a) page scroll unlocked (wheel moves it) {"overflowY":"visible","afterWheel":550}
+[run 2] [c3] a) entries after Leave (forward entries kept) ["/","/?computer=work","/?computer=work/cucadence","/?computer=about"]
+[run 2] [c3] b) opened directly at ?computer=about {"url":"/?computer=about","doc":"popu5q","len":2,"idx":0,"n":1,"state":{"pc":"about","back":0,"k":"4igiveaa"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c3] b) after Leave computer {"url":"/","doc":"popu5q","len":2,"idx":0,"n":1,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 2] [c3] PASS b) Leave replaces the entry (no new entry, same index) {"url":"/","idx":[0,0],"n":[1,1]}
+[run 2] [c3] PASS b) focus on the enter link "Explore the lab (enter link)"
+[run 2] [c3] PASS b) page at its top and unlocked {"y":0,"ovf":"visible"}
+[run 2] [c3] c) entered by clicking the monitor at 250,595 {"url":"/?computer=work","doc":"v2bel0","len":3,"idx":1,"n":2,"state":{"pc":"work","back":1,"k":"cz1wmnyn"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c3] PASS c) the monitor click adds one entry {"idx":[0,1]}
+[run 2] [c3] c) after Leave computer {"url":"/?probe","doc":"v2bel0","len":3,"idx":0,"n":2,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 2] [c3] PASS c) back at the opening, focus on the enter link {"idx":0,"focus":"Explore the lab (enter link)","url":"/?probe"}
+[run 2] [c3] d) direct about -> contact {"url":"/?computer=contact","doc":"c4j7mk","len":3,"idx":1,"n":2,"state":{"pc":"contact","back":0,"k":"aw94apt1"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c3] d) after Leave computer {"url":"/","doc":"c4j7mk","len":3,"idx":1,"n":2,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible","entries":["/?computer=about","/"]}
+[run 2] [c3] PASS d) Leave returns to the opening {"url":"/","idx":[0,1,1]}
+[run 2] [c3] d) then Back (the directly opened entry is still behind the opening) {"url":"/?computer=about","doc":"c4j7mk","len":3,"idx":0,"n":2,"state":{"pc":"about","back":0,"k":"kmjo2t0d","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":[null,"fade","fly","read"]}
+[run 2] [c4] --- start
+[run 2] [c4] Escape with focus in the frame: before {"focus":"iframe.pc-frame","frameFocus":"body","idx":1,"url":"/?computer=work"}
+[run 2] [c4] Escape (frame): after {"url":"/","doc":"zimi8z","len":3,"idx":0,"n":2,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 2] [c4] PASS Escape (frame) returns to the opening entry, no further {"idx":[0,1,0],"url":"/","doc":true}
+[run 2] [c4] PASS Escape (frame): focus on "Explore the lab" "Explore the lab (enter link)"
+[run 2] [c4] Escape with focus in the frame, three entries in: before {"focus":"iframe.pc-frame","frameFocus":"body","idx":3,"url":"/?computer=contact"}
+[run 2] [c4] Escape (frame, three entries in): after {"url":"/","doc":"9l1c7r","len":5,"idx":0,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 2] [c4] PASS Escape (frame, three entries in) returns to the opening entry, no further {"idx":[0,3,0],"url":"/","doc":true}
+[run 2] [c4] PASS Escape (frame, three entries in): focus on "Explore the lab" "Explore the lab (enter link)"
+[run 2] [c4] Escape with focus in the parent: before {"focus":"dialog.pc \"Portfolio, on the lab's computer\"","frameFocus":"body","idx":1,"url":"/?computer=work"}
+[run 2] [c4] Escape (parent): after {"url":"/","doc":"4i2x88","len":3,"idx":0,"n":2,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 2] [c4] PASS Escape (parent) returns to the opening entry, no further {"idx":[0,1,0],"url":"/","doc":true}
+[run 2] [c4] PASS Escape (parent): focus on "Explore the lab" "Explore the lab (enter link)"
+[run 2] [c4] Escape with focus in the parent, three entries in: before {"focus":"dialog.pc \"Portfolio, on the lab's computer\"","frameFocus":"body","idx":3,"url":"/?computer=contact"}
+[run 2] [c4] Escape (parent, three entries in): after {"url":"/","doc":"xpcy6h","len":5,"idx":0,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 2] [c4] PASS Escape (parent, three entries in) returns to the opening entry, no further {"idx":[0,3,0],"url":"/","doc":true}
+[run 2] [c4] PASS Escape (parent, three entries in): focus on "Explore the lab" "Explore the lab (enter link)"
+[run 2] [c4] two quick Escapes in the parent, two entries in {"url":"/","doc":"nfli04","len":4,"idx":0,"n":3,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 2] [c4] PASS two quick Escapes land on the opening entry {"idx":[0,0],"url":"/"}
+[run 2] [c5] --- start
+[run 2] [c5] resume, entered then navigated, frame scrolled to 900 {"url":"/?computer=resume","doc":"29siev","len":5,"idx":3,"n":4,"state":{"pc":"resume","back":3,"k":"w4mh0ivb","y":900},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/resume/","y":900,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c5] after reload {"url":"/?computer=resume","doc":"cee0o5","len":5,"idx":3,"n":4,"state":{"pc":"resume","back":3,"k":"w4mh0ivb","y":900},"pc":"read","full":false,"dialog":true,"src":"/computer/resume/","frame":{"path":"/computer/resume/","y":900,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"]}
+[run 2] [c5] PASS reload: same page in the computer {"url":"/?computer=resume","frame":"/computer/resume/"}
+[run 2] [c5] PASS reload: opens flat, no camera flight (no fade/fly state) ["read"]
+[run 2] [c5] PASS reload: no history change {"len":[5,5],"idx":[3,3]}
+[run 2] [c5] PASS reload: the frame page keeps its scroll (computer.ts:98 says remember() is for "Back and Forward (and a reload)") {"before":900,"afterReload":900,"state":{"pc":"resume","back":3,"k":"w4mh0ivb","y":900}}
+[run 2] [c5] reload, then Leave computer {"url":"/","doc":"cee0o5","len":5,"idx":0,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible","pcSeq":["read","return",null]}
+[run 2] [c5] PASS reload, then Leave: back at the opening {"url":"/","pc":null,"idx":[0,0]}
+[run 2] [c5] PASS reload, then Leave: without loading the page again {"reloaded":"cee0o5","afterLeave":"cee0o5"}
+[run 2] [c5] PASS reload, then Leave: focus on the enter link "Explore the lab (enter link)"
+[run 2] [c5] direct ?computer=about, reloaded {"url":"/?computer=about","doc":"dsnye7","len":2,"idx":0,"n":1,"state":{"pc":"about","back":0,"k":"4slr68te"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"]}
+[run 2] [c5] PASS direct + reload: flat, state {pc: about, back: 0} {"pc":"about","back":0,"k":"4slr68te"}
+[run 2] [c5] direct /?computer=work {"url":"/?computer=work","doc":"9d12o8","len":2,"idx":0,"n":1,"state":{"pc":"work","back":0,"k":"tm61gwan"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"msToReading":539}
+[run 2] [c5] PASS direct work: opens on it, flat, back 0 {"url":"/?computer=work","frame":"/computer/work/","pcSeq":["read"],"state":{"pc":"work","back":0,"k":"tm61gwan"}}
+[run 2] [c5] direct /?computer=work/cucadence {"url":"/?computer=work/cucadence","doc":"ox997m","len":2,"idx":0,"n":1,"state":{"pc":"work/cucadence","back":0,"k":"tkn9a9fd"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/cucadence/","frame":{"path":"/computer/work/cucadence/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"msToReading":544}
+[run 2] [c5] PASS direct work/cucadence: opens on it, flat, back 0 {"url":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","pcSeq":["read"],"state":{"pc":"work/cucadence","back":0,"k":"tkn9a9fd"}}
+[run 2] [c5] direct /?computer=about {"url":"/?computer=about","doc":"xxvj6e","len":2,"idx":0,"n":1,"state":{"pc":"about","back":0,"k":"id7sv8k6"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"msToReading":545}
+[run 2] [c5] PASS direct about: opens on it, flat, back 0 {"url":"/?computer=about","frame":"/computer/about/","pcSeq":["read"],"state":{"pc":"about","back":0,"k":"id7sv8k6"}}
+[run 2] [c5] direct /?computer=resume {"url":"/?computer=resume","doc":"e3lpy0","len":2,"idx":0,"n":1,"state":{"pc":"resume","back":0,"k":"cyqgi9j2"},"pc":"read","full":false,"dialog":true,"src":"/computer/resume/","frame":{"path":"/computer/resume/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"msToReading":529}
+[run 2] [c5] PASS direct resume: opens on it, flat, back 0 {"url":"/?computer=resume","frame":"/computer/resume/","pcSeq":["read"],"state":{"pc":"resume","back":0,"k":"cyqgi9j2"}}
+[run 2] [c5] direct /?computer=contact {"url":"/?computer=contact","doc":"eultyd","len":2,"idx":0,"n":1,"state":{"pc":"contact","back":0,"k":"vwxr427j"},"pc":"read","full":false,"dialog":true,"src":"/computer/contact/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"msToReading":531}
+[run 2] [c5] PASS direct contact: opens on it, flat, back 0 {"url":"/?computer=contact","frame":"/computer/contact/","pcSeq":["read"],"state":{"pc":"contact","back":0,"k":"vwxr427j"}}
+[run 2] [c5] invalid ?computer=bogus {"url":"/","doc":"mbamp0","len":2,"idx":0,"n":1,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible","pcSeq":[],"opening":{"enter":true,"h1":114}}
+[run 2] [c5] PASS ?computer=bogus: falls back to the opening, the address cleaned to / {"url":"/","pc":null}
+[run 2] [c5] invalid ?computer=work/nope {"url":"/","doc":"w18paw","len":2,"idx":0,"n":1,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible","pcSeq":[],"opening":{"enter":true,"h1":114}}
+[run 2] [c5] PASS ?computer=work/nope: falls back to the opening, the address cleaned to / {"url":"/","pc":null}
+[run 2] [c5] invalid ?computer= {"url":"/","doc":"r8342k","len":2,"idx":0,"n":1,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible","pcSeq":[],"opening":{"enter":true,"h1":114}}
+[run 2] [c5] PASS ?computer=: falls back to the opening, the address cleaned to / {"url":"/","pc":null}
+[run 2] [c5] invalid ?computer=work/ {"url":"/?computer=work/","doc":"iuipv5","len":2,"idx":0,"n":1,"state":{"pc":"work","back":0,"k":"80imktda"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"opening":{"enter":true,"h1":114}}
+[run 2] [c5] PASS a trailing slash is trimmed: ?computer=work/ opens Work {"url":"/?computer=work/","pc":"read"}
+[run 2] [c5] invalid ?computer=/about/ {"url":"/?computer=/about/","doc":"0a09tf","len":2,"idx":0,"n":1,"state":{"pc":"about","back":0,"k":"1zkudfyg"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","pcSeq":["read"],"opening":{"enter":true,"h1":114}}
+[run 2] [c5] PASS slashes are trimmed: ?computer=/about/ opens About {"url":"/?computer=/about/","pc":"read"}
+[run 2] [c5] frame page opened on its own: /computer/about/ {"status":200,"url":"/?computer=about","pc":"read","len":2}
+[run 2] [c5] frame page opened on its own: /computer/work/cucadence/ {"status":200,"url":"/?computer=work/cucadence","pc":"read","len":2}
+[run 2] [c5] frame page opened on its own: /computer/work/nope/ {"status":404,"url":"/computer/work/nope/","pc":null,"len":2}
+[run 2] [c6] --- start
+[run 2] [c6] Open ordinary page from about {"url":"/#about","doc":"1ztzo6","len":5,"idx":3,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":2341,"ovf":"visible","target":{"top":128,"text":"About","atPageEnd":false}}
+[run 2] [c6] PASS about -> /#about (top window, one new entry) {"url":"/#about","idx":[2,3],"pc":null}
+[run 2] [c6] PASS about: the section is at the top of the view (or the page is scrolled to its end) {"top":128,"text":"About","atPageEnd":false}
+[run 2] [c6]   then Back {"url":"/?computer=about","pc":"read","frame":"/computer/about/","doc":"same as before","lastPageshow":{"persisted":true,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true}}
+[run 2] [c6] Open ordinary page from work/cucadence {"url":"/projects/cucadence/","doc":"yrssln","len":5,"idx":3,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible","target":{"top":198,"text":"cuCadence","atPageEnd":false}}
+[run 2] [c6] PASS work/cucadence -> /projects/cucadence/ (top window, one new entry) {"url":"/projects/cucadence/","idx":[2,3],"pc":null}
+[run 2] [c6]   then Back {"url":"/?computer=work/cucadence","pc":"read","frame":"/computer/work/cucadence/","doc":"same as before","lastPageshow":{"persisted":true,"url":"/?computer=work/cucadence","pc":"read","frame":"/computer/work/cucadence/","dialogOpen":true}}
+[run 2] [c6] Open ordinary page from work {"url":"/#work","doc":"byu4xy","len":4,"idx":2,"n":3,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":772,"ovf":"visible","target":{"top":128,"text":"Work","atPageEnd":false}}
+[run 2] [c6] PASS work -> /#work (top window, one new entry) {"url":"/#work","idx":[1,2],"pc":null}
+[run 2] [c6] PASS work: the section is at the top of the view (or the page is scrolled to its end) {"top":128,"text":"Work","atPageEnd":false}
+[run 2] [c6]   then Back {"url":"/?computer=work","pc":"read","frame":"/computer/work/","doc":"same as before","lastPageshow":{"persisted":true,"url":"/?computer=work","pc":"read","frame":"/computer/work/","dialogOpen":true}}
+[run 2] [c6] Open ordinary page from resume {"url":"/#resume","doc":"3s34ch","len":5,"idx":3,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":3090,"ovf":"visible","target":{"top":128,"text":"Résumé","atPageEnd":false}}
+[run 2] [c6] PASS resume -> /#resume (top window, one new entry) {"url":"/#resume","idx":[2,3],"pc":null}
+[run 2] [c6] PASS resume: the section is at the top of the view (or the page is scrolled to its end) {"top":128,"text":"Résumé","atPageEnd":false}
+[run 2] [c6]   then Back {"url":"/?computer=resume","pc":"read","frame":"/computer/resume/","doc":"same as before","lastPageshow":{"persisted":true,"url":"/?computer=resume","pc":"read","frame":"/computer/resume/","dialogOpen":true}}
+[run 2] [c6] Open ordinary page from contact {"url":"/#contact","doc":"1310wq","len":5,"idx":3,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":4757,"ovf":"visible","target":{"top":352,"text":"Contact","atPageEnd":true}}
+[run 2] [c6] PASS contact -> /#contact (top window, one new entry) {"url":"/#contact","idx":[2,3],"pc":null}
+[run 2] [c6] PASS contact: the section is at the top of the view (or the page is scrolled to its end) {"top":352,"text":"Contact","atPageEnd":true}
+[run 2] [c6]   then Back {"url":"/?computer=contact","pc":"read","frame":"/computer/contact/","doc":"same as before","lastPageshow":{"persisted":true,"url":"/?computer=contact","pc":"read","frame":"/computer/contact/","dialogOpen":true}}
+[run 2] [c7] --- start
+[run 2] [c7] 1024x768 ?computer=about {"url":"/#about","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=about","/#about"],"unloadedDocs":[{"url":"/?computer=about","paints":[]}]}
+[run 2] [c7] PASS 1024x768 about -> /#about (replace, no extra entry) {"url":"/#about","len":2,"sameOriginEntries":1}
+[run 2] [c7] PASS 1024x768 about: the ?computer= document never painted {"url":"/?computer=about","paints":[]}
+[run 2] [c7] 1024x768 ?computer=work/cucadence {"url":"/projects/cucadence/","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=work/cucadence","/projects/cucadence/"],"unloadedDocs":[{"url":"/?computer=work/cucadence","paints":[]}]}
+[run 2] [c7] PASS 1024x768 work/cucadence -> /projects/cucadence/ (replace, no extra entry) {"url":"/projects/cucadence/","len":2,"sameOriginEntries":1}
+[run 2] [c7] PASS 1024x768 work/cucadence: the ?computer= document never painted {"url":"/?computer=work/cucadence","paints":[]}
+[run 2] [c7] 1024x768 ?computer=work {"url":"/#work","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=work","/#work"],"unloadedDocs":[{"url":"/?computer=work","paints":[]}]}
+[run 2] [c7] PASS 1024x768 work -> /#work (replace, no extra entry) {"url":"/#work","len":2,"sameOriginEntries":1}
+[run 2] [c7] PASS 1024x768 work: the ?computer= document never painted {"url":"/?computer=work","paints":[]}
+[run 2] [c7] 1024x768 ?computer=resume {"url":"/#resume","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=resume","/#resume"],"unloadedDocs":[{"url":"/?computer=resume","paints":[]}]}
+[run 2] [c7] PASS 1024x768 resume -> /#resume (replace, no extra entry) {"url":"/#resume","len":2,"sameOriginEntries":1}
+[run 2] [c7] PASS 1024x768 resume: the ?computer= document never painted {"url":"/?computer=resume","paints":[]}
+[run 2] [c7] 1024x768 ?computer=contact {"url":"/#contact","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=contact","/#contact"],"unloadedDocs":[{"url":"/?computer=contact","paints":[]}]}
+[run 2] [c7] PASS 1024x768 contact -> /#contact (replace, no extra entry) {"url":"/#contact","len":2,"sameOriginEntries":1}
+[run 2] [c7] PASS 1024x768 contact: the ?computer= document never painted {"url":"/?computer=contact","paints":[]}
+[run 2] [c7] 1024x768 /computer/about/ opened on its own {"url":"/#about","unloadedDocs":[{"url":"/computer/about/","paints":[]}]}
+[run 2] [c7] 390x844 ?computer=about {"url":"/#about","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=about","/#about"],"unloadedDocs":[{"url":"/?computer=about","paints":[]}]}
+[run 2] [c7] PASS 390x844 about -> /#about (replace, no extra entry) {"url":"/#about","len":2,"sameOriginEntries":1}
+[run 2] [c7] PASS 390x844 about: the ?computer= document never painted {"url":"/?computer=about","paints":[]}
+[run 2] [c7] 390x844 ?computer=work/cucadence {"url":"/projects/cucadence/","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=work/cucadence","/projects/cucadence/"],"unloadedDocs":[{"url":"/?computer=work/cucadence","paints":[]}]}
+[run 2] [c7] PASS 390x844 work/cucadence -> /projects/cucadence/ (replace, no extra entry) {"url":"/projects/cucadence/","len":2,"sameOriginEntries":1}
+[run 2] [c7] PASS 390x844 work/cucadence: the ?computer= document never painted {"url":"/?computer=work/cucadence","paints":[]}
+[run 2] [c7] 390x844 ?computer=work {"url":"/#work","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=work","/#work"],"unloadedDocs":[{"url":"/?computer=work","paints":[]}]}
+[run 2] [c7] PASS 390x844 work -> /#work (replace, no extra entry) {"url":"/#work","len":2,"sameOriginEntries":1}
+[run 2] [c7] PASS 390x844 work: the ?computer= document never painted {"url":"/?computer=work","paints":[]}
+[run 2] [c7] 390x844 ?computer=resume {"url":"/#resume","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=resume","/#resume"],"unloadedDocs":[{"url":"/?computer=resume","paints":[]}]}
+[run 2] [c7] PASS 390x844 resume -> /#resume (replace, no extra entry) {"url":"/#resume","len":2,"sameOriginEntries":1}
+[run 2] [c7] PASS 390x844 resume: the ?computer= document never painted {"url":"/?computer=resume","paints":[]}
+[run 2] [c7] 390x844 ?computer=contact {"url":"/#contact","len":2,"pc":null,"pcAble":false,"mainFrameNavigations":["/?computer=contact","/#contact"],"unloadedDocs":[{"url":"/?computer=contact","paints":[]}]}
+[run 2] [c7] PASS 390x844 contact -> /#contact (replace, no extra entry) {"url":"/#contact","len":2,"sameOriginEntries":1}
+[run 2] [c7] PASS 390x844 contact: the ?computer= document never painted {"url":"/?computer=contact","paints":[]}
+[run 2] [c7] 390x844 /computer/about/ opened on its own {"url":"/#about","unloadedDocs":[{"url":"/computer/about/","paints":[]}]}
+[run 2] [c8] --- start
+[run 2] [c8] links on the computer pages by what a plain click does {"pc:go":144,"top window (ordinary page)":15,"download":1,"mailto: (default, target _top via <base>)":2,"new tab (target=_blank)":21,"new tab (window.open, external)":3,"new tab (window.open, same-origin page with no computer path)":1}
+[run 2] [c8] PASS no link is swallowed by the frame []
+[run 2] [c8] Contact: GitHub {"newTab":"https://github.com/donaldheddesheimer","topUrl":"/?computer=contact","frame":"/computer/contact/","sameDoc":true,"idx":[2,2]}
+[run 2] [c8] PASS Contact: GitHub: a new tab; the frame and the top page stay {"newTab":"https://github.com/donaldheddesheimer","topUrl":"/?computer=contact","frame":"/computer/contact/","sameDoc":true,"idx":[2,2]}
+[run 2] [c8] Contact: LinkedIn {"newTab":"https://www.linkedin.com/in/donaldheddesheimer/","topUrl":"/?computer=contact","frame":"/computer/contact/","sameDoc":true,"idx":[2,2]}
+[run 2] [c8] PASS Contact: LinkedIn: a new tab; the frame and the top page stay {"newTab":"https://www.linkedin.com/in/donaldheddesheimer/","topUrl":"/?computer=contact","frame":"/computer/contact/","sameDoc":true,"idx":[2,2]}
+[run 2] [c8] Contact: Copy address {"label":"Copied","clipboardMatchesButton":true,"frame":"/computer/contact/","url":"/?computer=contact"}
+[run 2] [c8] PASS Copy address works inside the frame {"label":"Copied","clipboardMatchesButton":true}
+[run 2] [c8] Case study: repository button {"newTab":"https://github.com/donald-heddesheimer/cadence","topUrl":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","sameDoc":true,"idx":[4,4]}
+[run 2] [c8] PASS Case study: repository button: a new tab; the frame and the top page stay {"newTab":"https://github.com/donald-heddesheimer/cadence","topUrl":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","sameDoc":true,"idx":[4,4]}
+[run 2] [c8] Case study: inline external link without target (ui.perfetto.dev) {"newTab":"https://ui.perfetto.dev/","topUrl":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","sameDoc":true,"idx":[4,4]}
+[run 2] [c8] PASS Case study: inline external link without target (ui.perfetto.dev): a new tab; the frame and the top page stay {"newTab":"https://ui.perfetto.dev/","topUrl":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","sameDoc":true,"idx":[4,4]}
+[run 2] [c8] Case study: same-origin image link (/projects/cadence-timeline.png) {"newTab":"http://127.0.0.1:4322/projects/cadence-timeline.png","topUrl":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","sameDoc":true,"idx":[4,4]}
+[run 2] [c8] PASS Case study: same-origin image link (/projects/cadence-timeline.png): a new tab; the frame and the top page stay {"newTab":"http://127.0.0.1:4322/projects/cadence-timeline.png","topUrl":"/?computer=work/cucadence","frame":"/computer/work/cucadence/","sameDoc":true,"idx":[4,4]}
+[run 2] [c8] GET /resume.pdf {"status":200,"type":"application/pdf","bytes":146254}
+[run 2] [c8] PASS the résumé PDF is served (200, application/pdf) {"status":200,"type":"application/pdf"}
+[run 2] [c8] Résumé: Download PDF {"download":{"url":"/resume.pdf","suggested":"Donald-Heddesheimer-Resume.pdf"},"frame":"/computer/resume/","url":"/?computer=resume","pages":1}
+[run 2] [c8] PASS Download PDF downloads; the frame keeps the Résumé page {"download":{"url":"/resume.pdf","suggested":"Donald-Heddesheimer-Resume.pdf"},"frame":"/computer/resume/","url":"/?computer=resume","pages":1}
+[run 2] [c8] phone-number scan (counts only) {"/computer/work/":{"tel":0,"phoneLike":0},"/computer/about/":{"tel":0,"phoneLike":0},"/computer/resume/":{"tel":0,"phoneLike":0},"/computer/contact/":{"tel":0,"phoneLike":0},"/computer/work/cucadence/":{"tel":0,"phoneLike":0},"/projects/cucadence/":{"tel":0,"phoneLike":0},"/":{"tel":0,"phoneLike":0},"/resume.pdf":{"inflatedBytes":341013,"literalTextChars":95625,"wordsReadable":[],"tel":0,"phoneLike":0}}
+[run 2] [c8] PASS no phone number on the served pages (or found in the PDF text layer) {"/computer/work/":0,"/computer/about/":0,"/computer/resume/":0,"/computer/contact/":0,"/computer/work/cucadence/":0,"/projects/cucadence/":0,"/":0,"/resume.pdf":0}
+[run 2] [c8] external requests answered by the stub (hosts) ["github.com","www.linkedin.com","ui.perfetto.dev"]
+[run 2] [c9] --- start
+[run 2] [c9] [routed] a) ?computer=about -> / -> Back {"url":"/?computer=about","doc":"a1t09m","len":3,"idx":0,"n":2,"state":{"pc":"about","back":0,"k":"yx43j36n"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","msAfterBack":104,"pageshows":[{"persisted":false,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true},{"persisted":true,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true}],"bfcacheNotUsed":[]}
+[run 2] [c9] PASS [routed] a) restored from the back-forward cache (pageshow persisted, same document) {"persisted":true,"sameDoc":true,"notUsed":[]}
+[run 2] [c9] PASS [routed] a) at pageshow the lab already reads About {"persisted":true,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true}
+[run 2] [c9] [routed] b) opening -> work -> contact -> / -> Back {"url":"/?computer=contact","doc":"8hyebl","len":5,"idx":2,"n":4,"state":{"pc":"contact","back":2,"k":"zbl7wmtj"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","lastPageshow":{"persisted":true,"url":"/?computer=contact","pc":"read","frame":"/computer/contact/","dialogOpen":true},"bfcacheNotUsed":[]}
+[run 2] [c9] PASS [routed] b) restored on Contact, matching the address {"url":"/?computer=contact","pageshow":{"persisted":true,"url":"/?computer=contact","pc":"read","frame":"/computer/contact/","dialogOpen":true}}
+[run 2] [c9] [routed] b) then / and history.go(-3) straight to the opening (a jump to another entry of the cached document; see bfcacheNotUsed for whether Chrome restored it) {"at100ms":{"pc":null,"dialog":false},"url":"/","doc":"oyzm2a","len":5,"idx":0,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible","lastPageshow":{"persisted":false,"url":"/","pc":null,"frame":null,"dialogOpen":false},"pcSeq":[],"bfcacheNotUsed":[["Circumstantial:ConflictingBrowsingInstance","SupportPending:Unknown"]]}
+[run 2] [c9] PASS [routed] b) restored at the opening: the lab closes {"url":"/","pc":null,"dialog":false}
+[run 2] [c9] PASS [routed] b) closed at once (no return flight) []
+[run 2] [c9] [unrouted] a) ?computer=about -> / -> Back {"url":"/?computer=about","doc":"pmt6sh","len":3,"idx":0,"n":2,"state":{"pc":"about","back":0,"k":"ssjkfukk"},"pc":"read","full":false,"dialog":true,"src":"/computer/about/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","msAfterBack":103,"pageshows":[{"persisted":false,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true},{"persisted":true,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true}],"bfcacheNotUsed":[]}
+[run 2] [c9] PASS [unrouted] a) restored from the back-forward cache (pageshow persisted, same document) {"persisted":true,"sameDoc":true,"notUsed":[]}
+[run 2] [c9] PASS [unrouted] a) at pageshow the lab already reads About {"persisted":true,"url":"/?computer=about","pc":"read","frame":"/computer/about/","dialogOpen":true}
+[run 2] [c9] [unrouted] b) opening -> work -> contact -> / -> Back {"url":"/?computer=contact","doc":"ayx9lc","len":5,"idx":2,"n":4,"state":{"pc":"contact","back":2,"k":"txyo41rq"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/contact/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden","lastPageshow":{"persisted":true,"url":"/?computer=contact","pc":"read","frame":"/computer/contact/","dialogOpen":true},"bfcacheNotUsed":[]}
+[run 2] [c9] PASS [unrouted] b) restored on Contact, matching the address {"url":"/?computer=contact","pageshow":{"persisted":true,"url":"/?computer=contact","pc":"read","frame":"/computer/contact/","dialogOpen":true}}
+[run 2] [c9] [unrouted] b) then / and history.go(-3) straight to the opening (a jump to another entry of the cached document; see bfcacheNotUsed for whether Chrome restored it) {"at100ms":{"pc":null,"dialog":false},"url":"/","doc":"5njwgk","len":5,"idx":0,"n":4,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"body","y":0,"ovf":"visible","lastPageshow":{"persisted":false,"url":"/","pc":null,"frame":null,"dialogOpen":false},"pcSeq":[],"bfcacheNotUsed":[["Circumstantial:ConflictingBrowsingInstance","SupportPending:Unknown"]]}
+[run 2] [c9] PASS [unrouted] b) restored at the opening: the lab closes {"url":"/","pc":null,"dialog":false}
+[run 2] [c9] PASS [unrouted] b) closed at once (no return flight) []
+[run 2] [c10] --- start
+[run 2] [c10] 1440x900 reading Work {"viewport":[1440,900],"pc":"read","full":false,"pcAble":true,"frameRect":[115,72,1210,756],"quad":[[115,72],[1325,72],[1325,828],[115,828]],"maxCornerDevPx":0.1,"canvas":[0,0,1440,900],"frameY":300,"framePath":"/computer/work/","url":"/?computer=work","dialog":true,"pageY":0}
+[run 2] [c10] PASS 1440x900: frame on the monitor screen (corner deviation <= 2 px) 0.1
+[run 2] [c10] resized to 1024x768 {"viewport":[1024,768],"pc":"read","full":true,"pcAble":false,"frameRect":[0,0,1024,768],"quad":[[115,72],[1325,72],[1325,828],[115,828]],"maxCornerDevPx":309.5,"canvas":[0,0,1024,768],"frameY":300,"framePath":"/computer/work/","url":"/?computer=work","dialog":true,"pageY":0}
+[run 2] [c10] PASS 1024x768 (below the gate): the page across the window, still reading {"full":true,"rect":[0,0,1024,768],"pc":"read"}
+[run 2] [c10] PASS 1024x768: address, frame page and dialog unchanged {"url":"/?computer=work","frame":"/computer/work/","frameY":300,"dialog":true}
+[run 2] [c10] resized to 1440x900 {"viewport":[1440,900],"pc":"read","full":false,"pcAble":true,"frameRect":[115,72,1210,756],"quad":[[115,72],[1325,72],[1325,828],[115,828]],"maxCornerDevPx":0.1,"canvas":[0,0,1440,900],"frameY":298,"framePath":"/computer/work/","url":"/?computer=work","dialog":true,"pageY":0}
+[run 2] [c10] PASS 1440x900: frame back on the monitor screen (corner deviation <= 2 px) {"full":false,"dev":0.1,"rect":[115,72,1210,756]}
+[run 2] [c10] PASS 1440x900: address, frame page and dialog unchanged {"url":"/?computer=work","frame":"/computer/work/","frameY":298,"dialog":true}
+[run 2] [c10] resized to 1920x1080 {"viewport":[1920,1080],"pc":"read","full":false,"pcAble":true,"frameRect":[157,38,1607,1004],"quad":[[157,38],[1764,38],[1764,1042],[157,1042]],"maxCornerDevPx":0.2,"canvas":[0,0,1920,1080],"frameY":300,"framePath":"/computer/work/","url":"/?computer=work","dialog":true,"pageY":0}
+[run 2] [c10] PASS 1920x1080: frame back on the monitor screen (corner deviation <= 2 px) {"full":false,"dev":0.2,"rect":[157,38,1607,1004]}
+[run 2] [c10] PASS 1920x1080: address, frame page and dialog unchanged {"url":"/?computer=work","frame":"/computer/work/","frameY":300,"dialog":true}
+[run 2] [c10] left at 1920x1080 {"url":"/?probe","doc":"nmq5xm","len":3,"idx":0,"n":2,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible","monitorQuad":[[134,629],[516,610],[527,817],[152,846]]}
+[run 2] [c10] PASS left at 1920x1080: opening with the monitor in frame, focus on the enter link {"pc":null,"focus":"Explore the lab (enter link)"}
+[run 2] [c10] entered at 1440x900, resized to 1024x768, left {"url":"/?probe","doc":"nmq5xm","len":3,"idx":0,"n":2,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible"}
+[run 2] [c10] PASS leaving below the gate: closed, full flag cleared, page unlocked {"pc":null,"full":false,"url":"/?probe","ovf":"visible","focus":"Explore the lab (enter link)"}
+[run 2] [c10] direct ?probe&computer=about at 1440x900, then 1920x1080 {"at1440":{"viewport":[1440,900],"pc":"read","full":false,"pcAble":true,"frameRect":[115,72,1210,756],"quad":[[115,72],[1325,72],[1325,828],[115,828]],"maxCornerDevPx":0.1,"canvas":[0,0,1440,900],"frameY":0,"framePath":"/computer/about/","url":"/?probe&computer=about","dialog":true,"pageY":0},"at1920":{"viewport":[1920,1080],"pc":"read","full":false,"pcAble":true,"frameRect":[157,38,1607,1004],"quad":[[157,38],[1764,38],[1764,1042],[157,1042]],"maxCornerDevPx":0.2,"canvas":[0,0,1920,1080],"frameY":0,"framePath":"/computer/about/","url":"/?probe&computer=about","dialog":true,"pageY":0}}
+[run 2] [c10] PASS direct link: frame on the screen before and after the resize [0.1,0.2]
+[run 2] [c11] --- start
+[run 2] [c11] Tab from the top of the page to the entry ["a.sr-only \"Skip to content\"","a.home-mark \"Donald Heddesheimer, back to top\"","a \"Work\"","a \"About\"","a \"Résumé\"","a \"Contact\"","button.btn \"Settings\"","Explore the lab (enter link)"]
+[run 2] [c11] Enter on "Explore the lab" {"url":"/?computer=work","doc":"jyhjhe","len":3,"idx":1,"n":2,"state":{"pc":"work","back":1,"k":"xdxwtxgu"},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/work/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c11] PASS the frame has the focus on arrival {"focus":"iframe.pc-frame","frameFocus":"body"}
+[run 2] [c11] Tab order inside the computer [{"el":"Donald Heddesheimer, work","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[40,6,178,32]},{"el":"Work","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[596,6,53,32]},{"el":"About","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[652,6,59,32]},{"el":"Résumé","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[713,6,72,32]},{"el":"Contact","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[786,6,71,32]},{"el":"Open ordinary page","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[895,6,148,32]},{"el":"Leave computer","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[1046,6,124,32]},{"el":"Traffic Operations Center","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[40,595,272,28]},{"el":"cuCadence","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[619,595,123,28]},{"el":"claude-status","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[40,371,115,21]},{"el":"Smart Bin","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[426,371,81,21]},{"el":"Useless Machine","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[812,371,139,21]}]
+[run 2] [c11] PASS Tab reaches "Open ordinary page" and "Leave computer" {"ordinaryAt":5,"leaveAt":6}
+[run 2] [c11] PASS Tab continues from the bar into the content {"el":"Traffic Operations Center","fv":true,"outline":"solid 2px rgb(138, 187, 255)","box":[40,595,272,28]}
+[run 2] [c11] PASS every stop shows a visible focus ring (:focus-visible, 2px solid outline) ["true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)","true solid 2px rgb(138, 187, 255)"]
+[run 2] [c11] Shift+Tab back to "Leave computer"
+[run 2] [c11] Enter on About in the bar {"url":"/?computer=about","doc":"jyhjhe","len":4,"idx":2,"n":3,"state":{"pc":"about","back":2,"k":"rmg0bly5","y":0},"pc":"read","full":false,"dialog":true,"src":"/computer/work/","frame":{"path":"/computer/about/","y":0,"focus":"body"},"focus":"iframe.pc-frame","y":0,"ovf":"hidden"}
+[run 2] [c11] PASS after a keyboard move to About, the focus stays in the frame {"focus":"iframe.pc-frame","frameFocus":"body"}
+[run 2] [c11] Tab once on About, then Shift+Tab off the first stop {"firstStop":"Donald Heddesheimer, work","topFocus":"iframe.pc-frame","frameFocus":"body"}
+[run 2] [c11] Enter on "Leave computer" {"url":"/","doc":"jyhjhe","len":4,"idx":0,"n":3,"state":null,"pc":null,"full":false,"dialog":false,"src":null,"frame":null,"focus":"Explore the lab (enter link)","y":0,"ovf":"visible","focusVisible":true}
+[run 2] [c11] PASS after leaving by keyboard: focus (visible) on "Explore the lab", at the opening entry {"focus":"Explore the lab (enter link)","focusVisible":true,"idx":[0,0]}
+[summary] run 1 check 1: 21 pass, 0 fail
+[summary] run 1 check 2: 14 pass, 0 fail
+[summary] run 1 check 3: 11 pass, 0 fail
+[summary] run 1 check 4: 9 pass, 0 fail
+[summary] run 1 check 5: 18 pass, 0 fail
+[summary] run 1 check 6: 9 pass, 0 fail
+[summary] run 1 check 7: 20 pass, 0 fail
+[summary] run 1 check 8: 10 pass, 0 fail
+[summary] run 1 check 9: 10 pass, 0 fail
+[summary] run 1 check 10: 10 pass, 0 fail
+[summary] run 1 check 11: 6 pass, 0 fail
+[summary] run 2 check 1: 21 pass, 0 fail
+[summary] run 2 check 2: 14 pass, 0 fail
+[summary] run 2 check 3: 11 pass, 0 fail
+[summary] run 2 check 4: 9 pass, 0 fail
+[summary] run 2 check 5: 18 pass, 0 fail
+[summary] run 2 check 6: 9 pass, 0 fail
+[summary] run 2 check 7: 20 pass, 0 fail
+[summary] run 2 check 8: 10 pass, 0 fail
+[summary] run 2 check 9: 10 pass, 0 fail
+[summary] run 2 check 10: 10 pass, 0 fail
+[summary] run 2 check 11: 6 pass, 0 fail

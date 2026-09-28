@@ -1,13 +1,13 @@
-// /prototype/'s fallbacks: WebGL missing, a WebGL context that can't be created, no JavaScript, and
+// The homepage's fallbacks: WebGL missing, a WebGL context that can't be created, no JavaScript, and
 // Save-Data. For each: what the opening shows (the SVG still, the canvas, data-failed / data-mounted,
 // data-pc-able), what "Explore the lab" (or its "See the work" form) and a click on the picture do, where
-// the computer's shared address (/prototype/?computer=about) leads, and every page error, console error
+// the computer's shared address (/?computer=about) leads, and every page error, console error
 // and failed request.
 // - no WebGL: a browser launched with --disable-webgl --disable-3d-apis (the GPU shim leaves those alone),
 //   at 1440x900 and 390x844;
 // - context failure: the GPU browser with HTMLCanvasElement.prototype.getContext returning null for
 //   webgl / webgl2 / experimental-webgl (an init script), at 1440x900;
-// - no JavaScript (javaScriptEnabled false), at 1440x900 and 390x844, /prototype/ and the addresses;
+// - no JavaScript (javaScriptEnabled false), at 1440x900 and 390x844, / and the addresses;
 // - Save-Data: the request header alone (Save-Data: on), then the header plus navigator.connection.saveData
 //   true (the code reads only navigator.connection.saveData, LabStage.astro), at 1440x900: the scene waits
 //   until the lab is entered, and entering loads it (html[data-pc] traced).
@@ -43,7 +43,7 @@ const stillBox = (page) =>
 
 // The opening without a room: the still, the entry's form, the link and a click on the picture.
 async function failedOpening(page, tag, size) {
-  await page.goto(`${C.SERVER}/prototype/?probe`, { waitUntil: 'load' });
+  await page.goto(`${C.SERVER}/?probe`, { waitUntil: 'load' });
   await page.waitForSelector('[data-lab-root][data-failed], [data-lab-root][data-drawn]', { timeout: 30000 });
   await page.waitForTimeout(800);
   const r = await C.rendererOf(page);
@@ -54,7 +54,7 @@ async function failedOpening(page, tag, size) {
   await page.screenshot({ path: `${C.SHOTS}/fallbacks-${tag}-opening-${size}.jpg`, type: 'jpeg', quality: 86, scale: 'css' });
   for (let run = 1; run <= 2; run++) {
     await page.evaluate(() => {
-      history.replaceState(null, '', '/prototype/?probe');
+      history.replaceState(null, '', '/?probe');
       scrollTo({ top: 0, behavior: 'instant' });
     });
     await page.waitForTimeout(400);
@@ -73,7 +73,7 @@ async function failedOpening(page, tag, size) {
 // The shared address with no room behind it.
 async function sharedAddress(page, tag) {
   for (let run = 1; run <= 2; run++) {
-    await page.goto(`${C.SERVER}/prototype/?computer=about&probe`, { waitUntil: 'load' });
+    await page.goto(`${C.SERVER}/?computer=about&probe`, { waitUntil: 'load' });
     await page.waitForTimeout(2500);
     const s = await C.labState(page);
     const frame = await page.evaluate(() => {
@@ -137,7 +137,7 @@ async function noJS(browser) {
     const ctx = await C.newCtx(browser, { ...opts, javaScriptEnabled: false });
     const page = await ctx.newPage();
     const w = C.watch(page, size);
-    await page.goto(`${C.SERVER}/prototype/`, { waitUntil: 'load' });
+    await page.goto(`${C.SERVER}/`, { waitUntil: 'load' });
     await page.waitForTimeout(500);
     log('renderer (a probe canvas from the harness; the page runs no script)', await C.rendererOf(page));
     log('state', await C.labState(page), 'still', await stillBox(page));
@@ -159,7 +159,7 @@ async function noJS(browser) {
     await page.click('[data-lab-enter]');
     await page.waitForTimeout(800);
     log('enter link', await page.evaluate(() => ({ url: location.pathname + location.search + location.hash, workTop: Math.round(document.getElementById('work').getBoundingClientRect().top) })));
-    for (const u of ['/prototype/?computer=about', '/computer/about/', '/prototype/work/cucadence/']) {
+    for (const u of ['/?computer=about', '/computer/about/', '/projects/cucadence/']) {
       await page.goto(C.SERVER + u, { waitUntil: 'load' });
       await page.waitForTimeout(400);
       log(`address ${u}`, await page.evaluate(() => ({ url: location.pathname + location.search + location.hash, title: document.title, h1: document.querySelector('h1, h2')?.textContent.trim().slice(0, 40), sw: document.documentElement.scrollWidth, iw: innerWidth })));
@@ -185,7 +185,7 @@ async function saveData(browser) {
       page.on('request', (r) => {
         if (/scene|three/i.test(r.url())) threeRequests.push(r.url().replace(C.SERVER, ''));
       });
-      await page.goto(`${C.SERVER}/prototype/?probe`, { waitUntil: 'load' });
+      await page.goto(`${C.SERVER}/?probe`, { waitUntil: 'load' });
       await page.waitForTimeout(4000);
       const r0 = await C.rendererOf(page);
       L.setRenderer(r0);

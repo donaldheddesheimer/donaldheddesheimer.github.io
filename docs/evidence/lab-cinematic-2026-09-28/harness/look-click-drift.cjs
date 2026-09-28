@@ -1,4 +1,4 @@
-// A long hold at the look-around's tight side on /prototype/'s opening, to catch the camera's slow drift
+// A long hold at the look-around's tight side on the homepage's opening, to catch the camera's slow drift
 // pushing the monitor out of frame: at each size in W (default 1440x900, 1680x1050), from the room at
 // 62%/72% of [data-lab-root], a mouse drag of 12 x 60 px to the left (positive az, which swings the
 // monitor toward the left edge; aabec24 limits this side from the drift each frame), held for HOLD ms

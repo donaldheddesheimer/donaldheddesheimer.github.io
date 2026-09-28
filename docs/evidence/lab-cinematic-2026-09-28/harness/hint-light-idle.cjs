@@ -1,4 +1,4 @@
-// The idle hint on /prototype/?probe (scene.ts hint(), endHint(), idleEvents), from a running build (BASE,
+// The idle hint on /?probe (scene.ts hint(), endHint(), idleEvents), from a running build (BASE,
 // default :4322), at 1440x900. Every case is a fresh page. An init script timestamps (performance.now, in
 // the page) each change of [data-lab-root] data-hint / data-drawn, html data-pc / data-motion, and each
 // pointermove, pointerdown, keydown, wheel and scroll the window sees, so timings come from the page's
@@ -340,8 +340,8 @@ const CASES = [
   },
   {
     id: 'pc-direct',
-    what: '/prototype/?probe&computer=work (the computer open from load): the hint never runs (25 s watched)',
-    url: '/prototype/?probe&computer=work',
+    what: '/?probe&computer=work (the computer open from load): the hint never runs (25 s watched)',
+    url: '/?probe&computer=work',
     async act(p, d, n) {
       n.pc = await p.evaluate(() => document.documentElement.dataset.pc);
       await until(p, d + 25000);
@@ -477,7 +477,7 @@ async function runCase(browser, an, c, run) {
   const n = {};
   let res;
   try {
-    await p.goto(BASE + (c.url || '/prototype/?probe'), { waitUntil: 'load' });
+    await p.goto(BASE + (c.url || '/?probe'), { waitUntil: 'load' });
     await p.waitForSelector('[data-lab-root][data-drawn], [data-lab-root][data-failed]', { timeout: 60000 });
     const e0 = await evs(p);
     const d = e0.find((x) => x[1] === 'data-drawn')[0];

@@ -1,22 +1,20 @@
-// PROTOTYPE (lab-cinematic, 2026-09-28; first pass lab-prototype, 2026-09-27): the computer on the lab's
-// desk, in /prototype/. Forked from src/scripts/lab.ts (the released systems-map reveal), which is left as
-// it is.
+// The computer on the lab's desk, on the homepage (/).
 //
 // "Explore the lab", or a click on the monitor, flies the opening's camera once, straight to reading:
 // square on to the screen, where the portfolio is real HTML (/computer/…, src/layouts/Screen.astro) in a
 // frame laid over the monitor's screen. The frame rides the screen in flight and lies flat, focused and
 // scrollable, once there. While reading, the robots come to rest and the scene stops drawing.
 //
-// The address names what the computer shows (routes.ts): /prototype/?computer=<path>. Going in adds an
-// entry; each page opened inside adds one; Back and Forward move between them, and out of the lab. Leave
-// (the computer's own button, or Escape) goes back to the entry the lab was opened from. A reload or a
-// shared link opens the computer on its page at once, over the room, without the camera's entrance.
+// The address names what the computer shows (routes.ts): /?computer=<path>. Going in adds an entry; each
+// page opened inside adds one; Back and Forward move between them, and out of the lab. Leave (the
+// computer's own button, or Escape) goes back to the entry the lab was opened from. A reload or a shared
+// link opens the computer on its page at once, over the room, without the camera's entrance.
 // history.state is { pc: path, back: entries since the opening (0: the lab was opened here), y: the
 // page's scroll when last left, k: the entry's own key }.
 //
-// Windows that can't hold the composition (phones, narrow, short or portrait: the release's `roomy`
-// gate) don't enter; the page below the opening has the same content. One that stops being roomy while
-// reading shows the computer's page across the whole window.
+// Windows that can't hold the composition (phones, narrow, short or portrait: the `roomy` gate) don't
+// enter; the page below the opening has the same content. One that stops being roomy while reading shows
+// the computer's page across the whole window.
 import type { LabScene, Quad, Rect } from './scene';
 import { frameHref, labHref, parse } from './routes';
 
@@ -40,7 +38,7 @@ const smooth = (a: number, b: number, x: number) => {
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const noop = () => {};
 
-// The CSS transform that lays a w x h box onto a quad (corners clockwise from top left), as lab.ts.
+// The CSS transform that lays a w x h box onto a quad (corners clockwise from top left).
 function warp(q: Quad, w: number, h: number) {
   const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = q;
   const dx1 = x1 - x2;
@@ -86,7 +84,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   const motionOK = () => !reduce.matches && html.dataset.motion !== 'off';
   const ready = () => !!getScene() && root.dataset.drawn != null && root.dataset.failed == null;
   const canEnter = () => roomy.matches && root.dataset.failed == null;
-  // Whether "Explore the lab" is offered (the inline script on /prototype/ sets it first, from `roomy`).
+  // Whether "Explore the lab" is offered (the homepage's inline script sets it first, from `roomy`).
   const offer = () => html.toggleAttribute('data-pc-able', canEnter());
   const entry = (): Entry => (history.state && typeof history.state === 'object' ? history.state : {});
   const current = () => parse(new URLSearchParams(location.search).get('computer'), projects);
@@ -422,7 +420,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     }
   });
 
-  // A reload or a shared link: the inline script on /prototype/ has already shown the lab reading.
+  // A reload or a shared link: the homepage's inline script has already shown the lab reading.
   const path = current();
   if (path && html.dataset.pc === 'read') {
     if (entry().pc !== path) history.replaceState({ pc: path, back: 0, k: newKey() } satisfies Entry, '');

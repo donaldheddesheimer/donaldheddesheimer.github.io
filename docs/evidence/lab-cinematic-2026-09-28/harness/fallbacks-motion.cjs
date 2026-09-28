@@ -1,4 +1,4 @@
-// Reduced motion and the Motion switch on /prototype/?probe at 1440x900.
+// Reduced motion and the Motion switch on /?probe at 1440x900.
 // Reduced motion (reducedMotion 'reduce'): the opening holds still (data-running, __lab.stats().frames
 // and two screenshots 2 s apart), no idle hint after 7 s untouched, no look-around under a mouse drag,
 // and going in and out (the link, the monitor, Escape, the computer's "Leave computer") without the
@@ -16,7 +16,7 @@ const C = require('./fallbacks-common.cjs');
 
 const L = C.makeLog('fallbacks-motion');
 const log = L.log;
-const URL = `${C.SERVER}/prototype/?probe`;
+const URL = `${C.SERVER}/?probe`;
 const viewport = { width: 1440, height: 900 };
 const waitRoom = (page) => page.waitForSelector('[data-lab-root][data-drawn], [data-lab-root][data-failed]', { timeout: 60000 });
 
@@ -50,6 +50,17 @@ async function stillOver(page, ms) {
 const switches = (page) =>
   page.evaluate(() => [...document.querySelectorAll('[data-motion-toggle]')].map((b) => ({ where: b.closest('header') ? 'header' : b.closest('footer') ? 'footer' : 'other', role: b.getAttribute('role'), ariaChecked: b.getAttribute('aria-checked'), ariaPressed: b.getAttribute('aria-pressed'), shown: b.getBoundingClientRect().width > 0 && getComputedStyle(b).visibility !== 'hidden' })));
 const pref = (page) => page.evaluate(() => ({ motion: document.documentElement.dataset.motion, stored: (() => { try { return localStorage.getItem('motion'); } catch { return 'unavailable'; } })() }));
+// The header's Motion switch is inside the Settings disclosure (Base.astro): open it to reach the switch,
+// and close it again (a script click, so the focus stays put) before a screenshot.
+async function headerSwitch(page) {
+  if (await page.locator('#settings').isHidden()) await page.click('[data-settings-toggle]');
+  return page.locator('header [data-motion-toggle]');
+}
+const closeSettings = (page) =>
+  page.evaluate(() => {
+    const b = document.querySelector('[data-settings-toggle]');
+    if (b.getAttribute('aria-expanded') === 'true') b.click();
+  });
 
 async function dragLook(page) {
   const box = await page.locator('[data-lab-root]').boundingBox();
@@ -133,7 +144,8 @@ async function reduced(browser) {
 
   // Reduced motion, with the Motion switch turned on.
   log('\n-- reduced motion, Motion switch turned on --');
-  await page.locator('header [data-motion-toggle]').click();
+  await (await headerSwitch(page)).click();
+  await closeSettings(page);
   await page.mouse.move(700, 20);
   await page.waitForTimeout(500);
   log('pref', await pref(page), 'switches', await switches(page), 'state', await C.labState(page));
@@ -163,18 +175,24 @@ async function motionSwitch(browser) {
   await page.waitForTimeout(1000);
   log('pref', await pref(page), 'switches', await switches(page));
   log('frame loop, motion on', await framesOver(page, 2000));
-  log('aria snapshot, header switch', (await page.locator('header [data-motion-toggle]').ariaSnapshot()).replace(/\n/g, ' | '));
+  log('aria snapshot, header switch', (await (await headerSwitch(page)).ariaSnapshot()).replace(/\n/g, ' | '));
   log('getByRole(switch, name Motion) count', await page.getByRole('switch', { name: 'Motion' }).count(), 'accessible description (title)', await page.locator('header [data-motion-toggle]').getAttribute('title'));
 
-  // Tab from the top of the page to the header switch.
+  // Tab from the top of the page to the header switch, opening Settings with Enter on the way.
+  await page.reload({ waitUntil: 'load' });
+  await waitRoom(page);
   const order = [];
   for (let i = 0; i < 20; i++) {
     await page.keyboard.press('Tab');
     const f = await page.evaluate(() => {
       const a = document.activeElement;
-      return { txt: (a.getAttribute('aria-label') || a.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 30), sw: a.hasAttribute('data-motion-toggle'), header: !!a.closest('header'), visible: a.matches(':focus-visible') };
+      return { txt: (a.getAttribute('aria-label') || a.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 30), sw: a.hasAttribute('data-motion-toggle'), settings: a.hasAttribute('data-settings-toggle'), header: !!a.closest('header'), visible: a.matches(':focus-visible') };
     });
     order.push(f.txt);
+    if (f.settings) {
+      await page.keyboard.press('Enter');
+      order.push('(Enter)');
+    }
     if (f.sw && f.header) {
       log(`Tab x${i + 1} reaches the header switch`, { order, focusVisible: f.visible });
       break;
@@ -188,7 +206,7 @@ async function motionSwitch(browser) {
     await waitRoom(page);
     await page.waitForTimeout(1000);
     log(`cycle ${cycle}: after reload`, 'pref', await pref(page), 'switches', await switches(page), 'loop', await framesOver(page, 2000), 'state', await C.labState(page));
-    await page.locator('header [data-motion-toggle]').focus();
+    await (await headerSwitch(page)).focus();
     await page.keyboard.press('Enter');
     await page.waitForTimeout(300);
     log(`cycle ${cycle}: Enter`, 'pref', await pref(page), 'switches', await switches(page), 'loop', await framesOver(page, 2000));
@@ -201,7 +219,7 @@ async function motionSwitch(browser) {
   await page.waitForTimeout(600);
   const held = await page.evaluate(() => ({ az: window.__lab.stats().lookAz }));
   await page.mouse.up();
-  await page.locator('header [data-motion-toggle]').focus();
+  await (await headerSwitch(page)).focus();
   await page.keyboard.press('Space');
   await page.waitForTimeout(500);
   log('switched off mid-look', { lookAzBefore: held.az, after: await page.evaluate(() => ({ az: window.__lab.stats().lookAz, el: window.__lab.stats().lookEl })), loop: await framesOver(page, 1500) });
@@ -227,14 +245,16 @@ async function pose(browser) {
     await page.reload({ waitUntil: 'load' });
     await waitRoom(page);
     await page.waitForTimeout(2000);
-    const sw = page.locator('header [data-motion-toggle]');
+    const sw = await headerSwitch(page);
     await sw.click();
+    await closeSettings(page);
     await page.mouse.move(700, 20);
     await page.waitForTimeout(600);
     shots[`off-at-2s-run${run}`] = await page.screenshot({ clip: await clip() });
-    await sw.click();
+    await (await headerSwitch(page)).click();
     await page.waitForTimeout(2700);
-    await sw.click();
+    await (await headerSwitch(page)).click();
+    await closeSettings(page);
     await page.mouse.move(700, 20);
     await page.waitForTimeout(600);
     shots[`off-at-5s-run${run}`] = await page.screenshot({ clip: await clip() });
