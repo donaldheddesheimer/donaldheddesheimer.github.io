@@ -1429,7 +1429,9 @@ const PIXEL_RATIO = 1.25;
 const FLIGHT: Record<string, number> = { 'hero>read': 1900, 'read>hero': 1500 };
 // Looking around the opening (mouse or pen, in windows the lab opens in, with motion on): where the
 // pointer is turns the camera a little about the room's centre, and a drag turns it further, never past
-// LOOK (radians; `up` raises the camera). Let go, and it settles back to the composed view.
+// LOOK (radians; `up` raises the camera). Let go, and it settles back to the composed view. Turning to
+// positive az swings the monitor toward the left edge, so that side stops sooner where the window needs
+// it to (reachAz in mountLab).
 const PARALLAX = { az: 0.03, el: 0.015 };
 const LOOK = { az: 0.16, down: 0.05, up: 0.07 };
 const DRAG_PX = 6; // a press that moves further than this is a drag, not a click
@@ -1704,12 +1706,13 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
   }
 
   const across = new THREE.Vector3();
-  function heroView(v: View) {
+  const heroView = (v: View) => heroPose(v, look.az, look.el);
+  function heroPose(v: View, lookAz: number, lookEl: number) {
     // A slow drift about the opening's angle, never a cut, and wherever the pointer has turned it.
-    const az = Math.sin(t * 0.13) * 0.025 + look.az;
+    const az = Math.sin(t * 0.13) * 0.025 + lookAz;
     const d = heroDist + Math.sin(t * 0.07) * 0.12;
     v.pos.copy(HERO_DIR).applyAxisAngle(UP, az);
-    v.pos.applyAxisAngle(across.crossVectors(v.pos, UP).normalize(), look.el).multiplyScalar(d).add(HERO_LOOK);
+    v.pos.applyAxisAngle(across.crossVectors(v.pos, UP).normalize(), lookEl).multiplyScalar(d).add(HERO_LOOK);
     v.pos.y += Math.sin(t * 0.09 + 1.3) * 0.04;
     v.look.copy(HERO_LOOK);
     v.look.x += Math.sin(t * 0.11) * 0.04;
@@ -1957,14 +1960,48 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
   const soft = (x: number, lo: number, hi: number) => (x >= 0 ? hi * Math.tanh(x / hi) : lo * Math.tanh(x / lo));
   const lookOK = () => intent && mode === 'hero' && !flight && !lost && html.hasAttribute('data-pc-able') && !html.dataset.pc;
   const fine = (e: PointerEvent) => e.pointerType === 'mouse' || e.pointerType === 'pen';
+  // Turning to positive az swings the monitor toward the frame's left edge, so that way the look stops
+  // where the monitor's bezel would cross the fit's margin, with the drift where it is now: the limit
+  // moves with the drift, slowly, and the monitor never leaves the picture. The other way keeps LOOK.az.
+  const bezelCorners = [
+    [-1, 1],
+    [1, 1],
+    [1, -1],
+    [-1, -1],
+  ].map(([sx, sy]) => desk.group.localToWorld(new THREE.Vector3(sx * (SCREEN.w / 2 + 0.018), SCREEN.y + sy * (SCREEN.h / 2 + 0.018), SCREEN_Z)));
+  const trial = newView();
+  let lookAzMax = LOOK.az;
+  function inFrame(az: number) {
+    heroPose(trial, az, look.el);
+    probe.position.copy(trial.pos);
+    probe.lookAt(trial.look);
+    probe.updateMatrixWorld();
+    probe.matrixWorldInverse.copy(probe.matrixWorld).invert();
+    return bezelCorners.every((c) => {
+      pv.copy(c).applyMatrix4(probe.matrixWorldInverse);
+      return pv.z < -0.1 && trial.cx + (trial.f * pv.x) / -pv.z >= fw * 0.015;
+    });
+  }
+  function reachAz() {
+    if (inFrame(LOOK.az)) return LOOK.az;
+    let lo = 0;
+    let hi = LOOK.az;
+    for (let i = 0; i < 12; i++) {
+      const mid = (lo + hi) / 2;
+      if (inFrame(mid)) lo = mid;
+      else hi = mid;
+    }
+    return Math.max(lo, 1e-3);
+  }
   function steer(dt: number) {
     if (!press?.moved) {
       const k = Math.exp(-dt * 1.6);
       drag.az *= k;
       drag.el *= k;
     }
+    if (lookOK()) lookAzMax = reachAz();
     const k = 1 - Math.exp(-dt * 6);
-    look.az += (soft(par.az + drag.az, LOOK.az, LOOK.az) - look.az) * k;
+    look.az += (soft(par.az + drag.az, LOOK.az, lookAzMax) - look.az) * k;
     look.el += (soft(par.el + drag.el, LOOK.down, LOOK.up) - look.el) * k;
   }
   function unlook() {
@@ -1994,7 +2031,7 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
       }
       if (press.moved) {
         // Grab the room: drag right and it turns right. Wound up no further than the limits.
-        drag.az = Math.max(-2 * LOOK.az, Math.min(2 * LOOK.az, press.az - (dx / fw) * 0.9));
+        drag.az = Math.max(-2 * LOOK.az, Math.min(2 * lookAzMax, press.az - (dx / fw) * 0.9));
         drag.el = Math.max(-2 * LOOK.down, Math.min(2 * LOOK.up, press.el + (dy / fh) * 0.5));
       }
     } else if (lookOK()) {
@@ -2116,6 +2153,7 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
         heroDist,
         heroFramed,
         lookAz: look.az,
+        lookAzMax,
         lookEl: look.el,
       };
     },
