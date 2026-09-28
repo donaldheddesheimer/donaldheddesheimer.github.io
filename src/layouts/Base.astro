@@ -136,7 +136,7 @@ const search = lab ? labSearch : [
       })();
     </script>
     {
-      home && (
+      home && !lab && (
         <script is:inline>
           // The systems map moved from the homepage to /systems/: send its old links (/?sel=…) there.
           if (/[?&]sel=/.test(location.search)) location.replace('/systems/' + location.search + location.hash);

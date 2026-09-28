@@ -1,0 +1,74 @@
+# hint-light-lighting 2026-09-28T17:45:30.577Z renderer: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version) server: http://127.0.0.1:4322 viewport 1440x900 dpr 2
+== run 1
+renderer ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+page {"buffer":[1800,1125],"pixelRatio":1.25,"motion":"on","pcAble":true} drawn at 202 ms
+rest shots at +1946 ms after drawn; data-hint then: null
+peak clip taken 1084 ms after data-hint=on; hint k before/after the screenshot 0.999/0.991
+hover at 212,592: pick true, root.style.cursor 'pointer', computed cursor 'pointer' on CANVAS
+off the monitor: root.style.cursor 'grab', computed 'grab'
+hover+hint: still over the monitor true; hint k before/after the screenshot 0.999/0.986
+reduced motion: quad unchanged across the three shots true; hover cursor 'pointer'
+rest      clip {"x":0,"y":431,"width":503,"height":442} k 0/0
+  screen  luma 30.5 lum 0.021 p1/p50/p99/max 14/19/125/233 flatWhite(min>=250) 0.00% any255 0.00% rgb 29,31,32 R/B 0.905 n 169629
+  desk    luma 41 lum 0.031 p1/p50/p99/max 8/40/102/106 flatWhite(min>=250) 0.00% any255 0.00% rgb 49,40,31 R/B 1.568 n 91093
+  clip    luma 22.3 (whole clip, for scale)
+peak      clip {"x":0,"y":431,"width":488,"height":434} k 0.999/0.991
+  screen  luma 44.6 lum 0.035 p1/p50/p99/max 27/33/143/246 flatWhite(min>=250) 0.00% any255 0.00% rgb 44,45,45 R/B 0.972 n 165267
+  desk    luma 50.4 lum 0.047 p1/p50/p99/max 7/55/110/114 flatWhite(min>=250) 0.00% any255 0.00% rgb 58,49,40 R/B 1.452 n 88718
+  clip    luma 28.5 (whole clip, for scale)
+hover     clip {"x":0,"y":435,"width":458,"height":422} k 0/0
+  screen  luma 38.6 lum 0.028 p1/p50/p99/max 21/27/134/246 flatWhite(min>=250) 0.00% any255 0.00% rgb 38,39,40 R/B 0.945 n 159088
+  desk    luma 48.1 lum 0.043 p1/p50/p99/max 7/50/112/118 flatWhite(min>=250) 0.00% any255 0.00% rgb 56,47,38 R/B 1.489 n 85428
+  clip    luma 27 (whole clip, for scale)
+hoverpeak clip {"x":0,"y":436,"width":462,"height":425} k 0.999/0.986
+  screen  luma 52.6 lum 0.045 p1/p50/p99/max 34/41/153/254 flatWhite(min>=250) 0.00% any255 0.00% rgb 52,53,53 R/B 0.972 n 160576
+  desk    luma 55.2 lum 0.057 p1/p50/p99/max 8/65/113/118 flatWhite(min>=250) 0.00% any255 0.00% rgb 63,54,45 R/B 1.393 n 86189
+  clip    luma 32.5 (whole clip, for scale)
+fullRest: screen (inset quad) luma 30.5 lum 0.021; screen's box 601x367 image px mean luma 27.9; brightest same-size box elsewhere (text, bar, caption, monitor excluded) mean luma 62 at image px 2272,496 (CSS 1136,248); whole window luma 22.3
+fullHover: screen (inset quad) luma 38.6 lum 0.028; screen's box 585x351 image px mean luma 35.7; brightest same-size box elsewhere (text, bar, caption, monitor excluded) mean luma 63.6 at image px 2288,496 (CSS 1144,248); whole window luma 22.8
+hover burst (5 clips, 300 ms apart, motion on), screen: p1 21 p50 27 luma 38.6 | p1 21 p50 27 luma 38.6 | p1 21 p50 27 luma 38.6 | p1 21 p50 27 luma 38.6 | p1 21 p50 27 luma 38.6
+still: rest vs rest again (whole clip): 0 of 821760 px differ by >2 (max 0)
+still: hover - rest, screen (inset) luma difference: all {"n":161544,"min":5.9,"p1":7,"p50":8.2,"p99":11.8,"max":15.9,"le2":0}; dark screen pixels (rest luma<100) {"n":158185,"min":6.3,"p1":7,"p50":8.2,"p99":10.9,"max":12,"le2":0}
+still: hover vs rest outside the screen quad: 176652 of 638932 px differ by >2 (max 26) (the glow light on the desk and bezel)
+still rest   screen luma 30.3 lum 0.021 p1/p50/p99/max 14/19/124/223 flatWhite(min>=250) 0.00% any255 0.00% rgb 29,31,32 R/B 0.906 n 161544
+still hover  screen luma 38.7 lum 0.028 p1/p50/p99/max 21/27/135/239 flatWhite(min>=250) 0.00% any255 0.00% rgb 38,39,40 R/B 0.945 n 161544
+still: hover - rest, desk band luma difference {"n":86838,"min":0,"p1":0,"p50":2.9,"p99":17.7,"max":18.9,"le2":39888}
+== run 2
+renderer ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+page {"buffer":[1800,1125],"pixelRatio":1.25,"motion":"on","pcAble":true} drawn at 164 ms
+rest shots at +1940 ms after drawn; data-hint then: null
+peak clip taken 1081 ms after data-hint=on; hint k before/after the screenshot 0.999/0.991
+hover at 212,592: pick true, root.style.cursor 'pointer', computed cursor 'pointer' on CANVAS
+off the monitor: root.style.cursor 'grab', computed 'grab'
+hover+hint: still over the monitor true; hint k before/after the screenshot 0.999/0.98
+reduced motion: quad unchanged across the three shots true; hover cursor 'pointer'
+rest      clip {"x":0,"y":431,"width":503,"height":442} k 0/0
+  screen  luma 30.5 lum 0.021 p1/p50/p99/max 14/19/125/233 flatWhite(min>=250) 0.00% any255 0.00% rgb 29,31,32 R/B 0.905 n 169628
+  desk    luma 41 lum 0.031 p1/p50/p99/max 8/40/102/106 flatWhite(min>=250) 0.00% any255 0.00% rgb 49,40,31 R/B 1.568 n 91093
+  clip    luma 22.3 (whole clip, for scale)
+peak      clip {"x":0,"y":431,"width":488,"height":434} k 0.999/0.991
+  screen  luma 44.6 lum 0.035 p1/p50/p99/max 27/33/144/246 flatWhite(min>=250) 0.00% any255 0.00% rgb 44,45,45 R/B 0.972 n 165265
+  desk    luma 50.4 lum 0.047 p1/p50/p99/max 7/55/110/114 flatWhite(min>=250) 0.00% any255 0.00% rgb 58,49,40 R/B 1.452 n 88713
+  clip    luma 28.5 (whole clip, for scale)
+hover     clip {"x":0,"y":435,"width":458,"height":422} k 0/0
+  screen  luma 38.6 lum 0.028 p1/p50/p99/max 21/27/134/246 flatWhite(min>=250) 0.00% any255 0.00% rgb 38,39,40 R/B 0.945 n 159080
+  desk    luma 48.1 lum 0.043 p1/p50/p99/max 7/50/112/118 flatWhite(min>=250) 0.00% any255 0.00% rgb 56,47,38 R/B 1.489 n 85423
+  clip    luma 27 (whole clip, for scale)
+hoverpeak clip {"x":0,"y":436,"width":462,"height":425} k 0.999/0.98
+  screen  luma 52.6 lum 0.045 p1/p50/p99/max 34/41/153/254 flatWhite(min>=250) 0.00% any255 0.00% rgb 52,53,53 R/B 0.972 n 160576
+  desk    luma 55.2 lum 0.057 p1/p50/p99/max 8/65/113/118 flatWhite(min>=250) 0.00% any255 0.00% rgb 63,54,45 R/B 1.393 n 86189
+  clip    luma 32.5 (whole clip, for scale)
+fullRest: screen (inset quad) luma 30.5 lum 0.021; screen's box 601x367 image px mean luma 27.9; brightest same-size box elsewhere (text, bar, caption, monitor excluded) mean luma 62 at image px 2272,496 (CSS 1136,248); whole window luma 22.3
+fullHover: screen (inset quad) luma 38.6 lum 0.028; screen's box 585x351 image px mean luma 35.7; brightest same-size box elsewhere (text, bar, caption, monitor excluded) mean luma 63.1 at image px 2288,496 (CSS 1144,248); whole window luma 22.8
+hover burst (5 clips, 300 ms apart, motion on), screen: p1 21 p50 27 luma 38.6 | p1 21 p50 27 luma 38.6 | p1 21 p50 27 luma 38.6 | p1 21 p50 27 luma 38.6 | p1 21 p50 27 luma 38.6
+still: rest vs rest again (whole clip): 0 of 821760 px differ by >2 (max 0)
+still: hover - rest, screen (inset) luma difference: all {"n":161544,"min":5.9,"p1":7,"p50":8.2,"p99":11.8,"max":15.9,"le2":0}; dark screen pixels (rest luma<100) {"n":158185,"min":6.3,"p1":7,"p50":8.2,"p99":10.9,"max":12,"le2":0}
+still: hover vs rest outside the screen quad: 176652 of 638932 px differ by >2 (max 26) (the glow light on the desk and bezel)
+still rest   screen luma 30.3 lum 0.021 p1/p50/p99/max 14/19/124/223 flatWhite(min>=250) 0.00% any255 0.00% rgb 29,31,32 R/B 0.906 n 161544
+still hover  screen luma 38.7 lum 0.028 p1/p50/p99/max 21/27/135/239 flatWhite(min>=250) 0.00% any255 0.00% rgb 38,39,40 R/B 0.945 n 161544
+still: hover - rest, desk band luma difference {"n":86838,"min":0,"p1":0,"p50":2.9,"p99":17.7,"max":18.9,"le2":39888}
+== screen mean luma by state and run (inset quad)
+rest      luma 30.5 lum 0.021 desk luma 41 R/B 1.568 | luma 30.5 lum 0.021 desk luma 41 R/B 1.568
+peak      luma 44.6 lum 0.035 desk luma 50.4 R/B 1.452 | luma 44.6 lum 0.035 desk luma 50.4 R/B 1.452
+hover     luma 38.6 lum 0.028 desk luma 48.1 R/B 1.489 | luma 38.6 lum 0.028 desk luma 48.1 R/B 1.489
+hoverpeak luma 52.6 lum 0.045 desk luma 55.2 R/B 1.393 | luma 52.6 lum 0.045 desk luma 55.2 R/B 1.393

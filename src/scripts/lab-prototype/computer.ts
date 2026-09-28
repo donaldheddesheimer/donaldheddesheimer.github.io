@@ -12,7 +12,7 @@
 // (the computer's own button, or Escape) goes back to the entry the lab was opened from. A reload or a
 // shared link opens the computer on its page at once, over the room, without the camera's entrance.
 // history.state is { pc: path, back: entries since the opening (0: the lab was opened here), y: the
-// page's scroll when last left }.
+// page's scroll when last left, k: the entry's own key }.
 //
 // Windows that can't hold the composition (phones, narrow, short or portrait: the release's `roomy`
 // gate) don't enter; the page below the opening has the same content. One that stops being roomy while
@@ -25,6 +25,7 @@ interface Entry {
   pc?: string;
   back?: number;
   y?: number;
+  k?: string;
 }
 
 const FADE_MS = 250; // the opening's text fades before the camera moves
@@ -69,6 +70,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   } catch {}
   let state: State = 'closed';
   let shown: string | null = null; // the computer path in the frame
+  let shownKey: string | undefined; // and the key of the entry it was shown for
   let queued: (() => void) | null = null;
   let frame: HTMLIFrameElement | null = null;
   let loaded = false;
@@ -97,8 +99,29 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   };
   // Keep the page's scroll in its entry, for Back and Forward (and a reload) to return to.
   const remember = () => {
-    if (state === 'read' && current()) history.replaceState({ ...entry(), y: frameY() }, '');
+    if (state !== 'read' || !current()) return;
+    const e = entry();
+    const y = frameY();
+    if (e.k) left.set(e.k, y);
+    history.replaceState({ ...e, y }, '');
   };
+  // And as it scrolls, since Back and Forward leave an entry without asking: only while the frame still
+  // holds the page the address names (after Back, the old page may scroll once more before it goes).
+  let keepTimer = 0;
+  const keep = () => {
+    clearTimeout(keepTimer);
+    keepTimer = window.setTimeout(() => {
+      const path = current();
+      try {
+        if (path && frame?.contentWindow?.location.pathname === frameHref(path)) remember();
+      } catch {}
+    }, 150);
+  };
+  // Back or Forward can come before that (a scroll a moment old, or one still moving), and by the time
+  // popstate says so the entry left can't be written: its scroll is kept here, by its key, instead.
+  const left = new Map<string, number>();
+  const newKey = () => Math.random().toString(36).slice(2, 10);
+  const scrollOf = (e: Entry) => (e.k ? left.get(e.k) : undefined) ?? e.y ?? null;
 
   // Where the screen lands for reading: centred, as large as the window allows with a margin of room
   // round it, and nearly square on.
@@ -141,6 +164,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   function makeFrame(path: string) {
     loaded = false;
     shown = path;
+    shownKey = entry().k;
     frame = document.createElement('iframe');
     frame.className = 'pc-frame';
     frame.title = 'Portfolio';
@@ -149,6 +173,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     frame.addEventListener('load', () => {
       if (!frame) return;
       loaded = true;
+      frame.contentWindow?.addEventListener('scroll', keep, { passive: true });
       if (restoreY != null) {
         frame.contentWindow?.scrollTo(0, restoreY);
         restoreY = null;
@@ -165,6 +190,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   function show(path: string, hash = '', y: number | null = null) {
     if (!frame?.contentWindow) return;
     shown = path;
+    shownKey = entry().k;
     restoreY = y;
     frame.contentWindow.location.replace(frameHref(path) + hash);
   }
@@ -265,6 +291,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     frame?.remove();
     frame = null;
     shown = null;
+    shownKey = undefined;
     placed = false;
     delete html.dataset.pc;
     scene?.home();
@@ -291,7 +318,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
       return;
     }
     const path = current();
-    const y = entry().y ?? null;
+    const y = scrollOf(entry());
     if (path && state === 'closed') open(path, !instant && canEnter(), y);
     else if (path && state === 'read' && path !== shown) show(path, '', y ?? 0);
     else if (!path && state === 'read') close(instant);
@@ -300,7 +327,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   // Go in from the opening: a new entry, on Work.
   function go(path = 'work') {
     if (state !== 'closed' || !canEnter()) return;
-    history.pushState({ pc: path, back: 1 } satisfies Entry, '', labHref(path));
+    history.pushState({ pc: path, back: 1, k: newKey() } satisfies Entry, '', labHref(path));
     open(path, true);
   }
   // A page of the computer's, from a link on the computer: a new entry.
@@ -308,7 +335,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     if (state !== 'read' || !parse(path, projects)) return;
     remember();
     const back = entry().back ?? 0;
-    history.pushState({ pc: path, back: back ? back + 1 : 0 } satisfies Entry, '', labHref(path));
+    history.pushState({ pc: path, back: back ? back + 1 : 0, k: newKey() } satisfies Entry, '', labHref(path));
     show(path, hash);
   }
   // Leave: back to the entry the lab was opened from, or, for a lab opened here, the opening in place.
@@ -350,7 +377,13 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   dialog.addEventListener('close', () => {
     if (state === 'read' && !dialog.open) leave(true);
   });
-  addEventListener('popstate', () => sync());
+  addEventListener('popstate', () => {
+    // The page left, while the frame still holds it.
+    try {
+      if (state === 'read' && shown && shownKey && frame?.contentWindow?.location.pathname === frameHref(shown)) left.set(shownKey, frameY());
+    } catch {}
+    sync();
+  });
   addEventListener('pageshow', (e) => {
     if (e.persisted) sync(true);
   });
@@ -392,7 +425,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   // A reload or a shared link: the inline script on /prototype/ has already shown the lab reading.
   const path = current();
   if (path && html.dataset.pc === 'read') {
-    if (entry().pc !== path) history.replaceState({ pc: path, back: 0 } satisfies Entry, '');
-    open(path, false, entry().y ?? null);
+    if (entry().pc !== path) history.replaceState({ pc: path, back: 0, k: newKey() } satisfies Entry, '');
+    open(path, false, scrollOf(entry()));
   } else if (html.dataset.pc) delete html.dataset.pc;
 }

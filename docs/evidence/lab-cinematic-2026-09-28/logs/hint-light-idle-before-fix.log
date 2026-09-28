@@ -1,0 +1,114 @@
+# hint-light-idle 2026-09-28T02:41:35.919Z renderer: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version) server: http://127.0.0.1:4322 viewport 1440x900 dpr 1 runs 2 pool 6
+# times are ms after data-drawn, from performance.now() in the page; seq = data-hint values in order; xN/xLast = count and last time of each input event
+
+## fires-once: no input at all: on ~5 s after drawn, done ~2.2 s later, never again (20+ s watched)
+PASS run 1 {"seq":"on,done","load":-506,"on":4789,"done":7006,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":29284,"framesPerS":61}
+  notes {"curve":[[1,0.014],[104,0.067],[208,0.173],[312,0.292],[416,0.429],[520,0.571],[624,0.729],[728,0.845],[832,0.933],[935,0.986],[1040,0.998],[1145,0.964],[1249,0.893],[1353,0.79],[1459,0.641],[1562,0.5],[1666,0.359],[1771,0.23],[1874,0.107],[1977,0.036],[2082,0.002],[2183,0],[2287,0],[2391,0]],"kAfter":0}
+PASS run 2 {"seq":"on,done","load":-152,"on":4956,"done":7173,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":29742,"framesPerS":61}
+  notes {"curve":[[0,0.25],[113,0.405],[223,0.571],[327,0.708],[430,0.827],[533,0.921],[638,0.986],[740,0.999],[844,0.973],[945,0.907],[1050,0.809],[1154,0.664],[1257,0.524],[1361,0.382],[1465,0.25],[1568,0.138],[1673,0.045],[1777,0.005],[1881,0],[1985,0],[2089,0],[2193,0],[2296,0],[2398,0]],"kAfter":0}
+
+## press-during: pointerdown (a click on the floor) 0.6 s into the hint: stopped, light back to rest, never again
+PASS run 1 {"seq":"on,stopped","load":-498,"on":4777,"stopped":5380,"pointermoveN":1,"pointermoveLast":4893,"pointerdownN":1,"pointerdownLast":5380,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":26616,"framesPerS":60}
+  notes {"decay":[[0,0.571],[153,0.172],[307,0.052],[459,0.016],[614,0.004],[768,0],[921,0],[1074,0],[1226,0]]}
+PASS run 2 {"seq":"on,stopped","load":-155,"on":4952,"stopped":5555,"pointermoveN":1,"pointermoveLast":5351,"pointerdownN":1,"pointerdownLast":5555,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":26790,"framesPerS":60}
+  notes {"decay":[[1,0.571],[154,0.172],[307,0.052],[460,0.016],[615,0.004],[768,0],[921,0],[1074,0],[1228,0]]}
+
+## key-during: keydown (Shift) 0.6 s into the hint: stopped, light back to rest, never again
+PASS run 1 {"seq":"on,stopped","load":-468,"on":4789,"stopped":5392,"pointermoveN":0,"pointerdownN":0,"keydownN":1,"keydownLast":5392,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":26618,"framesPerS":60}
+  notes {"decay":[[1,0.571],[153,0.172],[307,0.052],[459,0.016],[611,0.005],[764,0],[917,0],[1070,0],[1222,0]]}
+PASS run 2 {"seq":"on,stopped","load":-155,"on":4951,"stopped":5554,"pointermoveN":0,"pointerdownN":0,"keydownN":1,"keydownLast":5554,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":26788,"framesPerS":60}
+  notes {"decay":[[0,0.571],[154,0.172],[307,0.052],[460,0.016],[613,0.005],[765,0],[919,0],[1073,0],[1226,0]]}
+
+## drag-during: a drag (press, 10 x 20 px left, release) 0.6 s into the hint: stopped, never again
+PASS run 1 {"seq":"on,stopped","load":-501,"on":4777,"stopped":5395,"pointermoveN":12,"pointermoveLast":5560,"pointerdownN":1,"pointerdownLast":5394,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":27162,"framesPerS":60}
+  notes {"dragged":true,"kAfter":0}
+PASS run 2 {"seq":"on,stopped","load":-179,"on":4961,"stopped":5577,"pointermoveN":12,"pointermoveLast":5743,"pointerdownN":1,"pointerdownLast":5577,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":27257,"framesPerS":60}
+  notes {"dragged":true,"kAfter":0}
+
+## move-during: pointermove only, every 200 ms through the hint: it plays to done (moves only restart the idle wait)
+PASS run 1 {"seq":"on,done","load":-446,"on":4817,"done":7034,"pointermoveN":10,"pointermoveLast":6833,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":27155,"framesPerS":60}
+PASS run 2 {"seq":"on,done","load":-172,"on":4941,"done":7158,"pointermoveN":10,"pointermoveLast":6957,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":27244,"framesPerS":60}
+
+## press-before: pointerdown (a click on the floor) 2 s after drawn: cancelled, never fires
+PASS run 1 {"seq":"cancelled","load":-444,"cancelled":2023,"pointermoveN":1,"pointermoveLast":2021,"pointerdownN":1,"pointerdownLast":2023,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":27006,"framesPerS":60}
+PASS run 2 {"seq":"cancelled","load":-171,"cancelled":2018,"pointermoveN":1,"pointermoveLast":2016,"pointerdownN":1,"pointerdownLast":2018,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":27004,"framesPerS":60}
+
+## key-before: keydown (Shift) 2 s after drawn: cancelled, never fires
+PASS run 1 {"seq":"cancelled","load":-246,"cancelled":2003,"pointermoveN":0,"pointerdownN":0,"keydownN":1,"keydownLast":2003,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":27008,"framesPerS":60}
+PASS run 2 {"seq":"cancelled","load":-175,"cancelled":2003,"pointermoveN":0,"pointerdownN":0,"keydownN":1,"keydownLast":2003,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":27005,"framesPerS":60}
+
+## drag-before: a drag 2 s after drawn: cancelled, never fires
+PASS run 1 {"seq":"cancelled","load":-246,"cancelled":2012,"pointermoveN":11,"pointermoveLast":2309,"pointerdownN":1,"pointerdownLast":2012,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":27009,"framesPerS":60}
+PASS run 2 {"seq":"cancelled","load":-154,"cancelled":2006,"pointermoveN":11,"pointermoveLast":2170,"pointerdownN":1,"pointerdownLast":2006,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":27005,"framesPerS":60}
+
+## move-delays: steady pointermove, one a second from 1 s to 13 s: nothing meanwhile, on ~5 s after the last move
+PASS run 1 {"seq":"on,done","load":-297,"on":18023,"done":20240,"pointermoveN":13,"pointermoveLast":13006,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":40337,"framesPerS":60}
+PASS run 2 {"seq":"on,done","load":-171,"on":18032,"done":20249,"pointermoveN":13,"pointermoveLast":13015,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":40345,"framesPerS":60}
+
+## wheel-delays: one pointermove at 0.5 s, then a sideways wheel (deltaX 40, no scroll) each second from 2 s to 12 s: on ~5 s after the last wheel
+PASS run 1 {"seq":"on,done","load":-287,"on":17056,"done":19271,"pointermoveN":1,"pointermoveLast":505,"pointerdownN":0,"keydownN":0,"wheelN":11,"wheelLast":12043,"scrollN":0,"pcN":0,"watchedTo":39353,"framesPerS":60}
+  notes {"scrollX":0}
+PASS run 2 {"seq":"on,done","load":-186,"on":17067,"done":19283,"pointermoveN":1,"pointermoveLast":517,"pointerdownN":0,"keydownN":0,"wheelN":11,"wheelLast":12056,"scrollN":0,"pcN":0,"watchedTo":39363,"framesPerS":60}
+  notes {"scrollX":0}
+
+## scroll-delays: scrollTo(0, 2) and back each second from 1 s to 11 s (no pointer, key or wheel): on ~5 s after the last scroll
+PASS run 1 {"seq":"on,done","load":-286,"on":16027,"done":18243,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":11,"scrollLast":11010,"pcN":0,"watchedTo":38324,"framesPerS":60}
+PASS run 2 {"seq":"on,done","load":-170,"on":16027,"done":18243,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":11,"scrollLast":11010,"pcN":0,"watchedTo":38399,"framesPerS":60}
+
+## reduced-motion: reducedMotion 'reduce': the hint never runs (25 s watched)
+PASS run 1 {"seq":"","load":-176,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":25043,"framesPerS":0}
+  notes {"running":"false","k":0}
+PASS run 2 {"seq":"","load":-162,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":25007,"framesPerS":0}
+  notes {"running":"false","k":0}
+
+## motion-off-stored: Motion switch off (localStorage motion='off' before load): the hint never runs (25 s watched)
+PASS run 1 {"seq":"","load":-379,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":25007,"framesPerS":0}
+  notes {"motion":"off","aria":"false","k":0}
+PASS run 2 {"seq":"","load":-161,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":25053,"framesPerS":0}
+  notes {"motion":"off","aria":"false","k":0}
+
+## motion-off-wait: html data-motion set 'off' at 2 s (what the switch does, without its click), 'on' again at 4 s: cancelled, never fires
+PASS run 1 {"seq":"cancelled","load":-380,"cancelled":2003,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":24004,"framesPerS":55}
+PASS run 2 {"seq":"cancelled","load":-155,"cancelled":2002,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":24005,"framesPerS":55}
+
+## motion-click-during: a mouse click on the Motion switch 0.9 s into the hint: stopped, and the screen should go back to rest (stats().hint 0)
+FAIL run 1 {"seq":"on,stopped","load":-251,"on":4947,"stopped":5851,"pointermoveN":2,"pointermoveLast":9029,"pointerdownN":2,"pointerdownLast":9030,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":30606,"framesPerS":54}
+  notes {"rest":{"file":"hint-light-idle-motion-click-during-rest-run1.png","luma":30.9,"k":0},"motion":"off","after":[[0,0.473],[504,0.473],[1009,0.473],[1512,0.473],[2015,0.473],[2520,0.473],[3024,0.473]],"stuck":{"file":"hint-light-idle-motion-click-during-after-motion-off-run1.png","luma":37.8,"k":0.473},"kOnAgain":0}
+FAIL run 2 {"seq":"on,stopped","load":-175,"on":4941,"stopped":5845,"pointermoveN":2,"pointermoveLast":9025,"pointerdownN":2,"pointerdownLast":9026,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":30547,"framesPerS":54}
+  notes {"rest":{"file":"hint-light-idle-motion-click-during-rest-run2.png","luma":30.9,"k":0},"motion":"off","after":[[0,0.473],[503,0.473],[1006,0.473],[1509,0.473],[2013,0.473],[2517,0.473],[3021,0.473]],"stuck":{"file":"hint-light-idle-motion-click-during-after-motion-off-run2.png","luma":37.7,"k":0.473},"kOnAgain":0}
+
+## motion-key-during: Enter on the (focused) Motion switch 0.9 s into the hint: stopped, and the screen should go back to rest (stats().hint 0)
+FAIL run 1 {"seq":"on,stopped","load":-183,"on":4952,"stopped":5854,"pointermoveN":0,"pointerdownN":0,"keydownN":1,"keydownLast":5854,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":28938,"framesPerS":13}
+  notes {"rest":{"file":"hint-light-idle-motion-key-during-rest-run1.png","luma":30.9,"k":0},"motion":"off","after":[[1,0.921],[505,0.921],[1009,0.921],[1510,0.921],[2014,0.921],[2517,0.921],[3020,0.921]],"stuck":{"file":"hint-light-idle-motion-key-during-after-motion-off-run1.png","luma":44,"k":0.921}}
+FAIL run 2 {"seq":"on,stopped","load":-161,"on":4959,"stopped":5862,"pointermoveN":0,"pointerdownN":0,"keydownN":1,"keydownLast":5862,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":28984,"framesPerS":13}
+  notes {"rest":{"file":"hint-light-idle-motion-key-during-rest-run2.png","luma":30.9,"k":0},"motion":"off","after":[[1,0.921],[503,0.921],[1007,0.921],[1510,0.921],[2014,0.921],[2517,0.921],[3026,0.921]],"stuck":{"file":"hint-light-idle-motion-key-during-after-motion-off-run2.png","luma":44,"k":0.921}}
+
+## reduce-during: the system's reduced motion switched on 0.9 s into the hint (emulateMedia; no pointer or key event): stopped, and the screen should go back to rest (stats().hint 0)
+FAIL run 1 {"seq":"on,stopped","load":-177,"on":4959,"stopped":5892,"pointermoveN":2,"pointermoveLast":9263,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":29581,"framesPerS":12}
+  notes {"rest":{"file":"hint-light-idle-reduce-during-rest-run1.png","luma":30.9,"k":0},"after":[[1,0.921],[505,0.933],[1009,0.933],[1513,0.933],[2016,0.933],[2520,0.933],[3024,0.933]],"stuck":{"file":"hint-light-idle-reduce-during-after-reduce-run1.png","luma":44,"k":0.933},"kAfterHover":0.9329650941550295}
+FAIL run 2 {"seq":"on,stopped","load":-168,"on":4952,"stopped":5883,"pointermoveN":2,"pointermoveLast":9288,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":0,"watchedTo":29610,"framesPerS":12}
+  notes {"rest":{"file":"hint-light-idle-reduce-during-rest-run2.png","luma":30.9,"k":0},"after":[[0,0.921],[504,0.933],[1008,0.933],[1511,0.933],[2014,0.933],[2546,0.933],[3059,0.933]],"stuck":{"file":"hint-light-idle-reduce-during-after-reduce-run2.png","luma":43.9,"k":0.933},"kAfterHover":0.9330364998743319}
+
+## pc-direct: /prototype/?probe&computer=work (the computer open from load): the hint never runs (25 s watched)
+PASS run 1 {"seq":"cancelled","load":-125,"cancelled":0,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":3,"watchedTo":25005,"framesPerS":2}
+  notes {"pc":"read","pcEnd":"read"}
+PASS run 2 {"seq":"cancelled","load":17,"cancelled":0,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":3,"watchedTo":25004,"framesPerS":2}
+  notes {"pc":"read","pcEnd":"read"}
+
+## pc-enter-leave: "Explore the lab" activated at 2 s with no pointer or key event (element.click()), history.back() once reading: cancelled on entering, never fires after leaving (20 s watched)
+PASS run 1 {"seq":"cancelled","load":-146,"cancelled":2259,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":5,"watchedTo":28341,"framesPerS":60}
+  notes {"hintInside":"cancelled","leftAt":6326}
+PASS run 2 {"seq":"cancelled","load":-207,"cancelled":2257,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":0,"pcN":5,"watchedTo":28338,"framesPerS":60}
+  notes {"hintInside":"cancelled","leftAt":6326}
+
+## scrolled-out: scrolled 1.5 windows down at 1 s: never fires while out of view (20 s); scrolled back: (by the code) fires ~5 s later
+PASS run 1 {"seq":"on,done","load":-156,"on":26011,"done":28227,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":2,"scrollLast":21003,"pcN":0,"watchedTo":29354,"framesPerS":19}
+  notes {"outSeq":"","backAt":21004}
+PASS run 2 {"seq":"on,done","load":-197,"on":26005,"done":28223,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":2,"scrollLast":21002,"pcN":0,"watchedTo":29321,"framesPerS":19}
+  notes {"outSeq":"","backAt":21003}
+
+## scrolled-mostly: scrolled so ~13% of the opening shows (the IntersectionObserver still counts it in view) and the monitor is above the window: does the hint play where it cannot be seen?
+FAIL run 1 {"seq":"on,done","load":-163,"on":6026,"done":8242,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":1,"scrollLast":1009,"pcN":0,"watchedTo":13002,"framesPerS":60}
+  notes {"scrollY":783,"visible":0.13,"screenBottomNow":-93}
+FAIL run 2 {"seq":"on,done","load":-133,"on":6023,"done":8239,"pointermoveN":0,"pointerdownN":0,"keydownN":0,"wheelN":0,"scrollN":1,"scrollLast":1006,"pcN":0,"watchedTo":13006,"framesPerS":60}
+  notes {"scrollY":783,"visible":0.13,"screenBottomNow":-93}

@@ -1,0 +1,305 @@
+# release-diff-html 2026-09-28T17:00:15.185Z renderer="none (no browser: HTTP fetches and files only)" server=A http://127.0.0.1:4330 (origin/main cc1a6c4, <scratch>/base-cc1a6c4/dist) vs B http://127.0.0.1:4322 (cinematic-lab-prototype HEAD aabec24, <repo>/dist)
+# dist index.html written: A 2026-09-28T02:23:58.387Z, B 2026-09-28T16:52:46.063Z; last commit touching src/ at HEAD: aabec24 2026-09-27T22:23:30-04:00
+# projects linked from A's home page (11): bytefight claude-status cucadence fluxion nn-mnist skyblock-bazaar smart-bin swerve-drive traffic-ops-center travelmate useless-machine
+# src/content/projects at cc1a6c4 (11) matches; at HEAD (11) matches
+
+## pages: markup after normalizing hashed asset names and data-astro-cid-*
+/  status 200/200  bytes 120759/117649  changed lines 10  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    < <link rel="stylesheet" href="/_astro/Base.#.css">
+    < <style>[data-astro-cid-3xih677i][data-tl]{--lane:2.5rem;--pitch:24px}@media (pointer:coarse){[data-astro-cid-3xih677i][data-tl]{--lane:3rem;--pitch:44px}.marker[data-as…
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > <link rel="stylesheet" href="/_astro/Base.#.css">
+    < <p class="text-lg font-semibold tracking-tight">Let's talk.</p>
+    > <p class="text-lg font-semibold tracking-tight">Let&#39;s talk.</p>
+    < <span>BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span>BUILD <span class="text-muted">aabec24 2026-09-27</span>
+/systems/  status 200/200  bytes 268647/268726  changed lines 6  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+    < <span class="ml-auto xl:ml-0">BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span class="ml-auto xl:ml-0">BUILD <span class="text-muted">aabec24 2026-09-27</span>
+/systems/screen/  status 200/200  bytes 241488/241567  changed lines 4  body equal (entities decoded, stamp replaced): yes  stamp "" -> ""
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+/no-such-page/  status 404/404  bytes 32254/32333  changed lines 6  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+    < <span class="ml-auto xl:ml-0">BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span class="ml-auto xl:ml-0">BUILD <span class="text-muted">aabec24 2026-09-27</span>
+/projects/bytefight/  status 200/200  bytes 31445/31524  changed lines 6  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+    < <span>BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span>BUILD <span class="text-muted">aabec24 2026-09-27</span>
+/projects/claude-status/  status 200/200  bytes 33294/33373  changed lines 6  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+    < <span>BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span>BUILD <span class="text-muted">aabec24 2026-09-27</span>
+/projects/cucadence/  status 200/200  bytes 38177/38256  changed lines 6  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+    < <span>BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span>BUILD <span class="text-muted">aabec24 2026-09-27</span>
+/projects/fluxion/  status 200/200  bytes 31591/31670  changed lines 6  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+    < <span>BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span>BUILD <span class="text-muted">aabec24 2026-09-27</span>
+/projects/nn-mnist/  status 200/200  bytes 32706/32785  changed lines 6  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+    < <span>BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span>BUILD <span class="text-muted">aabec24 2026-09-27</span>
+/projects/skyblock-bazaar/  status 200/200  bytes 31885/31964  changed lines 6  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+    < <span>BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span>BUILD <span class="text-muted">aabec24 2026-09-27</span>
+/projects/smart-bin/  status 200/200  bytes 33179/33258  changed lines 6  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+    < <span>BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span>BUILD <span class="text-muted">aabec24 2026-09-27</span>
+/projects/swerve-drive/  status 200/200  bytes 29960/30039  changed lines 6  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+    < <span>BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span>BUILD <span class="text-muted">aabec24 2026-09-27</span>
+/projects/traffic-ops-center/  status 200/200  bytes 34622/34701  changed lines 6  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+    < <span>BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span>BUILD <span class="text-muted">aabec24 2026-09-27</span>
+/projects/travelmate/  status 200/200  bytes 31639/31718  changed lines 6  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+    < <span>BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span>BUILD <span class="text-muted">aabec24 2026-09-27</span>
+/projects/useless-machine/  status 200/200  bytes 29146/29225  changed lines 6  body equal (entities decoded, stamp replaced): yes  stamp "cc1a6c4 2026-09-27" -> "aabec24 2026-09-27"
+    < <link rel="stylesheet" href="/_astro/model.#.css">
+    > <link rel="stylesheet" href="/_astro/site.#.css">
+    > <style>svg[data-astro-cid-ccg5yoga]>*{vector-effect:non-scaling-stroke}
+    > </style>
+    < <span>BUILD <span class="text-muted">cc1a6c4 2026-09-27</span>
+    > <span>BUILD <span class="text-muted">aabec24 2026-09-27</span>
+
+## links: every URL attribute, A against B (hashed asset names normalized)
+/  urls 113/113 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 3/3 identical
+    /_astro/ assets A: model.#.css index.#.css Base.#.css RobotStage.astro_astro_type_script_index_0_lang.#.js Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css index.#.css Base.#.css RobotStage.astro_astro_type_script_index_0_lang.#.js Base.astro_astro_type_script_index_0_lang.#.js
+/systems/  urls 165/165 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 5/5 identical
+    /_astro/ assets A: model.#.css Base.#.css Overview.#.css SystemsMap.astro_astro_type_script_index_0_lang.#.js MissionCanvas.astro_astro_type_script_index_0_lang.#.js Stage.astro_astro_type_script_index_0_lang.#.js Inspector.astro_astro_type_script_index_0_lang.#.js Overview.astro_astro_type_script_index_0_lang.#.js Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Base.#.css Overview.#.css SystemsMap.astro_astro_type_script_index_0_lang.#.js MissionCanvas.astro_astro_type_script_index_0_lang.#.js Stage.astro_astro_type_script_index_0_lang.#.js Inspector.astro_astro_type_script_index_0_lang.#.js Overview.astro_astro_type_script_index_0_lang.#.js Base.astro_astro_type_script_index_0_lang.#.js
+/systems/screen/  urls 139/139 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 0/0 identical
+    /_astro/ assets A: model.#.css Overview.#.css SystemsMap.astro_astro_type_script_index_0_lang.#.js MissionCanvas.astro_astro_type_script_index_0_lang.#.js Stage.astro_astro_type_script_index_0_lang.#.js Inspector.astro_astro_type_script_index_0_lang.#.js Overview.astro_astro_type_script_index_0_lang.#.js screen.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Overview.#.css SystemsMap.astro_astro_type_script_index_0_lang.#.js MissionCanvas.astro_astro_type_script_index_0_lang.#.js Stage.astro_astro_type_script_index_0_lang.#.js Inspector.astro_astro_type_script_index_0_lang.#.js Overview.astro_astro_type_script_index_0_lang.#.js screen.astro_astro_type_script_index_0_lang.#.js
+/no-such-page/  urls 34/34 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 5/5 identical
+    /_astro/ assets A: model.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+/projects/bytefight/  urls 31/31 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 4/4 identical
+    /_astro/ assets A: model.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+/projects/claude-status/  urls 36/36 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 4/4 identical
+    /_astro/ assets A: model.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+/projects/cucadence/  urls 41/41 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 4/4 identical
+    /_astro/ assets A: model.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+/projects/fluxion/  urls 35/35 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 4/4 identical
+    /_astro/ assets A: model.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+/projects/nn-mnist/  urls 36/36 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 4/4 identical
+    /_astro/ assets A: model.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+/projects/skyblock-bazaar/  urls 32/32 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 4/4 identical
+    /_astro/ assets A: model.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+/projects/smart-bin/  urls 36/36 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 4/4 identical
+    /_astro/ assets A: model.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+/projects/swerve-drive/  urls 30/30 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 4/4 identical
+    /_astro/ assets A: model.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+/projects/traffic-ops-center/  urls 37/37 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 4/4 identical
+    /_astro/ assets A: model.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+/projects/travelmate/  urls 34/34 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 4/4 identical
+    /_astro/ assets A: model.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+/projects/useless-machine/  urls 30/30 (not counting /_astro/ assets)  only in A: none  only in B: none  same order: yes  nav/footer blocks 4/4 identical
+    /_astro/ assets A: model.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+    /_astro/ assets B: site.#.css Base.#.css Base.astro_astro_type_script_index_0_lang.#.js
+# home page nav/footer blocks in B:
+    nav[Sections] #work #experience #contact /systems/
+    footer[home-foot readout] /systems/ https://github.com/donaldheddesheimer/donaldheddesheimer.github.io
+    nav[Sections] #top #work #experience #contact /systems/
+# /projects/bytefight/ nav/footer blocks in B:
+    nav[Sections] /#work /#experience /#contact /systems/
+    nav[More projects] /projects/travelmate/ /projects/skyblock-bazaar/
+    footer[home-foot readout] /systems/ https://github.com/donaldheddesheimer/donaldheddesheimer.github.io
+    nav[Sections] /#top /#work /#experience /#contact /systems/
+
+## css: style sheets in document order, flattened into rules
+/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/index.#.css | /_astro/Base.#.css | inline "[data-astro-cid-3xih677i][data-tl]{--lan…"
+   sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | /_astro/index.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Base.#.css
+   rules 938/942  only in A 1  only in B 5  in both but moved 29
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+    moved: 28 rule(s) inline "[data-astro-cid-3xih677i…" -> /_astro/index.#.css; 1 rule(s) /_astro/model.#.css -> inline "svg[data-astro-cid-ccg5y…"; e.g. [data-astro-cid-3xih677i][data-tl] {--lane:2.5rem;--pitch:24px} ;; @media (pointer:coarse) » [data-astro-cid-3xih677i][data-tl] {--lane:3…
+/systems/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Base.#.css | /_astro/Overview.#.css
+           sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | /_astro/Base.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Overview.#.css
+           rules 930/934  only in A 1  only in B 5  in both but moved 1
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+    moved: 1 rule(s) /_astro/model.#.css -> inline "svg[data-astro-cid-ccg5y…"; e.g. svg[data-astro-cid-ccg5yoga]>* {vector-effect:non-scaling-stroke}
+/systems/screen/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Overview.#.css
+                  sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Overview.#.css
+                  rules 889/890  only in A 1  only in B 2  in both but moved 0
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+/no-such-page/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Base.#.css
+                sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Base.#.css
+                rules 872/876  only in A 1  only in B 5  in both but moved 0
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+/projects/bytefight/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                      sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                      rules 903/907  only in A 1  only in B 5  in both but moved 0
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+/projects/claude-status/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                          sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                          rules 903/907  only in A 1  only in B 5  in both but moved 0
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+/projects/cucadence/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                      sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                      rules 903/907  only in A 1  only in B 5  in both but moved 0
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+/projects/fluxion/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                    sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                    rules 903/907  only in A 1  only in B 5  in both but moved 0
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+/projects/nn-mnist/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                     sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                     rules 903/907  only in A 1  only in B 5  in both but moved 0
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+/projects/skyblock-bazaar/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                            sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                            rules 903/907  only in A 1  only in B 5  in both but moved 0
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+/projects/smart-bin/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                      sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                      rules 903/907  only in A 1  only in B 5  in both but moved 0
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+/projects/swerve-drive/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                         sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                         rules 903/907  only in A 1  only in B 5  in both but moved 0
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+/projects/traffic-ops-center/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                               sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                               rules 903/907  only in A 1  only in B 5  in both but moved 0
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+/projects/travelmate/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                       sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                       rules 903/907  only in A 1  only in B 5  in both but moved 0
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+/projects/useless-machine/  sheets A: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/model.#.css | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                            sheets B: https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap | /_astro/site.#.css | inline "svg[data-astro-cid-ccg5yoga]>*{vector-ef…" | /_astro/Base.#.css | inline ".cs-head[data-astro-cid-p5wr5ghm]{margin…"
+                            rules 903/907  only in A 1  only in B 5  in both but moved 0
+    ~ @layer theme » :root,:host: declarations only in A: none; only in B: --text-2xl:1.75rem
+    + @layer utilities » .\[data-motion-toggle\]\:visible:is(data-motion-toggle) {visibility:visible}
+    + .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-md);border-radius:var(--radius-2);font-size:var(--text-sm);color:var(--muted);padding:0 .625rem}
+    + .bar-motion[data-astro-cid-hkbrpulz]:hover {background:var(--hover-bg)}
+    + @media (pointer:coarse) » .bar-motion[data-astro-cid-hkbrpulz] {min-height:var(--h-touch)}
+
+## files: the two dist folders by SHA-256
+files A 65, B 80: identical 30, changed 16, only in A 19, only in B 34
+identical, outside _astro: apple-touch-icon.png favicon.svg images/volleyball.jpg og.png projects/cadence-report.svg projects/cadence-timeline.png projects/claude-status-pet.gif projects/claude-status-sessions.png projects/claude-status-states.png projects/smart-bin.png projects/traffic-ops-flow.svg projects/traffic-ops.jpg projects/travelmate.jpg projects/useless-machine-circuit.jpg projects/useless-machine.jpg projects/useless-machine.mp4 resume.pdf
+identical, _astro: _astro/Base.astro_astro_type_script_index_0_lang.kQ__yDRq.js _astro/Inspector.astro_astro_type_script_index_0_lang.DVyGJaTR.js _astro/MissionCanvas.astro_astro_type_script_index_0_lang.D-tZHnnr.js _astro/Overview.ChZTkXHo.css _astro/Overview.astro_astro_type_script_index_0_lang.BCBunDkC.js _astro/RobotStage.astro_astro_type_script_index_0_lang.5Zy461fd.js _astro/RoomEnvironment.C6vVUpmh.js _astro/Stage.astro_astro_type_script_index_0_lang.CP3aYABM.js _astro/SystemsMap.astro_astro_type_script_index_0_lang.BNeA48TX.js _astro/preload-helper.B3nfOi5I.js _astro/robot-scene.CPDCRqFT.js _astro/screen.astro_astro_type_script_index_0_lang.DKxbsYUl.js _astro/selection.hkNiALH6.js
+changed: 404.html index.html projects/bytefight/index.html projects/claude-status/index.html projects/cucadence/index.html projects/fluxion/index.html projects/nn-mnist/index.html projects/skyblock-bazaar/index.html projects/smart-bin/index.html projects/swerve-drive/index.html projects/traffic-ops-center/index.html projects/travelmate/index.html projects/useless-machine/index.html prototype/index.html systems/index.html systems/screen/index.html
+only in A: _astro/Base.DMmrBrUA.css _astro/LabStage.astro_astro_type_script_index_0_lang.6bAlKSUh.js _astro/index.BMmQ_V_1.css _astro/model.BmJ2Xt5-.css _astro/prototype.ytcbo73S.css _astro/scene.DWvmRhwW.js computer/index.html computer/projects/bytefight/index.html computer/projects/claude-status/index.html computer/projects/cucadence/index.html computer/projects/fluxion/index.html computer/projects/nn-mnist/index.html computer/projects/skyblock-bazaar/index.html computer/projects/smart-bin/index.html computer/projects/swerve-drive/index.html computer/projects/traffic-ops-center/index.html computer/projects/travelmate/index.html computer/projects/useless-machine/index.html computer/systems/index.html
+only in B: _astro/Base.BX7ME1nj.css _astro/LabStage.astro_astro_type_script_index_0_lang.Cbfl2mPj.js _astro/Screen.astro_astro_type_script_index_0_lang.CcAo7QT7.js _astro/index.DCgSyqW-.css _astro/prototype.CTzuhT0R.css _astro/routes.CvcdIy2N.js _astro/scene.kS7-yd2c.js _astro/site.CG0r9ZLw.css computer/about/index.html computer/contact/index.html computer/resume/index.html computer/work/bytefight/index.html computer/work/claude-status/index.html computer/work/cucadence/index.html computer/work/fluxion/index.html computer/work/index.html computer/work/nn-mnist/index.html computer/work/skyblock-bazaar/index.html computer/work/smart-bin/index.html computer/work/swerve-drive/index.html computer/work/traffic-ops-center/index.html computer/work/travelmate/index.html computer/work/useless-machine/index.html prototype/work/bytefight/index.html prototype/work/claude-status/index.html prototype/work/cucadence/index.html prototype/work/fluxion/index.html prototype/work/nn-mnist/index.html prototype/work/skyblock-bazaar/index.html prototype/work/smart-bin/index.html prototype/work/swerve-drive/index.html prototype/work/traffic-ops-center/index.html prototype/work/travelmate/index.html prototype/work/useless-machine/index.html
+
+## routes: the deleted computer routes in the built site (B)
+reachable from the released pages (29 files): 404.html _astro/Base.BX7ME1nj.css _astro/Base.astro_astro_type_script_index_0_lang.kQ__yDRq.js _astro/Inspector.astro_astro_type_script_index_0_lang.DVyGJaTR.js _astro/MissionCanvas.astro_astro_type_script_index_0_lang.D-tZHnnr.js _astro/Overview.ChZTkXHo.css _astro/Overview.astro_astro_type_script_index_0_lang.BCBunDkC.js _astro/RobotStage.astro_astro_type_script_index_0_lang.5Zy461fd.js _astro/Stage.astro_astro_type_script_index_0_lang.CP3aYABM.js _astro/SystemsMap.astro_astro_type_script_index_0_lang.BNeA48TX.js _astro/index.DCgSyqW-.css _astro/preload-helper.B3nfOi5I.js _astro/screen.astro_astro_type_script_index_0_lang.DKxbsYUl.js _astro/selection.hkNiALH6.js _astro/site.CG0r9ZLw.css index.html projects/bytefight/index.html projects/claude-status/index.html projects/cucadence/index.html projects/fluxion/index.html projects/nn-mnist/index.html projects/skyblock-bazaar/index.html projects/smart-bin/index.html projects/swerve-drive/index.html projects/traffic-ops-center/index.html projects/travelmate/index.html projects/useless-machine/index.html systems/index.html systems/screen/index.html
+prototype _astro/routes.CvcdIy2N.js: 1 mention(s) of /computer, 0 of a deleted route  e.g. /computer/${e}/
+the word "computer" in the released files, in any form: Computer x110, skill:computer-vision x32, 3Acomputer-vision x15, d-skill-computer-vision x4, computer x2
+released files that mention /computer: 0; files that mention a deleted route (/computer/systems, /computer/projects, bare /computer/): none
+released files that mention /prototype: none

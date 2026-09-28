@@ -1,6 +1,6 @@
 // Screenshots of /prototype/ for review, from a running `npm run preview -- --host 127.0.0.1 --port 4321`.
 // STEPS picks what to take, at each size in W:
-//   hero      the opening, once the room has drawn (dance frozen at a fixed time, see FREEZE)
+//   hero      the opening, 1.5 s after the room has drawn (the dance is not frozen: poses vary a little run to run)
 //   look      the opening dragged to each limit of the look-around (left, right, up, down)
 //   read      "Explore the lab", then the computer's Work page, flat
 //   about, resume, contact, case   the computer's other pages (a case study: cuCadence)

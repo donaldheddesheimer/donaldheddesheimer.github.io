@@ -1,0 +1,4 @@
+# 2026-09-28T18:22:15Z · tsc 5.9.3 (scratch install; TypeScript isn't a dependency) · tsc --noEmit -p .
+src/lib/build.ts(4,26): error TS2307: Cannot find module 'node:child_process' or its corresponding type declarations.
+src/lib/build.ts(12,17): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+exit=2

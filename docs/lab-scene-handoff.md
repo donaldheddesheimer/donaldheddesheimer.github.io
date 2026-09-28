@@ -1,6 +1,248 @@
 # Robotics lab implementation handoff
 
-## Current checkpoint: computer-first prototype, 2026-09-28 (Claude)
+## Current checkpoint: cinematic lab prototype, 2026-09-28 (Claude)
+
+**Status: validated; waiting for review.** Local commits only. Nothing here is pushed, merged or deployed.
+
+- **Branch:** `cinematic-lab-prototype`, from `origin/main` at `cc1a6c4` (the merge of PR #2, which contains `796f421`).
+- **Commits:**
+  - `7c60fea` is the pass that started the branch. Its work-in-progress note is `git show 7c60fea:docs/lab-cinematic-status.md`.
+  - `aabec24` is the rightward look limit.
+  - This pass is the commit that adds this section: `git log -1 -- docs/lab-scene-handoff.md`.
+- **Brief:** "Handoff: Cinematic robotics lab with gentle exploration" (Option A), then the later direction under "Scope" below.
+- **Where to look:**
+  - `/prototype/` is the prototype. It's unlinked and `noindex`.
+  - The computer's pages are `/computer/{work, work/<id>, about, resume, contact}/`.
+  - A shareable address is `/prototype/?computer=<path>`.
+- **What to judge:** `docs/evidence/lab-cinematic-2026-09-28/screens/`.
+  - Rendered on a real GPU: Apple M5 Pro, ANGLE Metal, headless Chrome 153.
+  - Set in the fallback font, because every harness aborts the Google Fonts requests.
+
+### Scope (the later direction supersedes the earlier dashboard-preservation brief)
+
+- **The computer is a simple portfolio:** Work, About, Résumé and Contact, not the systems dashboard.
+- **Removed from the new experience** (`/prototype/`, `/computer/*`):
+  - the Rover Autonomy mission and simulation;
+  - every entry point to the dashboard.
+- **Checked:**
+  - These pages link nowhere under `/systems`.
+  - They have no mission, telemetry or map.
+  - The `?sel=` redirect to `/systems/` no longer fires on the prototype (below).
+- **Genuine rover content is kept:**
+  - the RoboJackets RoboNav / University Rover Challenge role in About and Résumé;
+  - the "rover autonomy" lines of the introduction.
+- **Legacy routes are untouched in this pass:**
+  - `/`, `/projects/<id>/`, `/systems/` and `/systems/screen/` are unchanged, as the release diff below shows.
+  - Their retirement is listed at the end of this section, for the homepage cutover.
+
+### What the prototype does now
+
+From `7c60fea` (details in its note):
+- **A monitor-first opening.**
+  - The chair is moved aside and Graphite moved by the desk.
+  - The monitor is large at the lower left: 262, 294 and 389 px wide at 1280×800, 1440×900 and 1920×1080.
+- **One flight straight into reading** (1.9 s), from "Explore the lab" or a click on the monitor. There is no workstation stop and no "Use the computer".
+- **A gentle look-around.**
+  - Pointer parallax, plus a mouse or pen drag past 6 px, softly bounded and easing back on release.
+  - Touch scrolls the page. The keyboard and the wheel are untouched.
+  - It's off while reading, in flight, without the lab, with reduced motion and with Motion off.
+- **The computer as a simple portfolio:**
+  - built from shared `Folio*` components;
+  - the old `/computer/` index, `/computer/systems/` and `/computer/projects/<id>/` are deleted.
+- **Controls:**
+  - a Motion switch in the header;
+  - Escape leaves;
+  - the computer's bar holds "Leave computer" and "Open ordinary page" (`postMessage`).
+- **Navigation:**
+  - an entry per computer page;
+  - `?computer=` links;
+  - a redirect before paint for windows the lab doesn't open in.
+- **The idle hint:** once, after 5 s without input, the screen and bezel brighten and dim over 2.2 s.
+
+From `aabec24`:
+- **The rightward look limit** is solved each frame, so the monitor's bezel stays inside the fit's 1.5% margin.
+- Roomy windows keep about 0.16 rad. Tight ones get 0.06–0.08 rad.
+
+This pass (each bug was reproduced before the fix; the "before" logs are kept):
+1. **Motion off resets the scene** (`scene.ts` `onMotion`):
+   - it ends the hint and drops its brightness;
+   - it drops the pointer's camera offset;
+   - it restores the normal screen light;
+   - it renders the settled frame.
+   - Before the fix, a hint or a pointer offset caught at the switch stayed in the still frame.
+2. **The hint needs the whole screen in the window** (`screenShown()`: all four corners inside it).
+   - It's still once only, and still never with reduced motion or Motion off.
+   - Before the fix, it played with the monitor scrolled out of sight (`logs/hint-light-idle-before-fix.log`).
+3. **Brightness: the comment above `SCREEN_LIT` is corrected.**
+   - The screen's page is mostly dark, so on the whole it reads dimmer than the floor under the work light. The bezel's glow and the hover lift mark it out.
+   - Nothing was raised. The visual judgment is under "Validation".
+4. **Click versus drag with the look off** (reduced motion, Motion off, stacked windows):
+   - A mouse or pen press that moves past 6 px is a drag.
+   - Letting go over the monitor no longer enters, or jumps to `#work` (`logs/look-click-off-before-fix.log`).
+5. **Scroll per history entry** (`computer.ts`).
+   - Each entry now carries a key `k`. At `popstate` the scroll of the page being left is kept under that key.
+   - Before the fix, Back then Forward lost it: Résumé at 900 px came back at 0.
+6. **The computer's bar in narrow windows** (`Screen.astro`).
+   - Below 56rem the name goes.
+   - Below 44rem the places scroll inside the bar, "Open ordinary page" goes and "Leave computer" reads "Leave".
+   - Before the fix, "Leave" was pushed out of the window at 390 px, with or without JavaScript.
+7. **`Base.astro`:** the home page's `?sel=` redirect to `/systems/` is gated `home && !lab`, so it can't take the prototype to the dashboard.
+8. **Harness fixes:**
+   - `look-click-off.cjs` no longer expects `dragged === false` for a moved mouse press with the look off (item 4).
+   - `navigation.cjs` check 6 waits for `commit` on Back: a back-forward cache restore fires no `load`.
+   - `navigation.cjs` check 11 finds "Leave computer" by its `aria-label`: the button's text now has a no-break space before the part that narrow windows hide (item 6).
+   - `shots.cjs` drops the unimplemented `FREEZE` line.
+
+### Validation on the final build
+
+- **Machine:** Apple M5 Pro (18 cores, 24 GB), Darwin 25.5.0.
+- **Browser:** headless Chrome 153.0.8010.54 through Playwright, with WebGL through **ANGLE Metal on the GPU** ("ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)", printed at the top of each log).
+- **Servers:** the branch's `npm run build` on :4322, and `origin/main` `cc1a6c4` built into a scratch copy on :4330.
+- **Measured vs inferred:** everything below is measured unless it says otherwise.
+- **Logs** are under `docs/evidence/lab-cinematic-2026-09-28/logs/`, and the scripts under `harness/`.
+- **Reruns after the last source change** (the computer's bar, item 6): navigation, both click-versus-drag scripts, the idle hint and the Motion fallbacks were run again on the final build, and gave the results below. `look-click-limits` ran before it; that change doesn't touch the room's camera.
+
+| Priority | Result | Log |
+|---|---|---|
+| Click versus drag | 18/18 with the look on. A click on the monitor enters, even with 4–5 px of movement. A drag doesn't enter: moved 8 px or more on the monitor, moved off it, or started in the room and let go over it. A drag that starts on a link doesn't turn the view. "Explore the lab" enters by click and by Tab + Enter, and a pen drags like a mouse. 11/11 with the look off (reduced motion, Motion off, the computer open, 1024×768, touch): a drag let go over the monitor doesn't enter or jump to `#work`, a click still enters, and touch scrolls the page at 390×844 and 1440×900. | `look-click-input.log`, `look-click-off.log` |
+| Look limits | At 1280×800, 1440×900 and 1920×1080, eight drags each (four sides and the corners): the whole screen stays in the window. The nearest edge is 31.6 px (1440×900, full leftward drag). The view eases back to rest in 1.5–3.1 s. Drift over 50 s: pass, from the `aabec24` build (the look code is unchanged since). | `look-click-limits.log`, `look-click-drift*.log` |
+| Direct entry and navigation | 11 checks × 2 runs, 276 assertions, 0 failures. They cover entries and addresses, Back/Forward with scroll per entry, "Leave computer", Escape (focus in the frame and outside it), reload, direct and invalid `?computer=` links, "Open ordinary page", the redirect for windows the lab doesn't open in, links out, the résumé PDF, copy-email, the back-forward cache (restored with `pageshow` persisted), resizing while reading, and the keyboard. The served pages were scanned for phone numbers (counts only): none found. | `navigation.log` |
+| Motion | Switched off, it matches the pose of a page loaded with Motion off: one frame drawn in 2 s, then the loop stops. It persists across reloads, and both switches agree. A click or Enter on the switch during the hint takes the screen back to rest (`hint 0`). | `fallbacks-motion.log`, `hint-light-idle.log` |
+| Idle hint | 42 PASS. It fires once. A press, key or drag stops or cancels it, and moves, the wheel and scroll only delay it. Never with reduced motion or Motion off (stored, or switched), and never with the computer open. Never while the monitor is out of the window. 2/2 with the screen's top 74 px above the window: no hint in 10 s. Scrolled back whole, it came on 5.0 s later, once. | `hint-light-idle.log`, `hint-light-partial.log` |
+| Mobile and stacked | At 390×844 and 1024×768: no horizontal overflow, touch scrolls, and a tap on the monitor goes to `#work`. The computer's bar fits at 600 and 390 px. A 1440→1024→1440 resize while reading works (full mode, then back). | `fallbacks-phone.log` |
+| Fallbacks | No WebGL: `data-failed`, the still, and "See the work" to `#work`; the only console errors are three.js's "could not create a WebGL context". No JavaScript: the still, all four sections shown, and "See the work" to `#work`. Save-Data: the scene isn't loaded until "Explore the lab", then it loads, draws and reaches reading in 2.4 s. | `fallbacks-nogl.log` |
+| Live pages | 87 loads of the branch and the baseline at 390 and 1440, clean: no page errors, failed requests or console errors, apart from the aborted fonts and the expected 404 page. | `fallbacks-live.log` |
+| Released pages against `cc1a6c4` | Built HTML bodies are equal on all 15 released pages. No released file mentions `/computer` or `/prototype`. | `release-diff-html.log` |
+| | Pixels (full page, reduced motion) at 1440×900, 390×844 and 1024×768: of 32 page/size pairs, 31 identical and 1 capture noise. Computed styles are equal apart from `--text-2xl`, which the prototype's CSS defines. | `release-diff-pixels.log` |
+| | Touch (390×844, `isMobile` + `hasTouch`): 14 of 15 identical. `/projects/cucadence/` was flagged at first by two max-1 regions inside `cadence-timeline.png`. With four captures a side, two baseline captures match all four candidate captures to the pixel, and the same regions differ between baseline captures: capture noise. | `release-diff-pixels-touch.log`, `release-diff-pixels-touch-cucadence.log` |
+
+**The monitor's light, judged visually** (`hint-light-lighting.log`; the clips were reviewed and aren't committed):
+- **Mean luma of the screen (0–255):**
+  - 30.5 at rest;
+  - 38.6 under the pointer;
+  - 44.6 at the hint's peak;
+  - 52.6 for both together.
+- **For comparison:** the brightest same-size patch elsewhere in the window (text, bar, caption and monitor excluded) is 62. The screen doesn't beat it, and wasn't made to.
+- **The judgment:** at rest the monitor clearly reads as a screen showing a page: the Work grid and its bar. The bezel's glow separates it from the desk. The peak is a gentle, visible swell, not a beacon.
+- **Under the pointer:** every dark screen pixel lifts, by at least 5.9 luma. There's no z-fighting, and the cursor is `pointer`.
+
+**Robots** (`robots-dance*.log`, from `7c60fea`'s scene; the dance code is unchanged since; report only, nothing fixed):
+- **Ivory and the stand:** they intersect in 87 of 541 samples, up to 100 mm. It isn't obvious from the camera (visual judgment).
+- **Graphite and Terracotta:** they intersect in 6 samples, up to 35 mm. It reads as a tap.
+- **Graphite over "Contact":** Graphite's arm crosses the "Contact" link at 1440×900 for about 0.1 s (beats 15.45–15.57).
+- **Terracotta's shimmy:** Terracotta doesn't face Ivory during the shimmy window its reaction is written for.
+- **The reduced-motion still (beat 21.2):** Terracotta is mid-move there, at the 88th percentile of its loop's speed. Graphite is at the 5th and Ivory at the 52nd.
+
+### Performance (real GPU: Apple M5 Pro, ANGLE Metal, headless Chrome 153.0.8010.54)
+
+`harness/measure.cjs`: 5 s windows (the flights are their own length). The WebGL draw calls and `requestAnimationFrame` are wrapped from outside the page.
+
+| State | 1440×900 @1x (buffer 1440×900) | 1440×900 @2x (1800×1125) | 1920×1080 @2x (2400×1350) |
+|---|---|---|---|
+| Opening, dancing | 60 fps; callbacks 1.9 / 2.7 ms (p50 / p95); 300 calls; 97,084 triangles | 60 fps; 2.0 / 2.9 ms | 60 fps; 2.3 / 3.1 ms; 303 calls; 98,016 triangles |
+| Dragging to look | 60 fps; 1.6 / 2.4 ms | 60 fps; 1.9 / 2.9 ms | 60 fps; 2.2 / 3.0 ms |
+| Flying in (1.9 s) | 59.5 fps; one 33 ms interval | 60.5 fps | 60 fps |
+| Reading, first 3 s (robots easing to rest) | 18 frames/s drawn; 149 calls; 51,212 triangles | 17.3 frames/s | 17.7 frames/s; 155 calls |
+| Reading, settled | 0 | 0 | 0 |
+| Flying out (1.5 s) | 59.2 fps | 58.6 fps | 51.3 fps in the first run: one 200 ms interval. Then 117 ms in run 2 and none in run 3. |
+| Motion off, and scrolled past the opening | 0 | 0 | 0 |
+
+- **Reduced motion** (1440×900 @1x, `measure-1440x900-dpr1-reduced.log`):
+  - Nothing is drawn in any window except the cuts in and out, one frame each.
+  - Those frames count 600 and 450 draw calls: about two scenes' worth in one tick (inferred from the counts: the cut draws twice). Not investigated.
+- **Frame intervals:** p50 16.7 ms and p95 ≤ 16.8 ms in every state.
+- **Callback time** on the main thread: at most 6.4 ms, in any frame.
+- **Budgets:**
+  - 300–306 draw calls per frame, against the provisional ~450.
+  - About 98k triangles.
+  - The pixel ratio is capped at 1.25, so a 2x display gets 1.25x the buffer.
+- **JS heap:** 10.5–25.5 MB.
+- **Not measured:**
+  - GPU time on the GPU (no timer query is exposed to pages).
+  - GPU memory. Stopping the drawing doesn't release it: the renderer, buffers and textures stay allocated.
+- **The fly-out interval at 1920×1080 @2x** (the three `measure-1920x1080-dpr2*.log`):
+  - It was seen only under the measuring harness, which wraps every draw call: 2 of 3 runs.
+  - A scratch probe (not committed) ran the same path ten times without the harness, five of them with the same look drag first: no interval over 25 ms after Escape.
+  - The probe recorded no long animation frame (> 50 ms on the main thread).
+  - Cause not established.
+
+### Evidence
+
+`docs/evidence/lab-cinematic-2026-09-28/`:
+- **`screens/`:** 20 JPEGs, 2.1 MB in all, at 86% quality:
+  - `opening-{1280x800,1440x900,1920x1080}`;
+  - `look-{left,right,up,down}-1440x900`;
+  - `reading-{work,about,resume,contact,case}-1440x900`;
+  - `phone-{opening,page-work}-390x844`;
+  - `stacked-{opening,page-work}-1024x768`;
+  - `reduced-{opening,reading-work}-1440x900`.
+- **`logs/`:** the runs above. The `*-before-fix.log` files show the bugs reproduced before the fixes. Local output paths in them are shortened to `<scratch>` and `<repo>`; the files they name (contact sheets, raw captures) aren't committed.
+- **`harness/`:** the scripts. Playwright isn't a dependency.
+
+No recording is committed.
+
+### Known limitations
+
+1. **Coverage.**
+   - Headless Chrome on one Mac only.
+   - No Safari, Firefox, Playwright WebKit, real phone or screen-reader pass.
+   - The fallback font throughout, because the fonts were aborted.
+2. **The redirect for windows the lab doesn't open in** is a client-side `location.replace` in the page body, because GitHub Pages can't redirect by query.
+   - The `?computer=` document can paint once before it goes. This was seen once, at 1024×768 on `?computer=work/cucadence`, in an earlier navigation run.
+   - It was then seen in 0 of 30 loads in a dedicated repeat, and in 0 of the 20 loads of the final run's check 7.
+   - Accepted for the prototype.
+3. **The computer's bar at 320 px:** the places scroll 32 px inside the bar.
+4. **The robots:** the intersections and reactions above.
+5. **The reduced-motion cut** draws about twice in one tick, and the 1920×1080 @2x fly-out has the interval above. Both are measured, and neither is explained.
+6. **The back-forward cache** was exercised in Chrome only. Safari's differs.
+7. **Carried over:**
+   - The two `src/lib/build.ts` type errors: no Node types, because `@types/node` isn't installed (TS2307 and TS2580 with tsc 5.9.3, `logs/tsc.log`).
+   - The existing chunk-size warning.
+
+### Legacy to retire at the homepage cutover (not removed now)
+
+- **Pages:** `src/pages/systems.astro` (`/systems/`) and `src/pages/systems/screen.astro` (`/systems/screen/`).
+- **Components:** `Overview` → `Stage` → `MissionCanvas`, `SystemsMap`, `Inspector`, `Evidence`, and the released lab's `RobotStage` and `Panel`.
+- **Scripts:** `rover-sim.ts`, `rover-render.ts`, the released `robot-scene.ts` and `lab.ts`, and `selection.ts` if nothing else uses it.
+- **Data:** `site.ts`'s `mission` export and `skillAliases`, and what in `lib/model` serves only the map.
+- **`Base.astro`:**
+  - the `?sel=` home redirect to `/systems/`;
+  - the nav's "Systems map" link;
+  - the search entries (`onConsole`).
+- **Links:**
+  - `HomeSections.astro`'s systems-map links;
+  - `CaseStudy.astro`'s `mapHref` and Connections links;
+  - the command palette's Map group.
+- **Text:**
+  - the og:image alt ("A console-style card with an abstract systems map");
+  - the stale comment in `CaseStudy.astro` that says the case study "stays on the systems map, one link away".
+- **Redirects for existing links**, which GitHub Pages can't do server-side, so each would be a small static page with `location.replace`, a `<meta http-equiv="refresh">` and a canonical link:
+  - `/systems/` and `/systems/screen/` → `/` (or `/#work`);
+  - `/?sel=<id>` (and `/systems/?sel=<id>`) → the matching `/projects/<id>/` where the id is a project, else `/#work`.
+
+### Commands (from the repository root)
+
+```sh
+npm run build                          # 42 pages
+git diff --check
+tsc --noEmit -p .                      # TypeScript isn't a dependency: only the two src/lib/build.ts errors (logs/tsc.log)
+npm run preview -- --host 127.0.0.1 --port 4322
+
+# Playwright isn't a dependency: NODE_PATH=<a directory with it>. Most scripts launch SwiftShader by default.
+# For the GPU numbers above, the launch was pointed at ANGLE Metal on the Mac's GPU instead.
+E=docs/evidence/lab-cinematic-2026-09-28; cd $E/harness
+BASE=http://127.0.0.1:4322 EXT=jpg OUT=../screens W=1440x900 STEPS=hero,look,read,about,resume,contact,case node shots.cjs
+BASE=http://127.0.0.1:4322/prototype/ W=1440x900 DPR=1 node measure.cjs     # also DPR=2, W=1920x1080, REDUCE=1
+LOG=../logs/navigation.log BASE=http://127.0.0.1:4322 node navigation.cjs
+node look-click-input.cjs; node look-click-off.cjs; node look-click-limits.cjs
+LOG=../logs/hint-light-idle.log node hint-light-idle.cjs; node hint-light-partial.cjs
+node fallbacks-motion.cjs; node fallbacks-phone.cjs; node fallbacks-nogl.cjs; node fallbacks-live.cjs
+# Baseline: origin/main cc1a6c4 built into a scratch copy, served on :4330
+DIST_A=<the baseline's dist> BASE_A=http://127.0.0.1:4330 BASE_B=http://127.0.0.1:4322 node release-diff-html.cjs
+BASE_A=http://127.0.0.1:4330 BASE_B=http://127.0.0.1:4322 node release-diff-pixels.cjs   # TOUCH=1 JOBS='390x844:*' for touch
+```
+
+## Earlier checkpoint: computer-first prototype, `796f421` (Claude)
 
 **Status: waiting for visual approval of the composition and the reading experience.** Nothing here is pushed, merged or deployed.
 

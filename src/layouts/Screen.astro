@@ -81,7 +81,7 @@ const nav = [
       </nav>
       <div class="scr-end">
         <a href={page} class="scr-quiet" data-top>Open ordinary page</a>
-        <button type="button" class="scr-leave" data-leave>Leave computer</button>
+        <button type="button" class="scr-leave" data-leave aria-label="Leave computer">Leave<span class="scr-more">&nbsp;computer</span></button>
       </div>
     </header>
     <main id="main" class="scr-main">
@@ -196,15 +196,40 @@ const nav = [
       .scr-leave {
         color: var(--muted);
       }
-      /* A narrow screen: the name goes first, then the ordinary page's link. */
+      /* A narrow screen: the name goes first, then the ordinary page's link, and the rest closes up. The
+         places scroll inside the bar before the bar would push "Leave" out of the window. */
       @media (width < 56rem) {
         .scr-name {
           display: none;
         }
       }
       @media (width < 44rem) {
-        .scr-quiet {
+        .scr-bar {
+          gap: 0.5rem;
+        }
+        .scr-nav {
+          min-width: 0;
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+        .scr-nav a,
+        .scr-end > * {
+          padding: 0 0.4375rem;
+        }
+        .scr-end {
+          flex-shrink: 0;
+          margin-left: 0;
+          padding-left: 0.375rem;
+        }
+        .scr-end > .scr-quiet,
+        .scr-more {
           display: none;
+        }
+      }
+      @media (width < 24rem) {
+        .scr-nav a,
+        .scr-end > * {
+          padding: 0 0.3125rem;
         }
       }
       .scr-main {

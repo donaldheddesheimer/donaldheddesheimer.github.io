@@ -1,0 +1,24 @@
+# look-click-input 2026-09-28T18:14:27.986Z renderer="ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version) (scene canvas)" server=http://127.0.0.1:4322
+== 1440x900
+renderer ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version) (scene canvas)
+parallax path [x, y, lookAz, lookEl, cursor] [[28.8,540,0.0269,0.0029,"grab"],[144,540,0.023,0.003,"pointer"],[259.2,540,0.0187,0.003,"pointer"],[374.4,540,0.0142,0.003,"grab"],[489.6,540,0.0096,0.003,"grab"],[604.8,540,0.0048,0.003,"grab"],[720,540,0.0001,0.003,"grab"],[835.2,540,-0.0047,0.003,"grab"],[950.4,540,-0.0095,0.003,"grab"],[1065.6,540,-0.0143,0.003,"grab"],[1180.8,540,-0.0191,0.003,"grab"],[1296,540,-0.0238,0.003,"grab"],[1411.2,540,-0.0284,0.003,"grab"],[892.8,108,-0.0074,-0.011,"grab"],[892.8,202.5,-0.0072,-0.0082,"grab"],[892.8,297,-0.0072,-0.0051,"grab"],[892.8,391.5,-0.0072,-0.002,"grab"],[892.8,486,-0.0072,0.0012,"grab"],[892.8,580.5,-0.0072,0.0043,"grab"],[892.8,675,-0.0072,0.0074,"grab"],[892.8,769.5,-0.0072,0.0105,"grab"],[892.8,864,-0.0072,0.0136,"grab"]]
+PASS parallax: moving the mouse turns the view slightly {"maxAbsAz":0.0284,"maxAbsEl":0.0136,"dragged":false,"pc":null}
+PASS cursor: 'grab' over the room {"root":"grab","computed":"grab"}
+PASS cursor: 'pointer' over the monitor {"root":"pointer","computed":"pointer"}
+PASS cursor: 'grabbing' while dragging {"root":"grabbing","computed":"grabbing"}
+PASS cursor: back to 'grab' after letting go over the room {"root":"grab","computed":"grab"}
+info cursor over the name (outside the stage) {"root":"","computed":"auto","lookAz":0.0513}
+PASS click: a plain click on the monitor enters {"at":[247.8,594.9],"pick":true,"firstPc":[1,"fade"],"readMs":2160,"url":"/prototype/?computer=work"}
+PASS click: a press on the monitor that moves 4 px still enters {"move":[4,0],"cursorWhilePressed":"pointer","firstPc":[1,"fade"],"readMs":2205,"url":"/prototype/?computer=work"}
+PASS click: a press on the monitor that moves 5 px still enters {"move":[3,4],"cursorWhilePressed":"pointer","firstPc":[1,"fade"],"readMs":2161,"url":"/prototype/?computer=work"}
+PASS drag: from the room, let go over the monitor, does not enter {"releasedAt":[178.2,537.1],"pickAtRelease":true,"lookAzAtRelease":0.0601,"cursorAtRelease":"grabbing","dragged":true,"firstPc":null,"readMs":null,"url":"/prototype/?probe"}
+PASS click: after a drag, a plain click on the monitor enters {"firstPc":[0,"fade"],"readMs":2208,"url":"/prototype/?computer=work"}
+PASS drag: starts on the monitor and moves away (150 px right), does not enter {"from":[247.8,594.9],"pickAtRelease":true,"lookAzAtRelease":-0.0637,"cursorWhileDragging":"grabbing","dragged":true,"firstPc":null,"readMs":null,"url":"/prototype/?probe"}
+PASS drag: starts on the monitor, moves 8 px and ends on it, does not enter {"from":[247.8,594.9],"pickAtRelease":true,"lookAzAtRelease":0.0148,"cursorWhileDragging":"grabbing","dragged":true,"firstPc":null,"readMs":null,"url":"/prototype/?probe"}
+PASS drag: starts on the monitor, moves 30 px and ends on it, does not enter {"from":[247.8,594.9],"pickAtRelease":true,"lookAzAtRelease":0.0021,"cursorWhileDragging":"grabbing","dragged":true,"firstPc":null,"readMs":null,"url":"/prototype/?probe"}
+PASS links: a drag that starts on Resume does not turn the view {"from":[327.6,319.5],"to":[687.6,539.5],"pre":{"lookAz":0,"lookEl":0},"maxAbsAz":0,"maxAbsEl":0,"heldAz":0,"rootCursors":[""],"dragged":false,"rootPointerEvents":{"pointermove:mouse":1},"popups":[],"firstPc":null,"readMs":null,"url":"/prototype/?probe"}
+PASS links: a drag that starts on Explore the lab does not turn the view {"from":[168.4,319.5],"to":[528.4,539.5],"pre":{"lookAz":0,"lookEl":0},"maxAbsAz":0,"maxAbsEl":0,"heldAz":0,"rootCursors":[""],"dragged":false,"rootPointerEvents":{"pointermove:mouse":1},"popups":[],"firstPc":null,"readMs":null,"url":"/prototype/?probe"}
+PASS enter: clicking "Explore the lab" enters {"firstPc":[1,"fade"],"readMs":2157,"url":"/prototype/?computer=work"}
+PASS enter: Tab to "Explore the lab" and Enter enters {"tabs":8,"order":["Skip to content","Donald Heddesheimer","Work","About","Résumé","Contact","Motion","Explore the labSee the w"],"lookAzBefore":0,"focusAfter":"IFRAME.pc-frame","firstPc":[1,"fade"],"readMs":2203,"url":"/prototype/?computer=work"}
+PASS pen: a pen drag turns the view like the mouse {"lookAz":0.0619,"lookAzMax":0.064,"cursor":"grabbing","pointerType":"pen","firstPc":null,"readMs":null,"url":"/prototype/?probe"}
+SUMMARY {"checks":18,"failed":0,"result":"PASS"}

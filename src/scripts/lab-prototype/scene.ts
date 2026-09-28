@@ -19,6 +19,7 @@ const BEATS = 32;
 const RAMP = 0.35; // beats of crossfade either side of a section boundary
 // Reduced motion (or Motion off) holds this moment: each robot in character, arms clear of the opening's text.
 const STILL_BEAT = 21.2;
+const STILL_T = (STILL_BEAT * 60) / BPM; // the same moment, in seconds
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 const smooth = (a: number, b: number, x: number) => {
@@ -1297,7 +1298,9 @@ export const DESK = { x: -1.35, z: 3.3, yaw: 0.5 };
 /** The monitor's screen (16:10), and the height of its centre, about seated eye level. */
 export const SCREEN = { w: 0.68, h: 0.425, y: 1.12 };
 const SCREEN_Z = -0.1475;
-// The screen is the brightest thing in the room, a little over the page's own white, and lights the desk.
+// The screen's white is a little over the page's own white, and it lights the desk. Its page is mostly
+// dark, so on the whole it reads dimmer than the floor under the work light: the bezel's glow and the
+// brightening under the pointer are what mark it out.
 const SCREEN_LIT = 1.08;
 const GLOW = 0.5;
 /** Where the chair stands, in the desk's frame (metres; x to the desk's right), and its turn. */
@@ -1594,7 +1597,7 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
   let inView = false;
   let raf = 0;
   let last = 0;
-  let t = intent ? 0 : (STILL_BEAT * 60) / BPM;
+  let t = intent ? 0 : STILL_T;
   let w = 0;
   let h = 0;
   let fw = 1;
@@ -1843,12 +1846,17 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
   };
 
   // The Motion switch (the page's bar) and the system setting: off holds one composed moment, and there
-  // is no looking around.
+  // is no looking around. Turned off mid-dance, the room goes to that moment (the one it opens on with
+  // motion off), not wherever the dance was: the look undone, the hint's light gone, drawn once.
   const onMotion = () => {
     intent = motionOK();
     if (!intent) {
       endHint();
       unlook();
+      t = STILL_T;
+      hintK = 0;
+      light();
+      if (drawn && !lost && !flight && w > 0) render();
     }
     sync();
   };
@@ -1910,7 +1918,8 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
   // --- The idle hint -------------------------------------------------------------------------------
   // Once: if nothing has moved the pointer, scrolled or pressed a key for IDLE_MS since the room first
   // drew, the monitor brightens and dims again over HINT_MS. Any press, a drag or going in ends it for
-  // good. It needs motion (the frame loop only runs with it), and the opening in view.
+  // good. It needs motion (the frame loop only runs with it), and the whole screen inside the window:
+  // until then it waits.
   let hintState: 'wait' | 'on' | 'off' = 'wait';
   let hintStart = 0;
   let idleFrom = performance.now();
@@ -1919,8 +1928,19 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
     root.dataset.hint = hintState === 'on' ? 'stopped' : 'cancelled';
     hintState = 'off';
   }
+  // Where the screen's corners fall in the window now (the stage may have scrolled since it was measured).
+  function screenShown() {
+    const r = stage!.getBoundingClientRect();
+    const [vw, vh] = [html.clientWidth, html.clientHeight];
+    return screenCorners.every((c) => {
+      corner.copy(c).project(camera);
+      const x = r.left + ((corner.x + 1) / 2) * w;
+      const y = r.top + ((1 - corner.y) / 2) * h;
+      return corner.z < 1 && x >= 0 && x <= vw && y >= 0 && y <= vh;
+    });
+  }
   function hint(now: number, dt: number) {
-    if (hintState === 'wait' && drawn && inView && intent && mode === 'hero' && !flight && !html.dataset.pc && !press && now - idleFrom >= IDLE_MS) {
+    if (hintState === 'wait' && drawn && inView && intent && mode === 'hero' && !flight && !html.dataset.pc && !press && now - idleFrom >= IDLE_MS && screenShown()) {
       hintState = 'on';
       hintStart = now;
       root.dataset.hint = 'on';
@@ -1956,6 +1976,9 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
   const drag = { az: 0, el: 0 };
   const look = { az: 0, el: 0 };
   let press: { id: number; x: number; y: number; az: number; el: number; moved: boolean } | null = null;
+  // Where any mouse or pen press on the room began, look or no look: moved past DRAG_PX it's a drag,
+  // and letting go over the monitor isn't a click on it (dragged()).
+  let down: { id: number; x: number; y: number } | null = null;
   let wasDrag = false;
   const soft = (x: number, lo: number, hi: number) => (x >= 0 ? hi * Math.tanh(x / hi) : lo * Math.tanh(x / lo));
   const lookOK = () => intent && mode === 'hero' && !flight && !lost && html.hasAttribute('data-pc-able') && !html.dataset.pc;
@@ -2015,12 +2038,16 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
   }
   const onDown = (e: PointerEvent) => {
     wasDrag = false;
-    if (e.button !== 0 || !fine(e) || !lookOK() || (e.target as Element).closest('a, button, input, select, textarea, label, [tabindex]')) return;
+    down = null;
+    if (e.button !== 0 || !fine(e) || (e.target as Element).closest('a, button, input, select, textarea, label, [tabindex]')) return;
+    down = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    if (!lookOK()) return;
     press = { id: e.pointerId, x: e.clientX, y: e.clientY, az: drag.az, el: drag.el, moved: false };
     e.preventDefault(); // no text selection while dragging; the click still comes
   };
   const onMove = (e: PointerEvent) => {
     if (!fine(e)) return;
+    if (down && e.pointerId === down.id && Math.hypot(e.clientX - down.x, e.clientY - down.y) >= DRAG_PX) wasDrag = true;
     if (press && e.pointerId === press.id) {
       const dx = e.clientX - press.x;
       const dy = e.clientY - press.y;
@@ -2044,6 +2071,7 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
     cursor(e.clientX, e.clientY);
   };
   const onUp = (e: PointerEvent) => {
+    if (down && e.pointerId === down.id) down = null;
     if (!press || e.pointerId !== press.id) return;
     if (root.hasPointerCapture(press.id)) root.releasePointerCapture(press.id);
     press = null;

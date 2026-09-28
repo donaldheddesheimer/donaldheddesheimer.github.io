@@ -1,0 +1,39 @@
+# release-diff-pixels 2026-09-28T17:34:43.066Z renderer="ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)" server=A http://127.0.0.1:4330 (origin/main cc1a6c4) vs B http://127.0.0.1:4322 (cinematic-lab-prototype) · reduced motion, full page, DPR 1, isMobile+hasTouch · JOBS=390x844:/projects/cucadence/
+# released pages (15): / /systems/ /systems/screen/ /no-such-page/ /projects/bytefight/ /projects/claude-status/ /projects/cucadence/ /projects/fluxion/ /projects/nn-mnist/ /projects/skyblock-bazaar/ /projects/smart-bin/ /projects/swerve-drive/ /projects/traffic-ops-center/ /projects/travelmate/ /projects/useless-machine/
+{"size":"390x844","path":"/projects/cucadence/","status":[200,200],"height":[4526,4526],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":false,"size":"390x4526","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,4228,246,4238]}],"cropFiles":["release-diff-touch-390x844_projects_cucadence_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x4526","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,4228,246,4238]}]}
+  A1B1 norm {"same":false,"size":"390x4370","diffPixels":9060,"maxChannelDiff":21,"regions":[{"px":8328,"max":21,"box":[0,335,389,626]},{"px":375,"max":4,"box":[16,860,373,873]},{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]},{"px":60,"max":3,"box":[18,3695,23,3828]},{"px":32,"max":1,"box":[16,3887,25,3928]}]}
+  A1B2 norm {"same":false,"size":"390x4370","diffPixels":9060,"maxChannelDiff":21,"regions":[{"px":8328,"max":21,"box":[0,335,389,626]},{"px":375,"max":4,"box":[16,860,373,873]},{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]},{"px":60,"max":3,"box":[18,3695,23,3828]},{"px":32,"max":1,"box":[16,3887,25,3928]}]}
+  A1B3 norm {"same":false,"size":"390x4370","diffPixels":9060,"maxChannelDiff":21,"regions":[{"px":8328,"max":21,"box":[0,335,389,626]},{"px":375,"max":4,"box":[16,860,373,873]},{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]},{"px":60,"max":3,"box":[18,3695,23,3828]},{"px":32,"max":1,"box":[16,3887,25,3928]}]}
+  A1B4 norm {"same":false,"size":"390x4370","diffPixels":9060,"maxChannelDiff":21,"regions":[{"px":8328,"max":21,"box":[0,335,389,626]},{"px":375,"max":4,"box":[16,860,373,873]},{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]},{"px":60,"max":3,"box":[18,3695,23,3828]},{"px":32,"max":1,"box":[16,3887,25,3928]}]}
+  A2B1 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B3 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B4 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A3B1 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A3B2 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A3B3 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A3B4 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A4B1 norm {"same":false,"size":"390x4370","diffPixels":265,"maxChannelDiff":1,"regions":[{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]}]}
+  A4B2 norm {"same":false,"size":"390x4370","diffPixels":265,"maxChannelDiff":1,"regions":[{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]}]}
+  A4B3 norm {"same":false,"size":"390x4370","diffPixels":265,"maxChannelDiff":1,"regions":[{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]}]}
+  A4B4 norm {"same":false,"size":"390x4370","diffPixels":265,"maxChannelDiff":1,"regions":[{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]}]}
+  A1A2 norm {"same":false,"size":"390x4370","diffPixels":9060,"maxChannelDiff":21,"regions":[{"px":8328,"max":21,"box":[0,335,389,626]},{"px":375,"max":4,"box":[16,860,373,873]},{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]},{"px":60,"max":3,"box":[18,3695,23,3828]},{"px":32,"max":1,"box":[16,3887,25,3928]}]}
+  B1B2 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A3 norm {"same":false,"size":"390x4370","diffPixels":9060,"maxChannelDiff":21,"regions":[{"px":8328,"max":21,"box":[0,335,389,626]},{"px":375,"max":4,"box":[16,860,373,873]},{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]},{"px":60,"max":3,"box":[18,3695,23,3828]},{"px":32,"max":1,"box":[16,3887,25,3928]}]}
+  B1B3 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A4 norm {"same":false,"size":"390x4370","diffPixels":8795,"maxChannelDiff":21,"regions":[{"px":8328,"max":21,"box":[0,335,389,626]},{"px":375,"max":4,"box":[16,860,373,873]},{"px":60,"max":3,"box":[18,3695,23,3828]},{"px":32,"max":1,"box":[16,3887,25,3928]}]}
+  B1B4 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2A3 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B2B3 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2A4 norm {"same":false,"size":"390x4370","diffPixels":265,"maxChannelDiff":1,"regions":[{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]}]}
+  B2B4 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A3A4 norm {"same":false,"size":"390x4370","diffPixels":265,"maxChannelDiff":1,"regions":[{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]}]}
+  B3B4 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A2B1 A2B2 A2B3 A2B4 A3B1 A3B2 A3B3 A3B4 match to the pixel
+  styles A1B1 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":297,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":7}}
+  styles A2B2 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":297,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":7}}
+  styles A1A2 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[]}
+  (17.5 s)
+# summary: 1 page/size pairs: identical 1, noise only 0, DIFFERENT 0; computed-style differences A/B beyond --text-2xl: 0 (controls 0)

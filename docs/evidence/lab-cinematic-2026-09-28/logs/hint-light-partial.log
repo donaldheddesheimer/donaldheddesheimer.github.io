@@ -1,0 +1,3 @@
+# hint-light-partial 2026-09-28T17:50:14.485Z renderer: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version) browser 153.0.8010.54 server: http://127.0.0.1:4322 viewport 1440x900
+PASS run 1 {"scrollY":580,"screenTopBefore":506,"screenYAfterScroll":[521,506,667,690],"partialFor":10000,"seqWhilePartial":[],"hintWhilePartial":null,"seqAfterScrollBack":[["on",5013],["done",7230]],"hintAtEnd":"done","stats":{"running":"true","hint":0}}
+PASS run 2 {"scrollY":580,"screenTopBefore":506,"screenYAfterScroll":[521,506,667,690],"partialFor":10000,"seqWhilePartial":[],"hintWhilePartial":null,"seqAfterScrollBack":[["on",5014],["done",7231]],"hintAtEnd":"done","stats":{"running":"true","hint":0}}
