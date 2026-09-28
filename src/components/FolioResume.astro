@@ -1,0 +1,169 @@
+---
+// Résumé: the PDF's content as a page (education, experience,
+// skills), and the PDF itself. From src/data/site.ts, which is copied from the résumé.
+import Icon from './Icon.astro';
+import { education, experience, orgs, profile, skills } from '../data/site';
+import { fmtMonth } from '../lib/format';
+import '../styles/folio.css';
+
+interface Props {
+  /** The section heading's level: 1 on a page of its own, 2 on the page with all four. */
+  level?: 1 | 2;
+}
+const { level = 2 } = Astro.props;
+const H = `h${level}` as 'h1' | 'h2';
+const H3 = `h${level + 1}` as 'h2' | 'h3';
+const H4 = `h${level + 2}` as 'h3' | 'h4';
+
+const org = (id: string) => orgs.find((o) => o.id === id)!;
+const file = `${profile.name.replace(/\s+/g, '-')}-Resume.pdf`;
+---
+
+<section id="resume" class="folio" aria-labelledby="resume-title">
+  <header class="folio-head">
+    <div>
+      <H class="folio-title" id="resume-title">Résumé</H>
+      <p class="folio-lede">The same as the PDF, to read here.</p>
+    </div>
+    <div class="folio-actions">
+      <a href={profile.resume} class="btn btn-primary" download={file}>
+        <Icon name="file" class="size-4" />
+        Download PDF
+      </a>
+    </div>
+  </header>
+
+  <div class="fr-body">
+    <section aria-labelledby="resume-edu">
+      <H3 class="folio-sub" id="resume-edu">Education</H3>
+      <div class="fr-entry">
+        <div class="fr-line">
+          <H4 class="fr-what">{education.school}</H4>
+          <span class="fr-when">{fmtMonth(education.start)} – {fmtMonth(education.end)} (expected)</span>
+        </div>
+        <p class="fr-sub">
+          {education.degree} · {education.program} · {education.thread} · GPA {education.gpa}
+        </p>
+        <p class="fr-note">Coursework: {education.coursework.join(', ')}</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="resume-exp">
+      <H3 class="folio-sub" id="resume-exp">Experience</H3>
+      {
+        experience.map((e) => (
+          <div class="fr-entry">
+            <div class="fr-line">
+              <H4 class="fr-what">
+                {e.role}, {org(e.org).name}
+              </H4>
+              <span class="fr-when">
+                {fmtMonth(e.start)} – {e.end ? fmtMonth(e.end) : 'Present'}
+              </span>
+            </div>
+            <p class="fr-sub">
+              {e.unit && `${e.unit} · `}
+              {e.location}
+            </p>
+            <ul class="fr-points">
+              {e.points.map((pt) => (
+                <li>{pt}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </section>
+
+    <section aria-labelledby="resume-skills">
+      <H3 class="folio-sub" id="resume-skills">Skills</H3>
+      <dl class="fr-skills">
+        {
+          skills.map((s) => (
+            <div>
+              <dt>{s.group}</dt>
+              <dd>{s.items.join(', ')}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+  </div>
+</section>
+
+<style>
+  .fr-body {
+    display: grid;
+    gap: 2.75rem;
+    max-width: 58rem;
+  }
+  .fr-entry {
+    margin-top: 1.25rem;
+  }
+  .fr-entry + .fr-entry {
+    margin-top: 1.75rem;
+  }
+  .fr-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1.5rem;
+  }
+  .fr-what {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--text);
+  }
+  .fr-when {
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--dim);
+    white-space: nowrap;
+  }
+  .fr-sub {
+    margin-top: 0.25rem;
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+  .fr-note {
+    margin-top: 0.5rem;
+    font-size: var(--text-sm);
+    color: var(--dim);
+  }
+  .fr-points {
+    display: grid;
+    gap: 0.5rem;
+    max-width: var(--measure);
+    margin-top: 0.75rem;
+    padding-left: 1.1rem;
+    list-style: disc;
+    font-size: var(--text-base);
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .fr-points li::marker {
+    color: var(--dim);
+  }
+  .fr-skills {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    font-size: var(--text-base);
+  }
+  .fr-skills > div {
+    display: grid;
+    gap: 0.125rem 1.5rem;
+  }
+  @media (width >= 40rem) {
+    .fr-skills > div {
+      grid-template-columns: 13rem minmax(0, 1fr);
+    }
+  }
+  .fr-skills dt {
+    color: var(--dim);
+  }
+  .fr-skills dd {
+    color: var(--ink);
+  }
+</style>

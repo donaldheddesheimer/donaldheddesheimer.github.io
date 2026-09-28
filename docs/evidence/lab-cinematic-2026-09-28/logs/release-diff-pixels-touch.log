@@ -1,0 +1,214 @@
+# release-diff-pixels 2026-09-28T17:29:38.983Z renderer="ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)" server=A http://127.0.0.1:4330 (origin/main cc1a6c4) vs B http://127.0.0.1:4322 (cinematic-lab-prototype) · reduced motion, full page, DPR 1, isMobile+hasTouch · JOBS=390x844:*
+# released pages (15): / /systems/ /systems/screen/ /no-such-page/ /projects/bytefight/ /projects/claude-status/ /projects/cucadence/ /projects/fluxion/ /projects/nn-mnist/ /projects/skyblock-bazaar/ /projects/smart-bin/ /projects/swerve-drive/ /projects/traffic-ops-center/ /projects/travelmate/ /projects/useless-machine/
+{"size":"390x844","path":"/","status":[200,200],"height":[8015,8015],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":false,"size":"390x8015","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,7657,246,7667]}],"cropFiles":["release-diff-touch-390x844_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x8015","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,7657,246,7667]}]}
+  A1B1 norm {"same":true,"size":"390x7799","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x7799","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x7799","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x7799","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x7799","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x7799","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":1257,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":1257,"::after --text-2xl: (none) | 1.75rem":23,"::before --text-2xl: (none) | 1.75rem":30}}
+  styles A2B2 {"elements":1257,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":1257,"::after --text-2xl: (none) | 1.75rem":23,"::before --text-2xl: (none) | 1.75rem":30}}
+  styles A1A2 {"elements":1257,"same":true,"count":0,"byProp":{},"examples":[]}
+  (12.3 s)
+{"size":"390x844","path":"/systems/","status":[200,200],"height":[1533,1533],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"canvases":[1,1],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":true,"size":"390x1533","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  AB2 raw  {"same":true,"size":"390x1533","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B1 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":false,"size":"390x1495","diffPixels":2,"maxChannelDiff":2,"regions":[{"px":1,"max":2,"box":[263,302,263,302]},{"px":1,"max":1,"box":[34,1008,34,1008]}]}
+  A2B1 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":false,"size":"390x1495","diffPixels":2,"maxChannelDiff":2,"regions":[{"px":1,"max":2,"box":[263,302,263,302]},{"px":1,"max":1,"box":[34,1008,34,1008]}]}
+  A1A2 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":false,"size":"390x1495","diffPixels":2,"maxChannelDiff":2,"regions":[{"px":1,"max":2,"box":[263,302,263,302]},{"px":1,"max":1,"box":[34,1008,34,1008]}]}
+  verdict (norm): identical: A1B1 A2B1 match to the pixel
+  styles A1B1 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":2319,"::after --text-2xl: (none) | 1.75rem":3,"::before --text-2xl: (none) | 1.75rem":31}}
+  styles A2B2 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":2319,"::after --text-2xl: (none) | 1.75rem":3,"::before --text-2xl: (none) | 1.75rem":31}}
+  styles A1A2 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[]}
+  (17.8 s)
+{"size":"390x844","path":"/systems/screen/","status":[200,200],"height":[1533,1533],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"canvases":[1,1],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":true,"size":"390x1533","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  AB2 raw  {"same":true,"size":"390x1533","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B1 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":2319,"::after --text-2xl: (none) | 1.75rem":3,"::before --text-2xl: (none) | 1.75rem":31}}
+  styles A2B2 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":2319,"::after --text-2xl: (none) | 1.75rem":3,"::before --text-2xl: (none) | 1.75rem":31}}
+  styles A1A2 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[]}
+  (17.8 s)
+{"size":"390x844","path":"/no-such-page/","status":[404,404],"height":[896,896],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":true,"size":"390x896","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  AB2 raw  {"same":true,"size":"390x896","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B1 norm {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":212,"::after --text-2xl: (none) | 1.75rem":3,"::before --text-2xl: (none) | 1.75rem":12}}
+  styles A2B2 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":212,"::after --text-2xl: (none) | 1.75rem":3,"::before --text-2xl: (none) | 1.75rem":12}}
+  styles A1A2 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.3 s)
+{"size":"390x844","path":"/projects/bytefight/","status":[200,200],"height":[2737,2737],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":false,"size":"390x2737","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2487,246,2497]}],"cropFiles":["release-diff-touch-390x844_projects_bytefight_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2737","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2487,246,2497]}]}
+  A1B1 norm {"same":true,"size":"390x2629","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x2629","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x2629","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x2629","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x2629","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x2629","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":194,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":194,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":194,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":194,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":194,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.2 s)
+{"size":"390x844","path":"/projects/claude-status/","status":[200,200],"height":[3466,3466],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":false,"size":"390x3466","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,3216,246,3226]}],"cropFiles":["release-diff-touch-390x844_projects_claude_status_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x3466","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,3216,246,3226]}]}
+  A1B1 norm {"same":true,"size":"390x3358","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":false,"size":"390x3358","diffPixels":1746,"maxChannelDiff":193,"regions":[{"px":1746,"max":193,"box":[125,451,264,543]}]}
+  A2B1 norm {"same":false,"size":"390x3358","diffPixels":7471,"maxChannelDiff":193,"regions":[{"px":5296,"max":1,"box":[0,256,389,376]},{"px":1792,"max":193,"box":[125,418,264,543]},{"px":151,"max":4,"box":[16,594,373,605]},{"px":123,"max":1,"box":[151,1680,238,1720]},{"px":48,"max":1,"box":[16,2875,25,2948]},{"px":24,"max":1,"box":[292,1615,342,1656]},{"px":20,"max":1,"box":[52,1619,102,1648]},{"px":15,"max":3,"box":[18,2781,23,2817]}],"moreRegions":2}
+  A2B2 norm {"same":false,"size":"390x3358","diffPixels":5777,"maxChannelDiff":4,"regions":[{"px":5296,"max":1,"box":[0,256,389,376]},{"px":151,"max":4,"box":[16,594,373,605]},{"px":123,"max":1,"box":[151,1680,238,1720]},{"px":66,"max":1,"box":[142,418,174,521]},{"px":48,"max":1,"box":[16,2875,25,2948]},{"px":24,"max":1,"box":[292,1615,342,1656]},{"px":20,"max":1,"box":[52,1619,102,1648]},{"px":18,"max":1,"box":[223,418,237,424]}],"moreRegions":4}
+  A1A2 norm {"same":false,"size":"390x3358","diffPixels":7471,"maxChannelDiff":193,"regions":[{"px":5296,"max":1,"box":[0,256,389,376]},{"px":1792,"max":193,"box":[125,418,264,543]},{"px":151,"max":4,"box":[16,594,373,605]},{"px":123,"max":1,"box":[151,1680,238,1720]},{"px":48,"max":1,"box":[16,2875,25,2948]},{"px":24,"max":1,"box":[292,1615,342,1656]},{"px":20,"max":1,"box":[52,1619,102,1648]},{"px":15,"max":3,"box":[18,2781,23,2817]}],"moreRegions":2}
+  B1B2 norm {"same":false,"size":"390x3358","diffPixels":1746,"maxChannelDiff":193,"regions":[{"px":1746,"max":193,"box":[125,451,264,543]}]}
+  verdict (norm): identical: A1B1 match to the pixel
+  styles A1B1 {"elements":224,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":224,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":224,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":224,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":224,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.3 s)
+{"size":"390x844","path":"/projects/cucadence/","status":[200,200],"height":[4526,4526],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":false,"size":"390x4526","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,4228,246,4238]}],"cropFiles":["release-diff-touch-390x844_projects_cucadence_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x4526","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,4228,246,4238]}]}
+  A1B1 norm {"same":false,"size":"390x4370","diffPixels":9060,"maxChannelDiff":21,"regions":[{"px":8328,"max":21,"box":[0,335,389,626]},{"px":375,"max":4,"box":[16,860,373,873]},{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]},{"px":60,"max":3,"box":[18,3695,23,3828]},{"px":32,"max":1,"box":[16,3887,25,3928]}]}
+  A1B2 norm {"same":false,"size":"390x4370","diffPixels":265,"maxChannelDiff":1,"regions":[{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]}]}
+  A2B1 norm {"same":false,"size":"390x4370","diffPixels":9060,"maxChannelDiff":21,"regions":[{"px":8328,"max":21,"box":[0,335,389,626]},{"px":375,"max":4,"box":[16,860,373,873]},{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]},{"px":60,"max":3,"box":[18,3695,23,3828]},{"px":32,"max":1,"box":[16,3887,25,3928]}]}
+  A2B2 norm {"same":false,"size":"390x4370","diffPixels":265,"maxChannelDiff":1,"regions":[{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]}]}
+  A1A2 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":false,"size":"390x4370","diffPixels":8795,"maxChannelDiff":21,"regions":[{"px":8328,"max":21,"box":[0,335,389,626]},{"px":375,"max":4,"box":[16,860,373,873]},{"px":60,"max":3,"box":[18,3695,23,3828]},{"px":32,"max":1,"box":[16,3887,25,3928]}]}
+  verdict (norm): DIFFERENT: A1B1 {"px":203,"max":1,"box":[27,2650,177,2797]} ; A1B1 {"px":62,"max":1,"box":[265,2718,371,2739]} ; A1B2 {"px":203,"max":1,"box":[27,2650,177,2797]}
+  styles A1B1 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":297,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":7}}
+  styles A2B2 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":297,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":7}}
+  styles A1A2 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.6 s)
+{"size":"390x844","path":"/projects/fluxion/","status":[200,200],"height":[2164,2164],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":false,"size":"390x2164","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,1902,246,1912]}],"cropFiles":["release-diff-touch-390x844_projects_fluxion_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2164","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,1902,246,1912]}]}
+  A1B1 norm {"same":true,"size":"390x2044","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x2044","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x2044","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x2044","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x2044","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x2044","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":193,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":193,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":193,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":193,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":193,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.1 s)
+{"size":"390x844","path":"/projects/nn-mnist/","status":[200,200],"height":[2419,2419],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":false,"size":"390x2419","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2133,246,2143]}],"cropFiles":["release-diff-touch-390x844_projects_nn_mnist_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2419","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2133,246,2143]}]}
+  A1B1 norm {"same":true,"size":"390x2275","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x2275","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x2275","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x2275","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x2275","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x2275","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":217,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":217,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":217,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":217,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":217,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.1 s)
+{"size":"390x844","path":"/projects/skyblock-bazaar/","status":[200,200],"height":[2819,2819],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":false,"size":"390x2819","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2557,246,2567]}],"cropFiles":["release-diff-touch-390x844_projects_skyblock_bazaar_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2819","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2557,246,2567]}]}
+  A1B1 norm {"same":true,"size":"390x2699","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x2699","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x2699","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x2699","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x2699","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x2699","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":212,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":212,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.2 s)
+{"size":"390x844","path":"/projects/smart-bin/","status":[200,200],"height":[2939,2939],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":false,"size":"390x2939","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2665,246,2675]}],"cropFiles":["release-diff-touch-390x844_projects_smart_bin_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2939","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2665,246,2675]}]}
+  A1B1 norm {"same":true,"size":"390x2807","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x2807","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x2807","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x2807","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x2807","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x2807","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":230,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":230,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":230,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":230,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":230,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.3 s)
+{"size":"390x844","path":"/projects/swerve-drive/","status":[200,200],"height":[2068,2068],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":false,"size":"390x2068","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,1854,246,1864]}],"cropFiles":["release-diff-touch-390x844_projects_swerve_drive_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2068","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,1854,246,1864]}]}
+  A1B1 norm {"same":true,"size":"390x1996","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x1996","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x1996","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x1996","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x1996","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x1996","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":175,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":175,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":175,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":175,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":175,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.1 s)
+{"size":"390x844","path":"/projects/traffic-ops-center/","status":[200,200],"height":[3765,3765],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":false,"size":"390x3765","diffPixels":22751,"maxChannelDiff":161,"regions":[{"px":22447,"max":10,"box":[29,637,360,787]},{"px":304,"max":161,"box":[205,3491,246,3501]}],"cropFiles":["release-diff-touch-390x844_projects_traffic_ops_center_-r0.jpg","release-diff-touch-390x844_projects_traffic_ops_center_-r1.jpg"]}
+  AB2 raw  {"same":false,"size":"390x3765","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,3491,246,3501]}]}
+  A1B1 norm {"same":false,"size":"390x3633","diffPixels":22447,"maxChannelDiff":10,"regions":[{"px":22447,"max":10,"box":[29,637,360,787]}]}
+  A1B2 norm {"same":true,"size":"390x3633","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":false,"size":"390x3633","diffPixels":22447,"maxChannelDiff":10,"regions":[{"px":22447,"max":10,"box":[29,637,360,787]}]}
+  A2B2 norm {"same":true,"size":"390x3633","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x3633","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":false,"size":"390x3633","diffPixels":22447,"maxChannelDiff":10,"regions":[{"px":22447,"max":10,"box":[29,637,360,787]}]}
+  verdict (norm): identical: A1B2 A2B2 match to the pixel
+  styles A1B1 {"elements":243,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":243,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":6}}
+  styles A2B2 {"elements":243,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":243,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":6}}
+  styles A1A2 {"elements":243,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.5 s)
+{"size":"390x844","path":"/projects/travelmate/","status":[200,200],"height":[2240,2240],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":false,"size":"390x2240","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,1978,246,1988]}],"cropFiles":["release-diff-touch-390x844_projects_travelmate_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2240","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,1978,246,1988]}]}
+  A1B1 norm {"same":true,"size":"390x2120","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x2120","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x2120","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x2120","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x2120","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x2120","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":196,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":196,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":196,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":196,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":196,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.1 s)
+{"size":"390x844","path":"/projects/useless-machine/","status":[200,200],"height":[2674,2674],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"videos":[["paused@0.00"],["paused@0.00"]],"motion":"off/off","coarse":true}
+  AB1 raw  {"same":false,"size":"390x2674","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2484,246,2494]}],"cropFiles":["release-diff-touch-390x844_projects_useless_machine_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2674","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2484,246,2494]}]}
+  A1B1 norm {"same":true,"size":"390x2626","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x2626","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x2626","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x2626","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x2626","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x2626","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":157,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":157,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":157,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":157,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":157,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.3 s)
+# summary: 15 page/size pairs: identical 14, noise only 0, DIFFERENT 1; computed-style differences A/B beyond --text-2xl: 0 (controls 0)
+# DIFFERENT: 390x844 /projects/cucadence/

@@ -1,0 +1,155 @@
+---
+// Work: every project, a picture where there is one, a line on what it is, and its case study. Featured
+// projects lead, large. From the projects collection (the order: src/lib/folio.ts).
+import Icon from './Icon.astro';
+import { workLede, workMeta as meta, workProjects } from '../lib/folio';
+import '../styles/folio.css';
+
+interface Props {
+  /** Where a project's case study is (the computer's page, or the ordinary one). */
+  href: (id: string) => string;
+  /** The section heading's level: 1 on a page of its own, 2 on the page with all four. */
+  level?: 1 | 2;
+}
+const { href, level = 2 } = Astro.props;
+const H = `h${level}` as 'h1' | 'h2';
+const H3 = `h${level + 1}` as 'h2' | 'h3';
+
+const { lead, rest } = await workProjects();
+---
+
+<section id="work" class="folio" aria-labelledby="work-title">
+  <header class="folio-head">
+    <div>
+      <H class="folio-title" id="work-title">Work</H>
+      <p class="folio-lede">{workLede}</p>
+    </div>
+  </header>
+  <div class="fw-lead">
+    {
+      lead.map(({ p, still }) => (
+        <article class="fw-card is-lead">
+          <div class:list={['fw-media', p.data.cardFit === 'contain' && 'is-contain']}>
+            <img src={still!.src} alt={still!.alt} loading="lazy" decoding="async" />
+          </div>
+          <p class="folio-meta">{meta(p.data)}</p>
+          <H3 class="fw-title">
+            <a href={href(p.id)} class="stretched">
+              {p.data.title}
+            </a>
+          </H3>
+          <p class="fw-summary">{p.data.summary}</p>
+          <span class="fw-more">
+            Case study <Icon name="arrow-right" class="size-3.5" />
+          </span>
+        </article>
+      ))
+    }
+  </div>
+  <div class="fw-grid">
+    {
+      rest.map(({ p, still }) => (
+        <article class="fw-card">
+          {still && (
+            <div class:list={['fw-media', p.data.cardFit === 'contain' && 'is-contain']}>
+              <img src={still.src} alt={still.alt} loading="lazy" decoding="async" />
+            </div>
+          )}
+          <p class="folio-meta">{meta(p.data)}</p>
+          <H3 class="fw-title">
+            <a href={href(p.id)} class="stretched">
+              {p.data.title}
+            </a>
+          </H3>
+          <p class="fw-summary">{p.data.summary}</p>
+        </article>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .fw-lead,
+  .fw-grid {
+    display: grid;
+    gap: 2.5rem 1.75rem;
+  }
+  .fw-grid {
+    margin-top: 3rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--line);
+  }
+  @media (width >= 40rem) {
+    .fw-lead,
+    .fw-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (width >= 64rem) {
+    .fw-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .fw-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-width: 0;
+  }
+  .fw-media {
+    aspect-ratio: 16 / 9;
+    margin-bottom: 0.625rem;
+    overflow: hidden;
+    border-radius: var(--radius-2);
+    background: var(--well);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .fw-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    opacity: 0.9;
+    transition:
+      opacity var(--dur-2) var(--ease),
+      scale 0.4s var(--ease);
+  }
+  .fw-media.is-contain img {
+    padding: 0.75rem;
+    object-fit: contain;
+    object-position: center;
+  }
+  .fw-card:hover .fw-media img {
+    opacity: 1;
+  }
+  .fw-title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  .is-lead .fw-title {
+    font-size: clamp(var(--text-lg), 2vw, var(--text-2xl));
+  }
+  .fw-title a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  .fw-summary {
+    max-width: 60ch;
+    font-size: var(--text-base);
+    line-height: 1.55;
+    color: var(--muted);
+  }
+  .fw-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 0.25rem;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--blue-3);
+  }
+</style>

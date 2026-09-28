@@ -1,8 +1,8 @@
 // Site-wide content. Projects live in src/content/projects/ (one Markdown file each).
 // Items marked TODO are placeholders. Confirm or replace them before sharing the link.
 
-// public/og.png (the link-preview card) is a one-time render of the name, headline, status, school,
-// location, coords, and the first sentence of `about` below. Re-render it when any of those change.
+// public/og.jpg (the link-preview card) is a screenshot of the homepage's opening at 1200×630: the
+// name, headline, status and school over the lab. Retake it when any of those change.
 export const profile = {
   name: 'Donald Heddesheimer',
   initials: 'DH',
@@ -30,7 +30,13 @@ export const socials = [
   { id: 'email', label: 'Email', handle: 'donaldheddes@gmail.com', href: 'mailto:donaldheddes@gmail.com', icon: 'mail' },
 ] as const;
 
-// Organizations appear as nodes in the entity graph. Projects point at them with `org:` / `related:`.
+// The contact section's heading and note (the homepage's Contact, and the lab computer's).
+export const contact = {
+  title: "Let's talk.",
+  note: 'Internships, research, or anything GPU- or robot-shaped. Email is the fastest way to reach me.',
+};
+
+// Organizations, by id: the roles and education below name them, and projects point at them with `org:` / `related:`.
 export type OrgKind = 'education' | 'work' | 'research' | 'team' | 'event' | 'school';
 export type Org = { id: string; name: string; short: string; kind: OrgKind; parent?: string };
 
@@ -134,12 +140,6 @@ export const education = {
   coursework: ['Operating Systems', 'Processor Design', 'Computer Architecture', 'Computer Networks', 'Algorithms'],
 };
 
-// The systems map (/systems/) opens on this record. Its simulation is illustrative, not recorded data.
-export const mission = {
-  exp: 'robonav',
-  title: 'Rover autonomy',
-};
-
 // From the resume's skills section.
 export const skills: { group: string; items: string[] }[] = [
   { group: 'Languages', items: ['C++17/20', 'CUDA C++', 'Python'] },
@@ -154,16 +154,6 @@ export const skills: { group: string; items: string[] }[] = [
   { group: 'ML & data', items: ['PyTorch', 'PPO', 'SAC', 'U-Net', 'LSTM', 'Weights & Biases', 'Redis'] },
   { group: 'Dev & infrastructure', items: ['CMake', 'GoogleTest', 'Git', 'GitHub Actions', 'Docker', 'Slurm'] },
 ];
-
-// Resume skills that name a capability on the systems map (a tag two or more projects or roles
-// share), by that capability's id. Only true matches: a chip listed here opens the evidence.
-export const skillAliases: Record<string, string> = {
-  'C++17/20': 'cpp',
-  'CUDA C++': 'cuda',
-  Python: 'python',
-  'Nsight Systems / Compute': 'nsight',
-  PyTorch: 'pytorch',
-};
 
 // Hobby photos go in public/images/. Leave `image` out for a text-only tile.
 export const offDuty: { id: string; name: string; note: string; image?: string; imageAlt?: string; primary?: boolean; link?: { label: string; href: string } }[] = [

@@ -1,0 +1,28 @@
+---
+// A case study on the lab computer: the same CaseStudy as /projects/<id>/, its links staying on the
+// computer.
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Screen from '../../../layouts/Screen.astro';
+import CaseStudy from '../../../components/CaseStudy.astro';
+import { profile } from '../../../data/site';
+import { labHref } from '../../../scripts/lab/routes';
+
+export async function getStaticPaths() {
+  const projects = (await getCollection('projects')).sort((a, b) => a.data.code.localeCompare(b.data.code));
+  return projects.map((p, i) => ({
+    params: { slug: p.id },
+    props: { project: p, prev: projects[i - 1], next: projects[i + 1] },
+  }));
+}
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  prev?: CollectionEntry<'projects'>;
+  next?: CollectionEntry<'projects'>;
+}
+const { project } = Astro.props;
+---
+
+<Screen title={`${project.data.title} · ${profile.name}`} path={`work/${project.id}`}>
+  <CaseStudy {...Astro.props} projectHref={(id) => labHref(`work/${id}`)} indexHref={labHref('work')} />
+</Screen>

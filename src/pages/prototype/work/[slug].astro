@@ -1,0 +1,14 @@
+---
+// A case study's prototype address, before the lab became the homepage: forwards to /projects/<id>/.
+import { getCollection } from 'astro:content';
+import Redirect from '../../../layouts/Redirect.astro';
+
+export async function getStaticPaths() {
+  return (await getCollection('projects')).map((p) => ({ params: { slug: p.id }, props: { title: p.data.title } }));
+}
+
+const { slug } = Astro.params;
+const { title } = Astro.props;
+---
+
+<Redirect to={`/projects/${slug}/`} title={title} keep />

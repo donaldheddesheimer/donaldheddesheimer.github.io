@@ -1,0 +1,452 @@
+# release-diff-pixels 2026-09-28T17:00:47.217Z renderer="ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)" server=A http://127.0.0.1:4330 (origin/main cc1a6c4) vs B http://127.0.0.1:4322 (cinematic-lab-prototype) · reduced motion, full page, DPR 1 · JOBS=1440x900:*;390x844:*;1024x768:/,/projects/cucadence/
+# released pages (15): / /systems/ /systems/screen/ /no-such-page/ /projects/bytefight/ /projects/claude-status/ /projects/cucadence/ /projects/fluxion/ /projects/nn-mnist/ /projects/skyblock-bazaar/ /projects/smart-bin/ /projects/swerve-drive/ /projects/traffic-ops-center/ /projects/travelmate/ /projects/useless-machine/
+{"size":"1440x900","path":"/","status":[200,200],"height":[5498,5498],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x5498","diffPixels":30720,"maxChannelDiff":161,"regions":[{"px":30416,"max":10,"box":[936,2971,1289,3196]},{"px":304,"max":161,"box":[845,5448,886,5458]}],"cropFiles":["release-diff-1440x900_-r0.jpg","release-diff-1440x900_-r1.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x5498","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,5448,886,5458]}]}
+  A1B1 norm {"same":false,"size":"1440x5498","diffPixels":30416,"maxChannelDiff":10,"regions":[{"px":30416,"max":10,"box":[936,2971,1289,3196]}]}
+  A1B2 norm {"same":true,"size":"1440x5498","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":false,"size":"1440x5498","diffPixels":30416,"maxChannelDiff":10,"regions":[{"px":30416,"max":10,"box":[936,2971,1289,3196]}]}
+  A2B2 norm {"same":true,"size":"1440x5498","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"1440x5498","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":false,"size":"1440x5498","diffPixels":30416,"maxChannelDiff":10,"regions":[{"px":30416,"max":10,"box":[936,2971,1289,3196]}]}
+  verdict (norm): identical: A1B2 A2B2 match to the pixel
+  styles A1B1 {"elements":1257,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":1257,"::after --text-2xl: (none) | 1.75rem":13,"::before --text-2xl: (none) | 1.75rem":21}}
+  styles A2B2 {"elements":1257,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":1257,"::after --text-2xl: (none) | 1.75rem":13,"::before --text-2xl: (none) | 1.75rem":21}}
+  styles A1A2 {"elements":1257,"same":true,"count":0,"byProp":{},"examples":[]}
+  (13.2 s)
+{"size":"1440x900","path":"/systems/","status":[200,200],"height":[1050,1050],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"canvases":[1,1],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x1050","diffPixels":295,"maxChannelDiff":152,"regions":[{"px":295,"max":152,"box":[1019,879,1060,889]}],"cropFiles":["release-diff-1440x900_systems_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x1050","diffPixels":295,"maxChannelDiff":152,"regions":[{"px":295,"max":152,"box":[1019,879,1060,889]}]}
+  A1B1 norm {"same":true,"size":"1440x1050","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":false,"size":"1440x1050","diffPixels":199,"maxChannelDiff":16,"regions":[{"px":154,"max":16,"box":[74,227,360,291]},{"px":26,"max":1,"box":[197,470,278,588]},{"px":8,"max":11,"box":[941,272,946,277]},{"px":3,"max":1,"box":[160,508,166,523]},{"px":2,"max":1,"box":[360,445,360,446]},{"px":2,"max":1,"box":[212,765,213,772]},{"px":2,"max":3,"box":[72,992,73,993]},{"px":2,"max":3,"box":[1422,992,1423,993]}]}
+  A2B1 norm {"same":true,"size":"1440x1050","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":false,"size":"1440x1050","diffPixels":199,"maxChannelDiff":16,"regions":[{"px":154,"max":16,"box":[74,227,360,291]},{"px":26,"max":1,"box":[197,470,278,588]},{"px":8,"max":11,"box":[941,272,946,277]},{"px":3,"max":1,"box":[160,508,166,523]},{"px":2,"max":1,"box":[360,445,360,446]},{"px":2,"max":1,"box":[212,765,213,772]},{"px":2,"max":3,"box":[72,992,73,993]},{"px":2,"max":3,"box":[1422,992,1423,993]}]}
+  A1A2 norm {"same":true,"size":"1440x1050","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":false,"size":"1440x1050","diffPixels":199,"maxChannelDiff":16,"regions":[{"px":154,"max":16,"box":[74,227,360,291]},{"px":26,"max":1,"box":[197,470,278,588]},{"px":8,"max":11,"box":[941,272,946,277]},{"px":3,"max":1,"box":[160,508,166,523]},{"px":2,"max":1,"box":[360,445,360,446]},{"px":2,"max":1,"box":[212,765,213,772]},{"px":2,"max":3,"box":[72,992,73,993]},{"px":2,"max":3,"box":[1422,992,1423,993]}]}
+  verdict (norm): identical: A1B1 A2B1 match to the pixel
+  styles A1B1 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":2319,"::before --text-2xl: (none) | 1.75rem":31,"::after --text-2xl: (none) | 1.75rem":2}}
+  styles A2B2 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":2319,"::before --text-2xl: (none) | 1.75rem":31,"::after --text-2xl: (none) | 1.75rem":2}}
+  styles A1A2 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[]}
+  (17.3 s)
+{"size":"1440x900","path":"/systems/screen/","status":[200,200],"height":[1050,1050],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"canvases":[1,1],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x1050","diffPixels":295,"maxChannelDiff":152,"regions":[{"px":295,"max":152,"box":[1019,879,1060,889]}],"cropFiles":["release-diff-1440x900_systems_screen_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x1050","diffPixels":295,"maxChannelDiff":152,"regions":[{"px":295,"max":152,"box":[1019,879,1060,889]}]}
+  A1B1 norm {"same":false,"size":"1440x1050","diffPixels":199,"maxChannelDiff":16,"regions":[{"px":154,"max":16,"box":[74,227,360,291]},{"px":26,"max":1,"box":[197,470,278,588]},{"px":8,"max":11,"box":[941,272,946,277]},{"px":3,"max":1,"box":[160,508,166,523]},{"px":2,"max":1,"box":[360,445,360,446]},{"px":2,"max":1,"box":[212,765,213,772]},{"px":2,"max":3,"box":[72,992,73,993]},{"px":2,"max":3,"box":[1422,992,1423,993]}]}
+  A1B2 norm {"same":false,"size":"1440x1050","diffPixels":199,"maxChannelDiff":16,"regions":[{"px":154,"max":16,"box":[74,227,360,291]},{"px":26,"max":1,"box":[197,470,278,588]},{"px":8,"max":11,"box":[941,272,946,277]},{"px":3,"max":1,"box":[160,508,166,523]},{"px":2,"max":1,"box":[360,445,360,446]},{"px":2,"max":1,"box":[212,765,213,772]},{"px":2,"max":3,"box":[72,992,73,993]},{"px":2,"max":3,"box":[1422,992,1423,993]}]}
+  A2B1 norm {"same":true,"size":"1440x1050","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"1440x1050","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":false,"size":"1440x1050","diffPixels":199,"maxChannelDiff":16,"regions":[{"px":154,"max":16,"box":[74,227,360,291]},{"px":26,"max":1,"box":[197,470,278,588]},{"px":8,"max":11,"box":[941,272,946,277]},{"px":3,"max":1,"box":[160,508,166,523]},{"px":2,"max":1,"box":[360,445,360,446]},{"px":2,"max":1,"box":[212,765,213,772]},{"px":2,"max":3,"box":[72,992,73,993]},{"px":2,"max":3,"box":[1422,992,1423,993]}]}
+  B1B2 norm {"same":true,"size":"1440x1050","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":2319,"::before --text-2xl: (none) | 1.75rem":31,"::after --text-2xl: (none) | 1.75rem":2}}
+  styles A2B2 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":2319,"::before --text-2xl: (none) | 1.75rem":31,"::after --text-2xl: (none) | 1.75rem":2}}
+  styles A1A2 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[]}
+  (27.3 s)
+{"size":"1440x900","path":"/no-such-page/","status":[404,404],"height":[900,900],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x900","diffPixels":262,"maxChannelDiff":147,"regions":[{"px":262,"max":147,"box":[1020,881,1062,889]}],"cropFiles":["release-diff-1440x900_no_such_page_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x900","diffPixels":262,"maxChannelDiff":147,"regions":[{"px":262,"max":147,"box":[1020,881,1062,889]}]}
+  A1B1 norm {"same":false,"size":"1440x900","diffPixels":24,"maxChannelDiff":1,"regions":[{"px":24,"max":1,"box":[269,878,292,891]}]}
+  A1B2 norm {"same":true,"size":"1440x900","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":false,"size":"1440x900","diffPixels":24,"maxChannelDiff":1,"regions":[{"px":24,"max":1,"box":[269,878,292,891]}]}
+  A2B2 norm {"same":true,"size":"1440x900","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"1440x900","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":false,"size":"1440x900","diffPixels":24,"maxChannelDiff":1,"regions":[{"px":24,"max":1,"box":[269,878,292,891]}]}
+  verdict (norm): identical: A1B2 A2B2 match to the pixel
+  styles A1B1 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":212,"::before --text-2xl: (none) | 1.75rem":12,"::after --text-2xl: (none) | 1.75rem":2}}
+  styles A2B2 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":212,"::before --text-2xl: (none) | 1.75rem":12,"::after --text-2xl: (none) | 1.75rem":2}}
+  styles A1A2 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.6 s)
+{"size":"1440x900","path":"/projects/bytefight/","status":[200,200],"height":[1534,1534],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x1534","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,1484,886,1494]}],"cropFiles":["release-diff-1440x900_projects_bytefight_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x1534","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,1484,886,1494]}]}
+  A1B1 norm {"same":true,"size":"1440x1534","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":false,"size":"1440x1534","diffPixels":31583,"maxChannelDiff":2,"regions":[{"px":31582,"max":2,"box":[0,255,1439,412]},{"px":1,"max":1,"box":[670,31,670,31]}]}
+  A2B1 norm {"same":false,"size":"1440x1534","diffPixels":31583,"maxChannelDiff":2,"regions":[{"px":31582,"max":2,"box":[0,255,1439,412]},{"px":1,"max":1,"box":[670,31,670,31]}]}
+  A2B2 norm {"same":true,"size":"1440x1534","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":false,"size":"1440x1534","diffPixels":31583,"maxChannelDiff":2,"regions":[{"px":31582,"max":2,"box":[0,255,1439,412]},{"px":1,"max":1,"box":[670,31,670,31]}]}
+  B1B2 norm {"same":false,"size":"1440x1534","diffPixels":31583,"maxChannelDiff":2,"regions":[{"px":31582,"max":2,"box":[0,255,1439,412]},{"px":1,"max":1,"box":[670,31,670,31]}]}
+  verdict (norm): identical: A1B1 A2B2 match to the pixel
+  styles A1B1 {"elements":194,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":194,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A2B2 {"elements":194,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":194,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A1A2 {"elements":194,"same":true,"count":0,"byProp":{},"examples":[]}
+  (12.5 s)
+{"size":"1440x900","path":"/projects/claude-status/","status":[200,200],"height":[2815,2815],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x2815","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,2765,886,2775]}],"cropFiles":["release-diff-1440x900_projects_claude_status_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x2815","diffPixels":5068,"maxChannelDiff":214,"regions":[{"px":4764,"max":214,"box":[408,570,679,747]},{"px":304,"max":161,"box":[845,2765,886,2775]}]}
+  A1B1 norm {"same":true,"size":"1440x2815","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":false,"size":"1440x2815","diffPixels":6074,"maxChannelDiff":214,"regions":[{"px":6074,"max":214,"box":[408,568,679,747]}]}
+  A2B1 norm {"same":false,"size":"1440x2815","diffPixels":6074,"maxChannelDiff":214,"regions":[{"px":6074,"max":214,"box":[408,568,679,747]}]}
+  A2B2 norm {"same":true,"size":"1440x2815","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":false,"size":"1440x2815","diffPixels":6074,"maxChannelDiff":214,"regions":[{"px":6074,"max":214,"box":[408,568,679,747]}]}
+  B1B2 norm {"same":false,"size":"1440x2815","diffPixels":6074,"maxChannelDiff":214,"regions":[{"px":6074,"max":214,"box":[408,568,679,747]}]}
+  verdict (norm): identical: A1B1 A2B2 match to the pixel
+  styles A1B1 {"elements":224,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":224,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A2B2 {"elements":224,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":224,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A1A2 {"elements":224,"same":true,"count":0,"byProp":{},"examples":[]}
+  (9.5 s)
+{"size":"1440x900","path":"/projects/cucadence/","status":[200,200],"height":[3253,3253],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x3253","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,3203,886,3213]}],"cropFiles":["release-diff-1440x900_projects_cucadence_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x3253","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,3203,886,3213]}]}
+  A1B1 norm {"same":true,"size":"1440x3253","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"1440x3253","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"1440x3253","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"1440x3253","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"1440x3253","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"1440x3253","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":297,"::before --text-2xl: (none) | 1.75rem":7,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A2B2 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":297,"::before --text-2xl: (none) | 1.75rem":7,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A1A2 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[]}
+  (19.1 s)
+{"size":"1440x900","path":"/projects/fluxion/","status":[200,200],"height":[1281,1281],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x1281","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,1231,886,1241]}],"cropFiles":["release-diff-1440x900_projects_fluxion_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x1281","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,1231,886,1241]}]}
+  A1B1 norm {"same":true,"size":"1440x1281","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"1440x1281","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"1440x1281","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"1440x1281","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"1440x1281","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"1440x1281","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":193,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":193,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A2B2 {"elements":193,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":193,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A1A2 {"elements":193,"same":true,"count":0,"byProp":{},"examples":[]}
+  (10.5 s)
+{"size":"1440x900","path":"/projects/nn-mnist/","status":[200,200],"height":[1426,1426],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x1426","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,1376,886,1386]}],"cropFiles":["release-diff-1440x900_projects_nn_mnist_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x1426","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,1376,886,1386]}]}
+  A1B1 norm {"same":true,"size":"1440x1426","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"1440x1426","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"1440x1426","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"1440x1426","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"1440x1426","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"1440x1426","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":217,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":217,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A2B2 {"elements":217,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":217,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A1A2 {"elements":217,"same":true,"count":0,"byProp":{},"examples":[]}
+  (15.9 s)
+{"size":"1440x900","path":"/projects/skyblock-bazaar/","status":[200,200],"height":[1520,1520],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x1520","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,1470,886,1480]}],"cropFiles":["release-diff-1440x900_projects_skyblock_bazaar_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x1520","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,1470,886,1480]}]}
+  A1B1 norm {"same":true,"size":"1440x1520","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"1440x1520","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"1440x1520","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"1440x1520","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"1440x1520","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"1440x1520","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":212,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A2B2 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":212,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A1A2 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[]}
+  (9.9 s)
+{"size":"1440x900","path":"/projects/smart-bin/","status":[200,200],"height":[2174,2174],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x2174","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,2124,886,2134]}],"cropFiles":["release-diff-1440x900_projects_smart_bin_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x2174","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,2124,886,2134]}]}
+  A1B1 norm {"same":true,"size":"1440x2174","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"1440x2174","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"1440x2174","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"1440x2174","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"1440x2174","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"1440x2174","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":230,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":230,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A2B2 {"elements":230,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":230,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A1A2 {"elements":230,"same":true,"count":0,"byProp":{},"examples":[]}
+  (11.9 s)
+{"size":"1440x900","path":"/projects/swerve-drive/","status":[200,200],"height":[1306,1306],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x1306","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,1256,886,1266]}],"cropFiles":["release-diff-1440x900_projects_swerve_drive_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x1306","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,1256,886,1266]}]}
+  A1B1 norm {"same":true,"size":"1440x1306","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"1440x1306","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"1440x1306","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"1440x1306","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"1440x1306","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"1440x1306","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":175,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":175,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A2B2 {"elements":175,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":175,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A1A2 {"elements":175,"same":true,"count":0,"byProp":{},"examples":[]}
+  (42.2 s)
+{"size":"1440x900","path":"/projects/traffic-ops-center/","status":[200,200],"height":[2777,2777],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x2777","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,2727,886,2737]}],"cropFiles":["release-diff-1440x900_projects_traffic_ops_center_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x2777","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,2727,886,2737]}]}
+  A1B1 norm {"same":true,"size":"1440x2777","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"1440x2777","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"1440x2777","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"1440x2777","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"1440x2777","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"1440x2777","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":243,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":243,"::before --text-2xl: (none) | 1.75rem":6,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A2B2 {"elements":243,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":243,"::before --text-2xl: (none) | 1.75rem":6,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A1A2 {"elements":243,"same":true,"count":0,"byProp":{},"examples":[]}
+  (54.0 s)
+{"size":"1440x900","path":"/projects/travelmate/","status":[200,200],"height":[1315,1315],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x1315","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,1265,886,1275]}],"cropFiles":["release-diff-1440x900_projects_travelmate_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x1315","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,1265,886,1275]}]}
+  A1B1 norm {"same":true,"size":"1440x1315","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"1440x1315","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"1440x1315","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"1440x1315","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"1440x1315","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"1440x1315","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":196,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":196,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A2B2 {"elements":196,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":196,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A1A2 {"elements":196,"same":true,"count":0,"byProp":{},"examples":[]}
+  (12.0 s)
+{"size":"1440x900","path":"/projects/useless-machine/","status":[200,200],"height":[3137,3137],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"videos":[["paused@0.00"],["paused@0.00"]],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1440x3137","diffPixels":909,"maxChannelDiff":255,"regions":[{"px":605,"max":255,"box":[508,1535,579,1594]},{"px":304,"max":161,"box":[845,3087,886,3097]}],"cropFiles":["release-diff-1440x900_projects_useless_machine_-r0.jpg","release-diff-1440x900_projects_useless_machine_-r1.jpg"]}
+  AB2 raw  {"same":false,"size":"1440x3137","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[845,3087,886,3097]}]}
+  A1B1 norm {"same":false,"size":"1440x3137","diffPixels":70,"maxChannelDiff":255,"regions":[{"px":70,"max":255,"box":[554,1596,566,1605]}]}
+  A1B2 norm {"same":false,"size":"1440x3137","diffPixels":37647,"maxChannelDiff":3,"regions":[{"px":34033,"max":1,"box":[0,256,1439,438]},{"px":1733,"max":1,"box":[459,2227,842,2580]},{"px":897,"max":1,"box":[233,521,833,934]},{"px":344,"max":1,"box":[239,2322,407,2541]},{"px":328,"max":1,"box":[902,2226,964,2539]},{"px":191,"max":1,"box":[124,2221,176,2394]},{"px":37,"max":1,"box":[302,2169,326,2240]},{"px":36,"max":1,"box":[751,2192,769,2243]}],"moreRegions":18}
+  A2B1 norm {"same":false,"size":"1440x3137","diffPixels":70,"maxChannelDiff":255,"regions":[{"px":70,"max":255,"box":[554,1596,566,1605]}]}
+  A2B2 norm {"same":false,"size":"1440x3137","diffPixels":37647,"maxChannelDiff":3,"regions":[{"px":34033,"max":1,"box":[0,256,1439,438]},{"px":1733,"max":1,"box":[459,2227,842,2580]},{"px":897,"max":1,"box":[233,521,833,934]},{"px":344,"max":1,"box":[239,2322,407,2541]},{"px":328,"max":1,"box":[902,2226,964,2539]},{"px":191,"max":1,"box":[124,2221,176,2394]},{"px":37,"max":1,"box":[302,2169,326,2240]},{"px":36,"max":1,"box":[751,2192,769,2243]}],"moreRegions":18}
+  A1A2 norm {"same":true,"size":"1440x3137","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":false,"size":"1440x3137","diffPixels":37717,"maxChannelDiff":255,"regions":[{"px":34033,"max":1,"box":[0,256,1439,438]},{"px":1733,"max":1,"box":[459,2227,842,2580]},{"px":897,"max":1,"box":[233,521,833,934]},{"px":344,"max":1,"box":[239,2322,407,2541]},{"px":328,"max":1,"box":[902,2226,964,2539]},{"px":191,"max":1,"box":[124,2221,176,2394]},{"px":70,"max":255,"box":[554,1596,566,1605]},{"px":37,"max":1,"box":[302,2169,326,2240]}],"moreRegions":19}
+  verdict (norm): noise only: no A/B pair matched exactly, and every A/B region is also in a control (B1B2 37717 px max 255)
+  styles A1B1 {"elements":157,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":157,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A2B2 {"elements":157,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":157,"::before --text-2xl: (none) | 1.75rem":5,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A1A2 {"elements":157,"same":true,"count":0,"byProp":{},"examples":[]}
+  (76.1 s)
+{"size":"390x844","path":"/","status":[200,200],"height":[7799,7799],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"390x7799","diffPixels":40313,"maxChannelDiff":161,"regions":[{"px":40009,"max":8,"box":[31,918,358,1101]},{"px":304,"max":161,"box":[205,7657,246,7667]}],"cropFiles":["release-diff-390x844_-r0.jpg","release-diff-390x844_-r1.jpg"]}
+  AB2 raw  {"same":false,"size":"390x7799","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,7657,246,7667]}]}
+  A1B1 norm {"same":false,"size":"390x7799","diffPixels":40009,"maxChannelDiff":8,"regions":[{"px":40009,"max":8,"box":[31,918,358,1101]}]}
+  A1B2 norm {"same":false,"size":"390x7799","diffPixels":47101,"maxChannelDiff":39,"regions":[{"px":40020,"max":12,"box":[16,918,373,1151]},{"px":3661,"max":3,"box":[0,615,389,787]},{"px":2823,"max":6,"box":[16,5995,359,6415]},{"px":273,"max":13,"box":[16,1538,373,1658]},{"px":60,"max":4,"box":[134,2561,143,2750]},{"px":48,"max":4,"box":[134,2322,143,2469]},{"px":16,"max":1,"box":[88,5567,165,5650]},{"px":16,"max":1,"box":[133,5706,233,5759]}],"moreRegions":39}
+  A2B1 norm {"same":true,"size":"390x7799","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":false,"size":"390x7799","diffPixels":7126,"maxChannelDiff":39,"regions":[{"px":3661,"max":3,"box":[0,615,389,787]},{"px":2823,"max":6,"box":[16,5995,359,6415]},{"px":273,"max":13,"box":[16,1538,373,1658]},{"px":60,"max":4,"box":[134,2561,143,2750]},{"px":48,"max":4,"box":[134,2322,143,2469]},{"px":31,"max":1,"box":[60,965,233,1078]},{"px":16,"max":1,"box":[88,5567,165,5650]},{"px":16,"max":1,"box":[133,5706,233,5759]}],"moreRegions":43}
+  A1A2 norm {"same":false,"size":"390x7799","diffPixels":40009,"maxChannelDiff":8,"regions":[{"px":40009,"max":8,"box":[31,918,358,1101]}]}
+  B1B2 norm {"same":false,"size":"390x7799","diffPixels":7126,"maxChannelDiff":39,"regions":[{"px":3661,"max":3,"box":[0,615,389,787]},{"px":2823,"max":6,"box":[16,5995,359,6415]},{"px":273,"max":13,"box":[16,1538,373,1658]},{"px":60,"max":4,"box":[134,2561,143,2750]},{"px":48,"max":4,"box":[134,2322,143,2469]},{"px":31,"max":1,"box":[60,965,233,1078]},{"px":16,"max":1,"box":[88,5567,165,5650]},{"px":16,"max":1,"box":[133,5706,233,5759]}],"moreRegions":43}
+  verdict (norm): identical: A2B1 match to the pixel
+  styles A1B1 {"elements":1257,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":1257,"::after --text-2xl: (none) | 1.75rem":23,"::before --text-2xl: (none) | 1.75rem":30}}
+  styles A2B2 {"elements":1257,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":1257,"::after --text-2xl: (none) | 1.75rem":23,"::before --text-2xl: (none) | 1.75rem":30}}
+  styles A1A2 {"elements":1257,"same":true,"count":0,"byProp":{},"examples":[]}
+  (18.0 s)
+{"size":"390x844","path":"/systems/","status":[200,200],"height":[1495,1495],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"canvases":[1,1],"motion":"off/off"}
+  AB1 raw  {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  AB2 raw  {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B1 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":2319,"::after --text-2xl: (none) | 1.75rem":3,"::before --text-2xl: (none) | 1.75rem":31}}
+  styles A2B2 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":2319,"::after --text-2xl: (none) | 1.75rem":3,"::before --text-2xl: (none) | 1.75rem":31}}
+  styles A1A2 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[]}
+  (17.4 s)
+{"size":"390x844","path":"/systems/screen/","status":[200,200],"height":[1495,1495],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"canvases":[1,1],"motion":"off/off"}
+  AB1 raw  {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  AB2 raw  {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B1 norm {"same":false,"size":"390x1495","diffPixels":2,"maxChannelDiff":2,"regions":[{"px":1,"max":2,"box":[263,302,263,302]},{"px":1,"max":1,"box":[34,1008,34,1008]}]}
+  A1B2 norm {"same":false,"size":"390x1495","diffPixels":2,"maxChannelDiff":2,"regions":[{"px":1,"max":2,"box":[263,302,263,302]},{"px":1,"max":1,"box":[34,1008,34,1008]}]}
+  A2B1 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":false,"size":"390x1495","diffPixels":2,"maxChannelDiff":2,"regions":[{"px":1,"max":2,"box":[263,302,263,302]},{"px":1,"max":1,"box":[34,1008,34,1008]}]}
+  B1B2 norm {"same":true,"size":"390x1495","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":2319,"::after --text-2xl: (none) | 1.75rem":3,"::before --text-2xl: (none) | 1.75rem":31}}
+  styles A2B2 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":2319,"::after --text-2xl: (none) | 1.75rem":3,"::before --text-2xl: (none) | 1.75rem":31}}
+  styles A1A2 {"elements":2319,"same":true,"count":0,"byProp":{},"examples":[]}
+  (97.0 s)
+{"size":"390x844","path":"/no-such-page/","status":[404,404],"height":[870,870],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  AB2 raw  {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B1 norm {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x870","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":212,"::after --text-2xl: (none) | 1.75rem":3,"::before --text-2xl: (none) | 1.75rem":12}}
+  styles A2B2 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":212,"::after --text-2xl: (none) | 1.75rem":3,"::before --text-2xl: (none) | 1.75rem":12}}
+  styles A1A2 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[]}
+  (19.1 s)
+{"size":"390x844","path":"/projects/bytefight/","status":[200,200],"height":[2629,2629],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"390x2629","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2487,246,2497]}],"cropFiles":["release-diff-390x844_projects_bytefight_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2629","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2487,246,2497]}]}
+  A1B1 norm {"same":true,"size":"390x2629","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":false,"size":"390x2629","diffPixels":8212,"maxChannelDiff":10,"regions":[{"px":8140,"max":1,"box":[0,255,389,424]},{"px":48,"max":1,"box":[16,2146,25,2219]},{"px":12,"max":10,"box":[16,2015,25,2024]},{"px":12,"max":3,"box":[18,2082,23,2087]}]}
+  A2B1 norm {"same":false,"size":"390x2629","diffPixels":8212,"maxChannelDiff":10,"regions":[{"px":8140,"max":1,"box":[0,255,389,424]},{"px":48,"max":1,"box":[16,2146,25,2219]},{"px":12,"max":10,"box":[16,2015,25,2024]},{"px":12,"max":3,"box":[18,2082,23,2087]}]}
+  A2B2 norm {"same":true,"size":"390x2629","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":false,"size":"390x2629","diffPixels":8212,"maxChannelDiff":10,"regions":[{"px":8140,"max":1,"box":[0,255,389,424]},{"px":48,"max":1,"box":[16,2146,25,2219]},{"px":12,"max":10,"box":[16,2015,25,2024]},{"px":12,"max":3,"box":[18,2082,23,2087]}]}
+  B1B2 norm {"same":false,"size":"390x2629","diffPixels":8212,"maxChannelDiff":10,"regions":[{"px":8140,"max":1,"box":[0,255,389,424]},{"px":48,"max":1,"box":[16,2146,25,2219]},{"px":12,"max":10,"box":[16,2015,25,2024]},{"px":12,"max":3,"box":[18,2082,23,2087]}]}
+  verdict (norm): identical: A1B1 A2B2 match to the pixel
+  styles A1B1 {"elements":194,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":194,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":194,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":194,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":194,"same":true,"count":0,"byProp":{},"examples":[]}
+  (180.0 s)
+{"size":"390x844","path":"/projects/claude-status/","status":[200,200],"height":[3358,3358],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"390x3358","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,3216,246,3226]}],"cropFiles":["release-diff-390x844_projects_claude_status_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x3358","diffPixels":10904,"maxChannelDiff":216,"regions":[{"px":10382,"max":216,"box":[0,256,389,545]},{"px":304,"max":161,"box":[205,3216,246,3226]},{"px":151,"max":4,"box":[16,594,373,605]},{"px":48,"max":1,"box":[16,2875,25,2948]},{"px":15,"max":3,"box":[18,2781,23,2817]},{"px":4,"max":1,"box":[180,1680,209,1680]}]}
+  A1B1 norm {"same":true,"size":"390x3358","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x3358","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":false,"size":"390x3358","diffPixels":2936,"maxChannelDiff":198,"regions":[{"px":2936,"max":198,"box":[122,451,267,543]}]}
+  A2B2 norm {"same":false,"size":"390x3358","diffPixels":2936,"maxChannelDiff":198,"regions":[{"px":2936,"max":198,"box":[122,451,267,543]}]}
+  A1A2 norm {"same":false,"size":"390x3358","diffPixels":2936,"maxChannelDiff":198,"regions":[{"px":2936,"max":198,"box":[122,451,267,543]}]}
+  B1B2 norm {"same":true,"size":"390x3358","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 match to the pixel
+  styles A1B1 {"elements":224,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":224,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":224,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":224,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":224,"same":true,"count":0,"byProp":{},"examples":[]}
+  (53.7 s)
+{"size":"390x844","path":"/projects/cucadence/","status":[200,200],"height":[4370,4370],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"390x4370","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,4228,246,4238]}],"cropFiles":["release-diff-390x844_projects_cucadence_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x4370","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,4228,246,4238]}]}
+  A1B1 norm {"same":false,"size":"390x4370","diffPixels":265,"maxChannelDiff":1,"regions":[{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]}]}
+  A1B2 norm {"same":false,"size":"390x4370","diffPixels":265,"maxChannelDiff":1,"regions":[{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]}]}
+  A2B1 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":false,"size":"390x4370","diffPixels":265,"maxChannelDiff":1,"regions":[{"px":203,"max":1,"box":[27,2650,177,2797]},{"px":62,"max":1,"box":[265,2718,371,2739]}]}
+  B1B2 norm {"same":true,"size":"390x4370","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":297,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":7}}
+  styles A2B2 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":297,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":7}}
+  styles A1A2 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[]}
+  (55.1 s)
+{"size":"390x844","path":"/projects/fluxion/","status":[200,200],"height":[2044,2044],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"390x2044","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,1902,246,1912]}],"cropFiles":["release-diff-390x844_projects_fluxion_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2044","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,1902,246,1912]}]}
+  A1B1 norm {"same":true,"size":"390x2044","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x2044","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x2044","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x2044","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x2044","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x2044","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":193,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":193,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":193,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":193,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":193,"same":true,"count":0,"byProp":{},"examples":[]}
+  (53.3 s)
+{"size":"390x844","path":"/projects/nn-mnist/","status":[200,200],"height":[2275,2275],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"390x2275","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2133,246,2143]}],"cropFiles":["release-diff-390x844_projects_nn_mnist_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2275","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2133,246,2143]}]}
+  A1B1 norm {"same":true,"size":"390x2275","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x2275","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x2275","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x2275","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x2275","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x2275","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":217,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":217,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":217,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":217,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":217,"same":true,"count":0,"byProp":{},"examples":[]}
+  (687.2 s)
+{"size":"390x844","path":"/projects/skyblock-bazaar/","status":[200,200],"height":[2699,2699],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"390x2699","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2557,246,2567]}],"cropFiles":["release-diff-390x844_projects_skyblock_bazaar_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2699","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2557,246,2567]}]}
+  A1B1 norm {"same":false,"size":"390x2699","diffPixels":8771,"maxChannelDiff":3,"regions":[{"px":8705,"max":1,"box":[0,335,389,608]},{"px":42,"max":1,"box":[16,2216,25,2285]},{"px":24,"max":3,"box":[18,2121,23,2158]}]}
+  A1B2 norm {"same":true,"size":"390x2699","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":false,"size":"390x2699","diffPixels":8771,"maxChannelDiff":3,"regions":[{"px":8705,"max":1,"box":[0,335,389,608]},{"px":42,"max":1,"box":[16,2216,25,2285]},{"px":24,"max":3,"box":[18,2121,23,2158]}]}
+  A2B2 norm {"same":true,"size":"390x2699","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x2699","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":false,"size":"390x2699","diffPixels":8771,"maxChannelDiff":3,"regions":[{"px":8705,"max":1,"box":[0,335,389,608]},{"px":42,"max":1,"box":[16,2216,25,2285]},{"px":24,"max":3,"box":[18,2121,23,2158]}]}
+  verdict (norm): identical: A1B2 A2B2 match to the pixel
+  styles A1B1 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":212,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":212,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":212,"same":true,"count":0,"byProp":{},"examples":[]}
+  (119.6 s)
+{"size":"390x844","path":"/projects/smart-bin/","status":[200,200],"height":[2807,2807],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"390x2807","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2665,246,2675]}],"cropFiles":["release-diff-390x844_projects_smart_bin_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2807","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2665,246,2675]}]}
+  A1B1 norm {"same":true,"size":"390x2807","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x2807","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x2807","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x2807","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x2807","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x2807","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":230,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":230,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":230,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":230,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":230,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.2 s)
+{"size":"390x844","path":"/projects/swerve-drive/","status":[200,200],"height":[1996,1996],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"390x1996","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,1854,246,1864]}],"cropFiles":["release-diff-390x844_projects_swerve_drive_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x1996","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,1854,246,1864]}]}
+  A1B1 norm {"same":true,"size":"390x1996","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x1996","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x1996","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x1996","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x1996","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x1996","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":175,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":175,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":175,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":175,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":175,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.2 s)
+{"size":"390x844","path":"/projects/traffic-ops-center/","status":[200,200],"height":[3633,3633],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"390x3633","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,3491,246,3501]}],"cropFiles":["release-diff-390x844_projects_traffic_ops_center_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x3633","diffPixels":22751,"maxChannelDiff":161,"regions":[{"px":22447,"max":10,"box":[29,637,360,787]},{"px":304,"max":161,"box":[205,3491,246,3501]}]}
+  A1B1 norm {"same":true,"size":"390x3633","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x3633","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":false,"size":"390x3633","diffPixels":22447,"maxChannelDiff":10,"regions":[{"px":22447,"max":10,"box":[29,637,360,787]}]}
+  A2B2 norm {"same":false,"size":"390x3633","diffPixels":22447,"maxChannelDiff":10,"regions":[{"px":22447,"max":10,"box":[29,637,360,787]}]}
+  A1A2 norm {"same":false,"size":"390x3633","diffPixels":22447,"maxChannelDiff":10,"regions":[{"px":22447,"max":10,"box":[29,637,360,787]}]}
+  B1B2 norm {"same":true,"size":"390x3633","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 match to the pixel
+  styles A1B1 {"elements":243,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":243,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":6}}
+  styles A2B2 {"elements":243,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":243,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":6}}
+  styles A1A2 {"elements":243,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.5 s)
+{"size":"390x844","path":"/projects/travelmate/","status":[200,200],"height":[2120,2120],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"390x2120","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,1978,246,1988]}],"cropFiles":["release-diff-390x844_projects_travelmate_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2120","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,1978,246,1988]}]}
+  A1B1 norm {"same":true,"size":"390x2120","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x2120","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x2120","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x2120","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x2120","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x2120","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":196,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":196,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":196,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":196,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":196,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.1 s)
+{"size":"390x844","path":"/projects/useless-machine/","status":[200,200],"height":[2626,2626],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"videos":[["paused@0.00"],["paused@0.00"]],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"390x2626","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2484,246,2494]}],"cropFiles":["release-diff-390x844_projects_useless_machine_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"390x2626","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[205,2484,246,2494]}]}
+  A1B1 norm {"same":true,"size":"390x2626","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"390x2626","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"390x2626","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"390x2626","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"390x2626","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"390x2626","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":157,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":157,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A2B2 {"elements":157,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":157,"::after --text-2xl: (none) | 1.75rem":2,"::before --text-2xl: (none) | 1.75rem":5}}
+  styles A1A2 {"elements":157,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.1 s)
+{"size":"1024x768","path":"/","status":[200,200],"height":[5931,5931],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1024x5931","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[637,5881,678,5891]}],"cropFiles":["release-diff-1024x768_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1024x5931","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[637,5881,678,5891]}]}
+  A1B1 norm {"same":true,"size":"1024x5931","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1B2 norm {"same":true,"size":"1024x5931","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B1 norm {"same":true,"size":"1024x5931","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"1024x5931","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":true,"size":"1024x5931","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  B1B2 norm {"same":true,"size":"1024x5931","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A1B1 A1B2 A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":1257,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":1257,"::after --text-2xl: (none) | 1.75rem":13,"::before --text-2xl: (none) | 1.75rem":21}}
+  styles A2B2 {"elements":1257,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":1257,"::after --text-2xl: (none) | 1.75rem":13,"::before --text-2xl: (none) | 1.75rem":21}}
+  styles A1A2 {"elements":1257,"same":true,"count":0,"byProp":{},"examples":[]}
+  (12.4 s)
+{"size":"1024x768","path":"/projects/cucadence/","status":[200,200],"height":[3042,3042],"stamp":["cc1a6c4 2026-09-27","aabec24 2026-09-27"],"motion":"off/off"}
+  AB1 raw  {"same":false,"size":"1024x3042","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[637,2992,678,3002]}],"cropFiles":["release-diff-1024x768_projects_cucadence_-r0.jpg"]}
+  AB2 raw  {"same":false,"size":"1024x3042","diffPixels":304,"maxChannelDiff":161,"regions":[{"px":304,"max":161,"box":[637,2992,678,3002]}]}
+  A1B1 norm {"same":false,"size":"1024x3042","diffPixels":32570,"maxChannelDiff":11,"regions":[{"px":32084,"max":11,"box":[0,255,1023,531]},{"px":362,"max":1,"box":[75,896,615,922]},{"px":60,"max":3,"box":[685,930,690,1063]},{"px":48,"max":1,"box":[683,1121,692,1194]},{"px":12,"max":10,"box":[683,862,692,871]},{"px":2,"max":4,"box":[61,2461,62,2462]},{"px":2,"max":4,"box":[629,2461,630,2462]}]}
+  A1B2 norm {"same":false,"size":"1024x3042","diffPixels":32570,"maxChannelDiff":11,"regions":[{"px":32084,"max":11,"box":[0,255,1023,531]},{"px":362,"max":1,"box":[75,896,615,922]},{"px":60,"max":3,"box":[685,930,690,1063]},{"px":48,"max":1,"box":[683,1121,692,1194]},{"px":12,"max":10,"box":[683,862,692,871]},{"px":2,"max":4,"box":[61,2461,62,2462]},{"px":2,"max":4,"box":[629,2461,630,2462]}]}
+  A2B1 norm {"same":true,"size":"1024x3042","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A2B2 norm {"same":true,"size":"1024x3042","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  A1A2 norm {"same":false,"size":"1024x3042","diffPixels":32570,"maxChannelDiff":11,"regions":[{"px":32084,"max":11,"box":[0,255,1023,531]},{"px":362,"max":1,"box":[75,896,615,922]},{"px":60,"max":3,"box":[685,930,690,1063]},{"px":48,"max":1,"box":[683,1121,692,1194]},{"px":12,"max":10,"box":[683,862,692,871]},{"px":2,"max":4,"box":[61,2461,62,2462]},{"px":2,"max":4,"box":[629,2461,630,2462]}]}
+  B1B2 norm {"same":true,"size":"1024x3042","diffPixels":0,"maxChannelDiff":0,"regions":[]}
+  verdict (norm): identical: A2B1 A2B2 match to the pixel
+  styles A1B1 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":297,"::before --text-2xl: (none) | 1.75rem":7,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A2B2 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[],"known":{"--text-2xl: (none) | 1.75rem":297,"::before --text-2xl: (none) | 1.75rem":7,"::after --text-2xl: (none) | 1.75rem":1}}
+  styles A1A2 {"elements":297,"same":true,"count":0,"byProp":{},"examples":[]}
+  (8.8 s)
+# summary: 32 page/size pairs: identical 31, noise only 1, DIFFERENT 0; computed-style differences A/B beyond --text-2xl: 0 (controls 0)
+# noise only: 1440x900 /projects/useless-machine/

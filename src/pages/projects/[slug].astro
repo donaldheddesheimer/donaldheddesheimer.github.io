@@ -1,7 +1,10 @@
 ---
+// A project's case study: the ordinary page for the lab computer's work/<id> (routes.ts), and the
+// address to share for it.
 import { getCollection, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import CaseStudy from '../../components/CaseStudy.astro';
+import { profile } from '../../data/site';
 
 export async function getStaticPaths() {
   const projects = (await getCollection('projects')).sort((a, b) => a.data.code.localeCompare(b.data.code));
@@ -20,6 +23,6 @@ const { project } = Astro.props;
 const d = project.data;
 ---
 
-<Base title={`${d.title} · ${d.code} · Donald Heddesheimer`} description={d.summary} section="work" story>
+<Base title={`${d.title} · ${profile.name}`} description={d.summary} section="work" story>
   <CaseStudy {...Astro.props} />
 </Base>

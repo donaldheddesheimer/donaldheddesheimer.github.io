@@ -1,31 +1,27 @@
 ---
-// PROTOTYPE (lab-prototype, 2026-09-27): the opening of /prototype/, a robotics lab after hours with the
-// portfolio on the desk's computer. Forked from RobotStage.astro (the released opening), which is left as
-// it is. The figure holds the scene (src/scripts/lab-prototype/scene.ts) over a composed SVG still of the
-// robots, which renders with the page and stays as the fallback (no JS, no WebGL). The dialog is the lab
-// once entered: its controls, and the frame the portfolio reads in (src/scripts/lab-prototype/computer.ts).
-// Save-Data leaves the scene unloaded until asked for (the still, with a Play button). Reduced motion (or
-// Motion off) loads it and holds one composed moment; entering cuts between the views.
-import { getCollection } from 'astro:content';
-import Icon from './Icon.astro';
+// The homepage's opening (/): a robotics lab after hours with the portfolio on the desk's computer. The
+// figure holds the scene (src/scripts/lab/scene.ts) over a composed SVG still of the robots, which renders
+// with the page and stays as the fallback (no JS, no WebGL). The dialog is the lab once entered: nothing
+// but the frame the portfolio reads in (src/scripts/lab/computer.ts); the way out is on the computer.
+// Save-Data leaves the scene unloaded until the lab is entered (the still stands in). Reduced motion (or
+// Motion off, in the page's settings or its footer) loads it and holds one composed moment, with no
+// looking around; going in cuts rather than flies.
 import { profile } from '../data/site';
-import { fmtMonth, statusLabel } from '../lib/format';
-import { getModel } from '../lib/model';
+import { workLede, workMeta, workProjects } from '../lib/folio';
 
 interface Props {
   class?: string;
 }
 const { class: cls } = Astro.props;
 
-// The monitor's picture before the page is laid over it: the Portfolio home's first screen.
-const model = await getModel();
-const featured = (await getCollection('projects'))
-  .sort((a, b) => b.data.code.localeCompare(a.data.code))
-  .flatMap((p) => {
-    const still = p.data.featured && model.get(`project:${p.id}`).media[0];
-    return still ? [{ title: p.data.title, meta: `${statusLabel[p.data.status]} · ${fmtMonth(p.data.start)}`, img: still.src }] : [];
-  });
-const screen = { kicker: `${profile.status} · ${profile.school}`, name: profile.name, role: profile.headline, cards: featured };
+// The monitor's picture before the page is laid over it: the computer's Work page, as it first shows.
+const { lead, rest } = await workProjects();
+const screen = {
+  name: profile.name,
+  lede: workLede,
+  cards: lead.map(({ p, still }) => ({ title: p.data.title, meta: workMeta(p.data), img: still!.src, contain: p.data.cardFit === 'contain' })),
+};
+const projects = [...lead, ...rest].map(({ p }) => p.id);
 ---
 
 <figure data-lab-root data-screen={JSON.stringify(screen)} class:list={['lab', cls]}>
@@ -54,7 +50,7 @@ const screen = { kicker: `${profile.status} · ${profile.school}`, name: profile
           <stop offset="1" stop-color="#8c4c37" />
         </linearGradient>
       </defs>
-      <!-- The three robots of RobotStage.astro's still, without its desk. -->
+      <!-- The three dancers, as a still. -->
       <ellipse cx="310" cy="382" rx="270" ry="42" fill="url(#ls-pool)" />
       <ellipse cx="150" cy="373" rx="70" ry="10" fill="url(#ls-shadow)" />
       <ellipse cx="488" cy="379" rx="48" ry="8" fill="url(#ls-shadow)" />
@@ -121,73 +117,42 @@ const screen = { kicker: `${profile.status} · ${profile.school}`, name: profile
     </svg>
   </div>
   <figcaption class="lab-cap"><span class="cap-title">After hours in the lab.</span> <span class="cap-note">Illustration</span></figcaption>
-  <div class="lab-ctl">
-    <button type="button" class="lab-pill lab-toggle" data-robot-toggle data-state="paused" aria-label="Play the robot animation">
-      <Icon name="pause" class="i-pause size-3.5" />
-      <Icon name="play" class="i-play size-3.5" />
-      <span data-robot-toggle-label>Play</span>
-    </button>
-  </div>
 </figure>
 
-<dialog class="pc" data-pc-dialog aria-labelledby="pc-title" tabindex="-1" data-name={profile.name}>
-  <div class="pc-top">
-    <button type="button" class="lab-pill in-desk" data-pc-leave><Icon name="arrow-left" class="size-3.5" />Leave the lab</button>
-    <button type="button" class="lab-pill in-read" data-pc-desk><Icon name="arrow-left" class="size-3.5" />Back to desk</button>
-    <h2 id="pc-title" class="pc-title" data-pc-title>The lab</h2>
-    <div class="pc-end">
-      <a href="/" class="lab-pill in-read in-full" data-pc-ordinary>Open ordinary page<Icon name="external" class="size-3.5" /></a>
-      <button type="button" class="lab-pill in-read in-full" data-pc-leave>Leave the lab</button>
-      <button type="button" class="lab-pill lab-toggle in-desk" data-robot-toggle data-state="playing" aria-label="Pause the robot animation">
-        <Icon name="pause" class="i-pause size-3.5" />
-        <Icon name="play" class="i-play size-3.5" />
-        <span data-robot-toggle-label>Pause</span>
-      </button>
-    </div>
-  </div>
-  <button type="button" class="lab-pill pc-use in-desk" data-pc-use>Use the computer<Icon name="arrow-right" class="size-3.5" /></button>
-</dialog>
+<dialog class="pc" data-pc-dialog aria-label="Portfolio, on the lab's computer" tabindex="-1" data-projects={JSON.stringify(projects)}></dialog>
 
 <script>
-  import type { LabScene, ScreenData } from '../scripts/lab-prototype/scene';
-  import { initComputer } from '../scripts/lab-prototype/computer';
+  import type { LabScene, ScreenData } from '../scripts/lab/scene';
+  import { initComputer } from '../scripts/lab/computer';
 
   const root = document.querySelector<HTMLElement>('[data-lab-root]');
   const dialog = document.querySelector<HTMLDialogElement>('[data-pc-dialog]');
-  const toggle = root?.querySelector<HTMLButtonElement>('[data-robot-toggle]');
-  if (root && dialog && toggle) {
+  if (root && dialog) {
     let scene: LabScene | null = null;
     let loading: Promise<LabScene | null> | null = null;
     let screen: ScreenData | null = null;
     try {
       screen = JSON.parse(root.dataset.screen ?? 'null');
     } catch {}
-    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
-    const fail = () => {
-      delete root.dataset.offer;
-      root.setAttribute('data-failed', '');
-    };
-    const load = (play = false) =>
-      (loading ??= import('../scripts/lab-prototype/scene')
+    const saveData = !!(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    const load = () =>
+      (loading ??= import('../scripts/lab/scene')
         .then((m) => {
-          scene = m.mountLab(root, { play, toggles: [...document.querySelectorAll<HTMLButtonElement>('[data-robot-toggle]')], screen, avoid: document.querySelector<HTMLElement>('[data-lab-avoid]') });
-          delete root.dataset.offer;
-          if (!scene) fail();
+          scene = m.mountLab(root, { screen, avoid: document.querySelector<HTMLElement>('[data-lab-avoid]') });
+          if (!scene) root.setAttribute('data-failed', '');
+          // For the review's measurements (docs/evidence/lab-cinematic-2026-09-28): /?probe.
+          if (new URLSearchParams(location.search).has('probe')) Object.assign(window, { __lab: scene });
           return scene;
         })
         .catch(() => {
-          fail();
+          root.setAttribute('data-failed', '');
           return null;
         }));
     const idle = (fn: () => void) => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 1200 }) : setTimeout(fn, 150));
     // Text first: the scene is requested once the page has loaded. With reduced motion it still loads,
-    // and holds still; with Save-Data it waits to be asked (Play, or entering the lab).
-    toggle.addEventListener('click', () => {
-      if (!loading) load(true);
-    });
-    if (saveData) root.dataset.offer = '';
-    else {
-      const start = () => idle(() => load(false));
+    // and holds still; with Save-Data it waits for the lab to be entered.
+    if (!saveData) {
+      const start = () => idle(() => load());
       if (document.readyState === 'complete') start();
       else addEventListener('load', start, { once: true });
     }
@@ -197,7 +162,7 @@ const screen = { kicker: `${profile.status} · ${profile.school}`, name: profile
       scene = null;
       loading = null;
     });
-    initComputer(root, dialog, () => scene, () => load(false));
+    initComputer(root, dialog, () => scene, load, !saveData);
   }
 </script>
 
@@ -275,86 +240,29 @@ const screen = { kicker: `${profile.status} · ${profile.school}`, name: profile
     text-transform: uppercase;
     color: var(--dim);
   }
-  .lab-ctl {
-    position: absolute;
-    right: 1rem;
-    bottom: 0.625rem;
-    z-index: 2;
-  }
-  .lab-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    height: var(--h-md);
-    padding: 0 0.75rem;
-    border-radius: 999px;
-    background: rgb(22 20 18 / 0.72);
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
-    backdrop-filter: blur(6px);
-    font-size: var(--text-xs);
-    font-weight: 500;
-    color: var(--text);
-    white-space: nowrap;
-    touch-action: manipulation;
-  }
-  .lab-pill:hover {
-    background: rgb(46 42 38 / 0.92);
-  }
-  .lab:not([data-mounted], [data-offer]) .lab-toggle,
-  .lab[data-failed] .lab-toggle {
-    display: none;
-  }
-  .lab-toggle[data-state='playing'] :global(.i-play),
-  .lab-toggle[data-state='paused'] :global(.i-pause) {
-    display: none;
-  }
-  @media (pointer: coarse) {
-    .lab-pill {
-      height: var(--h-touch);
-      padding: 0 1rem;
-    }
-  }
   /* Stacked (phones, and any window the lab can't open in): the picture is a band, its caption and
      controls a row under it, in the page's flow. */
   @media not ((width >= 64rem) and (height >= 36rem) and (min-aspect-ratio: 3/2)) {
     .lab {
       display: grid;
       grid-template:
-        'stage stage' var(--stage-h, 15rem)
-        'cap ctl' auto
-        / minmax(0, 1fr) auto;
-      align-items: center;
-      column-gap: 0.75rem;
+        'stage' var(--stage-h, 15rem)
+        'cap' auto
+        / minmax(0, 1fr);
     }
     .lab-canvas {
       position: relative;
       grid-area: stage;
       align-self: stretch;
     }
-    .lab-cap,
-    .lab-ctl {
+    .lab-cap {
       position: relative;
       inset: auto;
-      padding-block: 0.625rem;
-    }
-    .lab-cap {
       grid-area: cap;
-      padding-left: var(--home-inset, 1rem);
-    }
-    .lab-ctl {
-      grid-area: ctl;
-      padding-right: var(--home-inset, 1rem);
+      padding: 0.625rem var(--home-inset, 1rem);
     }
   }
   @media (width < 40rem) {
-    .lab-ctl .lab-toggle {
-      justify-content: center;
-      aspect-ratio: 1;
-      padding: 0;
-    }
-    .lab-ctl .lab-toggle [data-robot-toggle-label] {
-      display: none;
-    }
     .lab-cap {
       font-size: var(--text-xs);
       white-space: normal;
@@ -365,8 +273,8 @@ const screen = { kicker: `${profile.status} · ${profile.school}`, name: profile
     }
   }
 
-  /* The lab, once entered: the whole window, see-through but for its controls and the page's frame
-     (added by computer.ts), over the scene, which fills the window under it. */
+  /* The lab, once entered: the whole window, see-through but for the page's frame (added by
+     computer.ts), over the scene, which fills the window under it. */
   .pc {
     position: fixed;
     inset: 0;
@@ -385,64 +293,6 @@ const screen = { kicker: `${profile.status} · ${profile.school}`, name: profile
   .pc::backdrop {
     background: transparent;
   }
-  .pc-top {
-    position: absolute;
-    inset: 0.875rem 1rem auto;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  .pc-title {
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--text);
-    text-shadow: 0 1px 12px rgb(0 0 0 / 0.8);
-  }
-  .pc-end {
-    display: flex;
-    gap: 0.5rem;
-    margin-left: auto;
-  }
-  .pc-use {
-    position: absolute;
-    left: var(--x, 50%);
-    top: var(--y, 70%);
-    z-index: 2;
-    translate: -50% 0;
-    height: var(--h-lg, 2.5rem);
-    padding: 0 1.125rem;
-    background: var(--text);
-    box-shadow: 0 6px 24px rgb(0 0 0 / 0.5);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--bg);
-  }
-  .pc-use:hover {
-    background: #fff;
-  }
-  /* Each view's controls, once the camera has landed there. */
-  .pc :is(.in-desk, .in-read, .in-full) {
-    display: none;
-  }
-  :global(html[data-pc='desk']:not([data-pc-full])) .pc .in-desk,
-  :global(html[data-pc='read']:not([data-pc-full])) .pc .in-read,
-  :global(html[data-pc-full]) .pc .in-full {
-    display: inline-flex;
-    animation: pc-in 0.25s var(--ease);
-  }
-  .pc-title {
-    opacity: 0;
-    transition: opacity 0.25s var(--ease);
-  }
-  :global(html:is([data-pc='desk'], [data-pc='read'], [data-pc-full])) .pc-title {
-    opacity: 1;
-  }
-  @keyframes pc-in {
-    from {
-      opacity: 0;
-    }
-  }
   .pc :global(.pc-frame) {
     position: absolute;
     top: 0;
@@ -454,16 +304,18 @@ const screen = { kicker: `${profile.status} · ${profile.school}`, name: profile
     pointer-events: none;
     transition: opacity 0.3s var(--ease);
   }
-  :global(html[data-pc='read']) .pc :global(.pc-frame),
-  :global(html[data-pc-full]) .pc :global(.pc-frame) {
+  :global(html[data-pc='read']) .pc :global(.pc-frame) {
     pointer-events: auto;
-    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06);
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.06),
+      0 24px 80px rgb(0 0 0 / 0.55);
   }
+  /* A window too small for the room round it: the page, across the window. */
   :global(html[data-pc-full]) .pc :global(.pc-frame) {
-    top: 4rem;
     width: 100% !important;
-    height: calc(100% - 4rem) !important;
+    height: 100% !important;
     transform: none !important;
+    box-shadow: none;
   }
   :global(html[data-pc-loading]) [data-lab-enter] {
     cursor: progress;

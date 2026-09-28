@@ -1,0 +1,145 @@
+---
+// About: who, in two paragraphs, where so far (one line a role;
+// the Résumé has the detail), and what else. From src/data/site.ts.
+import { education, experience, offDuty, orgs, profile } from '../data/site';
+import { fmtMonth } from '../lib/format';
+import '../styles/folio.css';
+
+interface Props {
+  /** The section heading's level: 1 on a page of its own, 2 on the page with all four. */
+  level?: 1 | 2;
+}
+const { level = 2 } = Astro.props;
+const H = `h${level}` as 'h1' | 'h2';
+const H3 = `h${level + 1}` as 'h2' | 'h3';
+
+const org = (id: string) => orgs.find((o) => o.id === id)!;
+const year = (ym?: string) => (ym ? ym.slice(0, 4) : 'now');
+const photo = offDuty.find((h) => h.image);
+---
+
+<section id="about" class="folio" aria-labelledby="about-title">
+  <header class="folio-head">
+    <div>
+      <H class="folio-title" id="about-title">About</H>
+      <p class="folio-lede">{profile.headline} · {profile.school} · {profile.location}</p>
+    </div>
+  </header>
+  <div class="fa-body">
+    <div class="fa-text">
+      {profile.about.map((para) => <p>{para}</p>)}
+
+      <H3 class="folio-sub fa-sub">So far</H3>
+      <ul class="fa-roles">
+        {
+          experience.map((e) => (
+            <li>
+              <span class="fa-when">
+                {year(e.start)}–{year(e.end)}
+              </span>
+              <span>
+                <span class="fa-role">{e.role}</span>, {org(e.org).name}
+                {e.unit && <span class="fa-unit"> · {e.unit}</span>}
+              </span>
+            </li>
+          ))
+        }
+        <li>
+          <span class="fa-when">
+            {year(education.start)}–{fmtMonth(education.end).split(' ')[1]}
+          </span>
+          <span>
+            <span class="fa-role">{education.degree}</span>, {education.school}
+            <span class="fa-unit"> · {education.thread}</span>
+          </span>
+        </li>
+      </ul>
+    </div>
+
+    <aside class="fa-off" aria-labelledby="about-off">
+      {
+        photo && (
+          <figure class="fa-photo">
+            <img src={photo.image} alt={photo.imageAlt ?? photo.name} loading="lazy" decoding="async" />
+          </figure>
+        )
+      }
+      <H3 class="folio-sub" id="about-off">Off duty</H3>
+      <ul class="fa-hobbies">
+        {
+          offDuty.map((h) => (
+            <li>
+              <span class="fa-role">{h.name}.</span> {h.note}
+            </li>
+          ))
+        }
+      </ul>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .fa-body {
+    display: grid;
+    gap: 3rem;
+  }
+  @media (width >= 56rem) {
+    .fa-body {
+      grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+      gap: clamp(3rem, 6vw, 5rem);
+    }
+  }
+  .fa-text {
+    max-width: var(--measure);
+  }
+  .fa-text > p {
+    font-size: var(--text-md);
+    line-height: 1.65;
+    color: var(--ink);
+  }
+  .fa-text > p + p {
+    margin-top: 1rem;
+  }
+  .fa-sub {
+    margin-top: 2.5rem;
+  }
+  .fa-roles,
+  .fa-hobbies {
+    display: grid;
+    gap: 0.875rem;
+    margin-top: 1rem;
+    font-size: var(--text-base);
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .fa-roles li {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .fa-when {
+    font-variant-numeric: tabular-nums;
+    color: var(--dim);
+  }
+  .fa-role {
+    color: var(--text);
+  }
+  .fa-unit {
+    color: var(--dim);
+  }
+  .fa-photo {
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    border-radius: var(--radius-2);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .fa-photo img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    object-position: 50% 30%;
+  }
+  .fa-hobbies {
+    font-size: var(--text-sm);
+  }
+</style>

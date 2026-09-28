@@ -1,0 +1,92 @@
+# robots-dance 2026-09-28T20:53:52.326Z renderer="ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)" server=http://127.0.0.1:4322 viewport=1920x1080 dpr=1 run=r-1920x1080
+# fake clock (Playwright page.clock, paused); scene time t = last rAF time - loop start; beat = t*112/60 mod 32
+probe {"labels":["text: SWE Intern · Solopulse ·","text: Georgia Tech · B.S. CS '","text: Donald Heddesheimer","text: Donald Heddesheimer","text: Systems and GPU software","text: Explore the lab","text: Resume","text: (opens in new tab)","text: Contact","a: Explore the labSee the w","a: Resume (opens in new tab","a: Contact"],"rects":[[160,85,350,101],[358,85,564,101],[160,107,378,189],[160,175,616,257],[160,261,521,286],[178,324,284,343],[376,324,434,343],[404,335,536,354],[524,324,580,343],[160,314,326,356],[334,314,474,356],[482,314,598,356]],"found":["graphite","ivory","terracotta","proto"],"roots":{"graphite":[-0.75,0.45],"ivory":[0.85,-1.55],"terracotta":[0.6,0.8],"proto":[1.75,-2]},"textBox":[160,85,616,356],"textRects":12,"standMeshes":4,"verts":{"graphite":23715,"ivory":25846,"terracotta":16895,"proto":16001},"lineSegs":{"graphite":0,"ivory":0,"terracotta":0,"proto":47}}
+state hint=cancelled pcAble=true heroDist=6.805 lines=45 triangles=97856 calls=302
+samples 1612 (every 32 ms of scene time, t 0 to 51.539 s), frames 0, rAF calls 3222
+page errors []
+
+== frames (t s, beat, section; screen box [x0,y0,x1,y1] client px per robot; reactions active per react())
+
+== placement over all samples
+graphite   screen extent x 765..1386 y 270..900; vertices in text rects 0 (0/1612 samples); in text box+16px 0 (0); in monitor screen 0, in screen+6% bezel 0 (0); off-frame vertices in 0 samples
+           floor: lowest foot min -0.0003 m, lowest mesh point -0.0003 m; both feet above 1 cm in 0/1612 samples
+ivory      screen extent x 1333..1770 y 264..758; vertices in text rects 0 (0/1612 samples); in text box+16px 0 (0); in monitor screen 0, in screen+6% bezel 0 (0); off-frame vertices in 0 samples
+           floor: lowest foot min 0 m, lowest mesh point 0 m; both feet above 1 cm in 0/1612 samples
+terracotta screen extent x 1177..1734 y 419..956; vertices in text rects 0 (0/1612 samples); in text box+16px 0 (0); in monitor screen 0, in screen+6% bezel 0 (0); off-frame vertices in 0 samples
+           floor: lowest foot min 0 m, lowest mesh point 0 m; both feet above 1 cm in 200/1612 samples (max 0.0452 m at t=7.8; t: 7.44,7.48,7.51,7.54,7.57,7.6,7.64,7.7,7.73,7.76,7.8,7.83,7.86,7.89,8.56,8.6,8.63,8.66,8.69,8.72,8.76,8.82,8.85,8.88,8.91,8.95,8.98,9.01,12.98,13.01,13.04,13.08,13.11,13.14,13.17,13.2,13.24,14.04,14.07,14.1,...)
+proto      screen extent x 1548..1871 y 304..714; vertices in text rects 0 (0/1612 samples); in text box+16px 0 (0); in monitor screen 0, in screen+6% bezel 0 (0); off-frame vertices in 0 samples
+           floor: lowest foot min 0 m, lowest mesh point 0 m; both feet above 1 cm in 0/1612 samples
+text box (text-node + button rects of [data-lab-avoid]) [160,85,616,356]; robot left edges vs its right edge + 16: graphite 133, ivory 701, terracotta 545, proto 916 px (positive = clear to the right)
+gap graphite-ivory             min 0.883 m at t=44.05 (beat 18.23)
+gap graphite-terracotta        min -0.08 m at t=37.17 (beat 5.39)  BOXES OVERLAP
+gap ivory-terracotta           min 1.295 m at t=1.97 (beat 3.68)
+gap ivory-proto                min -0.017 m at t=33.81 (beat 31.11)  BOXES OVERLAP
+gap ivory-stand(merged boxes)  min -0.207 m at t=23.6 (beat 12.06)  BOXES OVERLAP
+interpenetration graphite-terracotta  samples with a vertex inside the other robot's shape: 14/1612, deepest 38 mm
+                  beats 3.26-3.32 (t 1.75-1.78 s) deepest 11 mm at beat 3.26: RoundedBox#202328~Sphere#2a2d33:5/11mm
+                  beats 5.35-5.53 (t 2.87-2.96 s) deepest 35 mm at beat 5.41: RoundedBox#202328~Sphere#2a2d33:156/35mm
+                  beats 3.28-3.28 (t 18.9-18.9 s) deepest 23 mm at beat 3.28: RoundedBox#202328~Sphere#2a2d33:101/23mm
+                  beats 5.37-5.49 (t 20.02-20.08 s) deepest 38 mm at beat 5.43: RoundedBox#202328~Sphere#2a2d33:177/38mm
+                  beats 3.3-3.3 (t 36.05-36.05 s) deepest 24 mm at beat 3.3: RoundedBox#202328~Sphere#2a2d33:139/24mm
+                  beats 5.39-5.51 (t 37.17-37.24 s) deepest 36 mm at beat 5.45: RoundedBox#202328~Sphere#2a2d33:210/36mm
+interpenetration graphite-ivory       samples with a vertex inside the other robot's shape: 0/1612
+interpenetration ivory-terracotta     samples with a vertex inside the other robot's shape: 0/1612
+interpenetration ivory-proto          samples with a vertex inside the other robot's shape: 0/1612
+interpenetration ivory-stand          samples with a vertex inside the other robot's shape: 0/1612
+text clearance graphite   closest 168.8 px to a: Contact [482,314,598,356] at t=8.339 beat 15.57; Contact link 168.8 px to a: Contact [482,314,598,356] at t=8.339 beat 15.57
+text clearance ivory      closest 729.5 px to text: Donald Heddesheimer [160,175,616,257] at t=25.267 beat 15.17; Contact link 735.2 px to a: Contact [482,314,598,356] at t=25.267 beat 15.17
+text clearance terracotta closest 630.9 px to a: Contact [482,314,598,356] at t=11.251 beat 21; Contact link 630.9 px to a: Contact [482,314,598,356] at t=11.251 beat 21
+camera at t=0 [0.72,1.96,6.11]; distance to each robot's floor spot: graphite 5.85 m, ivory 7.66 m, terracotta 5.31 m, proto 8.18 m
+
+== motion per robot (world metres / radians; from the 32 ms samples)
+graphite   bounce (pelvis y, warm-up): range 0.032 m, period 1.088 s = 2.03 beats; sway (pelvis x): range 0.057 m, period 1.92 s = 3.58 beats
+           fastest hand samples (m/s @ beat, hand): 19.3@17.43R 18.9@17.45R 18.7@17.43L 18.2@17.45L 16.3@22.5R
+           whole loop: pelvis y range 0.111 m, pelvis x range 0.189, z range 0.103; head heading range 1.12 rad (std 0.25); hand speed median 0.3 p95 4.42 max 19.33 m/s; gestures p95 6.3 max 11.63 m/s; highest hand 0.395 m above head origin
+ivory      bounce (pelvis y, warm-up): range 0.041 m, period 0.544 s = 1.02 beats; sway (pelvis x): range 0.079 m, period 1.024 s = 1.91 beats
+           fastest hand samples (m/s @ beat, hand): 17.1@13.07L 17@12.58L 17@13.07R 17@13.57L 16.9@13.57R
+           whole loop: pelvis y range 0.148 m, pelvis x range 0.246, z range 0.063; head heading range 2.95 rad (std 0.75); hand speed median 0.4 p95 4.57 max 17.1 m/s; gestures p95 9.49 max 17.1 m/s; highest hand 0.338 m above head origin
+terracotta bounce (pelvis y, warm-up): range 0.025 m, period 0.256 s = 0.48 beats; sway (pelvis x): range 0.083 m, period 1.024 s = 1.91 beats
+           fastest hand samples (m/s @ beat, hand): 11.7@13.55R 11.7@13.06L 11.7@12.55R 11.3@13.06R 11.2@13.55L
+           whole loop: pelvis y range 0.15 m, pelvis x range 0.187, z range 0.083; head heading range 6.27 rad (std 0.93); hand speed median 0.55 p95 4.04 max 11.71 m/s; gestures p95 7.7 max 24.81 m/s; highest hand 0.351 m above head origin
+proto      bounce (pelvis y, warm-up): range 0 m, period none; sway (pelvis x): range 0 m, period none
+           fastest hand samples (m/s @ beat, hand): 0@0.04L 0@0.04R 0@0.1L 0@0.1R 0@0.15L
+           whole loop: pelvis y range 0 m, pelvis x range 0, z range 0; head heading range 0.9 rad (std 0.31); hand speed median 0 p95 0 max 0 m/s; gestures p95 0 max 0 m/s; highest hand -0.611 m above head origin
+
+== where each head points (horizontal heading within 20 deg of a target), share of the loop and by section
+graphite   loop: camera 44%, elsewhere 40%, terracotta 16%
+           warmUp  : terracotta 43%, elsewhere 32%, camera 25%
+           gestures: elsewhere 52%, camera 37%, terracotta 10%
+           canon   : elsewhere 56%, camera 33%, terracotta 11%
+           travel  : camera 81%, elsewhere 19%
+ivory      loop: camera+terracotta 43%, elsewhere 32%, stand 15%, camera 7%, graphite 2%, graphite+terracotta 1%, camera+graphite+terracotta 0%
+           warmUp  : elsewhere 55%, camera+terracotta 29%, camera 17%
+           gestures: camera+terracotta 52%, elsewhere 40%, camera 7%
+           canon   : camera+terracotta 78%, elsewhere 8%, graphite 6%, graphite+terracotta 5%, camera 2%, camera+graphite+terracotta 1%
+           travel  : stand 59%, elsewhere 26%, camera+terracotta 14%, camera 1%
+terracotta loop: elsewhere 67%, camera 18%, graphite 10%, ivory+stand 4%, ivory 1%
+           warmUp  : elsewhere 46%, graphite 35%, camera 19%
+           gestures: elsewhere 51%, camera 28%, ivory+stand 16%, ivory 2%, graphite 2%
+           canon   : elsewhere 77%, camera 19%, ivory 2%, graphite 2%, ivory+stand 0%
+           travel  : elsewhere 94%, camera 6%
+proto      loop: camera+terracotta 31%, camera 27%, elsewhere 21%, graphite+terracotta 19%, camera+graphite+terracotta 2%
+           warmUp  : camera+terracotta 41%, camera 27%, graphite+terracotta 19%, elsewhere 9%, camera+graphite+terracotta 5%
+           gestures: elsewhere 45%, camera 43%, camera+terracotta 11%
+           canon   : camera+terracotta 34%, elsewhere 31%, camera 29%, graphite+terracotta 6%, camera+graphite+terracotta 0%
+           travel  : graphite+terracotta 50%, camera+terracotta 37%, camera 9%, camera+graphite+terracotta 4%
+
+== reactions (react() windows in beats; measured over the 32 ms samples)
+T faces G (head within 20 deg): beats 3.38-6.13, 14.07-14.19, 16.52-16.58, 3.34-6.15, 14.09-14.21, 16.54-16.6, 3.35-6.16, 14.11-14.17, 16.5-16.62   [code: 3-6.6, full 3.5-6]
+T right hand height over head origin: max 0.2 m at beat 4.73 in the wave window, vs max -0.209 m in beats 0.5-2.5; hand raised (> head origin) at beats 3.38-6.13, 8.34-10.13, 12.58-13, 13.59-15.27, 19.27-21, 22.32-23.45, 3.4-6.15, 8.3-10.15, 12.54-12.95, 13.55-15.22, 19.29-21.02, 22.33-23.47, 3.41-6.16, 8.31-10.16, 12.55-12.97, 13.57-15.24, 19.24-21.04, 22.29-23.49
+G faces T (head within 20 deg): beats 4.58-8.82, 18.19-19.03, 4.59-8.83, 18.21-18.99, 4.55-8.79, 18.17-19.01   [code: 5.4-9.4, full 6.3-8.4]
+G nod: head pitch max 0.324 rad at beat 7.54 (code adds 0.34 at 7-7.5), vs 0.05 just before (beats 5.8-6.4)
+T faces I (head within 20 deg): beats 14.55-16.16, 14.57-16.18, 14.58-16.14   [code: hops round 13.8-14.8, back 15.9-16.9]
+T shimmy: chest roll std 0.057 rad in beats 14.95-15.75 vs 0.036 in 12.5-13.7
+I faces T (head within 20 deg): beats 1.05-1.95, 8.34-10.13, 12.58-20.4, 20.7-22.02, 31.57-0.05, 1.07-1.96, 3.04-3.94, 8.42-10.09, 13.25-13.73, 14.57-18.93, 19.47-20.42, 20.72-23.95, 31.53-2.04, 3.06-3.95, 6.04-6.7, 8.43-10.05, 13.27-13.75, 14.7-18.95, 20.02-25.81, 31.55-0.21   [code: 14.5-16.5, full 14.9-16]
+I faces the stand (head within 20 deg): beats 26.32-31.04, 26.34-30.99, 26.29-31.01   [code: 25.6-31.8, full 26.6-30.8]
+I right hand to head origin: min 0.353 m at beat 29.84 (hand to chin 27.2-30.2), vs min 0.615 m in beats 20-25
+proto (on the stand): pelvis range x 0 y 0 z 0 m; hands range max 0 m; head yaw -0.45..0.45 rad; construction line segments 47 (dancers: 0/0/0)
+
+== the still beat (21.2, t=11.357 s): each robot's speed there vs its loop
+graphite   fastest point (head, pelvis, hands) 0.049 m/s = percentile 5 of the loop (median 0.373); feet 0/0 m; hands over head -0.33/-0.411 m
+ivory      fastest point (head, pelvis, hands) 0.528 m/s = percentile 52 of the loop (median 0.52); feet 0/0 m; hands over head -0.471/-0.385 m
+terracotta fastest point (head, pelvis, hands) 2.913 m/s = percentile 87 of the loop (median 0.672); feet 0/0 m; hands over head -0.248/-0.231 m

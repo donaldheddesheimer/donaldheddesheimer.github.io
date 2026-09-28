@@ -1,0 +1,93 @@
+# fallbacks-phone 2026-09-28T16:53:22.542Z renderer="scene: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)" server=http://127.0.0.1:4322
+
+== phone 390x844 DPR 3 (isMobile, hasTouch) ==
+renderer scene: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+state {"url":"/prototype/?probe","y":0,"pc":null,"pcAble":false,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"true","hint":null,"enterLabel":"See the work","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false}
+layout {"bar":{"x":0,"y":0,"w":390,"h":56,"shown":true},"copy":{"x":0,"y":56,"w":390,"h":286,"shown":true},"stage":{"x":0,"y":342,"w":390,"h":354,"shown":true},"cap":{"x":0,"y":696,"w":390,"h":55,"shown":true},"tabbar":{"x":0,"y":788,"w":390,"h":56,"shown":true},"motionSwitches":[{"cls":"bar-motion","shown":true},{"cls":"motion-switch","shown":true}],"monitorQuad":[[14,535],[81,532],[82,571],[16,575]]}
+overflow at the top {"scrollWidth":390,"innerWidth":390,"bodyScrollWidth":390,"pastRight":0,"first":[]}
+touch drag run 1 from room (195,519) up 300px {"before":{"y":0,"look":{"az":0,"el":0,"dragged":false}},"after":{"y":285,"look":{"az":0,"el":0,"dragged":false},"pointerTypes":["touch"],"cursor":"","pc":null},"afterDragDown250":50}
+touch drag run 1 from text (195,199) up 300px {"before":{"y":0,"look":{"az":0,"el":0,"dragged":false}},"after":{"y":285,"look":{"az":0,"el":0,"dragged":false},"pointerTypes":["touch"],"cursor":"","pc":null},"afterDragDown250":50}
+touch drag run 2 from room (195,519) up 300px {"before":{"y":0,"look":{"az":0,"el":0,"dragged":false}},"after":{"y":285,"look":{"az":0,"el":0,"dragged":false},"pointerTypes":["touch"],"cursor":"","pc":null},"afterDragDown250":50}
+touch drag run 2 from text (195,199) up 300px {"before":{"y":0,"look":{"az":0,"el":0,"dragged":false}},"after":{"y":285,"look":{"az":0,"el":0,"dragged":false},"pointerTypes":["touch"],"cursor":"","pc":null},"afterDragDown250":50}
+synthesized touch scroll gesture on the room, 400px {"from":0,"to":400,"look":{"az":0,"el":0,"dragged":false}}
+tap on the monitor run 1 at (44,551) {"pickHit":true,"url":"/prototype/?probe","y":623,"workTop":128,"dialogOpen":false,"pc":null}
+tap on the enter link run 1 {"label":"See the work","url":"/prototype/?probe#work","y":623,"workTop":128,"dialogOpen":false,"pc":null}
+tap on the monitor run 2 at (48,551) {"pickHit":true,"url":"/prototype/?probe#work","y":623,"workTop":128,"dialogOpen":false,"pc":null}
+tap on the enter link run 2 {"label":"See the work","url":"/prototype/?probe#work","y":623,"workTop":128,"dialogOpen":false,"pc":null}
+section #work {"heading":"Work","box":{"x":0,"w":390,"h":3313},"textNodes":37,"minFontPx":14,"under12px":0,"firstParagraphPx":16,"boxesPastEdges":0}
+section #about {"heading":"About","box":{"x":0,"w":390,"h":1566},"textNodes":32,"minFontPx":14,"under12px":0,"firstParagraphPx":16,"boxesPastEdges":0}
+section #resume {"heading":"Résumé","box":{"x":0,"w":390,"h":3346},"textNodes":44,"minFontPx":14,"under12px":0,"firstParagraphPx":16,"boxesPastEdges":0}
+section #contact {"heading":"Contact","box":{"x":0,"w":390,"h":433},"textNodes":10,"minFontPx":14,"under12px":0,"firstParagraphPx":16,"boxesPastEdges":0}
+overflow, whole page {"scrollWidth":390,"innerWidth":390,"bodyScrollWidth":390,"pastRight":0,"first":[]}
+address /prototype/?computer=about -> {"url":"/prototype/#about","y":3936,"pc":null,"sw":390,"iw":390}
+address /prototype/?computer=work/cucadence -> {"url":"/prototype/work/cucadence/","y":0,"pc":null,"sw":390,"iw":390}
+address /computer/resume/ -> {"url":"/prototype/#resume","y":5502,"pc":null,"sw":390,"iw":390}
+address /computer/work/cucadence/ -> {"url":"/prototype/work/cucadence/","y":0,"pc":null,"sw":390,"iw":390}
+errors {"pageerrors":[],"consoleErrors":[],"badResponses":[],"failed":[],"fontsAborted":9,"fontsConsole":9,"mediaAborted":[],"expected":[]}
+
+== phone 360x640 DPR 2 (isMobile, hasTouch) ==
+renderer scene: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+state {"url":"/prototype/?probe","y":0,"pc":null,"pcAble":false,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"true","hint":null,"enterLabel":"See the work","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false}
+layout {"bar":{"x":0,"y":0,"w":360,"h":56,"shown":true},"copy":{"x":0,"y":56,"w":360,"h":322,"shown":true},"stage":{"x":0,"y":378,"w":360,"h":269,"shown":true},"cap":{"x":0,"y":646,"w":360,"h":55,"shown":true},"tabbar":{"x":0,"y":584,"w":360,"h":56,"shown":true},"motionSwitches":[{"cls":"bar-motion","shown":true},{"cls":"motion-switch","shown":true}],"monitorQuad":[[15,527],[77,524],[78,559],[17,563]]}
+overflow at the top {"scrollWidth":360,"innerWidth":360,"bodyScrollWidth":360,"pastRight":0,"first":[]}
+touch drag run 1 from room (180,512) up 300px {"before":{"y":0,"look":{"az":0,"el":0,"dragged":false}},"after":{"y":285,"look":{"az":0,"el":0,"dragged":false},"pointerTypes":["touch"],"cursor":"","pc":null},"afterDragDown250":50}
+touch drag run 1 from text (180,217) up 300px {"before":{"y":0,"look":{"az":0,"el":0,"dragged":false}},"after":{"y":285,"look":{"az":0,"el":0,"dragged":false},"pointerTypes":["touch"],"cursor":"","pc":null},"afterDragDown250":50}
+touch drag run 2 from room (180,512) up 300px {"before":{"y":0,"look":{"az":0,"el":0,"dragged":false}},"after":{"y":285,"look":{"az":0,"el":0,"dragged":false},"pointerTypes":["touch"],"cursor":"","pc":null},"afterDragDown250":50}
+touch drag run 2 from text (180,217) up 300px {"before":{"y":0,"look":{"az":0,"el":0,"dragged":false}},"after":{"y":285,"look":{"az":0,"el":0,"dragged":false},"pointerTypes":["touch"],"cursor":"","pc":null},"afterDragDown250":50}
+synthesized touch scroll gesture on the room, 400px {"from":0,"to":400,"look":{"az":0,"el":0,"dragged":false}}
+tap on the monitor run 1 at (44,541) {"pickHit":true,"url":"/prototype/?probe","y":573,"workTop":128,"dialogOpen":false,"pc":null}
+tap on the enter link run 1 {"label":"See the work","url":"/prototype/?probe#work","y":573,"workTop":128,"dialogOpen":false,"pc":null}
+tap on the monitor run 2 at (47,541) {"pickHit":true,"url":"/prototype/?probe#work","y":573,"workTop":128,"dialogOpen":false,"pc":null}
+tap on the enter link run 2 {"label":"See the work","url":"/prototype/?probe#work","y":573,"workTop":128,"dialogOpen":false,"pc":null}
+section #work {"heading":"Work","box":{"x":0,"w":360,"h":3253},"textNodes":37,"minFontPx":14,"under12px":0,"firstParagraphPx":16,"boxesPastEdges":0}
+section #about {"heading":"About","box":{"x":0,"w":360,"h":1645},"textNodes":32,"minFontPx":14,"under12px":0,"firstParagraphPx":16,"boxesPastEdges":0}
+section #resume {"heading":"Résumé","box":{"x":0,"w":360,"h":3518},"textNodes":44,"minFontPx":14,"under12px":0,"firstParagraphPx":16,"boxesPastEdges":0}
+section #contact {"heading":"Contact","box":{"x":0,"w":360,"h":433},"textNodes":10,"minFontPx":14,"under12px":0,"firstParagraphPx":16,"boxesPastEdges":0}
+overflow, whole page {"scrollWidth":360,"innerWidth":360,"bodyScrollWidth":360,"pastRight":0,"first":[]}
+address /prototype/?computer=about -> {"url":"/prototype/#about","y":3827,"pc":null,"sw":360,"iw":360}
+address /prototype/?computer=work/cucadence -> {"url":"/prototype/work/cucadence/","y":0,"pc":null,"sw":360,"iw":360}
+address /computer/resume/ -> {"url":"/prototype/#resume","y":5471,"pc":null,"sw":360,"iw":360}
+address /computer/work/cucadence/ -> {"url":"/prototype/work/cucadence/","y":0,"pc":null,"sw":360,"iw":360}
+errors {"pageerrors":[],"consoleErrors":[],"badResponses":[],"failed":[],"fontsAborted":9,"fontsConsole":9,"mediaAborted":[],"expected":[]}
+
+== stacked 1024x768 (mouse, DPR 1) ==
+renderer scene: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+state {"url":"/prototype/?probe","y":0,"pc":null,"pcAble":false,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"true","hint":null,"enterLabel":"See the work","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false}
+layout {"copy":{"x":0,"y":56,"w":1024,"h":244},"stage":{"x":0,"y":300,"w":1024,"h":323},"work":{"x":0,"y":662,"w":1024,"h":1473},"monitorQuad":[[211,488],[327,482],[330,545],[217,554]],"sw":1024,"iw":1024}
+mouse drag run 1, 213px, released off the monitor {"during":{"look":{"az":0,"el":0,"dragged":true},"cursor":""},"after":{"az":0,"el":0,"dragged":true},"clicks":["click CANVAS 819,520"],"y":0,"url":"/prototype/?probe"}
+mouse drag run 1, 351px, released on the monitor {"during":{"look":{"az":0,"el":0,"dragged":true},"cursor":"pointer"},"after":{"az":0,"el":0,"dragged":true},"clicks":["click CANVAS 268,516"],"y":0,"url":"/prototype/?probe"}
+mouse drag run 2, 213px, released off the monitor {"during":{"look":{"az":0,"el":0,"dragged":true},"cursor":""},"after":{"az":0,"el":0,"dragged":true},"clicks":["click CANVAS 819,520"],"y":0,"url":"/prototype/?probe"}
+mouse drag run 2, 353px, released on the monitor {"during":{"look":{"az":0,"el":0,"dragged":true},"cursor":"pointer"},"after":{"az":0,"el":0,"dragged":true},"clicks":["click CANVAS 265,515"],"y":0,"url":"/prototype/?probe"}
+click on the enter link run 1 {"url":"/prototype/?probe#work","y":534,"pc":null,"pcAble":false,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"true","hint":"cancelled","enterLabel":"See the work","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false} {"workTop":128}
+click on the monitor run 1 at (266,514) {"cursorOver":"pointer","url":"/prototype/?probe","y":534,"pc":null,"pcAble":false,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"true","hint":"cancelled","enterLabel":"See the work","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false,"workTop":128}
+click on the enter link run 2 {"url":"/prototype/?probe#work","y":534,"pc":null,"pcAble":false,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"true","hint":"cancelled","enterLabel":"See the work","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false} {"workTop":128}
+click on the monitor run 2 at (270,513) {"cursorOver":"pointer","url":"/prototype/?probe","y":534,"pc":null,"pcAble":false,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"true","hint":"cancelled","enterLabel":"See the work","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false,"workTop":128}
+address /prototype/?computer=about -> {"url":"/prototype/#about","y":2007,"pc":null,"dialogOpen":false}
+address /prototype/?computer=work/cucadence -> {"url":"/prototype/work/cucadence/","y":0,"pc":null,"dialogOpen":null}
+address /computer/contact/ -> {"url":"/prototype/#contact","y":4499,"pc":null,"dialogOpen":false}
+errors {"pageerrors":[],"consoleErrors":[],"badResponses":[],"failed":[],"fontsAborted":7,"fontsConsole":7,"mediaAborted":[],"expected":[]}
+
+== lab opened at 1440x900, resized to 1024x768 and back ==
+run 1 at 1440x900 {"url":"/prototype/?computer=about&probe","y":0,"pc":"read","pcAble":true,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"false","hint":"cancelled","enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":true} {"frame":{"x":115,"y":72,"w":1210,"h":756,"opacity":"1"}}
+run 1 at 1024x768 {"url":"/prototype/?computer=about&probe","y":0,"pc":"read","pcAble":false,"pcFull":true,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"false","hint":"cancelled","enterLabel":"See the work","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":true} {"frame":{"x":0,"y":0,"w":1024,"h":768,"opacity":"1"}}
+run 1 back at 1440x900 {"url":"/prototype/?computer=about&probe","y":0,"pc":"read","pcAble":true,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"false","hint":"cancelled","enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":true} {"frame":{"x":115,"y":72,"w":1210,"h":756,"opacity":"1"}}
+run 1 after Escape {"url":"/prototype/","y":0,"pc":null,"pcAble":true,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"true","hint":"cancelled","enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false} {"active":"<a href=\"#work\" class=\"btn btn-primary btn-lg\" data-lab-enter=\"\" data-astro-cid-"}
+run 2 at 1440x900 {"url":"/prototype/?computer=about&probe","y":0,"pc":"read","pcAble":true,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"false","hint":"cancelled","enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":true} {"frame":{"x":115,"y":72,"w":1210,"h":756,"opacity":"1"}}
+run 2 at 1024x768 {"url":"/prototype/?computer=about&probe","y":0,"pc":"read","pcAble":false,"pcFull":true,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"false","hint":"cancelled","enterLabel":"See the work","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":true} {"frame":{"x":0,"y":0,"w":1024,"h":768,"opacity":"1"}}
+run 2 back at 1440x900 {"url":"/prototype/?computer=about&probe","y":0,"pc":"read","pcAble":true,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"false","hint":"cancelled","enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":true} {"frame":{"x":115,"y":72,"w":1210,"h":756,"opacity":"1"}}
+run 2 after Escape {"url":"/prototype/","y":0,"pc":null,"pcAble":true,"pcFull":false,"motion":"on","mounted":true,"drawn":true,"failed":false,"running":"true","hint":"cancelled","enterLabel":"Explore the lab","enterHref":"#work","stillOpacity":"0","canvas":{"display":"block","opacity":"1"},"dialogOpen":false} {"active":"<a href=\"#work\" class=\"btn btn-primary btn-lg\" data-lab-enter=\"\" data-astro-cid-"}
+
+== lab opened at 1440x900, narrowed to 800, 600 and 390 wide (full mode): the computer bar ==
+run 1 about 800x900 {"full":true,"innerWidth":800,"scrollWidth":800,"under44rem":false,"name":"none","ordinaryLink":{"display":"flex","left":493,"right":640},"leave":{"display":"flex","left":644,"right":768},"leaveInView":true}
+run 1 about 600x900 {"full":true,"innerWidth":600,"scrollWidth":600,"under44rem":true,"name":"none","ordinaryLink":{"display":"none","left":0,"right":0},"leave":{"display":"flex","left":524,"right":576},"leaveInView":true}
+run 1 about 390x844 {"full":true,"innerWidth":390,"scrollWidth":390,"under44rem":true,"name":"none","ordinaryLink":{"display":"none","left":0,"right":0},"leave":{"display":"flex","left":318,"right":370},"leaveInView":true}
+run 1 work/cucadence 800x900 {"full":true,"innerWidth":800,"scrollWidth":800,"under44rem":false,"name":"none","ordinaryLink":{"display":"flex","left":493,"right":640},"leave":{"display":"flex","left":644,"right":768},"leaveInView":true}
+run 1 work/cucadence 600x900 {"full":true,"innerWidth":600,"scrollWidth":600,"under44rem":true,"name":"none","ordinaryLink":{"display":"none","left":0,"right":0},"leave":{"display":"flex","left":524,"right":576},"leaveInView":true}
+run 1 work/cucadence 390x844 {"full":true,"innerWidth":390,"scrollWidth":390,"under44rem":true,"name":"none","ordinaryLink":{"display":"none","left":0,"right":0},"leave":{"display":"flex","left":318,"right":370},"leaveInView":true}
+run 2 about 800x900 {"full":true,"innerWidth":800,"scrollWidth":800,"under44rem":false,"name":"none","ordinaryLink":{"display":"flex","left":493,"right":640},"leave":{"display":"flex","left":644,"right":768},"leaveInView":true}
+run 2 about 600x900 {"full":true,"innerWidth":600,"scrollWidth":600,"under44rem":true,"name":"none","ordinaryLink":{"display":"none","left":0,"right":0},"leave":{"display":"flex","left":524,"right":576},"leaveInView":true}
+run 2 about 390x844 {"full":true,"innerWidth":390,"scrollWidth":390,"under44rem":true,"name":"none","ordinaryLink":{"display":"none","left":0,"right":0},"leave":{"display":"flex","left":318,"right":370},"leaveInView":true}
+run 2 work/cucadence 800x900 {"full":true,"innerWidth":800,"scrollWidth":800,"under44rem":false,"name":"none","ordinaryLink":{"display":"flex","left":493,"right":640},"leave":{"display":"flex","left":644,"right":768},"leaveInView":true}
+run 2 work/cucadence 600x900 {"full":true,"innerWidth":600,"scrollWidth":600,"under44rem":true,"name":"none","ordinaryLink":{"display":"none","left":0,"right":0},"leave":{"display":"flex","left":524,"right":576},"leaveInView":true}
+run 2 work/cucadence 390x844 {"full":true,"innerWidth":390,"scrollWidth":390,"under44rem":true,"name":"none","ordinaryLink":{"display":"none","left":0,"right":0},"leave":{"display":"flex","left":318,"right":370},"leaveInView":true}
+errors {"pageerrors":[],"consoleErrors":[],"badResponses":[],"failed":[],"fontsAborted":12,"fontsConsole":12,"mediaAborted":[],"expected":[]}

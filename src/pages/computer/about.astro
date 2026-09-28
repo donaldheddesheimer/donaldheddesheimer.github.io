@@ -1,0 +1,10 @@
+---
+// The lab computer's About page (src/layouts/Screen.astro).
+import Screen from '../../layouts/Screen.astro';
+import FolioAbout from '../../components/FolioAbout.astro';
+import { profile } from '../../data/site';
+---
+
+<Screen title={`About · ${profile.name}`} path="about">
+  <FolioAbout level={1} />
+</Screen>

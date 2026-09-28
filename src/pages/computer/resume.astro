@@ -1,0 +1,10 @@
+---
+// The lab computer's Résumé page (src/layouts/Screen.astro).
+import Screen from '../../layouts/Screen.astro';
+import FolioResume from '../../components/FolioResume.astro';
+import { profile } from '../../data/site';
+---
+
+<Screen title={`Résumé · ${profile.name}`} path="resume">
+  <FolioResume level={1} />
+</Screen>
