@@ -1,0 +1,6 @@
+# 2026-09-28T00:30:43Z · 1440x900
+nojs {"able":false}
+savedata before {"hash":"","y":0,"pc":null,"able":true,"failed":false,"offer":true,"mounted":false,"label":"Explore the lab"}
+savedata after enter {"hash":"","y":0,"pc":"desk","able":true,"failed":false,"offer":false,"mounted":true,"label":"Explore the lab"}
+nowebgl {"hash":"","y":0,"pc":null,"able":false,"failed":true,"offer":false,"mounted":false,"label":"Selected work"}
+nowebgl after click {"hash":"#work","y":828,"pc":null,"able":false,"failed":true,"offer":false,"mounted":false,"label":"Selected work"}

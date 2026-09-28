@@ -24,8 +24,10 @@ interface Props {
   status?: string;
   /** False for a page with no address of its own (the 404), which gets no canonical link. */
   canonical?: boolean;
+  /** Kept out of search results (a prototype). */
+  noindex?: boolean;
 }
-const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false, story = false, console = false, section, status, canonical = true } = Astro.props;
+const { title = profile.name, description = profile.tagline, crumb = [{ label: 'Overview' }], home = false, story = false, console = false, section, status, canonical = true, noindex = false } = Astro.props;
 // The homepage's own chrome (header, footer, no rail or status bar), on it and on the pages read like it.
 const editorial = home || story;
 // Absolute URLs for link previews. public/og.png is rendered from the profile (see src/data/site.ts).
@@ -89,6 +91,7 @@ const search = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <meta name="theme-color" content="#131211" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

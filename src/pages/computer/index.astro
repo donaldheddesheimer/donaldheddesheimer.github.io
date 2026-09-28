@@ -1,0 +1,50 @@
+---
+// PROTOTYPE. The lab computer's home screen, "Portfolio": a short introduction, then the homepage's
+// own sections (HomeSections). Only shown inside /prototype/'s monitor; opened on its own it goes to /.
+import Screen from '../../layouts/Screen.astro';
+import HomeSections from '../../components/HomeSections.astro';
+import Icon from '../../components/Icon.astro';
+import NewTab from '../../components/NewTab.astro';
+import { profile } from '../../data/site';
+---
+
+<Screen title={`Portfolio · ${profile.name}`} page="/">
+  <section class="scr-intro" aria-labelledby="scr-name">
+    <p class="hero-kicker"><span>{profile.status} ·</span> <span>{profile.school}</span></p>
+    <h1 id="scr-name" class="scr-name">{profile.name}</h1>
+    <p class="scr-role">{profile.headline}</p>
+    <p class="scr-lede">{profile.tagline}</p>
+    <div class="hero-actions">
+      <a href="#work" class="btn btn-primary">Selected work<Icon name="arrow-right" class="size-4" /></a>
+      <a href={profile.resume} class="btn" target="_blank" rel="noopener"><Icon name="file" class="size-4" />Resume<NewTab class="size-3.5 shrink-0" /></a>
+      <a href="#contact" class="btn btn-ghost"><Icon name="mail" class="size-4" />Contact</a>
+      <a href="/systems/" class="btn btn-ghost"><Icon name="graph" class="size-4" />Systems map</a>
+    </div>
+  </section>
+  <HomeSections />
+</Screen>
+
+<style>
+  .scr-intro {
+    padding: clamp(1.5rem, 5vw, 3rem) var(--home-edge) 0.5rem;
+  }
+  .scr-name {
+    margin-top: 0.75rem;
+    font-size: clamp(2rem, 6vw, 3.25rem);
+    line-height: 1;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+  .scr-role {
+    margin-top: 0.5rem;
+    font-size: var(--text-lg);
+    font-weight: 500;
+    color: var(--text);
+  }
+  .scr-lede {
+    margin-top: 0.75rem;
+    max-width: 60ch;
+    color: var(--muted);
+  }
+</style>

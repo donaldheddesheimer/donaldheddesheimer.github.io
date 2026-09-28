@@ -1,0 +1,477 @@
+---
+// The homepage's sections, from Selected work to Contact: on the homepage under the opening, and on the
+// lab computer's Portfolio screen (/computer/), so the two never drift apart.
+import { getCollection } from 'astro:content';
+import Icon, { type IconName } from './Icon.astro';
+import Section from './Section.astro';
+import NewTab from './NewTab.astro';
+import Timeline from './Timeline.astro';
+import Stat from './Stat.astro';
+import { education, experience, offDuty, orgs, profile, skillAliases, skills, socials } from '../data/site';
+import { duration, fmtDot, fmtMonth, statusLabel } from '../lib/format';
+import { getModel } from '../lib/model';
+
+const all = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code));
+const model = await getModel();
+// Featured projects with a still lead under Selected work; every other project is listed once, under
+// More projects.
+const featured = all.flatMap((p) => {
+  const still = p.data.featured && model.get(`project:${p.id}`).media[0];
+  return still ? [{ p, still }] : [];
+});
+const projects = all.filter((p) => !featured.some((f) => f.p === p));
+// Cards lead with those with a capture, so text-only cards share rows and none stretches beside an
+// image. Newest first within each; the table keeps plain newest-first.
+const rank = (p: (typeof projects)[number]) => (model.get(`project:${p.id}`).media.length ? 0 : 1);
+const cards = [...projects].sort((a, b) => rank(a) - rank(b));
+// Links into the systems map (/systems/), which opens with that object selected.
+const mapHref = (id: string) => `/systems/?sel=${encodeURIComponent(id)}#overview`;
+const counts = {
+  all: projects.length,
+  active: projects.filter((p) => p.data.status === 'active').length,
+  shipped: projects.filter((p) => p.data.status === 'shipped').length,
+  archived: projects.filter((p) => p.data.status === 'archived').length,
+};
+
+const org = (id: string) => orgs.find((o) => o.id === id)!;
+// Kind icons are all slate: the kind tag names the kind, and hue is kept for state.
+const kindMeta: Record<string, { label: string; icon: IconName }> = {
+  work: { label: 'Work', icon: 'building' },
+  research: { label: 'Research', icon: 'flask' },
+  team: { label: 'Team', icon: 'bot' },
+  education: { label: 'Edu', icon: 'cap' },
+};
+// A resume skill the map has evidence for links to it, counting the projects and roles behind it.
+const capability = (item: string) => {
+  const id = skillAliases[item] && `skill:${skillAliases[item]}`;
+  return id && model.entities.has(id) ? { id, n: model.degree(id), summary: model.get(id).summary } : null;
+};
+const hobbyIcon: Record<string, IconName> = { volleyball: 'ball', robotics: 'bot', reading: 'book', hiking: 'mountain' };
+const [primaryHobby, ...otherHobbies] = offDuty;
+---
+
+<div class="home-sections">
+  <!-- SELECTED WORK: the featured projects, large -->
+  <Section id="work" title="Selected work" open>
+    <a slot="actions" href="#projects" class="sect-link">More projects <Icon name="arrow-right" class="size-3.5" /></a>
+    <div class="work-grid">
+      {
+        featured.map(({ p, still }) => {
+          const d = p.data;
+          return (
+            <article data-entity={`project:${p.id}`} class="work-card">
+              <div class="work-media">
+                <img src={still.src} alt={still.alt} loading="lazy" decoding="async" />
+              </div>
+              <p class="work-meta">
+                <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
+                <span>
+                  {fmtMonth(d.start)}
+                  {d.context && ` · ${d.context}`}
+                </span>
+              </p>
+              <h3 class="work-title">
+                <a href={`/projects/${p.id}/`} class="stretched">{d.title}</a>
+              </h3>
+              <p class="work-summary">{d.summary}</p>
+              <div class="mt-3 flex flex-wrap gap-1">
+                {d.tags.slice(0, 4).map((t) => (
+                  <span class="tag">{t}</span>
+                ))}
+              </div>
+              <div class="work-foot">
+                <span class="work-more">
+                  Case study <Icon name="arrow-right" class="size-3.5" />
+                </span>
+                <a href={mapHref(`project:${p.id}`)} class="card-map btn btn-ghost">
+                  <Icon name="graph" class="size-3.5" />
+                  Show on map
+                </a>
+              </div>
+            </article>
+          );
+        })
+      }
+    </div>
+  </Section>
+
+  <!-- TIMELINE -->
+  <Section id="timeline" title="Timeline" code="2023 → 2028">
+    <div slot="actions" class="hidden items-center gap-3 readout text-2xs lg:flex">
+      <span class="flex items-center gap-1.5"><span class="tl-key-bar"></span>Role</span>
+      <span class="flex items-center gap-1.5"><span class="tl-key-bar is-future"></span>Ahead</span>
+      <span class="flex items-center gap-1.5"><span class="tl-key-ring"></span>Project</span>
+      <span class="flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-green"></span>Active</span>
+    </div>
+    <Timeline />
+  </Section>
+
+  <!-- EXPERIENCE -->
+  <Section id="experience" title="Experience">
+    <div class="hidden grid-cols-[2.25rem_minmax(0,1.6fr)_minmax(0,1fr)_10rem_6rem_1rem] gap-3 border-b border-line bg-panel-2/50 px-(--pad-panel) py-2 kicker md:grid">
+      <span></span><span>Organization / role</span><span>Location</span><span>Period</span><span>Duration</span><span></span>
+    </div>
+    {
+      experience.map((e, i) => {
+        const k = kindMeta[e.kind];
+        return (
+          <details id={`exp-${e.id}`} data-entity={`org:${e.org}`} class="exp-row group border-b border-line last:border-b-0" open={i === 0}>
+            <summary class="grid cursor-pointer list-none grid-cols-[2.25rem_minmax(0,1fr)_1rem] items-center gap-x-3 gap-y-1 px-(--pad-panel) py-3 hover:bg-panel-2/60 md:grid-cols-[2.25rem_minmax(0,1.6fr)_minmax(0,1fr)_10rem_6rem_1rem] [&::-webkit-details-marker]:hidden">
+              <span class="grid size-9 place-items-center rounded-2 bg-panel-3 text-slate">
+                <Icon name={k.icon} class="size-[18px]" />
+              </span>
+              <span class="min-w-0">
+                <span class="flex items-center gap-2">
+                  <span class="font-semibold">{org(e.org).name}</span>
+                  <span class="hidden kicker sm:inline">{k.label}</span>
+                </span>
+                <span class="block text-sm text-muted">{e.role}</span>
+              </span>
+              <span class="hidden truncate text-sm text-muted md:block">{e.location}</span>
+              <span class="hidden readout md:flex md:items-center md:gap-2">
+                {fmtDot(e.start)} → {e.end ? fmtDot(e.end) : <span class="text-green-2">NOW</span>}
+              </span>
+              <span class="hidden readout text-dim md:block">{duration(e.start, e.end)}</span>
+              <Icon name="chevron" class="size-4 text-dim transition-transform duration-(--dur-2) ease-(--ease) group-open:rotate-90" />
+              <span class="col-start-2 readout text-2xs md:hidden">
+                {fmtMonth(e.start)} – {fmtMonth(e.end)} · {duration(e.start, e.end)}
+              </span>
+            </summary>
+            <div class="exp-detail">
+              {e.unit && <p class="mb-2.5 kicker kicker--sentence">{e.unit}</p>}
+              <ul class="max-w-(--measure) space-y-2 text-base text-ink">
+                {e.points.map((pt) => (
+                  <li class="flex gap-2.5">
+                    <span class="mt-[0.55em] size-1.5 shrink-0 bg-dim" />
+                    <span>{pt}</span>
+                  </li>
+                ))}
+              </ul>
+              <div class="mt-3.5 flex flex-wrap items-center gap-1.5">
+                {e.tags.map((t) => (
+                  <span class="tag">{t}</span>
+                ))}
+                <a href={mapHref(`org:${e.org}`)} class="btn btn-ghost">
+                  <Icon name="graph" class="size-4" />
+                  Show on map
+                </a>
+              </div>
+            </div>
+          </details>
+        );
+      })
+    }
+    <details id="exp-education" data-entity={`org:${education.org}`} class="exp-row group">
+      <summary class="grid cursor-pointer list-none grid-cols-[2.25rem_minmax(0,1fr)_1rem] items-center gap-x-3 gap-y-1 px-(--pad-panel) py-3 hover:bg-panel-2/60 md:grid-cols-[2.25rem_minmax(0,1.6fr)_minmax(0,1fr)_10rem_6rem_1rem] [&::-webkit-details-marker]:hidden">
+        <span class="grid size-9 place-items-center rounded-2 bg-panel-3 text-slate"><Icon name="cap" class="size-[18px]" /></span>
+        <span class="min-w-0">
+          <span class="flex items-center gap-2">
+            <span class="font-semibold">{education.school}</span>
+            <span class="hidden kicker sm:inline">Edu</span>
+          </span>
+          <span class="block text-sm text-muted">{education.degree} · {education.program}</span>
+        </span>
+        <span class="hidden truncate text-sm text-muted md:block">Atlanta, GA</span>
+        <span class="hidden readout md:block">{fmtDot(education.start)} → {fmtDot(education.end)}</span>
+        <span class="hidden readout text-dim md:block">Expected</span>
+        <Icon name="chevron" class="size-4 text-dim transition-transform duration-(--dur-2) ease-(--ease) group-open:rotate-90" />
+        <span class="col-start-2 readout text-2xs md:hidden">Expected {fmtMonth(education.end)}</span>
+      </summary>
+      <div class="exp-detail">
+        <dl class="kv max-w-2xl">
+          <dt>Thread</dt>
+          <dd>{education.thread}</dd>
+          <dt>GPA</dt>
+          <dd class="font-mono text-xs">{education.gpa}</dd>
+          <dt>Coursework</dt>
+          <dd class="flex flex-wrap gap-1.5">{education.coursework.map((c) => <span class="tag">{c}</span>)}</dd>
+        </dl>
+        <a href={mapHref(`org:${education.org}`)} class="btn btn-ghost mt-3">
+          <Icon name="graph" class="size-4" />
+          Show on map
+        </a>
+      </div>
+    </details>
+  </Section>
+
+  <!-- MORE PROJECTS: everything not under Selected work -->
+  <Section id="projects" title="More projects">
+    <div slot="actions" class="flex min-w-0 items-center gap-2">
+      <div class="seg max-w-full overflow-x-auto" role="group" aria-label="Filter by status">
+        {
+          (['all', 'active', 'shipped', 'archived'] as const).map((s) => (
+            <button type="button" data-filter={s} aria-pressed={s === 'all' ? 'true' : 'false'}>
+              {s === 'all' ? 'All' : statusLabel[s]} <span class="ml-1 font-mono text-2xs text-muted">{counts[s]}</span>
+            </button>
+          ))
+        }
+      </div>
+      <div class="seg shrink-0" role="group" aria-label="View">
+        <button type="button" data-view-btn="grid" aria-pressed="true" aria-label="Card view" title="Cards"><Icon name="grid" class="size-3.5" /></button>
+        <button type="button" data-view-btn="table" aria-pressed="false" aria-label="Table view" title="Table"><Icon name="list" class="size-3.5" /></button>
+      </div>
+    </div>
+
+    <div data-view="grid" class="grid gap-3 p-3 sm:grid-cols-2 xl:grid-cols-6">
+      {
+        cards.map((p) => {
+          const d = p.data;
+          const still = model.get(`project:${p.id}`).media[0];
+          const stat = d.stats[0];
+          return (
+            <article data-status={d.status} data-entity={`project:${p.id}`} class="pcard group relative flex flex-col overflow-hidden rounded-2 border border-line bg-bg/40 hover:border-edge hover:bg-panel-2/40 xl:col-span-2">
+              {still ? (
+                <div class:list={['relative aspect-[16/9] overflow-hidden border-b border-line', d.cardFit === 'contain' ? 'bg-well' : 'bg-bg']}>
+                  <img src={still.src} alt={still.alt} loading="lazy" decoding="async" class:list={['size-full opacity-85 transition-opacity duration-(--dur-2) ease-(--ease) group-hover:opacity-100', d.cardFit === 'contain' ? 'object-contain p-3' : 'object-cover object-top']} />
+                  <span class="absolute top-2 right-2 rounded-1 bg-bg/90">
+                    <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
+                  </span>
+                </div>
+              ) : (
+                <div class="flex min-h-10 items-center gap-3 border-b border-line bg-panel px-4 py-1.5">
+                  <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
+                  {stat && (
+                    <dl class="ml-auto min-w-0">
+                      <Stat label={stat.label} value={stat.value} inline />
+                    </dl>
+                  )}
+                </div>
+              )}
+              <div class="flex flex-1 flex-col p-4">
+                <h3 class="text-md font-semibold">
+                  <a href={`/projects/${p.id}/`} class="stretched">{d.title}</a>
+                </h3>
+                <p class="mt-1 line-clamp-3 text-sm text-muted">{d.summary}</p>
+                <div class="mt-3 flex flex-wrap gap-1">
+                  {d.tags.slice(0, 4).map((t) => (
+                    <span class="tag">{t}</span>
+                  ))}
+                </div>
+                <div class="mt-auto flex items-center justify-between gap-3 pt-3">
+                  <span class="min-w-0 readout text-2xs text-dim">
+                    {fmtMonth(d.start)}
+                    {d.context && ` · ${d.context}`}
+                  </span>
+                  <a href={mapHref(`project:${p.id}`)} class="card-map btn btn-ghost btn-icon shrink-0" aria-label={`Show ${d.title} on map`} title="Show on map">
+                    <Icon name="graph" class="size-4" />
+                  </a>
+                </div>
+              </div>
+            </article>
+          );
+        })
+      }
+    </div>
+
+    <div data-view="table" hidden class="overflow-x-auto">
+      <table class="ptable w-full text-left text-sm sm:min-w-[760px]">
+        <thead class="border-b border-line bg-panel-2/50 max-sm:sr-only">
+          <tr class="kicker">
+            <th class="px-4 py-2 font-normal">ID</th>
+            <th class="px-4 py-2 font-normal">Name</th>
+            <th class="px-4 py-2 font-normal">Status</th>
+            <th class="px-4 py-2 font-normal">Started</th>
+            <th class="px-4 py-2 font-normal">Context</th>
+            <th class="px-4 py-2 font-normal">Stack</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          {
+            projects.map((p) => (
+              <tr data-status={p.data.status} data-entity={`project:${p.id}`} class="hover:bg-panel-2/60">
+                <td class="px-4 py-2.5 whitespace-nowrap readout text-dim">{p.data.code}</td>
+                <td class="pt-name px-4 py-2.5">
+                  <a href={`/projects/${p.id}/`} class="font-medium text-text underline-offset-3 hover:underline">
+                    {p.data.title}
+                  </a>
+                </td>
+                <td class="px-4 py-2.5">
+                  <span class={`pill pill-${p.data.status}`}>{statusLabel[p.data.status]}</span>
+                </td>
+                <td class="pt-date px-4 py-2.5 whitespace-nowrap readout">{fmtDot(p.data.start)}</td>
+                <td class="pt-ctx px-4 py-2.5 text-muted">{p.data.context ?? 'Personal'}</td>
+                <td class="pt-stack px-4 py-2.5 text-muted">{p.data.tags.slice(0, 3).join(', ')}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <p data-empty hidden class="px-4 py-10 text-center text-dim">No projects with that status.</p>
+  </Section>
+
+  <!-- CAPABILITIES -->
+  <Section id="capabilities" title="Capabilities">
+    <p slot="actions" class="hidden items-center gap-2 text-xs text-dim md:flex">
+      <span class="tag tag-link pointer-events-none" aria-hidden="true">Skill<span class="tag-n">· n</span></span>On the map, with n projects and roles
+    </p>
+    <div class="grid xl:grid-cols-2">
+      {
+        skills.map((s) => (
+          <div class="grid gap-2 border-t border-line px-(--pad-panel) py-3 first:border-t-0 md:grid-cols-[13rem_1fr] md:gap-4 xl:grid-cols-[10rem_1fr] xl:nth-2:border-t-0 xl:odd:not-last:border-r">
+            <div class="pt-0.5 kicker kicker--sentence">{s.group}</div>
+            <div class="flex flex-wrap content-start items-center gap-1.5">
+              {s.items.map((i) => {
+                const c = capability(i);
+                return c ? (
+                  <a href={mapHref(c.id)} class="tag tag-link" data-entity={c.id} title={`${c.summary} Show on the map.`}>
+                    {i}
+                    <span class="tag-n" aria-hidden="true">
+                      · {c.n}
+                    </span>
+                  </a>
+                ) : (
+                  <span class="tag">{i}</span>
+                );
+              })}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </Section>
+
+  <!-- OFF DUTY -->
+  <Section id="off-duty" title="Off duty">
+    <div class="grid gap-3 p-3 md:grid-cols-3">
+      <article class:list={['grid overflow-hidden rounded-2 border border-line bg-bg/40 md:col-span-3', primaryHobby.image && 'md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]']}>
+        {
+          primaryHobby.image && (
+            <div class="relative aspect-[4/5] border-b border-line md:aspect-square md:border-r md:border-b-0">
+              <img src={primaryHobby.image} alt={primaryHobby.imageAlt ?? primaryHobby.name} loading="lazy" class="absolute inset-0 size-full object-cover object-[50%_55%]" />
+            </div>
+          )
+        }
+        <div class="flex flex-col p-5">
+          <div class="flex items-center gap-2">
+            <Icon name={hobbyIcon[primaryHobby.id]} class="size-5 text-muted" />
+            <span class="kicker text-muted">Primary interest</span>
+          </div>
+          <h3 class="mt-3 text-xl font-semibold tracking-tight">{primaryHobby.name}</h3>
+          <p class="mt-2 max-w-md text-base text-muted">{primaryHobby.note}</p>
+          <dl class="kv mt-auto border-t border-line pt-4">
+            <dt>Priority</dt>
+            <dd>Highest</dd>
+            <dt>Where</dt>
+            <dd>{profile.location}</dd>
+          </dl>
+        </div>
+      </article>
+      {
+        otherHobbies.map((h) => (
+          <article class="flex flex-col overflow-hidden rounded-2 border border-line bg-bg/40">
+            {h.image && (
+              <div class="relative aspect-[16/9] border-b border-line">
+                <img src={h.image} alt={h.imageAlt ?? h.name} loading="lazy" class="absolute inset-0 size-full object-cover" />
+              </div>
+            )}
+            <div class="flex flex-1 flex-col p-4">
+              <div class="flex items-center gap-2">
+                <Icon name={hobbyIcon[h.id]} class="size-4 text-dim" />
+                <h3 class="font-semibold">{h.name}</h3>
+              </div>
+              <p class="mt-1.5 text-sm leading-relaxed text-muted">{h.note}</p>
+              {h.link && (
+                <a href={h.link.href} class="mt-3 inline-flex items-center gap-1 self-start text-sm text-blue-3 hover:underline pointer-coarse:min-h-11" target="_blank" rel="noopener">
+                  {h.link.label} <NewTab />
+                </a>
+              )}
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </Section>
+
+  <!-- CONTACT -->
+  <Section id="contact" title="Contact">
+    <div class="grid items-center gap-6 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:p-6">
+      <div>
+        <p class="text-lg font-semibold tracking-tight">Let's talk.</p>
+        <p class="mt-1.5 max-w-(--measure) text-base text-muted">
+          Internships, research, or anything GPU- or robot-shaped. Email is the fastest way to reach me.
+        </p>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <a href={`mailto:${profile.email}`} class="btn btn-primary"><Icon name="mail" class="size-4" />Email me</a>
+          <button type="button" class="btn" data-copy={profile.email}><Icon name="copy" class="size-4" /><span>Copy address</span></button>
+          {
+            socials
+              .filter((s) => s.id !== 'email')
+              .map((s) => (
+                <a href={s.href} class="btn" target="_blank" rel="noopener">
+                  <Icon name={s.icon} class="size-4" />
+                  {s.label}
+                  <NewTab class="size-3.5 text-dim" />
+                </a>
+              ))
+          }
+        </div>
+      </div>
+      <dl class="kv rounded-2 border border-line bg-bg/50 p-4 sm:min-w-[17rem]">
+        <dt>Email</dt>
+        <dd class="font-mono text-xs wrap-anywhere">{profile.email}</dd>
+        <dt>Location</dt>
+        <dd>{profile.location}</dd>
+        <dt>Local time</dt>
+        <dd class="font-mono text-xs" data-clock>--:--</dd>
+        <dt>Resume</dt>
+        <dd>
+          <a href={profile.resume} class="-my-1 inline-flex items-center gap-1 py-1 text-blue-3 hover:underline pointer-coarse:-my-3 pointer-coarse:min-h-11" target="_blank" rel="noopener">PDF <NewTab /></a>
+        </dd>
+      </dl>
+    </div>
+  </Section>
+</div>
+
+<script>
+  // Open an experience row when it's linked to.
+  const openHash = () => {
+    const el = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (el instanceof HTMLDetailsElement) el.open = true;
+  };
+  addEventListener('hashchange', openHash);
+  openHash();
+  document.addEventListener('click', (e) => {
+    const a = (e.target as Element).closest<HTMLAnchorElement>('a[href^="#exp-"]');
+    if (a) (document.getElementById(a.hash.slice(1)) as HTMLDetailsElement | null)?.setAttribute('open', '');
+  });
+
+  // Project filters and view toggle.
+  const filterBtns = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const viewBtns = document.querySelectorAll<HTMLButtonElement>('[data-view-btn]');
+  const items = document.querySelectorAll<HTMLElement>('#projects [data-status]');
+  const cards = document.querySelectorAll<HTMLElement>('#projects [data-view="grid"] [data-status]');
+  const empty = document.querySelector<HTMLElement>('[data-empty]');
+  filterBtns.forEach((b) =>
+    b.addEventListener('click', () => {
+      const f = b.dataset.filter!;
+      filterBtns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      items.forEach((it) => (it.hidden = f !== 'all' && it.dataset.status !== f));
+      if (empty) empty.hidden = [...cards].some((c) => !c.hidden);
+    }),
+  );
+  // On a phone the filter row scrolls sideways. Chrome leaves a button that is more than 32px in
+  // view where it is on focus, so bring the whole of it in.
+  filterBtns.forEach((b) => b.addEventListener('focus', () => b.scrollIntoView({ block: 'nearest', inline: 'nearest' })));
+  const setView = (view: string) => {
+    viewBtns.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.viewBtn === view)));
+    document.querySelectorAll<HTMLElement>('#projects [data-view]').forEach((v) => (v.hidden = v.dataset.view !== view));
+  };
+  viewBtns.forEach((b) => b.addEventListener('click', () => setView(b.dataset.viewBtn!)));
+  // Phones open on the compact list (the table, restacked); the cards are one tap away.
+  if (matchMedia('(width < 40rem)').matches) setView('table');
+
+  // Copy email.
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((b) =>
+    b.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(b.dataset.copy!);
+        const label = b.querySelector('span')!;
+        label.textContent = 'Copied';
+        setTimeout(() => (label.textContent = 'Copy address'), 1600);
+      } catch {
+        location.href = `mailto:${b.dataset.copy}`;
+      }
+    }),
+  );
+</script>
