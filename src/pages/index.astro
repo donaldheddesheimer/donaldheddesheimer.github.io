@@ -49,7 +49,7 @@ const projects = (await getCollection('projects')).map((p) => p.id);
         else history.replaceState(history.state, '', location.pathname + location.hash);
       })();
       // If the lab's script never starts (it failed to load, or broke): the terminal's own page instead
-      // (for the rest of the session), or a project's.
+      // (until the lab next runs, in this session), or a project's.
       addEventListener('load', function () {
         setTimeout(function () {
           var h = document.documentElement;

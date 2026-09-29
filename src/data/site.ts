@@ -32,7 +32,7 @@ export const socials = [
   { id: 'email', label: 'Email', handle: 'donaldheddes@gmail.com', href: 'mailto:donaldheddes@gmail.com', icon: 'mail' },
 ] as const;
 
-// The Contact page's heading and note (the lab computer's Contact).
+// What the terminal's contact prints before the addresses.
 export const contact = {
   title: "Let's talk.",
   note: 'Internships, research, or anything GPU- or robot-shaped. Email is the fastest way to reach me.',

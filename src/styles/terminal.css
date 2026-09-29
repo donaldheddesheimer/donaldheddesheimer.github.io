@@ -50,6 +50,12 @@
   position: relative;
   padding: var(--t-pad-y) var(--t-pad-x) 0;
 }
+/* A link or button the focus reaches scrolls clear of the prompt and its fade, not under them.
+   (A margin on these, not padding on .term: the prompt's own input, being scrolled to as it's typed
+   in, would otherwise pull the transcript away from where it's being read.) */
+.term-log :is(a, button) {
+  scroll-margin-bottom: calc(var(--t-prompt, 4.5em) + 1.25em);
+}
 .term-log,
 .term-prompt {
   max-width: 92ch;
@@ -168,6 +174,12 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* (rem, so enlarged text stacks them too: an email in a column a few letters wide can't be read.) */
+@container (width < 22rem) {
+  .t-kv > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .t-links {
   display: flex;
   flex-wrap: wrap;
@@ -175,8 +187,8 @@
   gap: 0.25em 2.5ch;
 }
 
-/* Links read as text, underlined; what can be run is the accent. Both give a finger room without
-   moving a letter. */
+/* Links read as text, underlined; what can be run is the accent. Both give a finger more room than the
+   letters without moving one (the links, on a touch screen, above and below). */
 .term a,
 .t-static a {
   color: var(--t-fg);
@@ -189,6 +201,18 @@
 .t-static a:hover {
   color: var(--t-accent);
   text-decoration-color: var(--t-accent);
+}
+@media (pointer: coarse) {
+  .term a,
+  .t-static a {
+    padding-block: 0.35em;
+  }
+  .t-links {
+    row-gap: 0.75em;
+  }
+  .t-kv {
+    gap: 0.5em;
+  }
 }
 .term a [aria-hidden],
 .t-static a [aria-hidden] {
@@ -236,14 +260,15 @@
 /* The prompt: after the history, and held at the screen's foot when the history runs past it, with
    the text above fading under it. Its field is a real input, see-through, with the block cursor drawn
    over it where the caret is (terminal.ts): solid and blinking while it has the keyboard, an outline
-   while it hasn't. */
+   while it hasn't. A line longer than the field scrolls inside it, with room at its end for the cursor. */
 .term-prompt {
   position: sticky;
   bottom: 0;
   z-index: 1;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1ch;
+  gap: 0 1ch;
   margin-top: var(--t-gap);
   padding-bottom: var(--t-pad-y);
   background: var(--t-bg);
@@ -258,19 +283,22 @@
   background: linear-gradient(to top, var(--t-bg), rgb(23 21 19 / 0));
   pointer-events: none;
 }
+/* (Under the prompt's name where they won't both fit: enlarged text on a phone.) */
 .term-field {
   position: relative;
   display: block;
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 8ch;
+  min-width: 8ch;
   height: 1.6em;
+  overflow: hidden;
+  overflow: clip;
 }
 .term-field input {
   display: block;
   width: 100%;
   height: 1.6em;
   margin: 0;
-  padding: 0;
+  padding: 0 1ch 0 0;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -319,8 +347,12 @@
 /* The startup, once a session (terminal.ts): the first line typed out, fast, behind a cursor; the
    second line and the prompt after it. About a second, and any key or tap ends it. Before it plays
    (in flight), the screen shows only that cursor, as the monitor did. */
+/* (Typed out on one line; once typed, it wraps like the rest where the screen is narrow or the type large.) */
 .term-boot-1 {
   white-space: nowrap;
+}
+.term[data-boot='done'] :is(.term-boot-1, .term-type) {
+  white-space: normal;
 }
 .term-type {
   display: inline-block;

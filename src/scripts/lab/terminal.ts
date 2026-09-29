@@ -63,6 +63,9 @@ export function initTerminal(
   const measure = root.querySelector<HTMLElement>('[data-term-measure]')!;
   const status = root.querySelector<HTMLElement>('[data-term-status]')!;
   const inner = log.parentElement!;
+  // What the prompt covers at the screen's foot, so a link reached with Tab scrolls clear of it
+  // (terminal.css, scroll-margin).
+  new ResizeObserver(() => root.style.setProperty('--t-prompt', `${form.offsetHeight}px`)).observe(form);
 
   let saved: Saved = {};
   try {
@@ -117,13 +120,12 @@ export function initTerminal(
   const settle = () => log.querySelectorAll('.is-new').forEach((e) => e.classList.remove('is-new'));
 
   // Show what a command printed: all of it, with the prompt under it, where it fits; else from its top.
+  // (The end, where all from the result's top down, the prompt too, fits in the view: the end is then
+  // above its top.)
   function reveal(entry: HTMLElement) {
-    const view = root.clientHeight;
-    const prompt = form.offsetHeight;
     const top = entry.offsetTop + inner.offsetTop - 12;
-    const end = root.scrollHeight - view;
-    const to = entry.offsetHeight + prompt + 12 <= view ? end : Math.min(top, end);
-    root.scrollTo({ top: to, behavior: hooks.motion() ? 'smooth' : 'auto' });
+    const end = root.scrollHeight - root.clientHeight;
+    root.scrollTo({ top: Math.min(top, end), behavior: hooks.motion() ? 'smooth' : 'auto' });
   }
 
   let say = 0;
@@ -222,8 +224,9 @@ export function initTerminal(
     const t = e.target as Element;
     const cmd = t.closest<HTMLElement>('[data-term-run]');
     if (cmd) {
-      // Once, however many clicks (a double click is still one).
-      if (e.detail > 1) return;
+      // Once, however many clicks (a double click is still one; its second press took the focus, which
+      // goes back to the prompt).
+      if (e.detail > 1) return void (pointer === 'mouse' && input.focus({ preventScroll: true }));
       const by = e.detail === 0 || pointer === 'mouse' ? 'click' : 'tap';
       return run(cmd.dataset.termRun!, by);
     }
@@ -248,7 +251,11 @@ export function initTerminal(
       setTimeout(() => (b.textContent = 'copy'), 1600);
     } catch {
       const a = b.parentElement?.querySelector('[data-term-email]');
-      if (a) document.getSelection()?.selectAllChildren(a);
+      if (!a) return;
+      document.getSelection()?.selectAllChildren(a);
+      b.textContent = 'selected';
+      announce('Selected, to copy.');
+      setTimeout(() => (b.textContent = 'copy'), 1600);
     }
   }
 
@@ -318,7 +325,8 @@ export function initTerminal(
     },
     focusReturn(visible, fallback) {
       boot();
-      const opts = visible ? { preventScroll: true } : ({ preventScroll: true, focusVisible: false } as FocusOptions);
+      // (Asked for either way: Escape pressed in the details' frame isn't a key this page saw.)
+      const opts = { preventScroll: true, focusVisible: visible } as FocusOptions;
       if (from?.isConnected) from.focus(opts);
       else if (fallback === 'input') input.focus({ preventScroll: true });
       else if (fallback === 'log') root.focus({ preventScroll: true });

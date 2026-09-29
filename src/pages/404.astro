@@ -4,7 +4,7 @@ import { getCollection } from 'astro:content';
 import Screen from '../layouts/Screen.astro';
 import Icon from '../components/Icon.astro';
 import { profile } from '../data/site';
-import { TERMINAL, pageHref } from '../scripts/lab/routes';
+import { pageHref } from '../scripts/lab/routes';
 
 const projects = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code)).slice(0, 5);
 ---
@@ -15,7 +15,7 @@ const projects = (await getCollection('projects')).sort((a, b) => b.data.code.lo
     <h1 id="nf-title" class="nf-title">Nothing is at this address.</h1>
     <p class="nf-note">It may have moved. <span class="nf-path" data-path></span></p>
     <div class="nf-actions">
-      <a href={pageHref(TERMINAL)} class="btn btn-primary">Explore my work<Icon name="arrow-right" class="size-4" /></a>
+      <a href={pageHref('work')} class="btn btn-primary">Explore my work<Icon name="arrow-right" class="size-4" /></a>
       <a href="/" class="btn"><Icon name="arrow-left" class="size-4" />Back to the lab</a>
     </div>
     <h2 class="nf-kicker nf-list-head">Recent projects</h2>

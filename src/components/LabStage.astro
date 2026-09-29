@@ -3,9 +3,10 @@
 // whole window, with the portfolio on the desk's computer. The figure holds the scene
 // (src/scripts/lab/scene.ts) over a still rendered from it, which shows with the page and stays as the
 // fallback (no JS, no WebGL, Save-Data until the lab is entered). The dialog is the lab once entered: the
-// computer's screen, a terminal (Terminal.astro), and the power button on the monitor's bezel that leaves
-// (src/scripts/lab/computer.ts). Reduced motion (or Motion off, in Settings) holds one composed moment,
-// with no looking around; going in cuts rather than flies.
+// computer's screen, a terminal (Terminal.astro), and on a touch screen the power button on the
+// monitor's bezel that leaves, as Esc does elsewhere (src/scripts/lab/computer.ts). Reduced motion (or
+// Motion off, in Settings) holds one composed moment, with no looking around; going in cuts rather than
+// flies.
 //
 // The monitor is the way in, and the only one: a link over it ("Explore my work", to the terminal's page,
 // /computer/, which stands alone without JavaScript) where the still shows it (the --mon-* properties
@@ -41,7 +42,6 @@ const projects = (await getCollection('projects')).map((p) => p.id);
       <path d="M5 3.9a5.4 5.4 0 1 0 6 0" />
       <path d="M8 1.9v5.2" />
     </svg>
-    <span class="pc-exit-tip" aria-hidden="true">Leave · Esc</span>
   </button>
 </dialog>
 
@@ -256,7 +256,7 @@ const projects = (await getCollection('projects')).map((p) => p.id);
      which fills the window under it. The screen (computer.ts sizes and places it) rides the drawn one in
      flight and lies flat over it to read; the terminal fills it, and a project's details cover it. */
   .pc {
-    --chin: calc(2.75rem + env(safe-area-inset-bottom));
+    --chin: env(safe-area-inset-bottom);
     position: fixed;
     inset: 0;
     width: 100%;
@@ -298,16 +298,17 @@ const projects = (await getCollection('projects')).map((p) => p.id);
   .pc-screen :global(.pc-detail.is-loaded) {
     opacity: 1;
   }
-  /* The way out: a power button on the bezel, under the screen at its right. Quiet until the pointer
-     or the keyboard comes to it; "Esc" beside it for a keyboard. */
+  /* The way out on a touch screen, with no Esc to hand: a power button on the bezel, under the screen at
+     its right. A finger's target: 44px, reaching on down past a bezel too narrow for its box
+     (computer.ts). With a mouse or a keyboard, Esc leaves, and there's no button. */
   .pc-exit {
     position: absolute;
     top: 0;
     left: 0;
-    display: grid;
+    display: none;
     place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: var(--pc-exit, 2.75rem);
+    height: var(--pc-exit, 2.75rem);
     margin: 0;
     padding: 0;
     border: 0;
@@ -323,6 +324,11 @@ const projects = (await getCollection('projects')).map((p) => p.id);
       visibility 0s linear 0.3s,
       color 0.15s ease;
   }
+  @media (pointer: coarse) {
+    .pc-exit {
+      display: grid;
+    }
+  }
   :global(html[data-pc='read']) .pc-exit {
     opacity: 1;
     visibility: visible;
@@ -330,29 +336,19 @@ const projects = (await getCollection('projects')).map((p) => p.id);
       opacity 0.3s var(--ease) 0.15s,
       color 0.15s ease;
   }
-  .pc-exit:hover,
   .pc-exit:focus-visible {
     color: #ebe5da;
-  }
-  .pc-exit:focus-visible {
     outline: 2px solid #e2a95c;
     outline-offset: -3px;
   }
-  .pc-exit-tip {
+  .pc-exit::before {
+    content: '';
     position: absolute;
-    top: 50%;
-    right: calc(100% - 0.25rem);
-    display: none;
-    color: #a69d90;
-    font: 500 0.75rem/1 var(--font-mono);
-    white-space: nowrap;
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .pc-exit:is(:hover, :focus-visible) .pc-exit-tip {
-      display: block;
-    }
+    top: 0;
+    left: 50%;
+    width: 2.75rem;
+    height: 2.75rem;
+    transform: translateX(-50%);
   }
   :global(html[data-motion='off']) .pc-screen,
   :global(html[data-motion='off']) .pc-screen :global(.pc-detail),
@@ -368,9 +364,15 @@ const projects = (await getCollection('projects')).map((p) => p.id);
   }
   /* A window too small to read on the monitor with the room round it: the screen across the window,
      inside its safe area and above a keyboard (--vv-*: what can be seen, computer.ts), with a chin
-     under it for the power button. While a keyboard is up, the chin and the button go. */
+     under it for the power button on a touch screen. While a keyboard is up, the chin and the button
+     go. */
   :global(html[data-pc-full]) .pc {
     background: #0e0d0c;
+  }
+  @media (pointer: coarse) {
+    .pc {
+      --chin: calc(2.75rem + env(safe-area-inset-bottom));
+    }
   }
   :global(html[data-pc-kb]) .pc {
     --chin: 0px;

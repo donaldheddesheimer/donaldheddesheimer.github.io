@@ -18,8 +18,8 @@ const outputs = ['help', 'about', 'work', 'resume', 'contact', 'not-found'] as c
   <div class="term-inner">
     <div class="term-log" data-term-log>
       <div class="term-boot">
-        <p class="term-boot-1">
-          <span class="term-type" style={`--n:${BOOT.first.length}`}>{BOOT.first}</span><span class="term-boot-cursor" aria-hidden="true"></span>
+        <p class="term-boot-1" style={`--n:${BOOT.first.length}`}>
+          <span class="term-type">{BOOT.first}</span><span class="term-boot-cursor" aria-hidden="true"></span>
         </p>
         <p class="term-boot-2" id="term-hint">
           {BOOT.second[0]}<TermCmd name="help" />{BOOT.second[1]}

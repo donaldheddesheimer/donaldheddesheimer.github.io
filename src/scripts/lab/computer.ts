@@ -16,13 +16,14 @@
 //
 // The address names what the computer shows (routes.ts): /?computer (the terminal) or
 // /?computer=work/<id> (a project's details). Going in adds an entry, and so does each project opened;
-// Back and Forward move between them, and out of the lab. Escape (a project's details first) and the
-// power button on the monitor's bezel go back to the entry the lab was opened from, and put the focus
-// back on the monitor (ringed, unless the button was clicked or tapped). A reload or a shared link opens
-// the computer at once, without the camera's entrance; so do the old pages' addresses
-// (/?computer=about, /#about…), which run their command. history.state is { pc: path, back: entries since
-// the opening (0: the lab was opened here), d: project entries since the terminal's, y: a project's
-// scroll when last left, k: the entry's own key }. The terminal keeps its own (terminal.ts).
+// Back and Forward move between them, and out of the lab. Escape (a project's details first), the
+// terminal's `exit` and, on a touch screen, the power button on the monitor's bezel go back to the entry
+// the lab was opened from, and put the focus back on the monitor (ringed, unless the button was
+// tapped). A reload or a shared link opens the computer at once, without the camera's entrance; so do
+// the old pages' addresses (/?computer=about, /#about…), which run their command. history.state is
+// { pc: path, back: entries since the opening (0: the lab was opened here), d: project entries since the
+// terminal's, y: a project's scroll when last left, k: the entry's own key }. The terminal keeps its own
+// (terminal.ts).
 import type { LabScene, Quad, Rect } from './scene';
 import { initTerminal, type Focus } from './terminal';
 import { TERMINAL, isCommand, labHref, pageHref, parse } from './routes';
@@ -91,7 +92,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   let homeTitle = document.title;
   const termTitle = dialog.dataset.title ?? document.title;
   let opener: HTMLElement | null = null;
-  let clicked = false; // the power button was clicked or tapped (not pressed): the focus comes back without a ring
+  let clicked = false; // the power button was tapped (not pressed): the focus comes back without a ring
   let scroll: [number, number] = [0, 0];
   let pending: string | null = null; // a command to run once the terminal is there (an old page's address)
   let used = ''; // what was last used here: 'key', or a pointer's type
@@ -190,17 +191,23 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     screen.style.transform = warp(q, rect.w, rect.h);
     screen.style.opacity = String(fade === 'in' ? smooth(0.3, 0.7, p) : 1 - smooth(0.05, 0.3, p));
   };
-  // The power button: on the bezel under the screen, at its right; across the window, CSS places it.
+  // The power button (a touch screen's; LabStage.astro shows it only there): on the bezel under the
+  // screen, at its right; across the window, CSS places it. Its box (and focus ring) keeps off the
+  // screen, with the icon on the bezel: where the bezel is narrower than the box would need, the box is
+  // smaller (a finger's reach goes on below it).
   function placeExit() {
     if (!exit) return;
     if (full) {
-      exit.style.removeProperty('left');
-      exit.style.removeProperty('top');
+      for (const k of ['left', 'top', '--pc-exit']) exit.style.removeProperty(k);
       return;
     }
     const b = rect.w * BEZEL;
+    const foot = view().y + view().h;
+    const rem = parseFloat(getComputedStyle(html).fontSize);
+    const size = Math.floor(Math.max(24, Math.min(rem * 2.75, 2 * b - 16, foot - (rect.y + rect.h) - 2)));
+    exit.style.setProperty('--pc-exit', `${size}px`);
     exit.style.left = `${Math.round(rect.x + rect.w - Math.max(22, b * 1.6))}px`;
-    exit.style.top = `${Math.round(Math.min(rect.y + rect.h + b / 2, view().y + view().h - 20))}px`;
+    exit.style.top = `${Math.round(Math.min(rect.y + rect.h + Math.max(b / 2, size / 2 + 1), foot - size / 2))}px`;
   }
   // Across the window, the terminal keeps to what can be seen, above a keyboard (terminal.css keeps
   // its prompt at the foot of it); the power button goes while the keyboard is up.
@@ -270,7 +277,8 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     rect = layout();
     size();
     term.restore();
-    if (path !== TERMINAL) showDetail(path, scrollOf(entry()));
+    // (A shared project's address may name a section of it: the details open there.)
+    if (path !== TERMINAL) showDetail(path, scrollOf(entry()), scrollOf(entry()) == null ? location.hash : '');
     if (fly) {
       html.dataset.pc = 'fade';
       await wait(FADE_MS);
@@ -536,9 +544,12 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   dialog.addEventListener('cancel', (e) => {
     if (!e.cancelable) return;
     e.preventDefault();
-    if (state !== 'read' || going != null) return;
-    const back = !escaped && (entry().back || entry().d);
+    const esc = escaped;
     escaped = false;
+    // Escape on the way in: out again, once there.
+    if (state === 'moving' && esc) return leave();
+    if (state !== 'read' || going != null) return;
+    const back = !esc && (entry().back || entry().d);
     if (back) {
       going = false;
       history.back();
@@ -629,8 +640,12 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     }
   });
 
-  // Running: the homepage's inline script leaves the failure guard be.
+  // Running: the homepage's inline script leaves the failure guard be, and the addresses that stopped at
+  // the transcript after a failure come to the lab again.
   html.dataset.pcLive = '';
+  try {
+    sessionStorage.removeItem('lab:static');
+  } catch {}
   // A reload, a shared link or an old address: the homepage's inline script has already shown the lab
   // reading (and made an old page's address the terminal's, with its command to run).
   const run = html.dataset.pcRun;
