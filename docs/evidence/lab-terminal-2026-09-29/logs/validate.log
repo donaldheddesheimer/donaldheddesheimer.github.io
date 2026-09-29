@@ -1,0 +1,198 @@
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  startup: in by the flight (fade, fly, read), the startup plays once, then done  {"pc":["fade","fly","read"],"boot":["pending","play","done"],"playedMs":909}
+PASS  startup: the screen shows the two lines and the prompt, nothing else run  New terminal started. Type help to look around. The robots are on break. donald@lab:~$
+PASS  startup: focus in the prompt (a mouse was used), the title is the terminal's, address /?computer  {"at":"/?computer","pc":"read","full":false,"boot":"done","entries":[],"focus":"input","ring":true,"status":"","top":0,"max":0,"winY":0,"title":"Terminal · Donald Heddesheimer","value":""}
+PASS  startup: a modal dialog labelled, the prompt labelled "Command" and described by the startup's hint, a status line  {"modal":true,"label":"Portfolio terminal, on the lab's computer","input":"Command","hint":"Type help to look around. The robots are on break.","status":"status","ps1":"donald@lab:~$","cursor":"term-blink"}
+PASS  startup: the block cursor blinks while the prompt waits  term-blink
+PASS  help: exactly four commands, about, work, resume, contact, each a button  [{"cmd":"about","tag":"BUTTON","label":"A little about me"},{"cmd":"work","tag":"BUTTON","label":"Selected projects"},{"cmd":"resume","tag":"BUTTON","label":"Experience, education, and résumé download"},{"cmd":"contact","tag":"BUTTON","label":"Get in touch"}]
+PASS  help: announced once in the status line, focus stays in the prompt  {"status":"Commands: about, work, resume, contact.","focus":"input"}
+PASS  startup: once a session (coming back, it doesn't play again)  {"pc":["fade","fade","fly","fly","read","read"],"boot":["done"]}
+PASS  startup: the cursor after the first line goes once it's typed (term-gone, at n x 18ms + 110ms), before the startup ends  {"name":"term-gone","delay":"0.488s","n":21,"typed":"term-type","opacityAfter":"0","bootThen":"play"}
+PASS  startup: a key during it ends it at once; the command typed then runs  {"bootAfterKey":"done","said":["help"]}
+PASS  commands: about prints its output, announced ("Printed: about me."), the prompt ready again  {"last":{"said":"about","out":"Printed: about me."},"status":"Printed: about me.","focus":"input"}
+PASS  commands: about shown whole, the prompt under it  {"fits":true,"whole":true,"fromTop":false,"prompt":true,"top":0,"max":0}
+PASS  commands: work prints its output, announced ("Printed: 11 projects."), the prompt ready again  {"last":{"said":"work","out":"Printed: 11 projects."},"status":"Printed: 11 projects.","focus":"input"}
+PASS  commands: work shown from its start  {"fits":false,"whole":false,"fromTop":true,"prompt":true,"top":509,"max":1887}
+PASS  commands: resume prints its output, announced ("Printed: the résumé, with the PDF to download."), the prompt ready again  {"last":{"said":"resume","out":"Printed: the résumé, with the PDF to download."},"status":"Printed: the résumé, with the PDF to download.","focus":"input"}
+PASS  commands: resume shown from its start  {"fits":false,"whole":false,"fromTop":true,"prompt":true,"top":2565,"max":4173}
+PASS  commands: contact prints its output, announced ("Printed: email, GitHub and LinkedIn."), the prompt ready again  {"last":{"said":"contact","out":"Printed: email, GitHub and LinkedIn."},"status":"Printed: email, GitHub and LinkedIn.","focus":"input"}
+PASS  commands: contact shown whole, the prompt under it  {"fits":true,"whole":true,"fromTop":false,"prompt":true,"top":4422,"max":4423}
+PASS  commands: about names Donald; work lists 11 projects, each with details; resume the PDF, then Experience, Education, Skills; contact email, GitHub, LinkedIn  {"about":"Donald Heddesheimer","work":11,"details":["/projects/traffic-ops-center/","/projects/cucadence/","/projects/fluxion/","/projects/claude-status/","/projects/nn-mnist/","/projects/skyblock-bazaar/","/projects/bytefight/","/projects/travelmate/","/projects/smart-bin/","/projects/swerve-drive/","/projects/useless-machine/"],"resume":[["/resume.pdf","Donald-Heddesheimer-Resume.pdf"]],"sections":["Experience","Education","Skills"],"contact":["mailto:donaldheddes@gmail.com","https://github.com/donaldheddesheimer","https://www.linkedin.com/in/donaldheddesheimer/"]}
+PASS  input: "  WoRk  " (mixed case, spaces) runs work  {"said":"  WoRk  ","out":"Printed: 11 projects."}
+PASS  input: an unknown command prints exactly the not-found line, with help to run  {"nf":"Command not found. Run help for available commands.","status":"Command not found. Run help for available commands."}
+PASS  input: an empty line, and one of spaces, just give a new prompt (no output, hidden from a screen reader)  [{"tag":"P","hidden":"true","out":false},{"tag":"P","hidden":"true","out":false}]
+PASS  input: markup typed is shown as text, never parsed or run  {"owned":null,"imgs":0,"echo":"donald@lab:~$<img src=x onerror=\"window.__owned=1\"><b>bold</b>"}
+PASS  input: a very long line stops at 200 characters, the terminal never scrolls sideways, the cursor stays in the field  {"len":200,"sideways":0,"cursorIn":true}
+PASS  input: run, the long line wraps in the history (no sideways scroll)  {"sideways":0}
+PASS  input: repeated and rapid commands each run once, in order  ["help","help","help","about","contact"]
+PASS  input: Up and Down recall earlier commands (repeats once), and Down again gives back the line being typed  ["contact","about","help","about","contact","draft"]
+PASS  input: the session keeps what was run (lab:terminal) and that the startup has played  {"boot":true,"n":15,"entries":15}
+PASS  input: no id repeats in the page, however many commands have run  []
+PASS  tap: help, clicked in the startup's line, runs once; focus in the prompt; announced  {"said":["help"],"focus":"input","status":"Commands: about, work, resume, contact."}
+PASS  tap: a double click on about runs it once  ["help","about"]
+PASS  tap: Enter on a command's button runs it once; focus back in the prompt  {"said":["help","about","contact"],"focus":"input"}
+PASS  tap: typing with the focus on a link in the output goes to the prompt  {"focus":"input","value":"he"}
+PASS  scroll: work, longer than the screen, is shown from its start, the prompt at the screen's foot  {"fits":false,"whole":false,"fromTop":true,"prompt":true,"top":92,"max":1470,"winY":0}
+PASS  scroll: the wheel scrolls the terminal, not the window or the room  {"before":92,"after":792,"winY":0,"lookAz":[0,0]}
+PASS  scroll: left where it's being read, it stays (and typing at the prompt doesn't move it)  {"reading":492,"after":492}
+PASS  scroll: about, which fits, is shown whole with the prompt under it  {"fits":true,"whole":true,"fromTop":false,"prompt":true,"top":1887,"max":1887}
+PASS  scroll: resume, longer than the screen, from its start  {"fits":false,"whole":false,"fromTop":true,"prompt":true,"top":2572,"max":4173}
+PASS  links: each project's details link is its /projects/<id>/ page, run in the computer  11
+PASS  links: source and demo open in a new tab (noopener), to https addresses  ["source↗ https://github.com/donaldheddesheimer/traffic-sim","source↗ https://github.com/donald-heddesheimer/cadence","source↗ https://github.com/donaldheddesheimer/fluxion","source↗ https://github.com/donald-heddesheimer/claude-status","source↗ https://github.com/donaldheddesheimer/nn","demo↗ https://travelmate-jv1d.onrender.com/","source↗ https://github.com/donaldheddesheimer/TravelMate","source↗ https://github.com/donaldheddesheimer/Smart-Bin","source↗ https://github.com/donaldheddesheimer/Swerve-Drive-Robotics","source↗ https://github.com/donaldheddesheimer/Useless-Machine"]
+PASS  links: a source link opens its address in a new tab, the computer stays open  https://github.com/donaldheddesheimer/traffic-sim
+PASS  links: details open over the terminal in the frame (address ?computer=work/<id>), focus on its heading, the terminal inert  {"at":"?computer=work/cucadence","inert":true,"title":"cuCadence · Donald Heddesheimer","h1":"cuCadence","back":"Back to terminal"}
+PASS  links: Escape in the details goes back to the terminal (address ?computer), focus on the details link (ringed), the terminal where it was  {"focus":"a:details: cuCadence","ring":true,"top":92,"was":92,"before":92}
+PASS  links: "Back to terminal" clicked goes back, focus on the details link without a ring  {"focus":"a:details: cuCadence","ring":false}
+PASS  links: the next project from inside the details (a new entry); Back, Back to the terminal  {"next":"/computer/work/fluxion/","second":"/?computer=work/fluxion"}
+PASS  links: the résumé's PDF downloads as Donald-Heddesheimer-Resume.pdf (a real PDF in the build)  {"href":"/resume.pdf","name":"Donald-Heddesheimer-Resume.pdf","status":200,"type":"application/pdf","bytes":146254,"magic":"%PDF-"}
+PASS  links: email is a mailto: link; GitHub and LinkedIn open in a new tab (noopener), labelled  [{"href":"mailto:donaldheddes@gmail.com","target":"","rel":"","label":null},{"href":"https://github.com/donaldheddesheimer","target":"_blank","rel":"noopener","label":"GitHub: github.com/donaldheddesheimer (opens in a new tab)"},{"href":"https://www.linkedin.com/in/donaldheddesheimer/","target":"_blank","rel":"noopener","label":"LinkedIn: linkedin.com/in/donaldheddesheimer (opens in a new tab)"}]
+PASS  links: LinkedIn opens in a new tab  https://www.linkedin.com/in/donaldheddesheimer/
+PASS  links: copy puts the address on the clipboard, says so  {"clip":"donaldheddes@gmail.com","label":"copied","status":"Copied."}
+PASS  links: copy refused, the address is selected for copying by hand  {"selected":"donaldheddes@gmail.com","label":"selected","status":"Selected, to copy."}
+PASS  leave: Escape leaves for the opening (the address it was opened from), focus on the monitor's link, ringed  {"at":"/?probe","focus":"monitor","ring":true}
+PASS  leave: back in, the history and the reading position as they were, no startup again  {"said":["help","work"],"top":52,"was":52}
+PASS  leave: with a mouse, no power button (Esc leaves)  {"display":"none","shown":false}
+PASS  leave: exit (a hidden alias, any case) leaves too  {"at":"/?probe","last":{"said":"EXIT","out":null}}
+PASS  leave: a reload opens the terminal at once, the history, the reading position and the finished startup kept  {"said":3,"top":52,"was":52,"boot":"done"}
+PASS  leave: Escape during the flight in leaves once it has landed  /?probe
+PASS  leave: on a touch screen, the power button sits on the bezel under the screen, at its right, in view  {"power":{"x":1026,"y":721,"w":36,"h":36,"r":1062,"b":757,"shown":true},"icon":{"x":1037,"y":732,"w":15,"h":15,"r":1052,"b":747,"shown":true},"screen":{"x":95,"y":101,"w":991,"h":619,"r":1086,"b":720,"shown":true}}
+PASS  leave: the power button, tapped, leaves; focus on the monitor's link without a ring  {"at":"/?probe","focus":"monitor","ring":false}
+PASS  history: details, Back to the terminal, Back to the room, Forward to the terminal (as it was), Forward to the details  {"steps":["/?computer=work/traffic-ops-center","/?computer","/","/?computer","/?computer=work/traffic-ops-center"],"kept":1}
+PASS  history: /?computer=about opens the terminal running about (address /?computer)  {"at":"/?computer","said":["about"]}
+PASS  history: /?computer=about, reloaded, doesn't run about again  ["about"]
+PASS  history: /#about opens the terminal running about (address /?computer)  {"at":"/?computer","said":["about"]}
+PASS  history: /#about, reloaded, doesn't run about again  ["about"]
+PASS  history: /computer/about/ opens the terminal running about (address /?computer)  {"at":"/?computer","said":["about"]}
+PASS  history: /computer/about/, reloaded, doesn't run about again  ["about"]
+PASS  history: /computer/#about opens the terminal running about (address /?computer)  {"at":"/?computer","said":["about"]}
+PASS  history: /computer/#about, reloaded, doesn't run about again  ["about"]
+PASS  history: /?computer=work opens the terminal running work (address /?computer)  {"at":"/?computer","said":["work"]}
+PASS  history: /?computer=work, reloaded, doesn't run work again  ["work"]
+PASS  history: /#work opens the terminal running work (address /?computer)  {"at":"/?computer","said":["work"]}
+PASS  history: /#work, reloaded, doesn't run work again  ["work"]
+PASS  history: /computer/work/ opens the terminal running work (address /?computer)  {"at":"/?computer","said":["work"]}
+PASS  history: /computer/work/, reloaded, doesn't run work again  ["work"]
+PASS  history: /computer/#work opens the terminal running work (address /?computer)  {"at":"/?computer","said":["work"]}
+PASS  history: /computer/#work, reloaded, doesn't run work again  ["work"]
+PASS  history: /?computer=resume opens the terminal running resume (address /?computer)  {"at":"/?computer","said":["resume"]}
+PASS  history: /?computer=resume, reloaded, doesn't run resume again  ["resume"]
+PASS  history: /#resume opens the terminal running resume (address /?computer)  {"at":"/?computer","said":["resume"]}
+PASS  history: /#resume, reloaded, doesn't run resume again  ["resume"]
+PASS  history: /computer/resume/ opens the terminal running resume (address /?computer)  {"at":"/?computer","said":["resume"]}
+PASS  history: /computer/resume/, reloaded, doesn't run resume again  ["resume"]
+PASS  history: /computer/#resume opens the terminal running resume (address /?computer)  {"at":"/?computer","said":["resume"]}
+PASS  history: /computer/#resume, reloaded, doesn't run resume again  ["resume"]
+PASS  history: /?computer=contact opens the terminal running contact (address /?computer)  {"at":"/?computer","said":["contact"]}
+PASS  history: /?computer=contact, reloaded, doesn't run contact again  ["contact"]
+PASS  history: /#contact opens the terminal running contact (address /?computer)  {"at":"/?computer","said":["contact"]}
+PASS  history: /#contact, reloaded, doesn't run contact again  ["contact"]
+PASS  history: /computer/contact/ opens the terminal running contact (address /?computer)  {"at":"/?computer","said":["contact"]}
+PASS  history: /computer/contact/, reloaded, doesn't run contact again  ["contact"]
+PASS  history: /computer/#contact opens the terminal running contact (address /?computer)  {"at":"/?computer","said":["contact"]}
+PASS  history: /computer/#contact, reloaded, doesn't run contact again  ["contact"]
+PASS  history: /computer/ opens the terminal (address /?computer)  {"at":"/?computer","said":[]}
+PASS  history: /?computer=work/traffic-ops-center opens the terminal (address /?computer=work/traffic-ops-center)  {"at":"/?computer=work/traffic-ops-center","said":[]}
+PASS  history: /?computer=bogus is not the computer's: the room, the address cleaned  /
+PASS  history: /?computer=work/no-such-project is not the computer's: the room, the address cleaned  /
+PASS  history: /prototype/?computer=about opens the terminal running about (address /?computer)  {"at":"/?computer","said":["about"]}
+PASS  history: /prototype/?computer=about, reloaded, doesn't run about again  ["about"]
+PASS  history: /?sel=layer:gpu opens the terminal running work (address /?computer)  {"at":"/?computer","said":["work"]}
+PASS  history: /?sel=layer:gpu, reloaded, doesn't run work again  ["work"]
+PASS  history: /?sel=project:traffic-ops-center goes to its case study
+PASS  history: /computer/work/ (the old Work page) opens the terminal running work
+PASS  history: /computer/work/fluxion/#approach opens the lab at that project's Approach  {"at":"/?computer=work/fluxion#approach","frame":"/computer/work/fluxion/#approach","top":199,"y":384}
+PASS  history: #contact set on the opening opens the terminal running contact  {"at":"/?computer","last":{"said":"contact","out":"Printed: email, GitHub and LinkedIn."}}
+PASS  phone 390x844: across the window, focus on the terminal (no keyboard raised), type at least 16px  {"full":true,"focus":"terminal","screen":{"x":0,"y":0,"w":390,"h":800,"r":390,"b":800,"shown":true},"fs":16,"touch":"auto"}
+PASS  phone 390x844: the power button in the strip under the screen, in view, clear of the screen  {"power":{"x":340,"y":800,"w":44,"h":44,"r":384,"b":844,"shown":true},"screenBottom":800}
+PASS  phone 390x844: help tapped runs once; focus to its heading, not the prompt (no keyboard)  {"said":["help"],"focus":"echo:help (newest)"}
+PASS  phone 390x844: work tapped runs once, shown from its start, focus on its heading  {"said":["help","work"],"focus":"echo:work (newest)","v":{"fits":false,"whole":false,"fromTop":true,"prompt":true,"top":275,"max":2227}}
+PASS  phone 390x844: a swipe scrolls the terminal, not the window  {"before":275,"after":578,"winY":0}
+PASS  phone 390x844: with a keyboard up, the terminal fits above it, the prompt in view, the power button gone  {"up":{"kb":true,"focus":true},"screen":{"x":0,"y":0,"w":390,"h":506,"r":390,"b":506,"shown":true},"prompt":{"x":16,"y":464,"w":358,"h":42,"r":374,"b":506,"shown":true},"keyboardTop":506}
+PASS  phone 390x844: typed with the keyboard up, about runs, the prompt still above the keyboard  {"last":{"said":"about","out":"Printed: about me."},"prompt":{"x":16,"y":464,"w":358,"h":42,"r":374,"b":506,"shown":true}}
+PASS  phone 390x844: the keyboard down, the power button back  {"x":340,"y":800,"w":44,"h":44,"r":384,"b":844,"shown":true}
+PASS  phone 390x844: the power button tapped leaves for the opening, no ring  {"at":"/?probe","focus":"monitor","ring":false}
+PASS  phone 360x640: across the window, focus on the terminal (no keyboard raised), type at least 16px  {"full":true,"focus":"terminal","screen":{"x":0,"y":0,"w":360,"h":596,"r":360,"b":596,"shown":true},"fs":16,"touch":"auto"}
+PASS  phone 360x640: the power button in the strip under the screen, in view, clear of the screen  {"power":{"x":310,"y":596,"w":44,"h":44,"r":354,"b":640,"shown":true},"screenBottom":596}
+PASS  phone 360x640: help tapped runs once; focus to its heading, not the prompt (no keyboard)  {"said":["help"],"focus":"echo:help (newest)"}
+PASS  phone 360x640: work tapped runs once, shown from its start, focus on its heading  {"said":["help","work"],"focus":"echo:work (newest)","v":{"fits":false,"whole":false,"fromTop":true,"prompt":true,"top":275,"max":2533}}
+PASS  phone 360x640: a swipe scrolls the terminal, not the window  {"before":275,"after":577,"winY":0}
+PASS  phone 360x640: with a keyboard up, the terminal fits above it, the prompt in view, the power button gone  {"up":{"kb":true,"focus":true},"screen":{"x":0,"y":0,"w":360,"h":384,"r":360,"b":384,"shown":true},"prompt":{"x":16,"y":342,"w":328,"h":42,"r":344,"b":384,"shown":true},"keyboardTop":384}
+PASS  phone 360x640: typed with the keyboard up, about runs, the prompt still above the keyboard  {"last":{"said":"about","out":"Printed: about me."},"prompt":{"x":16,"y":342,"w":328,"h":42,"r":344,"b":384,"shown":true}}
+PASS  phone 360x640: the keyboard down, the power button back  {"x":310,"y":596,"w":44,"h":44,"r":354,"b":640,"shown":true}
+PASS  phone 360x640: the power button tapped leaves for the opening, no ring  {"at":"/?probe","focus":"monitor","ring":false}
+PASS  phone 820x1180 (tablet): across the window, focus on the terminal  {"full":true,"focus":"terminal"}
+PASS  motion on: help's lines come in one after another (the check below can see animations)  {"animations":4}
+PASS  reduced motion: in without the flight, the startup all at once, no output animation, a steady cursor  {"pcs":["read"],"boots":["pending","done"],"animations":0,"cursor":"none","scrolledAtOnce":true}
+PASS  Motion off (Settings): in without the flight, the startup all at once, no output animation, a steady cursor  {"pcs":["read"],"boots":["pending","done"],"animations":0,"cursor":"none","scrolledAtOnce":true}
+PASS  keyboard: Tab to the monitor's link (ringed), Enter goes in, focus in the prompt  {"first":"monitor","ring":true,"now":"input"}
+PASS  keyboard: Shift+Tab from the prompt reaches the newest command button, ringed  {"run":"contact","ring":true,"outline":"solid 2px"}
+PASS  keyboard: Enter on it runs contact once; focus back in the prompt  {"last":{"said":"contact","out":"Printed: email, GitHub and LinkedIn."},"focus":"input"}
+PASS  keyboard: the output's links take the focus, ringed  {"el":"BUTTON:copy donaldheddes@gmail.com","ring":true,"outline":"solid 2px"}
+PASS  keyboard: Tab down through work's links, none is left under the prompt  []
+PASS  keyboard: Tab from the prompt reaches no power button (there's none with a keyboard)  {"power":false,"inDialog":true,"el":"BUTTON:help"}
+PASS  keyboard: Escape leaves, focus on the monitor's link, ringed  {"focus":"monitor","ring":true}
+PASS  no WebGL 1440x900: the still shows, its monitor a link over the pictured monitor, in view with room for the ring  {"still":true,"src":"opening-wide.webp","link":[488,530,289,180],"pictured":[488,530,289,180],"onPicture":true,"inView":true,"hit":true}
+PASS  no WebGL 1440x900: the still's monitor opens the terminal (across the window)  /?computer
+PASS  no WebGL 1440x900: Escape returns focus to the link, and Enter on it goes in again  {"focus":"Explore my work"}
+PASS  no WebGL 390x844: the still shows, its monitor a link over the pictured monitor, in view with room for the ring  {"still":true,"src":"opening-tall.webp","link":[91,391,208,130],"pictured":[91,391,208,130],"onPicture":true,"inView":true,"hit":true}
+PASS  no WebGL 390x844: the still's monitor opens the terminal (across the window)  /?computer
+PASS  no WebGL 390x844: Escape returns focus to the link, and Enter on it goes in again  {"focus":"Explore my work"}
+PASS  no WebGL 1440x400: the still shows, its monitor a link over the pictured monitor, in view with room for the ring  {"still":true,"src":"opening-wide.webp","link":[488,155,289,180],"pictured":[488,155,289,180],"onPicture":true,"inView":true,"hit":true}
+PASS  no WebGL 1440x400: the still's monitor opens the terminal (across the window)  /?computer
+PASS  no WebGL 1440x400: Escape returns focus to the link, and Enter on it goes in again  {"focus":"Explore my work"}
+PASS  no WebGL 2560x900: the still shows, its monitor a link over the pictured monitor, in view with room for the ring  {"still":true,"src":"opening-wide.webp","link":[868,417,513,319],"pictured":[868,417,513,319],"onPicture":true,"inView":true,"hit":true}
+PASS  no WebGL 2560x900: the still's monitor opens the terminal (across the window)  /?computer
+PASS  no WebGL 2560x900: Escape returns focus to the link, and Enter on it goes in again  {"focus":"Explore my work"}
+PASS  no WebGL 3840x950: the still shows, its monitor a link over the pictured monitor, in view with room for the ring  {"still":true,"src":"opening-wide.webp","link":[1303,326,770,479],"pictured":[1303,326,770,479],"onPicture":true,"inView":true,"hit":true}
+PASS  no WebGL 3840x950: the still's monitor opens the terminal (across the window)  /?computer
+PASS  no WebGL 3840x950: Escape returns focus to the link, and Enter on it goes in again  {"focus":"Explore my work"}
+PASS  no JS 1440x900: the monitor links to /computer/, the transcript: help and the four commands, each a section with its heading  {"at":"/computer/","h1":"Donald Heddesheimer: the portfolio's terminal","sections":["help:help","about:about","work:work","resume:resume","contact:contact"],"cmds":["#about","#contact","#help","#resume","#work"],"buttons":0,"details":11,"back":"/","robots":"noindex","canonical":"https://donaldheddesheimer.github.io/computer/","sideways":0}
+PASS  no JS 1440x900: commands link to their place, no buttons, details to /projects/, a way back, out of search, no sideways scroll  {"at":"/computer/","h1":"Donald Heddesheimer: the portfolio's terminal","sections":["help:help","about:about","work:work","resume:resume","contact:contact"],"cmds":["#about","#contact","#help","#resume","#work"],"buttons":0,"details":11,"back":"/","robots":"noindex","canonical":"https://donaldheddesheimer.github.io/computer/","sideways":0}
+PASS  no JS 390x844: the monitor links to /computer/, the transcript: help and the four commands, each a section with its heading  {"at":"/computer/","h1":"Donald Heddesheimer: the portfolio's terminal","sections":["help:help","about:about","work:work","resume:resume","contact:contact"],"cmds":["#about","#contact","#help","#resume","#work"],"buttons":0,"details":11,"back":"/","robots":"noindex","canonical":"https://donaldheddesheimer.github.io/computer/","sideways":0}
+PASS  no JS 390x844: commands link to their place, no buttons, details to /projects/, a way back, out of search, no sideways scroll  {"at":"/computer/","h1":"Donald Heddesheimer: the portfolio's terminal","sections":["help:help","about:about","work:work","resume:resume","contact:contact"],"cmds":["#about","#contact","#help","#resume","#work"],"buttons":0,"details":11,"back":"/","robots":"noindex","canonical":"https://donaldheddesheimer.github.io/computer/","sideways":0}
+PASS  no JS: /computer/about/ forwards to /computer/#about  /computer/#about
+PASS  failed script: the opening stays the opening  /
+PASS  failed script: /?computer goes to the transcript (/computer/?static), remembered for the session  {"at":"/computer/?static","flag":"1","sections":5}
+PASS  failed script: /?computer=about goes to the transcript at about  /computer/?static#about
+PASS  failed script: the monitor's link then stays on the transcript (no loop back to the lab)  /computer/
+PASS  failed script: a project's address goes to its page  /projects/traffic-ops-center/
+PASS  failed script, then working: the lab runs, the flag goes, and /computer/#about opens the lab running about  {"flag":null,"at":"/?computer","last":{"said":"about","out":"Printed: about me."}}
+PASS  fit 1440x900: on the monitor, the screen in view, no power button, the prompt in the screen, nothing sideways  {"fs":16.94,"screen":[115,72,1210,756],"inView":true,"prompt":true,"power":false,"noPower":true,"sideways":0,"outer":0,"full":false}
+PASS  fit 1440x900: contact and work typed, each ran  contact,work
+PASS  fit 1440x900: contact and work print with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width)  {"sideways":0,"fieldCh":78,"mailLines":1,"across":0.88,"mailH":22,"linkH":[27,27,27,27,27,27],"fs":16.94}
+PASS  fit 1920x1080: on the monitor, the screen in view, no power button, the prompt in the screen, nothing sideways  {"fs":17,"screen":[157,38,1607,1004],"inView":true,"prompt":true,"power":false,"noPower":true,"sideways":0,"outer":0,"full":false}
+PASS  fit 1920x1080: contact and work typed, each ran  contact,work
+PASS  fit 1920x1080: contact and work print with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width)  {"sideways":0,"fieldCh":78,"mailLines":1,"across":0.88,"mailH":22,"linkH":[27,27,27,27,27,27],"fs":17}
+PASS  fit 1280x800: on the monitor, the screen in view, no power button, the prompt in the screen, nothing sideways  {"fs":15.05,"screen":[103,64,1075,672],"inView":true,"prompt":true,"power":false,"noPower":true,"sideways":0,"outer":0,"full":false}
+PASS  fit 1280x800: contact and work typed, each ran  contact,work
+PASS  fit 1280x800: contact and work print with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width)  {"sideways":0,"fieldCh":78,"mailLines":1,"across":0.88,"mailH":20,"linkH":[24,24,24,24,24,24],"fs":15.05}
+PASS  fit 1024x768: on the monitor, the screen in view, no power button, the prompt in the screen, nothing sideways  {"fs":13,"screen":[82,115,860,538],"inView":true,"prompt":true,"power":false,"noPower":true,"sideways":0,"outer":0,"full":false}
+PASS  fit 1024x768: contact and work typed, each ran  contact,work
+PASS  fit 1024x768: contact and work print with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width)  {"sideways":0,"fieldCh":78,"mailLines":1,"across":0.88,"mailH":17,"linkH":[21,21,21,21,21,21],"fs":13}
+PASS  fit 1180x820: on the monitor, the screen in view and the power button, the prompt in the screen, nothing sideways  {"fs":16,"screen":[95,101,991,619],"inView":true,"prompt":true,"power":true,"noPower":false,"sideways":0,"outer":0,"full":false}
+PASS  fit 1180x820: the power button's box under the screen (not over it), its icon on the bezel, a finger's reach of 44px  {"screenBottom":720,"box":[1026,721,36,36],"icon":[12,27],"bezel":26,"reach":44,"off":true,"onBezel":true,"hit":true}
+PASS  fit 1180x820: contact and work tapped, each ran  contact,work
+PASS  fit 1180x820: contact and work print with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width), links 30px or more tall  {"sideways":0,"fieldCh":78,"mailLines":1,"across":0.88,"mailH":32,"linkH":[37,37,37,37,37,37],"fs":16}
+PASS  fit 1280x800-text200: on the monitor, the screen in view, no power button, the prompt in the screen, nothing sideways  {"fs":26,"screen":[103,64,1075,672],"inView":true,"prompt":true,"power":false,"noPower":true,"sideways":0,"outer":0,"full":false}
+PASS  fit 1280x800-text200: contact and work typed, each ran  contact,work
+PASS  fit 1280x800-text200: contact and work print with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width)  {"sideways":0,"fieldCh":50.8,"mailLines":1,"across":0.83,"mailH":35,"linkH":[42,42,42,42,42,42],"fs":26}
+PASS  fit 390x844: across the window, the screen in view and the power button, the prompt in the screen, nothing sideways  {"fs":16,"screen":[0,0,390,800],"inView":true,"prompt":true,"power":true,"noPower":false,"sideways":0,"outer":0,"full":true}
+PASS  fit 390x844: contact and work tapped, each ran  contact,work
+PASS  fit 390x844: contact and work print with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width), links 30px or more tall  {"sideways":0,"fieldCh":23.3,"mailLines":1,"across":0.71,"mailH":32,"linkH":[37,37,37,37,37,37],"fs":16}
+PASS  fit 390x844-text200: across the window, the screen in view and the power button, the prompt in the screen, nothing sideways  {"fs":32,"screen":[0,0,390,756],"inView":true,"prompt":true,"power":true,"noPower":false,"sideways":0,"outer":0,"full":true}
+PASS  fit 390x844-text200: contact and work tapped, each ran  contact,work
+PASS  fit 390x844-text200: contact and work print with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width), links 30px or more tall  {"sideways":0,"fieldCh":17,"mailLines":2,"across":1,"mailH":65,"linkH":[74,74,74,74,74,74],"fs":32}
+PASS  fit 360x640-text200: across the window, the screen in view and the power button, the prompt in the screen, nothing sideways  {"fs":32,"screen":[0,0,360,552],"inView":true,"prompt":true,"power":true,"noPower":false,"sideways":0,"outer":0,"full":true}
+PASS  fit 360x640-text200: contact and work tapped, each ran  contact,work
+PASS  fit 360x640-text200: contact and work print with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width), links 30px or more tall  {"sideways":0,"fieldCh":15.4,"mailLines":2,"across":1,"mailH":65,"linkH":[74,74,74,74,74,74],"fs":32}
+PASS  fit 1024x400: across the window, the screen in view, no power button, the prompt in the screen, nothing sideways  {"fs":14.336,"screen":[0,0,1024,400],"inView":true,"prompt":true,"power":false,"noPower":true,"sideways":0,"outer":0,"full":true}
+PASS  fit 1024x400: contact and work typed, each ran  contact,work
+PASS  fit 1024x400: contact and work print with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width)  {"sideways":0,"fieldCh":78,"mailLines":1,"across":0.88,"mailH":19,"linkH":[23,23,23,23,23,23],"fs":14.336}
+PASS  fit 740x360: across the window, the screen in view and the power button, the prompt in the screen, nothing sideways  {"fs":16,"screen":[0,0,740,316],"inView":true,"prompt":true,"power":true,"noPower":false,"sideways":0,"outer":0,"full":true}
+PASS  fit 740x360: contact and work tapped, each ran  contact,work
+PASS  fit 740x360: contact and work print with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width), links 30px or more tall  {"sideways":0,"fieldCh":58.5,"mailLines":1,"across":0.85,"mailH":32,"linkH":[37,37,37,37,37,37],"fs":16}
+PASS  fit 568x320-text150: across the window, the screen in view and the power button, the prompt in the screen, nothing sideways  {"fs":24,"screen":[0,0,568,254],"inView":true,"prompt":true,"power":true,"noPower":false,"sideways":0,"outer":0,"full":true}
+PASS  fit 568x320-text150: contact and work tapped, each ran  contact,work
+PASS  fit 568x320-text150: contact and work print with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width), links 30px or more tall  {"sideways":0,"fieldCh":22.1,"mailLines":1,"across":0.7,"mailH":48,"linkH":[55,55,55,55,55,55],"fs":24}
+
+all passed

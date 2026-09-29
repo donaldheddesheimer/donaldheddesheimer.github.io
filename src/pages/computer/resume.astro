@@ -1,10 +1,7 @@
 ---
-// The lab computer's Résumé page (src/layouts/Screen.astro).
-import Screen from '../../layouts/Screen.astro';
-import FolioResume from '../../components/FolioResume.astro';
-import { profile } from '../../data/site';
+// The lab computer's old Résumé page: now the terminal's `resume` command. Forwards to its place in the
+// terminal's page, which opens the lab running it (or stands alone without JavaScript).
+import Redirect from '../../layouts/Redirect.astro';
 ---
 
-<Screen title={`Résumé · ${profile.name}`} path="resume">
-  <FolioResume level={1} />
-</Screen>
+<Redirect to="/computer/#resume" title="Résumé" />

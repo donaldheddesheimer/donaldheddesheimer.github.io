@@ -1,0 +1,18 @@
+---
+// A command named in the terminal's output: on the lab's computer, a button that runs it
+// (src/scripts/lab/terminal.ts); in the /computer/ transcript, a link to where it ran.
+interface Props {
+  name: string;
+  /** The live terminal's (a button), or the transcript's (a link). */
+  live?: boolean;
+}
+const { name, live = true } = Astro.props;
+---
+
+{
+  live ? (
+    <button type="button" class="t-cmd" data-term-run={name}>{name}</button>
+  ) : (
+    <a class="t-cmd" href={`#${name}`}>{name}</a>
+  )
+}

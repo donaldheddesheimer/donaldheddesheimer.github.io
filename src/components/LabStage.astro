@@ -2,44 +2,51 @@
 // The homepage's room (/, in its main landmark, after the name): a robotics lab after hours, across the
 // whole window, with the portfolio on the desk's computer. The figure holds the scene
 // (src/scripts/lab/scene.ts) over a still rendered from it, which shows with the page and stays as the
-// fallback (no JS, no WebGL, Save-Data until the lab is entered). The dialog is the lab once entered: nothing but the frame the portfolio reads in
-// (src/scripts/lab/computer.ts). Reduced motion (or Motion off, in Settings) holds one composed moment,
-// with no looking around; going in cuts rather than flies.
+// fallback (no JS, no WebGL, Save-Data until the lab is entered). The dialog is the lab once entered: the
+// computer's screen, a terminal (Terminal.astro), and on a touch screen the power button on the
+// monitor's bezel that leaves, as Esc does elsewhere (src/scripts/lab/computer.ts). Reduced motion (or
+// Motion off, in Settings) holds one composed moment, with no looking around; going in cuts rather than
+// flies.
 //
-// The monitor is the way in, and the only one: a link over it ("Explore my work", to the computer's Work
-// page) where the still shows it (the --mon-* properties below, from the still's own numbers), then where
-// the scene draws it (mountLab's onFit). It takes the keyboard's focus (a ring round the monitor, which
-// brightens), a screen reader's, and a click without the scene; once the scene has drawn, the pointer
-// goes to the scene, which tells a click on the monitor from a drag to look around.
+// The monitor is the way in, and the only one: a link over it ("Explore my work", to the terminal's page,
+// /computer/, which stands alone without JavaScript) where the still shows it (the --mon-* properties
+// below, from the still's own numbers), then where the scene draws it (mountLab's onFit). It takes the
+// keyboard's focus (a ring round the monitor, which brightens), a screen reader's, and a click without
+// the scene; once the scene has drawn, the pointer goes to the scene, which tells a click on the monitor
+// from a drag to look around.
+import { getCollection } from 'astro:content';
+import Terminal from './Terminal.astro';
 import { profile } from '../data/site';
-import { workLede, workMeta, workProjects } from '../lib/folio';
-import { pageHref } from '../scripts/lab/routes';
+import { TERMINAL, pageHref } from '../scripts/lab/routes';
 
-// The monitor's picture before the page is laid over it: the computer's Work page, as it first shows.
-const { lead, rest } = await workProjects();
-const screen = {
-  name: profile.name,
-  lede: workLede,
-  cards: lead.map(({ p, still }) => ({ title: p.data.title, meta: workMeta(p.data), img: still!.src, contain: p.data.cardFit === 'contain' })),
-};
-const projects = [...lead, ...rest].map(({ p }) => p.id);
+const projects = (await getCollection('projects')).map((p) => p.id);
 ---
 
-<figure data-lab-root data-screen={JSON.stringify(screen)} class="lab">
+<figure data-lab-root class="lab">
   <div class="lab-canvas" data-lab-stage>
     <picture class="still">
       <source media="(max-aspect-ratio: 4/5)" srcset="/lab/opening-tall.webp" width="720" height="1440" />
       <img src="/lab/opening-wide.webp" alt="" width="1600" height="1000" fetchpriority="high" decoding="async" />
     </picture>
-    <a href={pageHref('work')} class="lab-monitor" data-lab-monitor aria-label="Explore my work" draggable="false"></a>
+    <a href={pageHref(TERMINAL)} class="lab-monitor" data-lab-monitor aria-label="Explore my work" draggable="false"></a>
   </div>
   <figcaption class="sr-only">A robotics lab after hours: a computer on a desk, three robots dancing behind it, an unfinished one on its stand. Illustration.</figcaption>
 </figure>
 
-<dialog class="pc" data-pc-dialog aria-label="Portfolio, on the lab's computer" tabindex="-1" data-projects={JSON.stringify(projects)}></dialog>
+<dialog class="pc" data-pc-dialog aria-label="Portfolio terminal, on the lab's computer" tabindex="-1" data-projects={JSON.stringify(projects)} data-title={`Terminal · ${profile.name}`}>
+  <div class="pc-screen" data-pc-screen>
+    <Terminal />
+  </div>
+  <button type="button" class="pc-exit" data-pc-exit aria-label="Leave the computer" aria-keyshortcuts="Escape">
+    <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+      <path d="M5 3.9a5.4 5.4 0 1 0 6 0" />
+      <path d="M8 1.9v5.2" />
+    </svg>
+  </button>
+</dialog>
 
 <script>
-  import type { LabScene, Rect, ScreenData } from '../scripts/lab/scene';
+  import type { LabScene, Rect } from '../scripts/lab/scene';
   import { initComputer } from '../scripts/lab/computer';
 
   const html = document.documentElement;
@@ -62,10 +69,6 @@ const projects = [...lead, ...rest].map(({ p }) => p.id);
   if (root && dialog) {
     let scene: LabScene | null = null;
     let loading: Promise<LabScene | null> | null = null;
-    let screen: ScreenData | null = null;
-    try {
-      screen = JSON.parse(root.dataset.screen ?? 'null');
-    } catch {}
     const saveData = !!(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
     // Focused from the keyboard, the link rings the monitor where it's drawn, following it as the room
     // sways, and the monitor brightens as it does under the pointer: from the focus, or from the room's
@@ -90,7 +93,7 @@ const projects = [...lead, ...rest].map(({ p }) => p.id);
     const load = () =>
       (loading ??= import('../scripts/lab/scene')
         .then((m) => {
-          scene = m.mountLab(root, { screen, avoid, onFit });
+          scene = m.mountLab(root, { avoid, onFit });
           if (!scene) root.setAttribute('data-failed', '');
           // For the review's measurements (docs/evidence/lab-cinematic-2026-09-28): /?probe.
           if (new URLSearchParams(location.search).has('probe')) Object.assign(window, { __lab: scene });
@@ -249,9 +252,11 @@ const projects = [...lead, ...rest].map(({ p }) => p.id);
     cursor: progress;
   }
 
-  /* The lab, once entered: the whole window, see-through but for the page's frame (added by
-     computer.ts), over the scene, which fills the window under it. */
+  /* The lab, once entered: the whole window, see-through but for the computer's screen, over the scene,
+     which fills the window under it. The screen (computer.ts sizes and places it) rides the drawn one in
+     flight and lies flat over it to read; the terminal fills it, and a project's details cover it. */
   .pc {
+    --chin: env(safe-area-inset-bottom);
     position: fixed;
     inset: 0;
     width: 100%;
@@ -269,37 +274,121 @@ const projects = [...lead, ...rest].map(({ p }) => p.id);
   .pc::backdrop {
     background: transparent;
   }
-  .pc :global(.pc-frame) {
+  .pc-screen {
     position: absolute;
     top: 0;
     left: 0;
-    border: 0;
-    background: var(--bg);
+    overflow: hidden;
+    container-type: size;
+    background: #171513;
     transform-origin: 0 0;
     opacity: 0;
-    pointer-events: none;
     transition: opacity 0.3s var(--ease);
   }
-  :global(html[data-motion='off']) .pc :global(.pc-frame) {
+  .pc-screen :global(.pc-detail) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: var(--bg);
+    opacity: 0;
+    transition: opacity 0.2s var(--ease);
+  }
+  .pc-screen :global(.pc-detail.is-loaded) {
+    opacity: 1;
+  }
+  /* The way out on a touch screen, with no Esc to hand: a power button on the bezel, under the screen at
+     its right. A finger's target: 44px, reaching on down past a bezel too narrow for its box
+     (computer.ts). With a mouse or a keyboard, Esc leaves, and there's no button. */
+  .pc-exit {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+    place-items: center;
+    width: var(--pc-exit, 2.75rem);
+    height: var(--pc-exit, 2.75rem);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #8a8278;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.3s var(--ease),
+      visibility 0s linear 0.3s,
+      color 0.15s ease;
+  }
+  @media (pointer: coarse) {
+    .pc-exit {
+      display: grid;
+    }
+  }
+  :global(html[data-pc='read']) .pc-exit {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 0.3s var(--ease) 0.15s,
+      color 0.15s ease;
+  }
+  .pc-exit:focus-visible {
+    color: #ebe5da;
+    outline: 2px solid #e2a95c;
+    outline-offset: -3px;
+  }
+  .pc-exit::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2.75rem;
+    height: 2.75rem;
+    transform: translateX(-50%);
+  }
+  :global(html[data-motion='off']) .pc-screen,
+  :global(html[data-motion='off']) .pc-screen :global(.pc-detail),
+  :global(html[data-motion='off']) .pc-exit {
     transition: none;
   }
-  :global(html[data-pc='read']) .pc :global(.pc-frame) {
-    pointer-events: auto;
-    box-shadow:
-      0 0 0 1px rgb(255 255 255 / 0.06),
-      0 24px 80px rgb(0 0 0 / 0.55);
+  @media (prefers-reduced-motion: reduce) {
+    .pc-screen,
+    .pc-screen :global(.pc-detail),
+    .pc-exit {
+      transition: none;
+    }
   }
-  /* A window too small to read on the monitor with the room round it: the page, across the window,
-     inside its safe area (a frame's page can't see the notch or the home bar for itself). */
+  /* A window too small to read on the monitor with the room round it: the screen across the window,
+     inside its safe area and above a keyboard (--vv-*: what can be seen, computer.ts), with a chin
+     under it for the power button on a touch screen. While a keyboard is up, the chin and the button
+     go. */
   :global(html[data-pc-full]) .pc {
-    background: var(--bg);
+    background: #0e0d0c;
   }
-  :global(html[data-pc-full]) .pc :global(.pc-frame) {
-    top: env(safe-area-inset-top);
+  @media (pointer: coarse) {
+    .pc {
+      --chin: calc(2.75rem + env(safe-area-inset-bottom));
+    }
+  }
+  :global(html[data-pc-kb]) .pc {
+    --chin: 0px;
+  }
+  :global(html[data-pc-full]) .pc-screen {
+    top: calc(var(--vv-top, 0px) + env(safe-area-inset-top));
     left: env(safe-area-inset-left);
     width: calc(100% - env(safe-area-inset-left) - env(safe-area-inset-right)) !important;
-    height: calc(100% - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    height: calc(var(--vv-h, 100dvh) - env(safe-area-inset-top) - var(--chin)) !important;
     transform: none !important;
-    box-shadow: none;
+  }
+  :global(html[data-pc-full]) .pc-exit {
+    top: calc(var(--vv-top, 0px) + var(--vv-h, 100dvh) - env(safe-area-inset-bottom) - 1.375rem);
+    left: calc(100% - max(1.75rem, env(safe-area-inset-right) + 1.5rem));
+  }
+  :global(html[data-pc-kb]) .pc-exit {
+    display: none;
   }
 </style>

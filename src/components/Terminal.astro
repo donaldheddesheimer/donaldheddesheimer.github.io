@@ -1,0 +1,58 @@
+---
+// The lab computer's terminal (src/scripts/lab/terminal.ts), inside the lab's dialog (LabStage.astro):
+// the startup's two lines, the history of what was run, and the prompt. What each command prints waits
+// in a <template> below it, rendered here from the site's data (TermOutput.astro), until it's run.
+//
+// The history is real text for reading, selecting and copying, and headed for moving through it: each
+// command run is an h2 (the prompt beside it is decoration). New output is announced once, briefly, in
+// the status line; the history itself isn't live.
+import TermCmd from './TermCmd.astro';
+import TermOutput from './TermOutput.astro';
+import { BOOT, PS1 } from '../lib/terminal';
+import '../styles/terminal.css';
+
+const outputs = ['help', 'about', 'work', 'resume', 'contact', 'not-found'] as const;
+---
+
+<div class="term" data-term data-boot="pending" tabindex="-1">
+  <div class="term-inner">
+    <div class="term-log" data-term-log>
+      <div class="term-boot">
+        <p class="term-boot-1" style={`--n:${BOOT.first.length}`}>
+          <span class="term-type">{BOOT.first}</span><span class="term-boot-cursor" aria-hidden="true"></span>
+        </p>
+        <p class="term-boot-2" id="term-hint">
+          {BOOT.second[0]}<TermCmd name="help" />{BOOT.second[1]}
+        </p>
+      </div>
+    </div>
+    <form class="term-prompt" data-term-form autocomplete="off">
+      <label class="term-ps1" for="term-cmd" aria-hidden="true">{PS1}</label>
+      <span class="term-field">
+        <input
+          id="term-cmd"
+          type="text"
+          aria-label="Command"
+          aria-describedby="term-hint"
+          autocomplete="off"
+          autocapitalize="none"
+          autocorrect="off"
+          spellcheck="false"
+          enterkeyhint="go"
+          maxlength="200"
+          data-term-input
+        />
+        <span class="term-cursor" data-term-cursor aria-hidden="true"></span>
+        <span class="term-measure" data-term-measure aria-hidden="true"></span>
+      </span>
+    </form>
+    <p class="sr-only" role="status" data-term-status></p>
+  </div>
+</div>
+{
+  outputs.map((cmd) => (
+    <template data-term-out={cmd}>
+      <TermOutput cmd={cmd} />
+    </template>
+  ))
+}

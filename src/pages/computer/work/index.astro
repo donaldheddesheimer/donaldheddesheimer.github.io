@@ -1,11 +1,7 @@
 ---
-// The lab computer's Work page (src/layouts/Screen.astro).
-import Screen from '../../../layouts/Screen.astro';
-import FolioWork from '../../../components/FolioWork.astro';
-import { profile } from '../../../data/site';
-import { pageHref } from '../../../scripts/lab/routes';
+// The lab computer's old Work page: now the terminal's `work` command. Forwards to its place in the
+// terminal's page, which opens the lab running it (or stands alone without JavaScript).
+import Redirect from '../../../layouts/Redirect.astro';
 ---
 
-<Screen title={`Work · ${profile.name}`} path="work">
-  <FolioWork level={1} href={(id) => pageHref(`work/${id}`)} />
-</Screen>
+<Redirect to="/computer/#work" title="Work" />

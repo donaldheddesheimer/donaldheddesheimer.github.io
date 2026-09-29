@@ -1,13 +1,15 @@
 # Cinematic lab: status (2026-09-29)
 
-**Status: the lab is the whole homepage, with the portfolio inside its computer, on the
-`lab-computer-portfolio` branch, in a pull request against `main`.** Not merged or deployed. The lab
-first became the homepage in `b4f5a5c` (merged as `2c1009b`); this pass drops the sections below it and
-the ordinary-page fallback, and puts Work, About, Résumé and Contact on the computer.
+**Status: the lab is the whole homepage, and its computer holds a command-driven terminal. The terminal
+is on the `lab-terminal` branch, validated, pushed and up for review as a pull request.** It isn't
+merged or deployed. The lab first became
+the homepage in `b4f5a5c` (merged as `2c1009b`). The portfolio moved inside its computer in `9daa78c`
+(merged as `b49f29c`). This pass replaces the computer's Work, About, Résumé and Contact pages with a
+terminal.
 
-The handoff, with what changed, the route mapping, what was validated (and how), evidence and known
-issues, is the top section of [`docs/lab-scene-handoff.md`](lab-scene-handoff.md): "Current checkpoint:
-full-screen lab, portfolio inside the computer". The earlier passes are the sections below it.
+The handoff is the top section of [`docs/lab-scene-handoff.md`](lab-scene-handoff.md): "Current
+checkpoint: a terminal inside the lab computer". It covers what changed, the addresses, what was
+validated and how, the evidence, and known issues. The earlier passes are the sections below it.
 
 This file was the work-in-progress note of the pass that started the prototype (`7c60fea`). Its content
 is folded into the handoff; `git show 7c60fea:docs/lab-cinematic-status.md` has the original.

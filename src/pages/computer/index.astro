@@ -1,0 +1,55 @@
+---
+// The terminal's own page: what the lab computer's terminal says, as a transcript, every command run in
+// turn (help, about, work, resume, contact), each where its anchor is (/computer/#work). It's where the
+// monitor's link goes without JavaScript, and where the lab goes if its script fails (?static, and until
+// the lab next runs, in this session). With JavaScript, it opens the lab at the terminal instead,
+// running the command its anchor names. Kept out of search results, as the computer's pages are.
+import Base from '../../layouts/Base.astro';
+import TermCmd from '../../components/TermCmd.astro';
+import TermOutput from '../../components/TermOutput.astro';
+import { profile } from '../../data/site';
+import { BOOT, PS1 } from '../../lib/terminal';
+import { COMMANDS } from '../../scripts/lab/routes';
+import '../../styles/terminal.css';
+
+const entries = ['help', ...COMMANDS] as const;
+---
+
+<Base title={`Terminal · ${profile.name}`} canonical="/computer/" noindex>
+  <Fragment slot="head">
+    <script is:inline define:vars={{ commands: COMMANDS }}>
+      (function () {
+        var stay = new URLSearchParams(location.search).has('static');
+        try {
+          stay = stay || sessionStorage.getItem('lab:static') === '1';
+        } catch (e) {}
+        if (stay) return;
+        var h = location.hash.slice(1);
+        location.replace('/?computer' + (commands.indexOf(h) >= 0 ? '=' + h : ''));
+      })();
+    </script>
+  </Fragment>
+  <main id="main" class="t-static">
+    <h1 class="sr-only">{profile.name}: the portfolio's terminal</h1>
+    <div class="term-log">
+      <div class="term-boot">
+        <p>{BOOT.first}</p>
+        <p>
+          {BOOT.second[0]}<TermCmd name="help" live={false} />{BOOT.second[1]}
+        </p>
+      </div>
+      {
+        entries.map((cmd) => (
+          <section class="term-entry" id={cmd} aria-labelledby={`${cmd}-cmd`}>
+            <h2 class="term-echo" id={`${cmd}-cmd`}><span class="term-ps1" aria-hidden="true">{PS1}</span>{cmd}</h2>
+            <TermOutput cmd={cmd} live={false} />
+          </section>
+        ))
+      }
+    </div>
+    <p class="t-static-prompt" aria-hidden="true">
+      <span class="term-ps1">{PS1}</span><span class="t-static-cursor"></span>
+    </p>
+    <p class="t-static-back"><a href="/">Back to the lab</a></p>
+  </main>
+</Base>

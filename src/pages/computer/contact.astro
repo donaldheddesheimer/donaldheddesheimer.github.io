@@ -1,10 +1,7 @@
 ---
-// The lab computer's Contact page (src/layouts/Screen.astro).
-import Screen from '../../layouts/Screen.astro';
-import FolioContact from '../../components/FolioContact.astro';
-import { profile } from '../../data/site';
+// The lab computer's old Contact page: now the terminal's `contact` command. Forwards to its place in the
+// terminal's page, which opens the lab running it (or stands alone without JavaScript).
+import Redirect from '../../layouts/Redirect.astro';
 ---
 
-<Screen title={`Contact · ${profile.name}`} path="contact">
-  <FolioContact level={1} />
-</Screen>
+<Redirect to="/computer/#contact" title="Contact" />

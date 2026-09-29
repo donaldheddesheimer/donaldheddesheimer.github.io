@@ -1,31 +1,31 @@
 ---
-// The lab computer's screen: one page of the portfolio (Work, a case study, About, Résumé or Contact) with
-// the computer's one slim bar: the name, the four places, and "Back to room". The content is the site's
-// own (src/components/Folio*.astro, CaseStudy.astro).
+// A project's case study, and the site's few other pages, under one slim bar. The content is the site's
+// own (CaseStudy.astro).
 //
-// The computer's own pages (/computer/<path>/, `path` set) are what the monitor's frame loads
-// (src/scripts/lab/computer.ts). There the lab owns the address (/?computer=<path>) and the history, and
-// this page never navigates itself: a plain click on a link to another page the computer has asks the
-// lab to go there (pc:go); a modified click opens that page's own address in a new tab. Links the
-// computer has no page for open in a new tab, so the lab stays; downloads and mail links do what they
-// do. "Back to room" and Escape ask the lab to close (pc:leave, pc:escape). Opened on their own with
-// JavaScript, these pages go to the lab reading them; without it they stand alone, linked to each other
-// and back to the room (/). They are kept out of search results; a case study's canonical page is
-// /projects/<id>/.
+// On the lab computer (/computer/work/<id>/, `path` set), the page is a project's details, opened from the
+// terminal's `work` and laid over it in a frame (src/scripts/lab/computer.ts). Its bar is only the way
+// back: "Back to terminal" (and Escape) ask the lab for the terminal again (pc:back, pc:escape). The lab
+// owns the address (/?computer=work/<id>) and the history, and this page never navigates itself: a
+// plain click on a link to another page the computer has asks the lab to go there (pc:go); a modified
+// click opens that page's own address in a new tab. Links the computer has no page for open in a new
+// tab, so the lab stays; downloads and mail links do what they do. Opened on their own with JavaScript,
+// these pages go to the lab showing them; without it they stand alone. They are kept out of search
+// results; a case study's canonical page is /projects/<id>/.
 //
-// The same layout serves the site's few pages of their own (a case study's /projects/<id>/, the 404),
-// which stay where they are: their bar leads into the computer and back to the room.
+// The site's pages of their own (a case study's /projects/<id>/, the 404) stay where they are: their bar
+// has the name (to the lab, /) and the terminal's commands (its page's anchors, /computer/#work, which
+// open the lab running them).
 import Base from './Base.astro';
 import Mark from '../components/Mark.astro';
 import Icon from '../components/Icon.astro';
 import { profile } from '../data/site';
-import { canonicalHref, labHref, pageHref } from '../scripts/lab/routes';
+import { COMMANDS, TERMINAL, canonicalHref, labHref, pageHref } from '../scripts/lab/routes';
 
 interface Props {
   title: string;
-  /** The computer path (routes.ts) of one of the computer's own pages. */
+  /** The computer path (routes.ts) of one of the computer's own pages: a project's, 'work/<id>'. */
   path?: string;
-  /** A page of its own: which of the four places it belongs to, if any. */
+  /** A page of its own: which of the terminal's commands it belongs to, if any. */
   section?: string;
   description?: string;
   /** A page of its own: its canonical address, or false for none (the 404). */
@@ -37,12 +37,8 @@ const framed = path != null;
 const section = framed ? path.split('/')[0] : Astro.props.section;
 const canonical = framed ? canonicalHref(path) : Astro.props.canonical;
 const lab = framed ? labHref(path) : null;
-const nav = [
-  ['work', 'Work'],
-  ['about', 'About'],
-  ['resume', 'Résumé'],
-  ['contact', 'Contact'],
-] as const;
+const labels: Record<string, string> = { about: 'About', work: 'Work', resume: 'Résumé', contact: 'Contact' };
+const nav = (['work', ...COMMANDS.filter((c) => c !== 'work')] as string[]).map((id) => [id, labels[id]] as const);
 ---
 
 <Base title={title} description={description} canonical={canonical} noindex={framed || Astro.props.noindex} screen>
@@ -54,22 +50,31 @@ const nav = [
   </Fragment>
   <div class="scr" data-path={path}>
     <header class="scr-bar">
-      <a href={pageHref('work')} class="scr-home" aria-label={`${profile.name}, work`}>
-        <Mark class="size-5 shrink-0" />
-        <span class="scr-name">{profile.name}</span>
-      </a>
-      <nav class="scr-nav" aria-label="Portfolio">
-        {
-          nav.map(([id, label]) => (
-            <a href={pageHref(id)} aria-current={path === id ? 'page' : section === id ? 'true' : undefined}>
-              {label}
+      {
+        framed ? (
+          <>
+            <a href={pageHref(section ?? TERMINAL)} class="scr-back" data-leave aria-keyshortcuts="Escape">
+              <Icon name="arrow-left" class="size-3.5 shrink-0" />
+              Back to terminal
             </a>
-          ))
-        }
-      </nav>
-      <a href="/" class="scr-back" data-leave aria-label="Back to room">
-        <Icon name="arrow-left" class="size-3.5 shrink-0" />Back<span class="scr-more">&nbsp;to room</span>
-      </a>
+            <kbd class="scr-esc" aria-hidden="true">Esc</kbd>
+          </>
+        ) : (
+          <>
+            <a href="/" class="scr-home" aria-label={`${profile.name}, the lab`}>
+              <Mark class="size-5 shrink-0" />
+              <span class="scr-name">{profile.name}</span>
+            </a>
+            <nav class="scr-nav" aria-label="Portfolio">
+              {nav.map(([id, label]) => (
+                <a href={pageHref(id)} aria-current={section === id ? 'true' : undefined}>
+                  {label}
+                </a>
+              ))}
+            </nav>
+          </>
+        )
+      }
     </header>
     <main id="main" class="scr-main">
       <slot />
@@ -105,7 +110,7 @@ const nav = [
       e.preventDefault();
       const to = a.hasAttribute('data-leave') ? null : pathOf(u, location.origin);
       // (A click with no count is the keyboard's: the lab rings the focus it gives back only then.)
-      if (a.hasAttribute('data-leave')) post({ type: 'pc:leave', pointer: e.detail > 0 });
+      if (a.hasAttribute('data-leave')) post({ type: 'pc:back', pointer: e.detail > 0 });
       else if (!to) window.open(u.href, '_blank', 'noopener');
       else if (to === here) scrollToHash(u.hash);
       else post({ type: 'pc:go', path: to, hash: u.hash });
@@ -126,8 +131,9 @@ const nav = [
 </script>
 
 <style>
-  /* The computer's own bar: whose it is, its four places, and the way back to the room. On a page
-     standing alone, the window's safe area (a phone's notch and home bar) is kept clear. */
+  /* The bar: on the computer, the way back to the terminal (and Escape, for a keyboard); on a page of its
+     own, the name and the terminal's commands. On a page standing alone, the window's safe area (a
+     phone's notch and home bar) is kept clear. */
   .scr-bar {
     position: sticky;
     top: 0;
@@ -180,12 +186,21 @@ const nav = [
   }
   .scr-back {
     gap: 0.375rem;
-    flex-shrink: 0;
-    margin-left: 0.75rem;
-    padding-left: 0.75rem;
-    border-left: 1px solid var(--line);
-    border-radius: 0 var(--radius-2) var(--radius-2) 0;
+    margin-left: -0.625rem;
     color: var(--muted);
+  }
+  .scr-esc {
+    margin-left: auto;
+    padding: 0.125rem 0.375rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--dim);
+    font: 500 var(--text-xs) / 1.2 var(--font-mono);
+  }
+  @media not ((hover: hover) and (pointer: fine)) {
+    .scr-esc {
+      display: none;
+    }
   }
   @media (pointer: coarse) {
     .scr-home,
@@ -194,14 +209,11 @@ const nav = [
       min-height: var(--h-touch);
     }
   }
-  /* A narrow screen: the name goes first, then "to room", and the rest closes up. The places scroll
-     inside the bar before the bar would push "Back" out of the window. */
-  @media (width < 56rem) {
+  /* A narrow screen: the name goes first, and the rest closes up, the places scrolling inside the bar. */
+  @media (width < 44rem) {
     .scr-name {
       display: none;
     }
-  }
-  @media (width < 44rem) {
     .scr-bar {
       gap: 0.5rem;
     }
@@ -210,21 +222,12 @@ const nav = [
       overflow-x: auto;
       scrollbar-width: none;
     }
-    .scr-nav a,
-    .scr-back {
+    .scr-nav a {
       padding: 0 0.4375rem;
-    }
-    .scr-back {
-      margin-left: 0;
-      padding-left: 0.5rem;
-    }
-    .scr-more {
-      display: none;
     }
   }
   @media (width < 24rem) {
-    .scr-nav a,
-    .scr-back {
+    .scr-nav a {
       padding: 0 0.3125rem;
     }
   }
@@ -237,8 +240,5 @@ const nav = [
     --home-inset: clamp(1.25rem, 4vw, 2.5rem);
     scroll-padding-top: 3.5rem;
     scroll-padding-bottom: 1rem;
-  }
-  :global(html[data-screen] .folio) {
-    padding-top: clamp(2rem, 5vw, 3.5rem);
   }
 </style>

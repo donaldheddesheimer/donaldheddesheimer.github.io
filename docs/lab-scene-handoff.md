@@ -1,11 +1,254 @@
 # Robotics lab implementation handoff
 
-## Current checkpoint: full-screen lab, portfolio inside the computer, 2026-09-29 (Claude)
+## Current checkpoint: a terminal inside the lab computer, 2026-09-29 (Claude)
 
-**Status: validated; in a pull request against `main`.** Not merged or deployed (`deploy.yml` deploys only on a push to `main`).
+**Status: validated, pushed to the `lab-terminal` branch, and up for review as a pull request to `main`.** Not merged and not deployed (`deploy.yml` deploys only on a push to `main`).
+
+- **Branch:** `lab-terminal`, from `main` at `b49f29c` (the merge of the full-screen lab below).
+- **Commits:**
+  - `7d73627`: the terminal, as work in progress. It was made by a cloud session, verified there only by a SwiftShader smoke run.
+  - The one that adds this section: the validation, the fixes it and two reviews found, the stills, the evidence and this write-up.
+- **Brief:** a command-driven portfolio inside the lab computer.
+- **This supersedes the pages inside the computer.** The Work, About, Résumé and Contact pages and their bar, from the checkpoint below, are gone. The computer now holds a terminal. The room, the robots, the opening's name and title, and the flight to the monitor are unchanged. Where the sections below describe the computer's pages, this one wins.
+- **What to judge:** `docs/evidence/lab-terminal-2026-09-29/`:
+  - `screens/`;
+  - `video/terminal-1280x800.webm`: 20.5 s, from the startup to leaving and coming back;
+  - `logs/validate.log`.
+
+### What changed
+
+1. **The computer is a terminal** (`src/components/Terminal.astro`, `src/scripts/lab/terminal.ts`, `src/styles/terminal.css`). It isn't a fake OS: there are no windows, only a prompt and what it prints.
+   - **Going in:** the same camera flight, then a startup of about a second:
+     - `New terminal started.` types out quickly;
+     - then `Type help to look around. The robots are on break.`, with `help` a button;
+     - then `donald@lab:~$ █`.
+
+     Then it waits. Nothing runs on its own. The startup plays once a session, and a key or tap during it finishes it at once.
+   - **Commands.** A small dispatcher runs them. What's typed is never run as code, HTML or a shell command, and it's trimmed and matched in any case.
+     - `help` lists exactly four: `about`, `work`, `resume` and `contact`, each a button.
+     - Those four print from the site's own data (`src/data/site.ts`, the projects collection, the résumé PDF), through `src/components/TermOutput.astro`. Nothing is invented.
+     - An empty line gives a new prompt.
+     - Anything else prints `Command not found. Run help for available commands.`
+     - `exit` leaves. It's a hidden alias, not listed by `help`.
+     - Up and Down recall earlier commands.
+   - **Output:**
+     - Output is real text and links, in a history that runs in order. Each command is an `h2`.
+     - The terminal alone scrolls. The prompt stays at the screen's foot.
+     - A new result is shown whole with the prompt under it when it fits. When it doesn't, it's shown from its start, not the bottom. Nothing moves the view after that, typing included.
+     - A polite status line gives a short summary, for example "Printed: 11 projects.".
+   - **Motion:**
+     - the startup;
+     - a blinking block cursor;
+     - `help`'s lines, staggered;
+     - a short entrance for each output.
+
+     None of these holds up input. Reduced motion, or Motion off in Settings, shows everything at once, with a steady cursor.
+   - **Kept for the session** (`sessionStorage`, `lab:terminal`): the history, the reading position and the finished startup. They survive leaving, coming back, and a reload.
+2. **Leaving** (`src/scripts/lab/computer.ts`, `src/components/LabStage.astro`).
+   - "Back to room" is gone.
+   - **Escape:**
+     - with a project's details open, it closes them first;
+     - otherwise it leaves, with the focus back on the monitor's link;
+     - during the flight in, it turns the lab around once the flight lands.
+   - **`exit`** leaves too, and so does Back.
+   - **The power button is a touch screen's only** (`@media (pointer: coarse)`), for the lack of an Esc key there. With a mouse and a keyboard there's no button: Esc leaves.
+     - **Placement:**
+       - on the monitor (a tablet), it sits in the bottom bezel at its right, under the screen;
+       - across the window (phones, small windows), it sits in a strip under the screen. With a mouse, a window that small has no strip: the screen reaches the window's foot;
+       - while a phone's keyboard is up, it's hidden.
+     - **Size:** it's sized from the text size and the bezel, with a 44 px reach.
+3. **A project's details** open inside the computer, in a frame over the terminal, at `/?computer=work/<id>`.
+   - They're the project's page (`/computer/work/<id>/`), which keeps the site's page design.
+   - "Back to terminal" and Escape return to the terminal as it was, with the focus on the details link.
+4. **Addresses** (`src/scripts/lab/routes.ts`, the pre-paint routing in `src/pages/index.astro`): see the table below.
+5. **Without JavaScript, or if the lab's script fails:** `/computer/` (`src/pages/computer/index.astro`) is a plain transcript of every command's output, each at its anchor (`/computer/#work`).
+   - It's where the monitor's link goes without JavaScript.
+   - It's where the lab sends you when a script fails to load (`/computer/?static`). A session flag holds you there until the lab next runs.
+   - It never shows under a working room.
+6. **The monitor in the room** shows the terminal's empty screen and cursor (`terminalTexture()` in `src/scripts/lab/scene.ts`), in place of the old Work page. At 1440×900, the drawn cursor lies within 0.7 px of the live startup's.
+7. **Stills and link preview** are re-rendered to show the terminal:
+   - `public/lab/opening-wide.webp`: 37 KB;
+   - `public/lab/opening-tall.webp`: 12 KB;
+   - `public/og.jpg`: 72 KB.
+
+   The monitor's position in them hasn't moved: the `--still-*` fractions are unchanged.
+
+   To retake them, follow "Retaking the stills" in the section below, with this pass's `harness/stills.cjs` and `harness/og.cjs`. The copy in `lab-computer-2026-09-29` now renders a black still (see the fixes).
+8. **Other pages:**
+   - The project pages' bar leads to the terminal's commands (`/computer/#<command>`).
+   - The 404's "Explore my work" runs `work`.
+9. **Removed:**
+   - `src/components/Folio{About,Contact,Resume,Work}.astro`;
+   - `src/styles/folio.css`.
+
+   `src/pages/computer/{about,resume,contact}.astro` and `src/pages/computer/work/index.astro` now forward to the terminal.
+10. **Docs:**
+    - `README.md` is rewritten for the terminal;
+    - `docs/lab-cinematic-status.md` points here;
+    - `docs/lab-terminal-progress.md`, the work-in-progress note, is folded into this section, so it's removed.
+
+### Addresses
+
+| Address | Now |
+|---|---|
+| `/` | The lab's opening, unchanged. |
+| `/?computer` | The lab, in the terminal. A reload or a shared link opens it at once, without the flight. |
+| `/?computer=about\|work\|resume\|contact`, `/#about` (and the other three), `/computer/about/` (and the other three), `/computer/#about` | The terminal, running that command. The address becomes `/?computer`, and a reload doesn't run it again. |
+| `/?computer=work/<id>` | The project's details over the terminal. |
+| `/computer/work/<id>/` | The page the details frame loads. Opened on its own with JavaScript, it goes to `/?computer=work/<id>`, keeping a section anchor (`#approach`). Without JavaScript it stands alone. |
+| `/computer/` | With JavaScript: `/?computer` (or `/?computer=<command>` for its anchor). Without JavaScript, or with `?static` or the failure flag: the transcript. `noindex`. |
+| `/projects/<id>/` | Unchanged: the project's page, indexable. |
+| `/resume.pdf` | Unchanged. |
+| `/?sel=…`, `/systems/`, `/prototype/…` | As before (below). |
+
+History:
+- Going in adds one entry, and opening a project's details adds one more.
+- Back and Forward move between them and out of the lab. The terminal comes back as it was.
+- Escape, `exit` and, on a touch screen, the power button go back to the entry the lab was opened from.
+
+### Review and fixes
+
+`7d73627` was reviewed in two halves, presentation and behaviour, by adversarial reviewers. A fresh skeptic then checked each finding in a browser. Of 13 findings, all 13 were confirmed and none refuted, and all are fixed:
+
+- **Escape during the flight in** was swallowed, so the lab opened anyway. Now it turns around once the flight lands.
+- **The failure flag** (`lab:static`) was never cleared, so after one failed script load every `/computer/…` address stayed on the transcript for the whole session. The lab now clears it when it runs.
+- **Focus rings:**
+  - Escape from details opened with the mouse returned the focus without a ring. It's now ringed after a key and not after a click.
+  - Double-clicking a command left the focus on its button, so Enter ran it again. The focus now goes back to the prompt.
+- **Scrolling:** a result that fitted could scroll its command's line off the top. It's now kept.
+- **Copy:** with the clipboard refused, the copy button selected the address silently. It now says "selected", and the status line says so too.
+- **A section anchor** on an old details address (`/computer/work/<id>/#approach`) was dropped. It's now kept.
+- **Phones at 200% text:**
+  - the startup line was cut off, and the prompt's field was one character wide;
+  - key–value rows overflowed.
+
+  The prompt now wraps and keeps a field of at least 8 characters, and the rows stack.
+- **The power button:**
+  - it was 40 px on touch screens, and is now a 44 px reach;
+  - its box overlapped the screen's foot, and now it sits below it.
+- **Touch targets:** links had no touch padding, despite the stylesheet's comment. They're padded now.
+- **The 404's "Explore my work"** opened an empty terminal. It now runs `work`.
+- **Stale descriptions** of the removed pages, in `README.md` and two comments.
+
+The validation harness found more, all fixed:
+- **Tabbing down through `work`'s links left 7 of 40 under the sticky prompt.** Now none are. A scroll margin on the terminal's links and buttons does it. It isn't padding on the terminal, because the input, scrolled to as it's typed in, would then drag the history away from where it's being read. The harness caught that too.
+- **The retake script (`stills.cjs`) rendered a black still.** It hid `.home`, which now holds the room. It now hides only the name and Settings.
+- **The power button across sizes:**
+  - at 1920×1080 it overlapped the screen when clamped to the window;
+  - at 1280×800 with 200% text it sat half a pixel off the bezel.
+- **The power button's "Leave · Esc" tip ran under its focus ring**, which was seen in the screenshots. It was fixed, then went with the desktop button (below).
+
+A second review, of the branch as validated, found three things, all fixed:
+- **The desktop still had a way out on the bezel.** The power button showed whenever the computer was open, against the direction that a desktop leaves by Esc alone. It's now shown only on a touch screen, and its desktop-only tip is gone. The checks now require no button with a mouse, at every desktop size, and none to Tab to.
+- **The startup's cursor stayed until the startup ended.** Its animation's delay used `--n`, which was set on its sibling (the typed line), so the browser computed the animation as `none`. `--n` is now on their shared parent, and the cursor goes at 488 ms (21 × 18 ms + 110 ms), with the startup still playing. A check covers it. Set back on the sibling, the same check reads `none`.
+- **The handoff wasn't finished.** This section was a placeholder, and the harness's scripts and screens weren't committed. They are now.
+
+### Validation on the final build
+
+- **Machine:** Apple M5 Pro, Darwin 25.5.0.
+- **Browser:** headless Chrome 154.0.8037.58 (installed Chrome, through Playwright). WebGL is ANGLE Metal on the Mac's GPU: "ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)". The log's first line records it.
+- **Not covered:**
+  - no SwiftShader run in this pass;
+  - no Safari, Firefox, Playwright WebKit, real phone or tablet, or screen reader.
+- **Site:** `dist/` from `npm run build`, served straight from disk into the browser (`harness/serve.cjs`). No server.
+- **Build:** 43 pages, with only the three.js chunk-size warning, which is older than this pass.
+- **Type check:** `tsc --noEmit -p .` is clean (`logs/tsc.log` is empty).
+- **Measured vs inferred:** everything in the table is measured, unless it says otherwise.
+
+`harness/validate.cjs` runs 195 checks in 14 groups. Result: 195/195, in 231 s (`logs/validate.log`).
+
+| Area | Result |
+|---|---|
+| Startup (1440×900) | The flight goes fade, fly, read. The startup plays once (909 ms to done), then waits with only its two lines and the prompt. Focus is in the prompt. The title is "Terminal · Donald Heddesheimer", at `/?computer`. The dialog is modal and labelled, the input is labelled "Command" and described by the startup's hint, and the block cursor blinks. The cursor after the first line goes at 488 ms (its animation `term-gone`, delay 0.488 s), and is gone (opacity 0) while the startup still plays. Coming back, the startup doesn't play again. A key during it finishes it at once, and the command typed then runs. |
+| `help` and the commands | `help` lists exactly `about`, `work`, `resume` and `contact`, each a button, and the status line says "Commands: about, work, resume, contact.". `about` names Donald. `work` lists 11 projects, each with details. `resume` links the PDF, then Experience, Education and Skills. `contact` gives email, GitHub and LinkedIn. Each is announced once ("Printed: 11 projects.") with the prompt ready. `about` and `contact` fit, so they're shown whole with the prompt under them; `work` and `resume` are shown from their start. |
+| Input | `"  WoRk  "` (mixed case, spaces around) runs `work`. An unknown command prints exactly the not-found line. An empty line, or one of spaces, gives a new prompt and is hidden from a screen reader. Typed markup (`<img onerror>`, `<b>`) is shown as text and never run. A long line stops at 200 characters, with no sideways scroll. Repeated and rapid commands each run once, in order. Up and Down recall. No `id` repeats after 15 commands. |
+| Clicks and taps | `help` in the startup's line runs once. A double click runs once. Enter on a command's button runs it once, with the focus back in the prompt. Typing with the focus on a link goes to the prompt. |
+| Scrolling | The wheel scrolls the terminal (92 → 792 px), not the window (0) or the room (its look unchanged). Left where it's being read, the terminal stays put, typing included (492 → 492). |
+| Links | All 11 details links open in the frame at `?computer=work/<id>`, with focus on its `h1` and the terminal inert. Escape comes back with the focus ringed on the details link and the terminal where it was; a clicked "Back to terminal", without the ring. The next project from inside the details is a new entry. Source and demo open a new tab (`noopener`, https). The résumé is a real PDF (200, `application/pdf`, 146,254 bytes, downloads as `Donald-Heddesheimer-Resume.pdf`). Email is `mailto:`; GitHub and LinkedIn open a new tab, labelled. Copy puts the address on the clipboard ("Copied."). With the clipboard refused, it selects it ("Selected, to copy."). |
+| Leaving and coming back | Escape goes back to the address the lab was opened from, with the focus ringed on the monitor's link. Back in, the history and the reading position are as they were (52 → 52 px), with no startup. With a mouse there's no power button (`display: none`). `EXIT` leaves. On a touch tablet (1180×820), the power button is 36×36 at (1026, 721), under the screen's foot at 720, its icon on the bezel, under the screen's foot; tapped, it leaves without a ring. A reload opens the terminal at once, with the history, the reading position and the finished startup. Escape during the flight in leaves once it has landed. |
+| Addresses and history | All 16 old command addresses (`/?computer=`, `/#`, `/computer/<cmd>/`, `/computer/#`, for each command) open the terminal running it, at `/?computer`, and a reload doesn't run it again. `/?computer=work/<id>` opens its details. `?computer=bogus` and an unknown project go to the room, with the address cleaned. `/prototype/?computer=about` and `/?sel=layer:gpu` run their command, and `?sel=project:<id>` goes to the project's page. `/computer/work/fluxion/#approach` opens `/?computer=work/fluxion#approach`, with Approach near the frame's top. `#contact` set on the opening runs `contact`. Back and Forward go details → terminal → room → terminal (as it was) → details. |
+| Phone (390×844, 360×640, touch) | Across the window, with 16 px type. Focus is on the terminal, not the input, so no keyboard is raised. The power button is 44×44, in the strip under the screen. `help` and `work` tapped each run once, with focus on their heading. A swipe scrolls the terminal (275 → 578 px), not the window. With a keyboard up (simulated: see Known limitations), the terminal fits above it (390×506), with the prompt in view and the power button hidden. Typing runs `about`. With the keyboard down, the button is back. Tapped, it leaves without a ring. A tablet held upright (820×1180) also reads across the window. |
+| Reduced motion, and Motion off | In without the flight, the startup all at once, and no output animation (0 animations, against 4 for `help` with motion on). The cursor is steady. |
+| Keyboard | Tab reaches the monitor's link, ringed, and Enter puts the focus in the prompt. Shift+Tab reaches the newest command button, ringed, and Enter runs it once, back to the prompt. The output's links and buttons take a ring. Tabbing down through `work`'s links, none is left under the prompt (7 of 40 were before the fix). Tab from the prompt reaches no power button. Escape leaves, with the focus ringed on the monitor. |
+| No WebGL (context refused) at 1440×900, 390×844, 1440×400, 2560×900 and 3840×950 | The still shows, and its monitor's link lies on the pictured monitor to the pixel. It opens the terminal across the window. Escape returns the focus to the link, and Enter goes in again. |
+| No JavaScript (1440×900, 390×844) | The monitor links to `/computer/`, the transcript. It has `help` and the four commands, each a section with its heading, with commands linking to their place and no buttons. The 11 details link to `/projects/`, and "Back to the lab" to `/`. It's `noindex`, with its canonical and no sideways scroll. `/computer/about/` forwards to `/computer/#about`. |
+| Failed script (scripts answered 503) | The opening stays the opening. `/?computer` goes to `/computer/?static`, with the flag set, and `/?computer=about` to its `#about`. The monitor's link then stays on the transcript, with no loop, and a project's address goes to its page. When scripts load again, the lab runs, the flag is cleared, and `/computer/#about` opens the lab running `about`. |
+| Fit: on the monitor at 1440×900, 1920×1080, 1280×800, 1024×768, 1180×820 (touch) and 1280×800 at 200% text. Across the window at 390×844, 390×844 and 360×640 at 200% text, 1024×400, 740×360, and 568×320 at 150% text | The screen and the prompt are in view, with nothing sideways. On touch screens the power button is in view; with a mouse there's none, and at 1024×400 the screen reaches the window's foot (measured 1024×400). On the monitor on a touch tablet (1180×820), the power button's box is under the screen and its icon on the bezel: 36 px, with a 44 px reach. `contact` and `work` run. The prompt's field is 15 characters or more. The email is on one line, or across the width on a phone at 200% text. On touch screens, links are 32–37 px tall at the default text size. |
+
+**Not measured in this pass (inferred):** frame rate and frame time. The scene's per-frame work is unchanged apart from the screen's texture, which is drawn once.
+
+**Screens** (GPU, the page's own fonts, JPEG): `docs/evidence/lab-terminal-2026-09-29/screens/`.
+- **Opening:**
+  - `opening-{1440x900,1280x800,1920x1080}` and `phone-opening-390x844`;
+  - `focus-monitor-1440x900`: the keyboard's ring on the monitor.
+- **The terminal, at 1440×900:**
+  - `terminal-startup`;
+  - `terminal-help`;
+  - `terminal-work`;
+  - `terminal-contact`;
+  - `details`: a project over the terminal.
+- **Tablet, 1180×820, touch, at 2×:** `tablet-terminal-1180x820`: the terminal on the monitor, the power button on the bezel.
+- **Phone, 390×844, touch, at 2×:**
+  - `phone-terminal`;
+  - `phone-terminal-work`.
+
+**Recording:** `video/terminal-1280x800.webm` (VP9, 1280×800, 20.5 s, 1,980 KB). In it, a real mouse and keyboard:
+- find the monitor and click it;
+- fly in;
+- watch the startup;
+- type `help`, then `work`;
+- scroll;
+- press Esc and fly out;
+- click the monitor again: the history is back, and the startup doesn't replay.
+
+It's made from Chrome's screencast frames, replayed at their own timing into MediaRecorder, with no ffmpeg. `harness/frames.cjs` makes a contact sheet of it.
+
+### Known limitations
+
+1. **Coverage:**
+   - headless Chrome 154 on one Mac;
+   - no Safari, Firefox, Playwright WebKit, real phone or tablet, or screen-reader pass.
+2. **A phone's keyboard is simulated.** The checks stub `visualViewport` to stand in for one, so a real iOS or Android keyboard hasn't been seen.
+3. **The monitor's texture shows only the empty prompt.** The room's picture of the screen doesn't follow what's been run.
+4. **`exit` is a hidden alias**, deliberately not listed by `help`.
+5. **Project details keep the site's page design.** They aren't terminal output.
+6. **Touch targets:**
+   - Links in the output are about 32–37 px tall on touch screens, not 44. That's the text's line plus padding, measured at 30 px or more at every touch size.
+   - On a touch screen large enough to show the monitor (a tablet, 1180×820), the power button's box on the bezel is 36 px, with a 44 px reach below it.
+   - A device with both a touch screen and a mouse gets the button only if its primary pointer is coarse (`pointer: coarse`), so a touch laptop leaves by Esc. That's inferred from the media query, not tested.
+7. **Nothing on a desktop says Esc leaves.** `help` doesn't list it, following the direction that a desktop leaves by Esc alone. `exit` and Back also leave.
+8. **The terminal isn't a shell.** It has no pipes, arguments, tab completion or history search, by design.
+9. **Carried over from the checkpoint below:**
+   - the right-click on the drawn monitor;
+   - browser close-request limits;
+   - the three.js chunk-size warning;
+   - stills that go stale if the opening changes without a retake.
+
+### Commands (from the repository root)
+
+```sh
+npm run build                          # 43 pages
+git diff --check
+tsc --noEmit -p .                      # clean (logs/tsc.log)
+
+# Playwright isn't a dependency: PW=<path to a playwright or playwright-core module>. The scripts launch
+# installed Chrome (channel 'chrome') with ANGLE Metal; validate.cjs takes --swiftshader instead. They
+# read the built site straight from dist/ (harness/serve.cjs): no server.
+E=docs/evidence/lab-terminal-2026-09-29
+PW=<playwright> node $E/harness/validate.cjs dist > $E/logs/validate.log   # or: … dist <group>, e.g. leave
+PW=<playwright> node $E/harness/shots.cjs                                   # → $E/screens
+PW=<playwright> node $E/harness/rec.cjs                                     # → $E/video/terminal-1280x800.webm
+PW=<playwright> node $E/harness/frames.cjs $E/video/terminal-1280x800.webm <scratch>/sheet.png
+PW=<playwright> node $E/harness/stills.cjs <scratch>                        # then "Retaking the stills", below
+PW=<playwright> node $E/harness/og.cjs <scratch>/og.png                     # then down to public/og.jpg
+```
+
+## Earlier checkpoint: full-screen lab, portfolio inside the computer, `9daa78c` (Claude)
+
+**Superseded inside the computer by the terminal above.** Its Work, About, Résumé and Contact pages and their bar ("Back to room") are gone. Its room, opening, monitor link, stills and fallbacks still stand, as updated above. Merged to `main` as `b49f29c`.
 
 - **Branch:** `lab-computer-portfolio`, from `main` at `2c1009b` (the merge of the homepage cutover below).
-- **Commit:** the one that adds this section (`git log -1 -- docs/lab-scene-handoff.md`).
+- **Commit:** `9daa78c`.
 - **Brief:** "Full-screen robotics lab, portfolio inside the computer". It was headed "Direction — supersedes earlier homepage instructions". Later in the pass: "get rid of the show my work button its redundant".
 - **This direction supersedes the scroll-down and ordinary-page fallback.** The earlier checkpoints below built these, and all of them are gone:
   - Work, About, Résumé and Contact as sections below the lab;

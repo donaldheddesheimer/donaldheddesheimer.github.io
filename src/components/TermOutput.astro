@@ -1,0 +1,227 @@
+---
+// What one of the terminal's commands prints, as real HTML: `help`, the four it lists, and the answer
+// to anything else. From src/data/site.ts and the projects, nothing added. The lab's terminal holds each
+// in a <template> until it's run (Terminal.astro); the /computer/ transcript prints them all (`live`
+// false: commands are links to where they ran, and there's nothing to copy with).
+//
+// Plain text laid out as a terminal lays it out: a heading per part, key and value columns, "- " lists.
+// Under the entry's heading (the command, an h2), parts are h3 and entries h4.
+import { getCollection } from 'astro:content';
+import TermCmd from './TermCmd.astro';
+import { contact, education, experience, offDuty, orgs, profile, skills, socials } from '../data/site';
+import { fmtMonth } from '../lib/format';
+import { workMeta } from '../lib/folio';
+import { HELP, NOT_FOUND } from '../lib/terminal';
+
+interface Props {
+  cmd: 'help' | 'about' | 'work' | 'resume' | 'contact' | 'not-found';
+  live?: boolean;
+}
+const { cmd, live = true } = Astro.props;
+
+const org = (id: string) => orgs.find((o) => o.id === id)!;
+const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+// Featured projects first, then the rest; newest first within each.
+const projects = (await getCollection('projects')).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.code.localeCompare(a.data.code));
+const file = `${profile.name.replace(/\s+/g, '-')}-Resume.pdf`;
+const current = experience.find((e) => !e.end);
+---
+
+{
+  cmd === 'help' && (
+    <div class="t-out t-stagger" data-announce={`Commands: ${HELP.map((h) => h.cmd).join(', ')}.`}>
+      <ul class="t-help">
+        {HELP.map((h, i) => (
+          <li style={`--i:${i}`}>
+            <TermCmd name={h.cmd} live={live} />
+            <span>{h.label}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+{
+  cmd === 'about' && (
+    <div class="t-out" data-announce="Printed: about me.">
+      <p>
+        <strong class="t-strong">{profile.name}</strong> <span class="t-dim">· {profile.headline}</span>
+      </p>
+      <p class="t-dim">
+        {profile.school} · {profile.location}
+      </p>
+      {profile.about.map((para) => (
+        <p class="t-prose">{para}</p>
+      ))}
+      <dl class="t-kv">
+        {current && (
+          <div>
+            <dt>now</dt>
+            <dd>
+              {current.role}, {org(current.org).name}
+            </dd>
+          </div>
+        )}
+        <div>
+          <dt>off duty</dt>
+          <dd>{offDuty.map((h) => h.name).join(', ')}</dd>
+        </div>
+      </dl>
+      <p class="t-hint">
+        Run <TermCmd name="work" live={live} /> to see what I've built, or <TermCmd name="contact" live={live} /> to say hello.
+      </p>
+    </div>
+  )
+}
+
+{
+  cmd === 'work' && (
+    <div class="t-out" data-announce={`Printed: ${projects.length} projects.`}>
+      <p class="t-dim">Projects in GPU software, robotics and simulation, and a few from before. {projects.length} in all, featured first.</p>
+      <ul class="t-list t-work">
+        {projects.map((p) => (
+          <li>
+            <h3 class="t-strong">{p.data.title}</h3>
+            <p class="t-dim">{workMeta(p.data)}</p>
+            <p class="t-prose">{p.data.summary}</p>
+            <p class="t-links">
+              <a href={`/projects/${p.id}/`} data-term-detail={live ? p.id : undefined} aria-label={`details: ${p.data.title}`}>
+                details
+              </a>
+              {p.data.demo && (
+                <a href={p.data.demo} target="_blank" rel="noopener" aria-label={`demo: ${p.data.title} (opens in a new tab)`}>
+                  demo<span aria-hidden="true">↗</span>
+                </a>
+              )}
+              {p.data.repo ? (
+                <a href={p.data.repo} target="_blank" rel="noopener" aria-label={`source: ${p.data.title} (opens in a new tab)`}>
+                  source<span aria-hidden="true">↗</span>
+                </a>
+              ) : (
+                <span class="t-dim">{(p.data.repoNote ?? 'Private repository').toLowerCase()}</span>
+              )}
+            </p>
+          </li>
+        ))}
+      </ul>
+      <p class="t-hint">
+        Run <TermCmd name="resume" live={live} /> for the full story, or <TermCmd name="contact" live={live} /> to get in touch.
+      </p>
+    </div>
+  )
+}
+
+{
+  cmd === 'resume' && (
+    <div class="t-out" data-announce="Printed: the résumé, with the PDF to download.">
+      <p class="t-links">
+        <a href={profile.resume} download={file}>
+          <span aria-hidden="true">↓ </span>Download the PDF
+        </a>
+        <span class="t-dim">{file}</span>
+      </p>
+
+      <h3 class="t-section">Experience</h3>
+      <ul class="t-list">
+        {experience.map((e) => (
+          <li>
+            <div class="t-row">
+              <h4 class="t-strong">
+                {e.role}, {org(e.org).name}
+              </h4>
+              <span class="t-dim">
+                {fmtMonth(e.start)} – {e.end ? fmtMonth(e.end) : 'Present'}
+              </span>
+            </div>
+            <p class="t-dim">
+              {e.unit && `${e.unit} · `}
+              {e.location}
+            </p>
+            <ul class="t-points">
+              {e.points.map((pt) => (
+                <li>{pt}</li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
+
+      <h3 class="t-section">Education</h3>
+      <div class="t-row">
+        <h4 class="t-strong">{education.school}</h4>
+        <span class="t-dim">
+          {fmtMonth(education.start)} – {fmtMonth(education.end)} (expected)
+        </span>
+      </div>
+      <p>
+        {education.degree} · {education.program} · {education.thread} · GPA {education.gpa}
+      </p>
+      <p class="t-dim">Coursework: {education.coursework.join(', ')}</p>
+
+      <h3 class="t-section">Skills</h3>
+      <dl class="t-kv t-kv-wide">
+        {skills.map((s) => (
+          <div>
+            <dt>{s.group}</dt>
+            <dd>{s.items.join(', ')}</dd>
+          </div>
+        ))}
+      </dl>
+      <p class="t-hint">
+        Run <TermCmd name="contact" live={live} /> to get in touch.
+      </p>
+    </div>
+  )
+}
+
+{
+  cmd === 'contact' && (
+    <div class="t-out" data-announce="Printed: email, GitHub and LinkedIn.">
+      <p class="t-prose">
+        {contact.title} {contact.note}
+      </p>
+      <dl class="t-kv">
+        <div>
+          <dt>email</dt>
+          <dd>
+            <a href={`mailto:${profile.email}`} data-term-email>
+              {profile.email}
+            </a>
+            {live && (
+              <button type="button" class="t-cmd t-copy" data-term-copy={profile.email} aria-label={`copy ${profile.email}`}>
+                copy
+              </button>
+            )}
+          </dd>
+        </div>
+        {socials
+          .filter((s) => s.id !== 'email')
+          .map((s) => (
+            <div>
+              <dt>{s.id}</dt>
+              <dd>
+                <a href={s.href} target="_blank" rel="noopener" aria-label={`${s.label}: ${host(s.href)} (opens in a new tab)`}>
+                  {host(s.href)}
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </dd>
+            </div>
+          ))}
+      </dl>
+      <p class="t-dim">Based in {profile.location}.</p>
+    </div>
+  )
+}
+
+{
+  cmd === 'not-found' && (
+    <div class="t-out" data-announce={NOT_FOUND.join('help')}>
+      <p>
+        {NOT_FOUND[0]}
+        <TermCmd name="help" live={live} />
+        {NOT_FOUND[1]}
+      </p>
+    </div>
+  )
+}
