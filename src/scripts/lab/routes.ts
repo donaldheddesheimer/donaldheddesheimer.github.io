@@ -3,9 +3,11 @@
 //
 // A computer path names what the computer shows: 'work', 'work/<project id>', 'about', 'resume' or
 // 'contact'. For each there are three addresses:
-// - the lab reading it, the one to share:        /?computer=<path>
-// - the page the monitor's frame loads:           /computer/<path>/
-// - the ordinary page with the same content:      /#<path>, or /projects/<id>/
+// - the lab reading it, the one to share:          /?computer=<path>
+// - the page itself (the monitor's frame loads it,
+//   and it stands alone without JavaScript):        /computer/<path>/
+// - its canonical page:                             /projects/<id>/ for a case study, or the page itself
+// The homepage's old anchors (/#work, /#about, /#resume, /#contact) open the same pages.
 export const PAGES = ['work', 'about', 'resume', 'contact'] as const;
 
 /** A valid computer path, or null. `projects` are the project ids the site has. */
@@ -17,8 +19,8 @@ export function parse(path: string | null | undefined, projects: readonly string
 }
 
 export const labHref = (path: string) => `/?computer=${path}`;
-export const frameHref = (path: string) => `/computer/${path}/`;
-export const ordinaryHref = (path: string) => (path.startsWith('work/') ? `/projects/${path.slice(5)}/` : `/#${path}`);
+export const pageHref = (path: string) => `/computer/${path}/`;
+export const canonicalHref = (path: string) => (path.startsWith('work/') ? `/projects/${path.slice(5)}/` : pageHref(path));
 
 /** The computer path for a same-site address that has one (not yet checked against the projects). */
 export function pathOf(u: URL, origin: string): string | null {

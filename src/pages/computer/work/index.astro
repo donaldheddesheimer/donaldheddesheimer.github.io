@@ -3,9 +3,9 @@
 import Screen from '../../../layouts/Screen.astro';
 import FolioWork from '../../../components/FolioWork.astro';
 import { profile } from '../../../data/site';
-import { labHref } from '../../../scripts/lab/routes';
+import { pageHref } from '../../../scripts/lab/routes';
 ---
 
 <Screen title={`Work · ${profile.name}`} path="work">
-  <FolioWork level={1} href={(id) => labHref(`work/${id}`)} />
+  <FolioWork level={1} href={(id) => pageHref(`work/${id}`)} />
 </Screen>

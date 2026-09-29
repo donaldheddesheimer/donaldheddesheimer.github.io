@@ -1,6 +1,6 @@
 # donaldheddesheimer.github.io
 
-My personal site. The homepage opens on a robotics lab after hours: three robots dance beside a desk, and the portfolio is on the desk's computer. "Explore the lab" (or a click on the monitor) takes the camera to the screen, where Work, About, Résumé and Contact read as ordinary HTML. Below the lab, the same four sections are on the page itself, so everything is there without 3D, JavaScript or WebGL, and on small screens.
+My personal site. The homepage is a robotics lab after hours, across the whole window: three robots dance round a desk, and the portfolio is on the desk's computer. A click on the monitor goes straight to the screen, where Work, About, Résumé and Contact read as ordinary HTML; in a small window the same pages read across the window. There is nothing below the lab. Without WebGL the lab is a still of the same room, and without JavaScript the way in is a link to the computer's pages, which stand alone.
 Built with [Astro](https://astro.build), [Tailwind CSS](https://tailwindcss.com) and [three.js](https://threejs.org), and deployed to GitHub Pages on every push to `main`.
 
 ## Develop
@@ -20,7 +20,8 @@ npm run build    # outputs to dist/
 | Project images and video | `public/projects/` |
 | Photos (headshot, hobbies) | `public/images/` |
 | Resume (redacted, no phone number) | `public/resume.pdf` |
-| Link-preview card (a screenshot of the homepage's opening, 1200×630) | `public/og.jpg` |
+| Link-preview card (a render of the homepage's opening, 1200×630) | `public/og.jpg` |
+| The lab's stills (shown until the scene draws, and without WebGL) | `public/lab/` |
 
 - **Headshot:** add `public/images/me.jpg` and set `profile.photo`.
 - **Hobby photo:** add it to `public/images/` and set `image` on that entry in `offDuty`.
@@ -31,27 +32,29 @@ npm run build    # outputs to dist/
 
 | Address | What it is |
 | --- | --- |
-| `/` | The lab, then Work, About, Résumé and Contact |
+| `/` | The lab |
 | `/?computer=<path>` | The lab with the computer open on a page: `work`, `work/<project id>`, `about`, `resume` or `contact` |
-| `/projects/<id>/` | A project's case study |
-| `/computer/<path>/` | The page the computer's screen shows (noindex; opened on its own, it goes to the lab or the ordinary page) |
+| `/#work`, `/#about`, `/#resume`, `/#contact` | Old anchors: become `/?computer=<page>` |
+| `/projects/<id>/` | A project's case study, on its own (the address to share and index) |
+| `/computer/<path>/` | The page the computer's screen shows (noindex; opened on its own with JavaScript, it goes to `/?computer=<path>`; without, it stands alone) |
 | `/prototype/`, `/prototype/work/<id>/` | Retired: go to `/` and `/projects/<id>/`, keeping the query and anchor |
-| `/systems/`, `/systems/screen/` | Retired: `?sel=project:<id>` goes to that case study, any other selection to `/#work`, none to `/` |
+| `/systems/`, `/systems/screen/` | Retired: `?sel=project:<id>` goes to that case study, any other selection to `/?computer=work`, none to `/` |
 
 ## Layout
 
 | Path | What it is |
 | --- | --- |
-| `src/pages/index.astro` | Homepage: the lab, then the four sections |
+| `src/pages/index.astro` | Homepage: the lab, the name and Settings (the monitor is the way in) |
 | `src/pages/projects/[slug].astro` | A project's case study |
 | `src/pages/computer/` | The computer's pages |
 | `src/pages/prototype*`, `src/pages/systems*` | Redirects from retired addresses |
 | `src/pages/404.astro` | Not-found page |
-| `src/layouts/Base.astro` | Page shell: top bar, settings (Motion), mobile tab bar, footer, ⌘K search |
-| `src/layouts/Screen.astro` | The computer's page shell |
+| `src/layouts/Base.astro` | Document shell: head, link preview, the Motion setting before first paint |
+| `src/layouts/Screen.astro` | The computer's page shell (also the case studies' and the 404's) |
 | `src/layouts/Redirect.astro` | A retired address |
 | `src/components/LabStage.astro` | The lab: the scene over a still that stands in without WebGL |
-| `src/components/Folio*.astro`, `CaseStudy.astro` | Work, About, Résumé, Contact and the case study, shared by the homepage and the computer |
+| `src/components/Settings.astro` | The Motion setting |
+| `src/components/Folio*.astro`, `CaseStudy.astro` | Work, About, Résumé, Contact and the case study (which `/projects/<id>/` shares) |
 | `src/scripts/lab/scene.ts` | The three.js scene: room, robots, choreography, camera |
 | `src/scripts/lab/computer.ts` | Going in and out of the computer, its address and history |
 | `src/scripts/lab/routes.ts` | The computer's paths and addresses |

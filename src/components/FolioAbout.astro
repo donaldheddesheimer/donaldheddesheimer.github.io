@@ -6,7 +6,7 @@ import { fmtMonth } from '../lib/format';
 import '../styles/folio.css';
 
 interface Props {
-  /** The section heading's level: 1 on a page of its own, 2 on the page with all four. */
+  /** The heading's level: 1 on a page of its own (the computer's), 2 under another page's heading. */
   level?: 1 | 2;
 }
 const { level = 2 } = Astro.props;

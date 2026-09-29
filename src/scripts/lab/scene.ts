@@ -312,19 +312,18 @@ const STILL: Persona = { lag: 0, canon: 0, sway: 0, bounce: 0, arm: 0, twist: 0,
 
 // Graphite: heavy, grounded, deliberate. The broadest build, thick limbs and a wide low stance; it
 // sways at half time, bounces every other beat and arrives late on every arm move, and keeps its arms
-// close (clear of the opening's text beside it). It keeps to the
-// workstation's side of the floor.
+// close. It dances just behind the monitor, left of it.
 // Ivory: precise, curious, attentive. Tall, slim and long-necked; snaps to each arm key and looks
 // around (and tilts its head) between moves. It stands back by the service stand, and leaves the step
 // now and then to inspect the unfinished robot on it.
 // Terracotta: small, energetic, playful. Bounces twice a beat, hops its steps and throws its arms wide.
-// It has the front of the floor, and starts the exchanges (react()).
-// The three stand as a loose triangle, not a line: Graphite and Terracotta a little apart at the front,
-// turned partly toward each other, Ivory further back.
+// It has the front of the floor, right of the monitor, and starts the exchanges (react()).
+// The three stand as a loose triangle round the monitor, not a line: Graphite and Terracotta either side
+// of it and a little behind, turned partly toward each other, Ivory further back.
 const BUILDS: Build[] = [
   {
     name: 'graphite',
-    at: [-0.75, 0.45, 0.5],
+    at: [-1.55, 0.35, 0.55],
     paint: 0x464c54,
     trim: 0x202328,
     eye: 0xc9d6e6,
@@ -374,7 +373,7 @@ const BUILDS: Build[] = [
   },
   {
     name: 'terracotta',
-    at: [0.6, 0.8, -0.3],
+    at: [1.85, 1.0, -0.55],
     paint: 0xb86a4e,
     trim: 0x2a2d33,
     eye: 0xffe3b8,
@@ -1021,7 +1020,7 @@ function portfolioTexture(data: ScreenData | null, onChange: () => void) {
   const draw = () => {
     g.fillStyle = '#131211';
     g.fillRect(0, 0, W, H);
-    // The bar: the mark and name, the four places, the ordinary page and the way out.
+    // The bar: the mark and name, the four places, and the way back to the room.
     g.fillStyle = '#3a3632';
     g.fillRect(0, 44 * S - 1, W, 1);
     g.textBaseline = 'middle';
@@ -1030,11 +1029,10 @@ function portfolioTexture(data: ScreenData | null, onChange: () => void) {
     g.strokeRect((edge + 1) * S, 13 * S, 18 * S, 18 * S);
     if (data) text(data.name, edge + 28, 22, '#f5f2ed', font(600, 14));
     let x = 1209 - edge;
-    x -= text('Leave computer', x - 10, 22, '#b4ada3', font(400, 14), 'right') + 20;
-    x -= text('Open ordinary page', x - 10, 22, '#9a9288', font(400, 14), 'right') + 20;
+    x -= text('← Back to room', x - 10, 22, '#b4ada3', font(400, 14), 'right') + 20;
     g.fillStyle = '#3a3632';
-    g.fillRect((x - 2) * S, 10 * S, 1, 24 * S);
-    x -= 14;
+    g.fillRect((x + 8) * S, 10 * S, 1, 24 * S);
+    x -= 12;
     for (const [i, label] of ['Contact', 'Résumé', 'About', 'Work'].entries()) {
       const w = text(label, x - 10, 22, i === 3 ? '#f5f2ed' : '#b4ada3', font(400, 14), 'right');
       if (i === 3) {
@@ -1162,7 +1160,7 @@ type Mats = ReturnType<typeof materials>;
 // --- The room ------------------------------------------------------------------------------------
 // Back wall at z = -3.1; the dance floor, taped out, in the middle; the window high over it, right of
 // centre; the workbench under a pendant at the right, the service stand in front of the bench's end. The
-// wall's left half is left bare: the opening's text is over it.
+// wall's left half is left bare: the name is over it.
 const WALL_Z = -3.1;
 export const STAND = { x: 1.75, z: -2.0, yaw: -0.15 };
 
@@ -1342,9 +1340,10 @@ function buildProps(mats: Mats) {
 }
 
 // --- Workstation ---------------------------------------------------------------------------------
-// The desk at the front left, turned toward the room: whoever sits there looks past the monitor to the
-// dancers. Life size (the robots stand 1.4 to 1.8 m). The monitor is the way into the portfolio.
-export const DESK = { x: -1.35, z: 3.3, yaw: 0.5 };
+// The desk at the front, a little left of centre and turned toward the room: whoever sits there looks
+// past the monitor to the dancers. Life size (the robots stand 1.4 to 1.8 m). The monitor is the way
+// into the portfolio, and the opening's centre.
+export const DESK = { x: 0.1, z: 3.5, yaw: 0.22 };
 /** The monitor's screen (16:10), and the height of its centre, about seated eye level. */
 export const SCREEN = { w: 0.68, h: 0.425, y: 1.12 };
 const SCREEN_Z = -0.1475;
@@ -1451,6 +1450,10 @@ export interface LabScene {
   pick(x: number, y: number): boolean;
   /** Whether the last press on the room turned into a drag (a look around), rather than a click. */
   dragged(): boolean;
+  /** Brighten the monitor as the pointer over it does (its link, focused from the keyboard). */
+  highlight(on: boolean): void;
+  /** The monitor's bezel as drawn now, in the opening (client px). */
+  monitor(): Rect;
   /** What the last frame drew, for measurements. */
   stats(): Record<string, number>;
   dispose(): void;
@@ -1473,8 +1476,9 @@ const copyView = (a: View, b: View) => {
 };
 const easeInOut = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2);
 
-// One lens per view, never widened to fit a window: the opening dollies back instead, and windows
-// that can't hold the composition get the simpler stacked page (computer.ts, LabStage.astro).
+// One lens per view, never widened to fit a window: the opening dollies back instead (or, in a tall
+// window, comes in on the monitor and lets the room crop), and a window too small to read on the monitor
+// reads across the window instead (computer.ts).
 const HERO_FOV = 34;
 const READ_FOV = 40;
 const tanHalf = (fov: number) => Math.tan(THREE.MathUtils.degToRad(fov / 2));
@@ -1496,8 +1500,13 @@ const HINT_MS = 2200;
 const HERO_LOOK = new THREE.Vector3(-0.6, 1.0, -0.5);
 const HERO_DIR = new THREE.Vector3(0.2, 0.14, 1).normalize();
 /** `screen` is what the monitor shows before the page is laid over it. `avoid` is the opening's text,
- *  where it lies over the picture: the dancers and the monitor keep clear of it. */
-export function mountLab(root: HTMLElement, { screen = null as ScreenData | null, avoid = null as HTMLElement | null } = {}): LabScene | null {
+ *  where it lies over the picture: the dancers and the monitor keep clear of it. `onFit` hears where the
+ *  monitor's bezel is drawn (client px) each time the opening is fitted to its window, for the link over
+ *  it (LabStage.astro) to stand there. */
+export function mountLab(
+  root: HTMLElement,
+  { screen = null as ScreenData | null, avoid = null as HTMLElement | null, onFit = null as ((monitor: Rect) => void) | null } = {},
+): LabScene | null {
   const stage = root.querySelector<HTMLElement>('[data-lab-stage]');
   if (!stage || root.dataset.mounted != null) return null;
 
@@ -1601,6 +1610,14 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
   ].map(([sx, sy]) => desk.group.localToWorld(new THREE.Vector3((sx * SCREEN.w) / 2, SCREEN.y + (sy * SCREEN.h) / 2, SCREEN_Z)));
   const screenCentre = desk.group.localToWorld(new THREE.Vector3(0, SCREEN.y, SCREEN_Z));
   const screenNormal = new THREE.Vector3(Math.sin(DESK.yaw), 0, Math.cos(DESK.yaw));
+  // The monitor's bezel: what the pointer picks, what the look keeps in the picture, where the link over
+  // it stands.
+  const bezelCorners = [
+    [-1, 1],
+    [1, 1],
+    [1, -1],
+    [-1, -1],
+  ].map(([sx, sy]) => desk.group.localToWorld(new THREE.Vector3(sx * (SCREEN.w / 2 + 0.018), SCREEN.y + sy * (SCREEN.h / 2 + 0.018), SCREEN_Z)));
 
   // What the opening keeps in the picture: the monitor and keyboard, the dancers at the top of a reach,
   // the unfinished robot on its stand. The foreground props and the room's edges may crop.
@@ -1687,11 +1704,12 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
   const next = newView();
   const probe = new THREE.PerspectiveCamera();
   const pv = new THREE.Vector3();
+  const pose = newView();
 
   // The opening's distance: the nearest at which every fit point is inside the safe part of the frame
-  // (clear of the bar at the top and the controls at the bottom) and, where the text lies over the
-  // picture, the top-left of each dancer's head and of the monitor is right of the text or below it, and
-  // no elbow or hand comes within 16 px of a line of it or a link (an arm may reach beside a shorter line).
+  // (below a band at the top, where the name is, and above the bottom edge) and, where the name lies over
+  // the picture, the top-left of each dancer's head and of the monitor is right of it or below it, and
+  // no elbow or hand comes within 16 px of a line of it (an arm may reach beside a shorter line).
   // For that the picture may slide right and down (an off-centre view, the same lens and angle), and
   // takes whichever slide keeps the room largest; failing that it shrinks, by no more than a quarter.
   function fitHero(box: DOMRect) {
@@ -1751,6 +1769,23 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
     const framed = nearest(false);
     heroShift.set(0, 0);
     heroDist = heroFramed = framed;
+    // A tall window can't hold the whole room at a size worth seeing. There the monitor keeps a share of
+    // the width (the more, the taller the window): the camera comes as close as that takes, the room
+    // round it crops, and the picture slides to put the monitor in the middle, a little low.
+    const share = Math.min(0.52, 0.12 + (1.3 - fw / fh) * 0.48);
+    if (share > 0 && bezelAt(framed).w < share * fw) {
+      let lo = 1;
+      let hi = framed;
+      for (let i = 0; i < 24; i++) {
+        const mid = (lo + hi) / 2;
+        if (bezelAt(mid).w > share * fw) lo = mid;
+        else hi = mid;
+      }
+      heroDist = hi;
+      const m = drawnBezel();
+      heroShift.set(fw * 0.5 - (m.x + m.w / 2), fh * 0.54 - (m.y + m.h / 2));
+      return;
+    }
     if (!text) return;
     let best = Infinity;
     for (const y of [0, 0.025, 0.05]) {
@@ -1763,6 +1798,27 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
     heroDist = Math.min(best, framed * 1.25);
   }
 
+  // The monitor's bezel from the opening's angle at distance `d`, unslid (stage px). Nearer than the
+  // monitor itself, it is as wide as can be.
+  function bezelAt(d: number): Rect {
+    const f = fh / 2 / tanHalf(HERO_FOV);
+    probe.position.copy(HERO_DIR).multiplyScalar(d).add(HERO_LOOK);
+    probe.lookAt(HERO_LOOK);
+    probe.updateMatrixWorld();
+    probe.matrixWorldInverse.copy(probe.matrixWorld).invert();
+    const xs: number[] = [];
+    const ys: number[] = [];
+    for (const c of bezelCorners) {
+      pv.copy(c).applyMatrix4(probe.matrixWorldInverse);
+      if (pv.z > -0.1) return { x: -Infinity, y: -Infinity, w: Infinity, h: Infinity };
+      xs.push(fw / 2 + (f * pv.x) / -pv.z);
+      ys.push(fh / 2 - (f * pv.y) / -pv.z);
+    }
+    const x = Math.min(...xs);
+    const y = Math.min(...ys);
+    return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
+  }
+
   function measureStage() {
     const r = (mode === 'hero' && !flight ? stage! : root).getBoundingClientRect();
     fw = r.width || 1;
@@ -1770,19 +1826,20 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
     rootX = r.left;
     rootY = r.top;
     fitHero(r);
+    onFit?.(monitorRect());
   }
 
   const across = new THREE.Vector3();
   const heroView = (v: View) => heroPose(v, look.az, look.el);
-  function heroPose(v: View, lookAz: number, lookEl: number) {
+  function heroPose(v: View, lookAz: number, lookEl: number, at = t) {
     // A slow drift about the opening's angle, never a cut, and wherever the pointer has turned it.
-    const az = Math.sin(t * 0.13) * 0.025 + lookAz;
-    const d = heroDist + Math.sin(t * 0.07) * 0.12;
+    const az = Math.sin(at * 0.13) * 0.025 + lookAz;
+    const d = heroDist + Math.sin(at * 0.07) * 0.12;
     v.pos.copy(HERO_DIR).applyAxisAngle(UP, az);
     v.pos.applyAxisAngle(across.crossVectors(v.pos, UP).normalize(), lookEl).multiplyScalar(d).add(HERO_LOOK);
-    v.pos.y += Math.sin(t * 0.09 + 1.3) * 0.04;
+    v.pos.y += Math.sin(at * 0.09 + 1.3) * 0.04;
     v.look.copy(HERO_LOOK);
-    v.look.x += Math.sin(t * 0.11) * 0.04;
+    v.look.x += Math.sin(at * 0.11) * 0.04;
     v.f = fh / 2 / tanHalf(HERO_FOV);
     v.cx = fw / 2 + heroShift.x;
     v.cy = fh / 2 + heroShift.y;
@@ -1909,7 +1966,7 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
     resize(Math.round(r.width), Math.round(r.height));
   };
 
-  // The Motion switch (the page's bar) and the system setting: off holds one composed moment, and there
+  // The Motion switch (Settings) and the system setting: off holds one composed moment, and there
   // is no looking around. Turned off mid-dance, the room goes to that moment (the one it opens on with
   // motion off), not wherever the dance was: the look undone, the hint's light gone, drawn once.
   const onMotion = () => {
@@ -1920,8 +1977,10 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
       t = STILL_T;
       hintK = 0;
       light();
-      if (drawn && !lost && !flight && w > 0) render();
     }
+    // The opening is fitted to the drift, or to the moment held (monitorRect()).
+    if (w > 0) measureStage();
+    if (!intent && drawn && !lost && !flight && w > 0) render();
     sync();
   };
   const onLost = (e: Event) => {
@@ -1967,11 +2026,12 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
   const raycaster = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
   let hovered = false;
+  let lit = false; // the monitor, hovered or its link focused
 
   // The screen's light: brighter under the pointer, and while the idle hint plays.
   let hintK = 0;
   function light() {
-    const k = (hovered ? 1 : 0) * 0.6 + hintK;
+    const k = (hovered || lit ? 1 : 0) * 0.6 + hintK;
     desk.screenMat.color.setScalar(SCREEN_LIT * (1 + 0.14 * k));
     desk.lift.material.opacity = 0.05 * k;
     desk.lift.visible = k > 0.002;
@@ -2045,17 +2105,11 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
   let down: { id: number; x: number; y: number } | null = null;
   let wasDrag = false;
   const soft = (x: number, lo: number, hi: number) => (x >= 0 ? hi * Math.tanh(x / hi) : lo * Math.tanh(x / lo));
-  const lookOK = () => intent && mode === 'hero' && !flight && !lost && html.hasAttribute('data-pc-able') && !html.dataset.pc;
+  const lookOK = () => intent && mode === 'hero' && !flight && !lost && !html.dataset.pc;
   const fine = (e: PointerEvent) => e.pointerType === 'mouse' || e.pointerType === 'pen';
   // Turning to positive az swings the monitor toward the frame's left edge, so that way the look stops
   // where the monitor's bezel would cross the fit's margin, with the drift where it is now: the limit
   // moves with the drift, slowly, and the monitor never leaves the picture. The other way keeps LOOK.az.
-  const bezelCorners = [
-    [-1, 1],
-    [1, 1],
-    [1, -1],
-    [-1, -1],
-  ].map(([sx, sy]) => desk.group.localToWorld(new THREE.Vector3(sx * (SCREEN.w / 2 + 0.018), SCREEN.y + sy * (SCREEN.h / 2 + 0.018), SCREEN_Z)));
   const trial = newView();
   let lookAzMax = LOOK.az;
   function inFrame(az: number) {
@@ -2068,6 +2122,33 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
       pv.copy(c).applyMatrix4(probe.matrixWorldInverse);
       return pv.z < -0.1 && trial.cx + (trial.f * pv.x) / -pv.z >= fw * 0.015;
     });
+  }
+  // The bezel in the opening as drawn now, with the drift and the look where they are (client px).
+  function monitorRect(): Rect {
+    const r = bezelIn(1, () => heroView(pose));
+    return { x: r.x + rootX, y: r.y + rootY, w: r.w, h: r.h };
+  }
+  // Where the bezel is drawn in the opening without a look (stage px): while the room holds still, where
+  // it is; while it doesn't, everywhere the drift takes it (its periods are all under 90 s).
+  function drawnBezel() {
+    return intent ? bezelIn(96, (i) => heroPose(pose, 0, 0, i * 4.7)) : bezelIn(1, () => heroPose(pose, 0, 0));
+  }
+  function bezelIn(samples: number, set: (i: number) => void): Rect {
+    let [x0, y0, x1, y1] = [Infinity, Infinity, -Infinity, -Infinity];
+    for (let i = 0; i < samples; i++) {
+      set(i);
+      probe.position.copy(pose.pos);
+      probe.lookAt(pose.look);
+      probe.updateMatrixWorld();
+      probe.matrixWorldInverse.copy(probe.matrixWorld).invert();
+      for (const c of bezelCorners) {
+        pv.copy(c).applyMatrix4(probe.matrixWorldInverse);
+        const x = pose.cx + (pose.f * pv.x) / -pv.z;
+        const y = pose.cy - (pose.f * pv.y) / -pv.z;
+        [x0, y0, x1, y1] = [Math.min(x0, x), Math.min(y0, y), Math.max(x1, x), Math.max(y1, y)];
+      }
+    }
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
   }
   function reachAz() {
     if (inFrame(LOOK.az)) return LOOK.az;
@@ -2217,6 +2298,14 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
     screenAspect: SCREEN.w / SCREEN.h,
     pick: pickAt,
     dragged: () => wasDrag,
+    monitor: monitorRect,
+    highlight(on) {
+      if (on === lit) return;
+      lit = on;
+      if (on) endHint();
+      light();
+      if (!raf && !lost && w && mode === 'hero' && !flight) render();
+    },
     stats() {
       if (!lost && w) render();
       const info = renderer.info;
@@ -2244,6 +2333,7 @@ export function mountLab(root: HTMLElement, { screen = null as ScreenData | null
         hint: hintK,
         heroDist,
         heroFramed,
+        ...(({ x, y, w, h }) => ({ monX: x, monY: y, monW: w, monH: h }))(monitorRect()),
         lookAz: look.az,
         lookAzMax,
         lookEl: look.el,

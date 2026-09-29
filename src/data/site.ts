@@ -1,12 +1,14 @@
 // Site-wide content. Projects live in src/content/projects/ (one Markdown file each).
 // Items marked TODO are placeholders. Confirm or replace them before sharing the link.
 
-// public/og.jpg (the link-preview card) is a screenshot of the homepage's opening at 1200×630: the
-// name, headline, status and school over the lab. Retake it when any of those change.
+// public/og.jpg (the link-preview card) is a render of the homepage's opening at 1200×630: the name and
+// title over the lab, the monitor at its centre. Retake it when the opening changes.
 export const profile = {
   name: 'Donald Heddesheimer',
   initials: 'DH',
   headline: 'Systems and GPU software engineer',
+  /** What the opening says under the name: the headline, shorter. */
+  title: 'Software engineer',
   tagline:
     'I build real-time software that senses, simulates, and decides: CUDA radar pipelines, rover autonomy, GPU-parallel control, and the tools to make them fast.',
   status: 'SWE Intern · Solopulse',
@@ -30,7 +32,7 @@ export const socials = [
   { id: 'email', label: 'Email', handle: 'donaldheddes@gmail.com', href: 'mailto:donaldheddes@gmail.com', icon: 'mail' },
 ] as const;
 
-// The contact section's heading and note (the homepage's Contact, and the lab computer's).
+// The Contact page's heading and note (the lab computer's Contact).
 export const contact = {
   title: "Let's talk.",
   note: 'Internships, research, or anything GPU- or robot-shaped. Email is the fastest way to reach me.',

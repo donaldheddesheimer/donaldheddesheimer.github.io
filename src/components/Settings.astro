@@ -1,0 +1,153 @@
+---
+// Settings, in the opening's corner: a quiet icon button that discloses the Motion switch. It closes on
+// Escape (focus back on its button), when focus moves to something else, and on a press anywhere else.
+// Without JavaScript the switch can't work (and the lab doesn't run), so it isn't offered.
+import Icon from './Icon.astro';
+
+interface Props {
+  class?: string;
+}
+const { class: cls } = Astro.props;
+---
+
+<div class:list={['settings', cls]} data-settings>
+  <button type="button" class="btn btn-ghost btn-icon settings-btn" aria-expanded="false" aria-controls="settings" aria-label="Settings" title="Settings" data-settings-toggle>
+    <Icon name="sliders" class="size-4" />
+  </button>
+  <div id="settings" class="settings-pop" role="group" aria-label="Settings" hidden>
+    <button type="button" role="switch" aria-checked="true" class="motion-switch" data-motion-toggle aria-describedby="settings-motion-note">
+      Motion <span class="sw" aria-hidden="true"></span>
+    </button>
+    <p id="settings-motion-note" class="settings-note">The lab's robots and camera, and the page's transitions. It starts off if your system asks for reduced motion, and the robots and camera then stay still.</p>
+  </div>
+</div>
+
+<script>
+  const html = document.documentElement;
+  const settings = document.querySelector<HTMLElement>('[data-settings]');
+  const btn = settings?.querySelector<HTMLButtonElement>('[data-settings-toggle]');
+  const pop = settings?.querySelector<HTMLElement>('#settings');
+  const motion = settings?.querySelector<HTMLButtonElement>('[data-motion-toggle]');
+  if (settings && btn && pop && motion) {
+    const showMotion = () => motion.setAttribute('aria-checked', String(html.dataset.motion !== 'off'));
+    showMotion();
+    motion.addEventListener('click', () => {
+      const next = html.dataset.motion === 'off' ? 'on' : 'off';
+      html.dataset.motion = next;
+      try {
+        localStorage.setItem('motion', next);
+      } catch {}
+      showMotion();
+    });
+    const show = (open: boolean) => {
+      pop.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+    };
+    btn.addEventListener('click', () => show(pop.hidden));
+    // (From the whole page: a click doesn't focus a button in Safari, or in Firefox on a Mac.)
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || pop.hidden) return;
+      e.preventDefault();
+      show(false);
+      btn.focus();
+    });
+    // (Not a press inside that focuses nothing, such as on the note: the focus goes nowhere then.)
+    settings.addEventListener('focusout', (e) => {
+      const to = e.relatedTarget as Node | null;
+      if (to && !settings.contains(to)) show(false);
+    });
+    document.addEventListener('pointerdown', (e) => {
+      if (!pop.hidden && !settings.contains(e.target as Node)) show(false);
+    });
+  }
+</script>
+
+<style>
+  .settings {
+    position: relative;
+  }
+  .settings-btn {
+    color: var(--muted);
+  }
+  .settings-btn:hover,
+  .settings-btn[aria-expanded='true'] {
+    background: var(--panel-3);
+    color: var(--text);
+  }
+  @media (pointer: coarse) {
+    .settings-btn {
+      width: var(--h-touch);
+      height: var(--h-touch);
+    }
+  }
+  .settings-pop {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 5;
+    display: grid;
+    gap: 0.5rem;
+    width: min(17rem, calc(100vw - 2rem));
+    padding: 0.75rem 0.875rem 0.875rem;
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-2);
+    background: var(--panel);
+    box-shadow: var(--shadow-elev-3);
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+  .motion-switch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: var(--h-md);
+    padding: 0;
+    color: var(--text);
+    font-weight: 500;
+  }
+  @media (pointer: coarse) {
+    .motion-switch {
+      min-height: var(--h-touch);
+    }
+  }
+  .settings-note {
+    font-size: var(--text-xs);
+    line-height: 1.5;
+    color: var(--dim);
+  }
+  @media (scripting: none) {
+    .settings {
+      display: none;
+    }
+  }
+
+  /* Motion: a switch, drawn in neutrals (green means active, and this is a preference). */
+  .sw {
+    position: relative;
+    width: 1.5rem;
+    height: 0.875rem;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--line-2);
+    background: var(--bg);
+    transition: background-color var(--dur-1) var(--ease);
+  }
+  .sw::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--dim);
+    transition: translate var(--dur-1) var(--ease);
+  }
+  [aria-checked='true'] > .sw {
+    background: var(--panel-3);
+  }
+  [aria-checked='true'] > .sw::after {
+    translate: 0.625rem 0;
+    background: var(--text);
+  }
+</style>

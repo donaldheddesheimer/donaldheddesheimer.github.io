@@ -1,34 +1,38 @@
-// The computer on the lab's desk, on the homepage (/).
+// The computer on the lab's desk, on the homepage (/). It holds the whole portfolio.
 //
-// "Explore the lab", or a click on the monitor, flies the opening's camera once, straight to reading:
+// A click on the monitor (or its link, from the keyboard) flies the opening's camera once, straight to reading:
 // square on to the screen, where the portfolio is real HTML (/computer/…, src/layouts/Screen.astro) in a
 // frame laid over the monitor's screen. The frame rides the screen in flight and lies flat, focused and
 // scrollable, once there. While reading, the robots come to rest and the scene stops drawing.
 //
-// The address names what the computer shows (routes.ts): /?computer=<path>. Going in adds an entry; each
-// page opened inside adds one; Back and Forward move between them, and out of the lab. Leave (the
-// computer's own button, or Escape) goes back to the entry the lab was opened from. A reload or a shared
-// link opens the computer on its page at once, over the room, without the camera's entrance.
-// history.state is { pc: path, back: entries since the opening (0: the lab was opened here), y: the
-// page's scroll when last left, k: the entry's own key }.
+// Windows too small to read on the monitor with the room round it (phones, narrow or short windows: the
+// `onDesk` gate), and a room that can't be drawn (no WebGL), read the same pages across the whole window
+// instead: no flight, the page fading in (cutting in, without motion). A window resized either way while
+// reading moves between the two.
 //
-// Windows that can't hold the composition (phones, narrow, short or portrait: the `roomy` gate) don't
-// enter; the page below the opening has the same content. One that stops being roomy while reading shows
-// the computer's page across the whole window.
+// The address names what the computer shows (routes.ts): /?computer=<path>. Going in adds an entry; each
+// page opened inside adds one; Back and Forward move between them, and out of the lab. "Back to room"
+// (the computer's own link) and Escape go back to the entry the lab was opened from, and put the focus
+// back where it was (ringed, unless "Back to room" was clicked or tapped). A reload or a shared link opens the computer on its page at once, without the
+// camera's entrance; so do the homepage's old anchors (/#work, /#about, /#resume, /#contact).
+// history.state is { pc: path, back: entries since the opening (0: the lab was opened here), prev: the
+// entry before is one of the computer's pages too (in a lab opened here), y: the page's scroll when last
+// left, k: the entry's own key }.
 import type { LabScene, Quad, Rect } from './scene';
-import { frameHref, labHref, parse } from './routes';
+import { PAGES, labHref, pageHref, parse } from './routes';
 
 type State = 'closed' | 'moving' | 'read';
 interface Entry {
   pc?: string;
   back?: number;
+  prev?: boolean;
   y?: number;
   k?: string;
 }
 
 const FADE_MS = 250; // the opening's text fades before the camera moves
 const ASPECT = 1.6; // the monitor's screen (scene.ts SCREEN), for reading before the scene has loaded
-const roomy = matchMedia('(width >= 64rem) and (height >= 36rem) and (min-aspect-ratio: 3/2)');
+const onDesk = matchMedia('(width >= 64rem) and (height >= 36rem)');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 const html = document.documentElement;
 const smooth = (a: number, b: number, x: number) => {
@@ -61,7 +65,7 @@ function warp(q: Quad, w: number, h: number) {
 /** `load` gets the scene, loading it first if it hasn't been (a click before it was ready, or Save-Data).
  *  `eager`: a lab opened at once (a reload, a shared link) loads the room behind it straight away. */
 export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getScene: () => LabScene | null, load: () => Promise<LabScene | null>, eager = true) {
-  const enter = document.querySelector<HTMLAnchorElement>('[data-lab-enter]');
+  const link = document.querySelector<HTMLAnchorElement>('[data-lab-monitor]');
   let projects: string[] = [];
   try {
     projects = JSON.parse(dialog.dataset.projects ?? '[]');
@@ -79,13 +83,13 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   let homeTitle = document.title;
   let pageTitle = document.title;
   let opener: HTMLElement | null = null;
+  let clicked = false; // "Back to room" was clicked or tapped (not pressed): the focus comes back without a ring
   let scroll: [number, number] = [0, 0];
 
   const motionOK = () => !reduce.matches && html.dataset.motion !== 'off';
   const ready = () => !!getScene() && root.dataset.drawn != null && root.dataset.failed == null;
-  const canEnter = () => roomy.matches && root.dataset.failed == null;
-  // Whether "Explore the lab" is offered (the homepage's inline script sets it first, from `roomy`).
-  const offer = () => html.toggleAttribute('data-pc-able', canEnter());
+  // Whether the computer reads on the monitor, in the room (or else across the window).
+  const inRoom = () => onDesk.matches && root.dataset.failed == null;
   const entry = (): Entry => (history.state && typeof history.state === 'object' ? history.state : {});
   const current = () => parse(new URLSearchParams(location.search).get('computer'), projects);
   const frameY = () => {
@@ -111,7 +115,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     keepTimer = window.setTimeout(() => {
       const path = current();
       try {
-        if (path && frame?.contentWindow?.location.pathname === frameHref(path)) remember();
+        if (path && frame?.contentWindow?.location.pathname === pageHref(path)) remember();
       } catch {}
     }, 150);
   };
@@ -159,7 +163,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     frame.contentWindow?.focus();
   }
 
-  function makeFrame(path: string) {
+  function makeFrame(path: string, hash = '') {
     loaded = false;
     shown = path;
     shownKey = entry().k;
@@ -181,7 +185,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
         if (dialog.contains(document.activeElement)) focusFrame();
       }
     });
-    frame.src = frameHref(path);
+    frame.src = pageHref(path) + hash;
     dialog.append(frame);
   }
   // Another page in the same frame, without an entry of the frame's own (the lab keeps the history).
@@ -190,7 +194,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     shown = path;
     shownKey = entry().k;
     restoreY = y;
-    frame.contentWindow.location.replace(frameHref(path) + hash);
+    frame.contentWindow.location.replace(pageHref(path) + hash);
   }
 
   // Put the scene in the reading view at once, if it's there and hasn't flown there itself.
@@ -218,10 +222,10 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     });
 
   // Open on `path`: flying in from the opening (`fly`, where the room is there and motion allows), or
-  // at once. `y` is where the page was last left.
-  async function open(path: string, fly: boolean, y: number | null = null) {
+  // at once. `y` is where the page was last left, `hash` an anchor on it.
+  async function open(path: string, fly: boolean, y: number | null = null, hash = '') {
     state = 'moving';
-    if (fly && !ready() && canEnter()) {
+    if (fly && !ready() && inRoom() && motionOK()) {
       html.dataset.pcLoading = '';
       if (await load()) await firstFrame();
       delete html.dataset.pcLoading;
@@ -233,14 +237,16 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
       return after();
     }
     const scene = getScene();
-    fly = fly && !!scene && ready() && canEnter() && motionOK();
+    fly = fly && !!scene && ready() && inRoom() && motionOK();
+    // Focus comes back to what had it (the monitor's link, from the keyboard), or to the monitor's link.
     opener = document.activeElement instanceof HTMLElement && document.activeElement !== document.body ? document.activeElement : null;
+    clicked = false;
     if (!html.dataset.pc) scroll = [scrollX, scrollY];
     homeTitle = html.dataset.pc ? homeTitle : document.title;
-    full = !roomy.matches;
+    full = !inRoom();
     html.toggleAttribute('data-pc-full', full);
     restoreY = y;
-    makeFrame(path);
+    makeFrame(path, hash);
     dialog.showModal();
     // The dialog takes focus until the page is ready for it.
     dialog.focus();
@@ -265,12 +271,13 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     state = 'read';
     html.dataset.pc = 'read';
     getScene()?.quiet(true);
-    flat();
-    focusFrame();
+    // Laid out for the window as it is now (it may have been resized, or the room lost, in flight), with
+    // the room behind a lab opened at once (loaded now, or when it arrives).
+    relayout();
+    // The page, once it's there (a frame focused on its blank document can lose the keys when the page
+    // replaces it; the frame's load focuses it otherwise, from the dialog).
+    if (loaded) focusFrame();
     document.title = pageTitle;
-    place();
-    // The room behind a lab opened at once (loaded now, or when it arrives).
-    if (!placed && eager && !full && root.dataset.failed == null) load().then(() => place());
     after();
   }
 
@@ -282,7 +289,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     if (frame) frame.inert = true;
     const scene = getScene();
     scene?.quiet(false);
-    if (scene && placed && ready() && !instant && roomy.matches && motionOK()) {
+    if (scene && placed && ready() && !instant && inRoom() && motionOK()) {
       html.dataset.pc = 'return';
       await scene.go('hero', rect, riding('out'));
     }
@@ -297,7 +304,12 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     document.title = homeTitle;
     state = 'closed';
     scrollTo(scroll[0], scroll[1]);
-    (opener?.isConnected ? opener : enter)?.focus({ preventScroll: true });
+    // Or the monitor's link, if that's gone or can't take it now (a Settings switch, its panel shut).
+    // (focusVisible: not yet in TypeScript's DOM types; a browser without it shows the ring.)
+    const opts = clicked ? ({ preventScroll: true, focusVisible: false } as FocusOptions) : { preventScroll: true };
+    if (opener?.isConnected) opener.focus(opts);
+    if (document.activeElement !== opener) link?.focus(opts);
+    clicked = false;
     after();
   }
 
@@ -317,14 +329,14 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     }
     const path = current();
     const y = scrollOf(entry());
-    if (path && state === 'closed') open(path, !instant && canEnter(), y);
+    if (path && state === 'closed') open(path, !instant, y);
     else if (path && state === 'read' && path !== shown) show(path, '', y ?? 0);
     else if (!path && state === 'read') close(instant);
   }
 
   // Go in from the opening: a new entry, on Work.
   function go(path = 'work') {
-    if (state !== 'closed' || !canEnter()) return;
+    if (state !== 'closed') return;
     history.pushState({ pc: path, back: 1, k: newKey() } satisfies Entry, '', labHref(path));
     open(path, true);
   }
@@ -333,64 +345,103 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     if (state !== 'read' || !parse(path, projects)) return;
     remember();
     const back = entry().back ?? 0;
-    history.pushState({ pc: path, back: back ? back + 1 : 0, k: newKey() } satisfies Entry, '', labHref(path));
+    history.pushState({ pc: path, back: back ? back + 1 : 0, prev: !back || undefined, k: newKey() } satisfies Entry, '', labHref(path));
     show(path, hash);
   }
   // Leave: back to the entry the lab was opened from, or, for a lab opened here, the opening in place.
+  let going: boolean | null = null; // a history.go() asked for, until its popstate: whether to leave at once
   function leave(instant = false) {
     if (state === 'moving') {
       queued = () => leave(instant);
       return;
     }
-    if (state !== 'read') return;
+    // (Asked for during a move that shut the lab: the address may have moved on since.)
+    if (state !== 'read') return sync();
+    if (going != null) return;
     if (current()) {
       remember();
       const back = entry().back ?? 0;
-      if (back > 0) return history.go(-back); // popstate closes it
+      if (back > 0) {
+        going = instant;
+        return history.go(-back); // popstate closes it
+      }
       history.replaceState(null, '', location.pathname);
     }
     close(instant);
   }
 
   const plain = (e: MouseEvent) => e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
-  enter?.addEventListener('click', (e) => {
-    if (!plain(e) || !html.hasAttribute('data-pc-able')) return; // the link's own #work
+  // The monitor's link: the keyboard's way in, and the pointer's until the room has drawn.
+  link?.addEventListener('click', (e) => {
+    if (!plain(e)) return; // the link's own address (the computer's Work page), in a new tab or window
     e.preventDefault();
     go();
   });
-  // The monitor, from the opening. A drag that ends over it is a look around, not a click. Where the
-  // lab can't open, its content is below.
-  root.addEventListener('click', (e) => {
+  // The drawn monitor, from the opening. A drag that ends over it is a look around, not a click; a
+  // modified or middle click opens the link's own address in a new tab, as the link does.
+  const onMonitor = (e: MouseEvent) => {
     const scene = getScene();
-    if ((e.target as Element).closest('a, button') || state !== 'closed' || !scene || scene.dragged() || !scene.pick(e.clientX, e.clientY)) return;
-    if (canEnter() && plain(e)) go();
-    else document.getElementById('work')?.scrollIntoView({ behavior: motionOK() ? 'smooth' : 'auto' });
+    if (state !== 'closed' || (e.target as Element).closest('a, button') || !scene || !ready()) return false;
+    return !scene.dragged() && scene.pick(e.clientX, e.clientY);
+  };
+  const newTab = () => link && window.open(link.href, '_blank', 'noopener');
+  root.addEventListener('click', (e) => {
+    if (!onMonitor(e)) return;
+    if (plain(e)) go();
+    else if (e.button === 0 && (e.metaKey || e.ctrlKey || e.shiftKey)) newTab();
   });
-  // Escape, with the focus out of the frame.
+  root.addEventListener('auxclick', (e) => {
+    if (e.button === 1 && onMonitor(e)) newTab();
+  });
+  // A close request, with the focus out of the frame (the page not loaded yet, or a tap on the room round
+  // it): Escape leaves; the platform's Back (Android's), with no Escape behind it, goes back a page as
+  // Back does, or leaves a lab opened at once on its first page. (With the focus in the frame, Back is
+  // the history's.) One the page may not refuse (the browser's limit on them, without a tap or a key
+  // since) shuts the dialog regardless: 'close' leaves then.
+  let escaped = false;
+  addEventListener('keydown', (e) => (escaped = e.key === 'Escape'), true);
+  addEventListener('keyup', () => (escaped = false), true);
   dialog.addEventListener('cancel', (e) => {
+    if (!e.cancelable) return;
     e.preventDefault();
-    leave();
+    if (escaped || state !== 'read' || going != null || !(entry().back || entry().prev)) leave();
+    else {
+      going = false;
+      history.back();
+    }
   });
-  // Closed by the browser rather than by us (a second Escape can force it): leave at once.
+  // Closed by the browser rather than by us (in flight, too): leave at once.
   dialog.addEventListener('close', () => {
-    if (state === 'read' && !dialog.open) leave(true);
+    if (state === 'closed' || dialog.open) return;
+    if (going != null) going = true;
+    else leave(true);
   });
   addEventListener('popstate', () => {
     // The page left, while the frame still holds it.
     try {
-      if (state === 'read' && shown && shownKey && frame?.contentWindow?.location.pathname === frameHref(shown)) left.set(shownKey, frameY());
+      if (state === 'read' && shown && shownKey && frame?.contentWindow?.location.pathname === pageHref(shown)) left.set(shownKey, frameY());
     } catch {}
-    sync();
+    const instant = going === true;
+    going = null;
+    sync(instant);
   });
   addEventListener('pageshow', (e) => {
-    if (e.persisted) sync(true);
+    if (!e.persisted) return;
+    going = null;
+    sync(true);
+  });
+  // An old anchor typed or followed on the opening (/#about): the computer on that page, in its place.
+  addEventListener('hashchange', () => {
+    const h = location.hash.slice(1);
+    if (state !== 'closed' || current() || !(PAGES as readonly string[]).includes(h)) return;
+    history.replaceState({ pc: h, back: 1, k: newKey() } satisfies Entry, '', labHref(h));
+    sync();
   });
 
-  // A window that stops (or starts) being able to hold the composition.
+  // A window resized between the monitor and the whole window, or a room lost while reading.
   function relayout() {
-    offer();
     if (state !== 'read' || !frame) return;
-    full = !roomy.matches;
+    full = !inRoom();
     html.toggleAttribute('data-pc-full', full);
     rect = layout();
     size();
@@ -398,12 +449,12 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     const scene = getScene();
     if (full) scene?.quiet(true);
     else if (placed && scene) scene.setRect(rect);
-    else place();
+    else if (scene) place();
+    else if (eager) load().then(() => place());
   }
   addEventListener('resize', relayout);
-  roomy.addEventListener('change', relayout);
-  new MutationObserver(offer).observe(root, { attributes: true, attributeFilter: ['data-failed'] });
-  offer();
+  onDesk.addEventListener('change', relayout);
+  new MutationObserver(relayout).observe(root, { attributes: true, attributeFilter: ['data-failed'] });
 
   // The page under the lab stays where it was, whatever tries to scroll it.
   addEventListener('scroll', () => {
@@ -411,19 +462,23 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   });
   addEventListener('message', (e) => {
     if (!frame || e.source !== frame.contentWindow || e.origin !== location.origin) return;
-    const msg = e.data as { type?: string; path?: string; hash?: string; title?: string };
+    const msg = e.data as { type?: string; path?: string; hash?: string; title?: string; pointer?: boolean };
     if (msg.type === 'pc:go' && typeof msg.path === 'string') navigate(msg.path, typeof msg.hash === 'string' ? msg.hash : '');
-    else if (msg.type === 'pc:leave' || msg.type === 'pc:escape') leave();
+    else if (msg.type === 'pc:leave' || msg.type === 'pc:escape') {
+      clicked = msg.type === 'pc:leave' && msg.pointer === true;
+      leave();
+    }
     else if (msg.type === 'pc:page' && typeof msg.title === 'string') {
       pageTitle = msg.title;
       if (state === 'read') document.title = pageTitle;
     }
   });
 
-  // A reload or a shared link: the homepage's inline script has already shown the lab reading.
+  // A reload, a shared link or an old anchor: the homepage's inline script has already shown the lab
+  // reading (and made an anchor the address it stands for). An anchor on the page itself comes along.
   const path = current();
   if (path && html.dataset.pc === 'read') {
     if (entry().pc !== path) history.replaceState({ pc: path, back: 0, k: newKey() } satisfies Entry, '');
-    open(path, false, scrollOf(entry()));
+    open(path, false, scrollOf(entry()), location.hash);
   } else if (html.dataset.pc) delete html.dataset.pc;
 }
