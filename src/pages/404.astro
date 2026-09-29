@@ -1,10 +1,10 @@
 ---
-// Not found: under the computer's bar (Screen.astro), with the way into the work and back to the room.
+// Not found: under the site's bar (Screen.astro), with the way into the terminal and back to the lab.
 import { getCollection } from 'astro:content';
 import Screen from '../layouts/Screen.astro';
 import Icon from '../components/Icon.astro';
 import { profile } from '../data/site';
-import { pageHref } from '../scripts/lab/routes';
+import { TERMINAL, pageHref } from '../scripts/lab/routes';
 
 const projects = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code)).slice(0, 5);
 ---
@@ -15,8 +15,8 @@ const projects = (await getCollection('projects')).sort((a, b) => b.data.code.lo
     <h1 id="nf-title" class="nf-title">Nothing is at this address.</h1>
     <p class="nf-note">It may have moved. <span class="nf-path" data-path></span></p>
     <div class="nf-actions">
-      <a href={pageHref('work')} class="btn btn-primary">Explore my work<Icon name="arrow-right" class="size-4" /></a>
-      <a href="/" class="btn"><Icon name="arrow-left" class="size-4" />Back to room</a>
+      <a href={pageHref(TERMINAL)} class="btn btn-primary">Explore my work<Icon name="arrow-right" class="size-4" /></a>
+      <a href="/" class="btn"><Icon name="arrow-left" class="size-4" />Back to the lab</a>
     </div>
     <h2 class="nf-kicker nf-list-head">Recent projects</h2>
     <ul class="nf-list">

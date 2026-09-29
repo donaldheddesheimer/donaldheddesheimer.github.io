@@ -1,6 +1,6 @@
 ---
-// A case study on the lab computer: the same CaseStudy as /projects/<id>/, its links staying on the
-// computer.
+// A project's details on the lab computer, over the terminal: the same CaseStudy as /projects/<id>/, its
+// links staying on the computer, and its bar the way back to the terminal (Screen.astro).
 import { getCollection, type CollectionEntry } from 'astro:content';
 import Screen from '../../../layouts/Screen.astro';
 import CaseStudy from '../../../components/CaseStudy.astro';
@@ -24,5 +24,5 @@ const { project } = Astro.props;
 ---
 
 <Screen title={`${project.data.title} · ${profile.name}`} path={`work/${project.id}`}>
-  <CaseStudy {...Astro.props} projectHref={(id) => pageHref(`work/${id}`)} indexHref={pageHref('work')} />
+  <CaseStudy {...Astro.props} projectHref={(id) => pageHref(`work/${id}`)} indexHref={false} />
 </Screen>

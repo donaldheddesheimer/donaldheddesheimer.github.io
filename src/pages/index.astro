@@ -1,14 +1,16 @@
 ---
 // The homepage is the lab, and only the lab: the room across the whole window (LabStage.astro), the name
 // and title quietly in one corner, Settings in the other. The monitor is the way in: it goes straight
-// into the computer, which holds the whole portfolio (/computer/…: Work, About, Résumé, Contact;
-// computer.ts). There is nothing below the room.
+// into the computer, which holds the whole portfolio as a terminal (about, work, resume, contact;
+// computer.ts, terminal.ts). There is nothing below the room.
 //
-// /?computer=<path> is the lab reading that page (routes.ts): a shared link or a reload opens it at
-// once, without the camera's entrance, on the monitor or, in a small window, across the window. The old
-// anchors (/#work, /#about, /#resume, /#contact) open the computer the same way. /?sel=<id> is an old
-// systems-map link (LegacySel.astro). Without JavaScript, the monitor is a link to the computer's Work
-// page, which stands alone.
+// /?computer is the lab at the terminal, and /?computer=work/<id> a project's details over it (routes.ts):
+// a shared link or a reload opens it at once, without the camera's entrance, on the monitor or, in a
+// small window, across the window. The old pages' addresses (/?computer=about, and the older anchors
+// /#work, /#about, /#resume, /#contact) open the terminal the same way and run their command. /?sel=<id>
+// is an old systems-map link (LegacySel.astro). Without JavaScript, the monitor is a link to the
+// terminal's own page (/computer/), which stands alone; if the lab's script fails, that page is where
+// the lab goes instead.
 //
 // All of it is the page's main landmark, in reading order: the name (the page's heading), the room with
 // its one link (the monitor), then Settings. The room is fixed behind; the name and Settings stand over it.
@@ -18,7 +20,7 @@ import LabStage from '../components/LabStage.astro';
 import LegacySel from '../components/LegacySel.astro';
 import Settings from '../components/Settings.astro';
 import { profile } from '../data/site';
-import { PAGES } from '../scripts/lab/routes';
+import { COMMANDS } from '../scripts/lab/routes';
 
 const projects = (await getCollection('projects')).map((p) => p.id);
 ---
@@ -26,25 +28,40 @@ const projects = (await getCollection('projects')).map((p) => p.id);
 <Base title={`${profile.name} · ${profile.headline}`} description={profile.tagline}>
   <Fragment slot="head">
     <LegacySel />
-    <script is:inline define:vars={{ projects, pages: PAGES }}>
-      // Before first paint: open a shared computer address straight on its page (routes.ts parse(),
-      // inlined), and make an old anchor the address it stands for.
+    <script is:inline define:vars={{ projects, commands: COMMANDS }}>
+      // Before first paint: open a shared computer address at once (routes.ts parse(), inlined), and make
+      // an old page's address (a command's, or its anchor) the terminal's, with the command to run.
       (function () {
         var h = document.documentElement;
         var query = new URLSearchParams(location.search);
         if (query.get('sel')) return;
         var path = query.get('computer');
         var anchor = location.hash.slice(1);
-        if (path == null && pages.indexOf(anchor) >= 0) {
-          path = anchor;
-          history.replaceState(null, '', '/?computer=' + anchor);
-        }
+        if (path == null && commands.indexOf(anchor) >= 0) path = anchor;
         if (path == null) return;
         path = path.replace(/^\/+|\/+$/g, '');
         var m = path.match(/^work\/([\w-]+)$/);
-        if (pages.indexOf(path) >= 0 || (m && projects.indexOf(m[1]) >= 0)) h.dataset.pc = 'read';
+        if (commands.indexOf(path) >= 0) {
+          h.dataset.pcRun = path;
+          history.replaceState(history.state, '', '/?computer');
+          h.dataset.pc = 'read';
+        } else if (path === '' || path === 'terminal' || (m && projects.indexOf(m[1]) >= 0)) h.dataset.pc = 'read';
         else history.replaceState(history.state, '', location.pathname + location.hash);
       })();
+      // If the lab's script never starts (it failed to load, or broke): the terminal's own page instead
+      // (for the rest of the session), or a project's.
+      addEventListener('load', function () {
+        setTimeout(function () {
+          var h = document.documentElement;
+          if (h.dataset.pc == null || h.dataset.pcLive != null) return;
+          try {
+            sessionStorage.setItem('lab:static', '1');
+          } catch (e) {}
+          var m = (new URLSearchParams(location.search).get('computer') || '').match(/^\/*work\/([\w-]+)\/*$/);
+          var run = h.dataset.pcRun;
+          location.replace(m ? '/projects/' + m[1] + '/' : '/computer/?static' + (run ? '#' + run : ''));
+        }, 0);
+      });
     </script>
   </Fragment>
 

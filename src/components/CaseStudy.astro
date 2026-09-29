@@ -1,6 +1,7 @@
 ---
 // A case study's content: its title band, write-up, details and related work, and the pager. On the
-// project's own page (/projects/<id>/) and on the lab computer (/computer/work/<id>/).
+// project's own page (/projects/<id>/) and on the lab computer (/computer/work/<id>/), as a project's
+// details over the terminal.
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Icon from './Icon.astro';
 import NewTab from './NewTab.astro';
@@ -13,10 +14,11 @@ interface Props {
   next?: CollectionEntry<'projects'>;
   /** Where another project's case study is. */
   projectHref?: (id: string) => string;
-  /** Where "All projects" goes. */
-  indexHref?: string;
+  /** Where "All projects" goes (the terminal's `work`), or false for no link (on the computer, whose bar
+   *  goes back to the terminal). */
+  indexHref?: string | false;
 }
-const { project, prev, next, projectHref = (id: string) => `/projects/${id}/`, indexHref = '/computer/work/' } = Astro.props;
+const { project, prev, next, projectHref = (id: string) => `/projects/${id}/`, indexHref = '/computer/#work' } = Astro.props;
 const d = project.data;
 const { Content } = await render(project);
 
@@ -36,9 +38,13 @@ const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
 <!-- A case study reads like the room it opens from: a title over a warm dark band, the write-up, and
      a quiet column of details and related work. -->
 <header class="cs-head">
-  <a href={indexHref} class="cs-back">
-    <Icon name="arrow-left" class="size-3.5" /> All projects
-  </a>
+  {
+    indexHref && (
+      <a href={indexHref} class="cs-back">
+        <Icon name="arrow-left" class="size-3.5" /> All projects
+      </a>
+    )
+  }
   <p class="cs-meta">
     <span class={`pill pill-${d.status}`}>{statusLabel[d.status]}</span>
     <span>

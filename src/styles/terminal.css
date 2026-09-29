@@ -1,0 +1,432 @@
+/* The lab computer's terminal (src/components/Terminal.astro) and its transcript, /computer/ (the same
+   outputs, standing alone). Charcoal, warm off-white type in the site's mono, and one accent, amber,
+   for the prompt and for what can be run. Sizes follow the screen: the terminal is the container
+   (the lab's .pc-screen), so a larger monitor reads larger; on a touch screen the type never drops
+   under 16px (the prompt's field would zoom the page on focus). */
+.term,
+.t-static {
+  --t-bg: #171513;
+  --t-fg: #ebe5da;
+  --t-dim: #a69d90;
+  --t-accent: #e2a95c;
+  --t-rule: #2e2a26;
+  --t-fs: clamp(0.8125rem, 1.4cqi, 1.0625rem);
+  --t-pad-y: max(1rem, 2.6cqi);
+  --t-pad-x: max(1rem, 3cqi);
+  --t-gap: 1.1em;
+  background: var(--t-bg);
+  color: var(--t-fg);
+  font-family: var(--font-mono);
+  font-size: var(--t-fs);
+  font-variant-ligatures: none;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+  -webkit-text-size-adjust: 100%;
+}
+@media (pointer: coarse) {
+  .term,
+  .t-static {
+    --t-fs: clamp(1rem, 1.4cqi, 1.125rem);
+  }
+}
+.term ::selection,
+.t-static ::selection {
+  background: rgb(226 169 92 / 0.32);
+  color: var(--t-fg);
+}
+
+/* The live terminal: the screen's whole area, scrolling inside itself and never the page. */
+.term {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #4a443d transparent;
+  outline: none;
+}
+.term-inner {
+  position: relative;
+  padding: var(--t-pad-y) var(--t-pad-x) 0;
+}
+.term-log,
+.term-prompt {
+  max-width: 92ch;
+}
+
+/* The history: the startup's lines, then each command as typed (its heading), and what it printed. */
+.term-entry {
+  margin-top: var(--t-gap);
+}
+.term-echo {
+  font: inherit;
+  color: var(--t-fg);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.term-echo:focus,
+[tabindex='-1']:focus {
+  outline: none;
+}
+.term-ps1 {
+  color: var(--t-accent);
+  white-space: nowrap;
+}
+.term-echo .term-ps1 {
+  margin-right: 1ch;
+}
+
+/* Output: lines of text, a half line between blocks, a blank line before each part. */
+.t-out {
+  margin-top: 0.35em;
+}
+.t-out > * + *,
+.t-list > li > * + * {
+  margin-top: 0.5em;
+}
+.t-out > * + :is(.t-list, .t-kv, .t-hint, .t-section) {
+  margin-top: var(--t-gap);
+}
+.t-out .t-section {
+  margin-top: 1.6em;
+}
+.t-out h3,
+.t-out h4 {
+  font: inherit;
+}
+.t-strong {
+  font-weight: 600;
+  color: var(--t-fg);
+}
+.t-dim,
+.t-hint,
+.t-kv dt {
+  color: var(--t-dim);
+}
+.t-prose {
+  max-width: 76ch;
+}
+.t-section {
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.t-help,
+.t-list {
+  list-style: none;
+  padding: 0;
+}
+.t-help li {
+  display: grid;
+  grid-template-columns: 9ch minmax(0, 1fr);
+  align-items: baseline;
+}
+.t-list > li + li {
+  margin-top: 1.4em;
+}
+/* A project: its title, when and where just under it, then what it is and its links. */
+.t-work > li > h3 + .t-dim {
+  margin-top: 0;
+}
+.t-work > li > * + :is(.t-prose, .t-links) {
+  margin-top: 0.3em;
+}
+.t-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 3ch;
+  max-width: 80ch;
+}
+.t-points {
+  max-width: 80ch;
+  padding-left: 2ch;
+  list-style-type: '- ';
+}
+.t-points li + li {
+  margin-top: 0.35em;
+}
+.t-points li::marker {
+  color: var(--t-dim);
+}
+.t-kv {
+  display: grid;
+  gap: 0.25em;
+}
+.t-kv > div {
+  display: grid;
+  grid-template-columns: 10ch minmax(0, 1fr);
+  gap: 0 1ch;
+}
+.t-kv-wide > div {
+  grid-template-columns: 24ch minmax(0, 1fr);
+}
+@container (width < 34rem) {
+  .t-kv-wide > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.t-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25em 2.5ch;
+}
+
+/* Links read as text, underlined; what can be run is the accent. Both give a finger room without
+   moving a letter. */
+.term a,
+.t-static a {
+  color: var(--t-fg);
+  text-decoration: underline;
+  text-decoration-color: rgb(235 229 218 / 0.4);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+.term a:hover,
+.t-static a:hover {
+  color: var(--t-accent);
+  text-decoration-color: var(--t-accent);
+}
+.term a [aria-hidden],
+.t-static a [aria-hidden] {
+  margin-left: 0.15em;
+  text-decoration: none;
+}
+.t-cmd {
+  display: inline-block;
+  margin: -0.25em -0.35em;
+  padding: 0.25em 0.35em;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: var(--t-accent) !important;
+  font: inherit;
+  line-height: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgb(226 169 92 / 0.45) !important;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  cursor: pointer;
+}
+.t-cmd:hover {
+  text-decoration-color: var(--t-accent) !important;
+}
+.t-copy {
+  margin-left: 1.65ch;
+  color: var(--t-dim) !important;
+  text-decoration-color: rgb(166 157 144 / 0.45) !important;
+}
+.t-copy:hover {
+  color: var(--t-accent) !important;
+}
+.term :focus-visible,
+.t-static :focus-visible {
+  outline: 2px solid var(--t-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+/* (The prompt's focus is its cursor: solid while it has the keyboard.) */
+.term .term-field input:focus-visible {
+  outline: none;
+}
+
+/* The prompt: after the history, and held at the screen's foot when the history runs past it, with
+   the text above fading under it. Its field is a real input, see-through, with the block cursor drawn
+   over it where the caret is (terminal.ts): solid and blinking while it has the keyboard, an outline
+   while it hasn't. */
+.term-prompt {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+  margin-top: var(--t-gap);
+  padding-bottom: var(--t-pad-y);
+  background: var(--t-bg);
+}
+.term-prompt::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 1.25em;
+  background: linear-gradient(to top, var(--t-bg), rgb(23 21 19 / 0));
+  pointer-events: none;
+}
+.term-field {
+  position: relative;
+  display: block;
+  flex: 1;
+  min-width: 0;
+  height: 1.6em;
+}
+.term-field input {
+  display: block;
+  width: 100%;
+  height: 1.6em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--t-fg);
+  caret-color: transparent;
+  font: inherit;
+  letter-spacing: inherit;
+  outline: none;
+  appearance: none;
+}
+.term-cursor,
+.term-boot-cursor,
+.t-static-cursor {
+  width: 1ch;
+  height: 1.3em;
+  background: var(--t-fg);
+}
+.term-cursor {
+  position: absolute;
+  top: calc(50% - 0.65em);
+  left: 0;
+  color: var(--t-bg);
+  line-height: 1.3em;
+  white-space: pre;
+  pointer-events: none;
+}
+.term-field input:not(:focus) ~ .term-cursor {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--t-dim);
+  color: transparent;
+}
+.term-cursor[hidden] {
+  display: none;
+}
+.term-cursor.is-blink {
+  animation: term-blink 1.06s steps(1, end) infinite;
+}
+.term-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  white-space: pre;
+}
+
+/* The startup, once a session (terminal.ts): the first line typed out, fast, behind a cursor; the
+   second line and the prompt after it. About a second, and any key or tap ends it. Before it plays
+   (in flight), the screen shows only that cursor, as the monitor did. */
+.term-boot-1 {
+  white-space: nowrap;
+}
+.term-type {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  white-space: nowrap;
+}
+.term-boot-cursor,
+.t-static-cursor {
+  display: none;
+  vertical-align: -0.3em;
+}
+.term[data-boot='pending'] .term-type {
+  width: 0;
+}
+.term:is([data-boot='pending'], [data-boot='play']) .term-boot-cursor {
+  display: inline-block;
+}
+.term[data-boot='pending'] :is(.term-boot-2, .term-prompt) {
+  opacity: 0;
+}
+.term[data-boot='play'] .term-type {
+  animation: term-type calc(var(--n) * 18ms) steps(var(--n), end) both;
+}
+.term[data-boot='play'] .term-boot-cursor {
+  animation: term-gone 1ms linear calc(var(--n) * 18ms + 110ms) both;
+}
+.term[data-boot='play'] .term-boot-2 {
+  animation: term-in 200ms var(--ease) 500ms both;
+}
+.term[data-boot='play'] .term-prompt {
+  animation: term-in 180ms var(--ease) 700ms both;
+}
+
+/* A command's output comes in quickly; help's lines one after another. Only ever the newest: the
+   next command, or leaving, settles it (terminal.ts). */
+.term-entry.is-new > .t-out {
+  animation: term-in 200ms var(--ease) both;
+}
+.term-entry.is-new > .t-out.t-stagger {
+  animation: none;
+}
+.term-entry.is-new .t-stagger li {
+  animation: term-in 160ms var(--ease) both;
+  animation-delay: calc(var(--i) * 55ms + 30ms);
+}
+
+@keyframes term-type {
+  from {
+    width: 0;
+  }
+  to {
+    width: calc(var(--n) * 1ch);
+  }
+}
+@keyframes term-gone {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes term-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+}
+@keyframes term-blink {
+  50% {
+    opacity: 0;
+  }
+}
+/* Reduced motion, or Motion off: everything at once, and a steady cursor. */
+html[data-motion='off'] .term,
+html[data-motion='off'] .term * {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .term,
+  .term * {
+    animation: none !important;
+  }
+}
+
+/* /computer/: the transcript, a page of its own, for when the lab can't run it. */
+.t-static {
+  container-type: inline-size;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: max(var(--t-pad-y), env(safe-area-inset-top)) max(var(--t-pad-x), env(safe-area-inset-right)) max(3rem, env(safe-area-inset-bottom)) max(var(--t-pad-x), env(safe-area-inset-left));
+}
+.t-static .term-log {
+  max-width: 92ch;
+}
+.t-static .term-entry {
+  margin-top: 2.2em;
+  scroll-margin-top: 1rem;
+}
+.t-static-cursor {
+  display: inline-block;
+}
+.t-static-prompt {
+  margin-top: 2.2em;
+}
+.t-static-prompt .term-ps1 {
+  margin-right: 1ch;
+}
+.t-static-back {
+  margin-top: 3em;
+}

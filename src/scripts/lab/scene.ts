@@ -4,8 +4,8 @@
 // pendant, an unfinished robot on a service stand, two props (a task chair pushed aside, a tool cart), a
 // tripod work light as the key, and the three dancers, given characters through proportion, timing,
 // where they stand and how they answer each other. Two camera views: the opening, which the pointer may
-// look around a little (lookAround), and reading, square on to the monitor, whose screen the page covers
-// with real HTML (computer.ts). One flight joins them. Simple geometry throughout.
+// look around a little (lookAround), and reading, square on to the monitor, whose screen the terminal
+// covers in real HTML (computer.ts). One flight joins them. Simple geometry throughout.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -985,111 +985,23 @@ function nightTexture() {
   });
 }
 
-export interface ScreenData {
-  name: string;
-  lede: string;
-  /** The Work page's leading projects. */
-  cards: { title: string; meta: string; img: string; contain?: boolean }[];
-}
-
-// The monitor's picture before the real page is laid over it: the computer's Work page as it first
-// shows (src/layouts/Screen.astro, src/components/FolioWork.astro), drawn from the page's data in the
-// site's colours, laid out as the page is at a 1209 px frame (reading, in a 1440 x 900 window).
-function portfolioTexture(data: ScreenData | null, onChange: () => void) {
+// The monitor's picture before the terminal is laid over it: the terminal as it waits to start, charcoal
+// with its cursor at the first line (src/components/Terminal.astro, src/styles/terminal.css), laid out as
+// it is at a 1209 px screen (reading, in a 1440 x 900 window). The terminal itself fades in over it in
+// flight.
+function terminalTexture() {
   const W = 1280;
   const H = 800;
   const S = W / 1209; // texture px per CSS px
-  const c = document.createElement('canvas');
-  c.width = W;
-  c.height = H;
-  const g = c.getContext('2d')!;
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = 4;
-  const sans = 'Inter, ui-sans-serif, system-ui, sans-serif';
-  const images: (HTMLImageElement | null)[] = [];
-  const edge = 40; // the page's side margin, CSS px
-  const font = (weight: number, px: number) => `${weight} ${px * S}px ${sans}`;
-  const text = (s: string, x: number, y: number, colour: string, f: string, align: CanvasTextAlign = 'left') => {
-    g.font = f;
-    g.fillStyle = colour;
-    g.textAlign = align;
-    g.fillText(s, x * S, y * S);
-    return g.measureText(s).width / S;
-  };
-  const draw = () => {
-    g.fillStyle = '#131211';
+  // terminal.css at a 1209 px screen: type 1.4cqi, padding 3cqi across and 2.6cqi down; the block cursor
+  // 1ch x 1.3em, its top 0.16em into the first line (measured in the page).
+  const em = 1209 * 0.014;
+  return canvasTexture(W, H, (g) => {
+    g.fillStyle = '#171513';
     g.fillRect(0, 0, W, H);
-    // The bar: the mark and name, the four places, and the way back to the room.
-    g.fillStyle = '#3a3632';
-    g.fillRect(0, 44 * S - 1, W, 1);
-    g.textBaseline = 'middle';
-    g.strokeStyle = '#f5f2ed';
-    g.lineWidth = 1.6 * S;
-    g.strokeRect((edge + 1) * S, 13 * S, 18 * S, 18 * S);
-    if (data) text(data.name, edge + 28, 22, '#f5f2ed', font(600, 14));
-    let x = 1209 - edge;
-    x -= text('← Back to room', x - 10, 22, '#b4ada3', font(400, 14), 'right') + 20;
-    g.fillStyle = '#3a3632';
-    g.fillRect((x + 8) * S, 10 * S, 1, 24 * S);
-    x -= 12;
-    for (const [i, label] of ['Contact', 'Résumé', 'About', 'Work'].entries()) {
-      const w = text(label, x - 10, 22, i === 3 ? '#f5f2ed' : '#b4ada3', font(400, 14), 'right');
-      if (i === 3) {
-        g.fillStyle = '#f5f2ed';
-        g.fillRect((x - w - 20) * S, 42 * S, (w + 20) * S, 2 * S);
-      }
-      x -= w + 22;
-    }
-    if (!data) return;
-    // Work: the title, the lede, and the leading projects two across.
-    g.textBaseline = 'alphabetic';
-    text('Work', edge, 44 + 56 + 36, '#f5f2ed', font(650, 38.7));
-    text(data.lede, edge, 44 + 56 + 76, '#b4ada3', font(400, 16));
-    const cardW = (1209 - 2 * edge - 28) / 2;
-    const top = 44 + 56 + 124;
-    data.cards.slice(0, 2).forEach((card, i) => {
-      const cx = edge + i * (cardW + 28);
-      const mh = (cardW * 9) / 16;
-      g.fillStyle = '#0e0d0c';
-      g.fillRect(cx * S, top * S, cardW * S, mh * S);
-      const img = images[i];
-      if (img?.naturalWidth) {
-        g.save();
-        g.beginPath();
-        g.rect(cx * S, top * S, cardW * S, mh * S);
-        g.clip();
-        const pad = card.contain ? 12 : 0;
-        const fit = card.contain ? Math.min : Math.max;
-        const k = fit(((cardW - 2 * pad) * S) / img.naturalWidth, ((mh - 2 * pad) * S) / img.naturalHeight);
-        const iw = img.naturalWidth * k;
-        const ih = img.naturalHeight * k;
-        g.globalAlpha = 0.9;
-        // Cover pictures are anchored at the top, as the page's are.
-        g.drawImage(img, cx * S + (cardW * S - iw) / 2, card.contain ? top * S + (mh * S - ih) / 2 : top * S, iw, ih);
-        g.restore();
-      }
-      g.strokeStyle = '#3a3632';
-      g.lineWidth = 1;
-      g.strokeRect(cx * S + 0.5, top * S + 0.5, cardW * S - 1, mh * S - 1);
-      text(card.meta, cx, top + mh + 10 + 20, '#9a9288', font(400, 14));
-      text(card.title, cx, top + mh + 10 + 20 + 34, '#f5f2ed', font(600, 24));
-    });
-  };
-  draw();
-  data?.cards.slice(0, 2).forEach((card, i) => {
-    const img = new Image();
-    img.decoding = 'async';
-    img.onload = () => {
-      images[i] = img;
-      draw();
-      t.needsUpdate = true;
-      onChange();
-    };
-    img.src = card.img;
-    images[i] = null;
+    g.fillStyle = '#ebe5da';
+    g.fillRect(Math.round(1209 * 0.03 * S), Math.round((1209 * 0.026 + 0.16 * em) * S), Math.round(0.6 * em * S), Math.round(1.3 * em * S));
   });
-  return t;
 }
 
 // Bakes a group's meshes into one per material: the room and props are still, so they cost a draw
@@ -1499,13 +1411,12 @@ const HINT_MS = 2200;
 // The opening: from the front and a little right, looking into the room, the desk nearest at the left.
 const HERO_LOOK = new THREE.Vector3(-0.6, 1.0, -0.5);
 const HERO_DIR = new THREE.Vector3(0.2, 0.14, 1).normalize();
-/** `screen` is what the monitor shows before the page is laid over it. `avoid` is the opening's text,
- *  where it lies over the picture: the dancers and the monitor keep clear of it. `onFit` hears where the
- *  monitor's bezel is drawn (client px) each time the opening is fitted to its window, for the link over
- *  it (LabStage.astro) to stand there. */
+/** `avoid` is the opening's text, where it lies over the picture: the dancers and the monitor keep clear
+ *  of it. `onFit` hears where the monitor's bezel is drawn (client px) each time the opening is fitted to
+ *  its window, for the link over it (LabStage.astro) to stand there. */
 export function mountLab(
   root: HTMLElement,
-  { screen = null as ScreenData | null, avoid = null as HTMLElement | null, onFit = null as ((monitor: Rect) => void) | null } = {},
+  { avoid = null as HTMLElement | null, onFit = null as ((monitor: Rect) => void) | null } = {},
 ): LabScene | null {
   const stage = root.querySelector<HTMLElement>('[data-lab-stage]');
   if (!stage || root.dataset.mounted != null) return null;
@@ -1594,11 +1505,7 @@ export function mountLab(
   props.cart.rotation.y = -0.5;
   scene.add(props.chair, props.cart);
 
-  let screenDirty = false;
-  const screenMap = portfolioTexture(screen, () => {
-    screenDirty = true;
-    if (!raf && !lost && w) render();
-  });
+  const screenMap = terminalTexture();
   const desk = buildWorkstation(mats, screenMap);
   scene.add(desk.group);
   scene.updateMatrixWorld(true);
@@ -1893,7 +1800,6 @@ export function mountLab(
     place(cur);
     renderer.render(scene, camera);
     frames++;
-    screenDirty = false;
     if (!drawn) {
       drawn = true;
       idleFrom = now;
@@ -2329,7 +2235,6 @@ export function mountLab(
         bufferH: canvas.height,
         pixelRatio: renderer.getPixelRatio(),
         frames,
-        screenDirty: screenDirty ? 1 : 0,
         hint: hintK,
         heroDist,
         heroFramed,
