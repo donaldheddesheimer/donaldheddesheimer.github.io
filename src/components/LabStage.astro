@@ -1,18 +1,19 @@
 ---
-// The homepage's opening (/): a robotics lab after hours with the portfolio on the desk's computer. The
-// figure holds the scene (src/scripts/lab/scene.ts) over a composed SVG still of the robots, which renders
-// with the page and stays as the fallback (no JS, no WebGL). The dialog is the lab once entered: nothing
-// but the frame the portfolio reads in (src/scripts/lab/computer.ts); the way out is on the computer.
-// Save-Data leaves the scene unloaded until the lab is entered (the still stands in). Reduced motion (or
-// Motion off, in the page's settings or its footer) loads it and holds one composed moment, with no
-// looking around; going in cuts rather than flies.
+// The homepage's room (/, in its main landmark, after the name): a robotics lab after hours, across the
+// whole window, with the portfolio on the desk's computer. The figure holds the scene
+// (src/scripts/lab/scene.ts) over a still rendered from it, which shows with the page and stays as the
+// fallback (no JS, no WebGL, Save-Data until the lab is entered). The dialog is the lab once entered: nothing but the frame the portfolio reads in
+// (src/scripts/lab/computer.ts). Reduced motion (or Motion off, in Settings) holds one composed moment,
+// with no looking around; going in cuts rather than flies.
+//
+// The monitor is the way in, and the only one: a link over it ("Explore my work", to the computer's Work
+// page) where the still shows it (the --mon-* properties below, from the still's own numbers), then where
+// the scene draws it (mountLab's onFit). It takes the keyboard's focus (a ring round the monitor, which
+// brightens), a screen reader's, and a click without the scene; once the scene has drawn, the pointer
+// goes to the scene, which tells a click on the monitor from a drag to look around.
 import { profile } from '../data/site';
 import { workLede, workMeta, workProjects } from '../lib/folio';
-
-interface Props {
-  class?: string;
-}
-const { class: cls } = Astro.props;
+import { pageHref } from '../scripts/lab/routes';
 
 // The monitor's picture before the page is laid over it: the computer's Work page, as it first shows.
 const { lead, rest } = await workProjects();
@@ -24,109 +25,40 @@ const screen = {
 const projects = [...lead, ...rest].map(({ p }) => p.id);
 ---
 
-<figure data-lab-root data-screen={JSON.stringify(screen)} class:list={['lab', cls]}>
+<figure data-lab-root data-screen={JSON.stringify(screen)} class="lab">
   <div class="lab-canvas" data-lab-stage>
-    <svg class="still" viewBox="0 0 600 420" preserveAspectRatio="xMidYMax meet" overflow="visible" aria-hidden="true">
-      <defs>
-        <radialGradient id="ls-pool" cx="50%" cy="50%" r="50%">
-          <stop offset="0" stop-color="#4a3b2e" stop-opacity="0.95" />
-          <stop offset="0.6" stop-color="#2e2620" stop-opacity="0.6" />
-          <stop offset="1" stop-color="#2e2620" stop-opacity="0" />
-        </radialGradient>
-        <radialGradient id="ls-shadow" cx="50%" cy="50%" r="50%">
-          <stop offset="0" stop-color="#000" stop-opacity="0.7" />
-          <stop offset="1" stop-color="#000" stop-opacity="0" />
-        </radialGradient>
-        <linearGradient id="ls-ivory" x1="0" x2="1">
-          <stop offset="0" stop-color="#ece5d6" />
-          <stop offset="1" stop-color="#a9a293" />
-        </linearGradient>
-        <linearGradient id="ls-graphite" x1="0" x2="1">
-          <stop offset="0" stop-color="#6d7681" />
-          <stop offset="1" stop-color="#3f464f" />
-        </linearGradient>
-        <linearGradient id="ls-terracotta" x1="0" x2="1">
-          <stop offset="0" stop-color="#cf7f60" />
-          <stop offset="1" stop-color="#8c4c37" />
-        </linearGradient>
-      </defs>
-      <!-- The three dancers, as a still. -->
-      <ellipse cx="310" cy="382" rx="270" ry="42" fill="url(#ls-pool)" />
-      <ellipse cx="150" cy="373" rx="70" ry="10" fill="url(#ls-shadow)" />
-      <ellipse cx="488" cy="379" rx="48" ry="8" fill="url(#ls-shadow)" />
-      <ellipse cx="300" cy="390" rx="66" ry="10" fill="url(#ls-shadow)" />
-      <g transform="translate(150 372) scale(0.88) translate(-163 -382)">
-        <g stroke-linecap="round" fill="none">
-          <path d="M145 300 140 336 142 372M178 300 183 336 184 372" stroke="url(#ls-graphite)" stroke-width="20" />
-          <path d="M112 216 86 180 72 146M210 216 236 180 250 146" stroke="url(#ls-graphite)" stroke-width="15" />
-        </g>
-        <g fill="#1b1e23">
-          <rect x="120" y="368" width="42" height="14" rx="5" /><rect x="164" y="368" width="42" height="14" rx="5" />
-          <circle cx="140" cy="336" r="10" /><circle cx="183" cy="336" r="10" />
-          <circle cx="86" cy="180" r="9" /><circle cx="236" cy="180" r="9" />
-          <circle cx="70" cy="142" r="10" /><circle cx="252" cy="142" r="10" />
-          <rect x="130" y="284" width="62" height="24" rx="8" />
-        </g>
-        <rect x="112" y="204" width="98" height="84" rx="16" fill="url(#ls-graphite)" />
-        <circle cx="112" cy="214" r="15" fill="url(#ls-graphite)" /><circle cx="210" cy="214" r="15" fill="url(#ls-graphite)" />
-        <rect x="138" y="222" width="46" height="30" rx="5" fill="#1b1e23" />
-        <rect x="130" y="158" width="62" height="46" rx="20" fill="url(#ls-graphite)" />
-        <rect x="135" y="172" width="52" height="15" rx="7" fill="#07090b" />
-        <rect x="147" y="177.5" width="28" height="4" rx="2" fill="#9cc4ff" />
-      </g>
-      <g transform="translate(488 378) scale(0.96) translate(-444 -381)">
-        <g stroke-linecap="round" fill="none" stroke="url(#ls-terracotta)">
-          <path d="M433 320 427 347 428 374M451 320 457 347 458 374" stroke-width="13" />
-          <path d="M476 266 500 266 500 242M408 266 384 266 384 290" stroke-width="11" />
-        </g>
-        <g fill="#262a30">
-          <rect x="414" y="370" width="30" height="11" rx="4" /><rect x="444" y="370" width="30" height="11" rx="4" />
-          <circle cx="427" cy="347" r="7" /><circle cx="457" cy="347" r="7" />
-          <circle cx="500" cy="266" r="6" /><circle cx="384" cy="266" r="6" />
-          <circle cx="500" cy="238" r="8" /><circle cx="384" cy="294" r="8" />
-          <rect x="421" y="307" width="44" height="18" rx="8" />
-        </g>
-        <rect x="410" y="252" width="66" height="60" rx="22" fill="url(#ls-terracotta)" />
-        <circle cx="442" cy="220" r="31" fill="url(#ls-terracotta)" />
-        <rect x="420" y="209" width="44" height="19" rx="9.5" fill="#07090b" />
-        <circle cx="433" cy="218.5" r="3.5" fill="#ffe3b8" /><circle cx="451" cy="218.5" r="3.5" fill="#ffe3b8" />
-      </g>
-      <g transform="translate(300 390) scale(1.06) translate(-304 -382)">
-        <g stroke-linecap="round" fill="none" stroke="url(#ls-ivory)">
-          <path d="M292 286 287 330 287 372M311 286 316 330 318 372" stroke-width="15" />
-          <path d="M334 200 362 170 378 132M269 200 246 226 266 254" stroke-width="12" />
-        </g>
-        <g fill="#262a30">
-          <rect x="268" y="368" width="36" height="13" rx="5" /><rect x="304" y="368" width="36" height="13" rx="5" />
-          <circle cx="287" cy="330" r="8" /><circle cx="316" cy="330" r="8" />
-          <circle cx="334" cy="200" r="8" /><circle cx="269" cy="200" r="8" />
-          <circle cx="362" cy="170" r="7" /><circle cx="246" cy="226" r="7" />
-          <rect x="370" y="118" width="16" height="18" rx="5" /><rect x="258" y="248" width="16" height="16" rx="5" />
-          <rect x="281" y="268" width="42" height="24" rx="8" />
-          <rect x="296" y="176" width="12" height="16" rx="3" />
-          <rect x="300.5" y="106" width="3" height="24" />
-        </g>
-        <rect x="271" y="190" width="62" height="80" rx="13" fill="url(#ls-ivory)" />
-        <rect x="286" y="208" width="32" height="26" rx="5" fill="#262a30" />
-        <circle cx="310" cy="214" r="2.5" fill="#ffb561" />
-        <rect x="272" y="128" width="60" height="50" rx="13" fill="url(#ls-ivory)" />
-        <rect x="280" y="141" width="44" height="21" rx="8" fill="#07090b" />
-        <rect x="288" y="148" width="8" height="6" rx="2" fill="#ffb561" /><rect x="308" y="148" width="8" height="6" rx="2" fill="#ffb561" />
-        <circle cx="302" cy="104" r="4.5" fill="#ffb561" />
-      </g>
-    </svg>
+    <picture class="still">
+      <source media="(max-aspect-ratio: 4/5)" srcset="/lab/opening-tall.webp" width="720" height="1440" />
+      <img src="/lab/opening-wide.webp" alt="" width="1600" height="1000" fetchpriority="high" decoding="async" />
+    </picture>
+    <a href={pageHref('work')} class="lab-monitor" data-lab-monitor aria-label="Explore my work" draggable="false"></a>
   </div>
-  <figcaption class="lab-cap"><span class="cap-title">After hours in the lab.</span> <span class="cap-note">Illustration</span></figcaption>
+  <figcaption class="sr-only">A robotics lab after hours: a computer on a desk, three robots dancing behind it, an unfinished one on its stand. Illustration.</figcaption>
 </figure>
 
 <dialog class="pc" data-pc-dialog aria-label="Portfolio, on the lab's computer" tabindex="-1" data-projects={JSON.stringify(projects)}></dialog>
 
 <script>
-  import type { LabScene, ScreenData } from '../scripts/lab/scene';
+  import type { LabScene, Rect, ScreenData } from '../scripts/lab/scene';
   import { initComputer } from '../scripts/lab/computer';
 
+  const html = document.documentElement;
   const root = document.querySelector<HTMLElement>('[data-lab-root]');
   const dialog = document.querySelector<HTMLDialogElement>('[data-pc-dialog]');
+  const link = document.querySelector<HTMLElement>('[data-lab-monitor]');
+  const avoid = document.querySelector<HTMLElement>('[data-lab-avoid]');
+
+  // The link over the monitor, where the scene draws it; without the scene (not yet, or lost), where the
+  // still shows it.
+  function place(mon: Rect | null) {
+    if (!link) return;
+    const on = mon && root?.dataset.failed == null;
+    for (const [k, v] of [['left', mon?.x], ['top', mon?.y], ['width', mon?.w], ['height', mon?.h]] as const) {
+      if (on) link.style.setProperty(k, `${Math.round(v!)}px`);
+      else link.style.removeProperty(k);
+    }
+  }
+
   if (root && dialog) {
     let scene: LabScene | null = null;
     let loading: Promise<LabScene | null> | null = null;
@@ -135,10 +67,30 @@ const projects = [...lead, ...rest].map(({ p }) => p.id);
       screen = JSON.parse(root.dataset.screen ?? 'null');
     } catch {}
     const saveData = !!(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    // Focused from the keyboard, the link rings the monitor where it's drawn, following it as the room
+    // sways, and the monitor brightens as it does under the pointer: from the focus, or from the room's
+    // first frame if the focus came first.
+    let follow = 0;
+    const track = () => {
+      const s = scene as LabScene | null;
+      follow = s && document.activeElement === link && root.dataset.failed == null ? requestAnimationFrame(track) : 0;
+      if (follow) place(s!.monitor());
+    };
+    const ring = () => {
+      const s = scene as LabScene | null;
+      if (!s || !link || follow || root.dataset.drawn == null || root.dataset.failed != null) return;
+      if (document.activeElement !== link || !link.matches(':focus-visible')) return;
+      s.highlight(true);
+      track();
+    };
+    const onFit = (r: Rect) => {
+      if (!follow) place(r);
+      ring();
+    };
     const load = () =>
       (loading ??= import('../scripts/lab/scene')
         .then((m) => {
-          scene = m.mountLab(root, { screen, avoid: document.querySelector<HTMLElement>('[data-lab-avoid]') });
+          scene = m.mountLab(root, { screen, avoid, onFit });
           if (!scene) root.setAttribute('data-failed', '');
           // For the review's measurements (docs/evidence/lab-cinematic-2026-09-28): /?probe.
           if (new URLSearchParams(location.search).has('probe')) Object.assign(window, { __lab: scene });
@@ -161,14 +113,63 @@ const projects = [...lead, ...rest].map(({ p }) => p.id);
       scene.dispose();
       scene = null;
       loading = null;
+      place(null);
+    });
+    // Drawn, the ring (if the focus is there already); lost, the still's monitor again.
+    new MutationObserver(() => (root.dataset.failed != null ? place(null) : ring())).observe(root, { attributes: true, attributeFilter: ['data-failed', 'data-drawn'] });
+    link?.addEventListener('focus', ring);
+    link?.addEventListener('blur', () => {
+      cancelAnimationFrame(follow);
+      follow = 0;
+      (scene as LabScene | null)?.highlight(false);
     });
     initComputer(root, dialog, () => scene, load, !saveData);
   }
 </script>
 
 <style>
+  /* The still's own numbers: its aspect, and the monitor's bezel in it (fractions of its width and
+     height, as the scene measured them when it drew the still), for the monitor's link to stand where the
+     still shows it. Retake them with the stills (docs/lab-scene-handoff.md). The still
+     covers the window, centred, or in a window more than twice as wide as it is tall, lower (--still-py:
+     its top as a share of the overflow), so the monitor stays in view. */
+  :global(:root) {
+    --still-a: 1.6;
+    --still-ml: 0.3392;
+    --still-mt: 0.5889;
+    --still-mr: 0.5396;
+    --still-mb: 0.7884;
+  }
+  @media (max-aspect-ratio: 4/5) {
+    :global(:root) {
+      --still-a: 0.5;
+      --still-ml: 0.253;
+      --still-mt: 0.4627;
+      --still-mr: 0.747;
+      --still-mb: 0.6173;
+    }
+  }
+  :global(:root) {
+    --still-py: 0.5;
+  }
+  @media (min-aspect-ratio: 2/1) {
+    :global(:root) {
+      --still-py: 0.75;
+    }
+  }
+  :global(:root) {
+    --still-w: max(100vw, 100dvh * var(--still-a));
+    --still-h: calc(var(--still-w) / var(--still-a));
+    --mon-l: calc((100vw - var(--still-w)) / 2 + var(--still-w) * var(--still-ml));
+    --mon-r: calc((100vw - var(--still-w)) / 2 + var(--still-w) * var(--still-mr));
+    --mon-t: calc((100dvh - var(--still-h)) * var(--still-py) + var(--still-h) * var(--still-mt));
+    --mon-b: calc((100dvh - var(--still-h)) * var(--still-py) + var(--still-h) * var(--still-mb));
+  }
+
+  /* The room: the whole window, behind everything, still while the page over it scrolls. */
   .lab {
-    position: relative;
+    position: fixed;
+    inset: 0;
     margin: 0;
   }
   .lab-canvas {
@@ -192,6 +193,9 @@ const projects = [...lead, ...rest].map(({ p }) => p.id);
   [data-failed] .lab-canvas :global(canvas) {
     display: none;
   }
+  :global(html[data-motion='off']) .lab-canvas :global(canvas) {
+    transition: none;
+  }
   /* Reading: the room steps back behind the page while the robots come to rest (scene.ts quiet()). */
   .lab-canvas::after {
     content: '';
@@ -205,72 +209,44 @@ const projects = [...lead, ...rest].map(({ p }) => p.id);
   :global(html[data-pc='read']) .lab-canvas::after {
     opacity: 1;
   }
-  /* The still stands where the dancers will, then gives way once the scene has drawn. */
-  .still {
+  /* The still stands where the room will draw, then gives way once the scene has drawn. */
+  .still,
+  .still img {
     position: absolute;
-    bottom: var(--still-bottom, 8%);
-    left: var(--still-x, 50%);
-    width: min(var(--still-w, 90%), 780px);
-    height: 80%;
-    translate: -50% 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .still img {
+    object-fit: cover;
+    object-position: 50% calc(var(--still-py) * 100%);
     transition: opacity 0.25s ease;
   }
-  [data-drawn]:not([data-failed]) .still {
+  [data-drawn]:not([data-failed]) .still img {
     opacity: 0;
   }
-
-  .lab-cap {
+  /* The way in: the monitor, and a ring round it when the keyboard is on it. Once the scene has drawn,
+     the pointer passes through to it (scene.ts picks the monitor, and tells a click from a drag). */
+  .lab-monitor {
     position: absolute;
-    left: var(--cap-left, 1rem);
-    bottom: var(--cap-bottom, 0.875rem);
-    z-index: 2;
-    font-size: var(--text-sm);
-    line-height: 1.4;
-    color: var(--muted);
-    white-space: nowrap;
+    z-index: 1;
+    left: var(--mon-l);
+    top: var(--mon-t);
+    width: calc(var(--mon-r) - var(--mon-l));
+    height: calc(var(--mon-b) - var(--mon-t));
+    border-radius: 3px;
+    cursor: pointer;
+    -webkit-user-drag: none;
   }
-  .cap-title {
-    font-style: italic;
+  .lab-monitor:focus-visible {
+    outline: 2px solid var(--blue-3);
+    outline-offset: 5px;
   }
-  .cap-note {
-    margin-left: 0.375rem;
-    font-family: var(--font-mono);
-    font-size: var(--text-2xs);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--dim);
+  [data-drawn]:not([data-failed]) .lab-monitor {
+    pointer-events: none;
   }
-  /* Stacked (phones, and any window the lab can't open in): the picture is a band, its caption and
-     controls a row under it, in the page's flow. */
-  @media not ((width >= 64rem) and (height >= 36rem) and (min-aspect-ratio: 3/2)) {
-    .lab {
-      display: grid;
-      grid-template:
-        'stage' var(--stage-h, 15rem)
-        'cap' auto
-        / minmax(0, 1fr);
-    }
-    .lab-canvas {
-      position: relative;
-      grid-area: stage;
-      align-self: stretch;
-    }
-    .lab-cap {
-      position: relative;
-      inset: auto;
-      grid-area: cap;
-      padding: 0.625rem var(--home-inset, 1rem);
-    }
-  }
-  @media (width < 40rem) {
-    .lab-cap {
-      font-size: var(--text-xs);
-      white-space: normal;
-    }
-    .cap-note {
-      display: block;
-      margin-left: 0;
-    }
+  :global(html[data-pc-loading]) .lab-monitor {
+    cursor: progress;
   }
 
   /* The lab, once entered: the whole window, see-through but for the page's frame (added by
@@ -304,20 +280,26 @@ const projects = [...lead, ...rest].map(({ p }) => p.id);
     pointer-events: none;
     transition: opacity 0.3s var(--ease);
   }
+  :global(html[data-motion='off']) .pc :global(.pc-frame) {
+    transition: none;
+  }
   :global(html[data-pc='read']) .pc :global(.pc-frame) {
     pointer-events: auto;
     box-shadow:
       0 0 0 1px rgb(255 255 255 / 0.06),
       0 24px 80px rgb(0 0 0 / 0.55);
   }
-  /* A window too small for the room round it: the page, across the window. */
+  /* A window too small to read on the monitor with the room round it: the page, across the window,
+     inside its safe area (a frame's page can't see the notch or the home bar for itself). */
+  :global(html[data-pc-full]) .pc {
+    background: var(--bg);
+  }
   :global(html[data-pc-full]) .pc :global(.pc-frame) {
-    width: 100% !important;
-    height: 100% !important;
+    top: env(safe-area-inset-top);
+    left: env(safe-area-inset-left);
+    width: calc(100% - env(safe-area-inset-left) - env(safe-area-inset-right)) !important;
+    height: calc(100% - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
     transform: none !important;
     box-shadow: none;
-  }
-  :global(html[data-pc-loading]) [data-lab-enter] {
-    cursor: progress;
   }
 </style>

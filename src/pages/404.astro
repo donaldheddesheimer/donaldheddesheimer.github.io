@@ -1,20 +1,22 @@
 ---
+// Not found: under the computer's bar (Screen.astro), with the way into the work and back to the room.
 import { getCollection } from 'astro:content';
-import Base from '../layouts/Base.astro';
+import Screen from '../layouts/Screen.astro';
 import Icon from '../components/Icon.astro';
 import { profile } from '../data/site';
+import { pageHref } from '../scripts/lab/routes';
 
 const projects = (await getCollection('projects')).sort((a, b) => b.data.code.localeCompare(a.data.code)).slice(0, 5);
 ---
 
-<Base title={`Not found · ${profile.name}`} story canonical={false} noindex>
+<Screen title={`Not found · ${profile.name}`} canonical={false} noindex>
   <section class="nf" aria-labelledby="nf-title">
     <p class="nf-kicker">404</p>
     <h1 id="nf-title" class="nf-title">Nothing is at this address.</h1>
     <p class="nf-note">It may have moved. <span class="nf-path" data-path></span></p>
     <div class="nf-actions">
-      <a href="/" class="btn btn-primary"><Icon name="arrow-left" class="size-4" />Return home</a>
-      <a href="/#work" class="btn">See the work</a>
+      <a href={pageHref('work')} class="btn btn-primary">Explore my work<Icon name="arrow-right" class="size-4" /></a>
+      <a href="/" class="btn"><Icon name="arrow-left" class="size-4" />Back to room</a>
     </div>
     <h2 class="nf-kicker nf-list-head">Recent projects</h2>
     <ul class="nf-list">
@@ -30,7 +32,7 @@ const projects = (await getCollection('projects')).sort((a, b) => b.data.code.lo
       }
     </ul>
   </section>
-</Base>
+</Screen>
 
 <script>
   const el = document.querySelector('[data-path]');

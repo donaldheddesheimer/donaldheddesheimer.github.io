@@ -1,6 +1,5 @@
-/* The portfolio's four sections (Work, About, Résumé, Contact: src/components/Folio*.astro), on the lab
-   computer's pages (/computer/…) and under the homepage's opening. A personal page: headings, text,
-   pictures and links, no panels. */
+/* The portfolio's four pages (Work, About, Résumé, Contact: src/components/Folio*.astro), on the lab
+   computer (/computer/…). A personal page: headings, text, pictures and links, no panels. */
 .folio {
   padding: clamp(3rem, 7vw, 5.5rem) var(--home-edge) 0;
   scroll-margin-top: 3.5rem;

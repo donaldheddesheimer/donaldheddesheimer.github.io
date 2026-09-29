@@ -1,11 +1,264 @@
 # Robotics lab implementation handoff
 
-## Current checkpoint: the lab becomes the homepage, 2026-09-28 (Claude)
+## Current checkpoint: full-screen lab, portfolio inside the computer, 2026-09-29 (Claude)
 
 **Status: validated; in a pull request against `main`.** Not merged or deployed (`deploy.yml` deploys only on a push to `main`).
 
-- **Branch:** `cinematic-lab-homepage`, from `cinematic-lab-prototype` at `b7800f0`. `origin/main` was still `cc1a6c4` when the branch was pushed, so it merges without conflicts.
+- **Branch:** `lab-computer-portfolio`, from `main` at `2c1009b` (the merge of the homepage cutover below).
 - **Commit:** the one that adds this section (`git log -1 -- docs/lab-scene-handoff.md`).
+- **Brief:** "Full-screen robotics lab, portfolio inside the computer". It was headed "Direction — supersedes earlier homepage instructions". Later in the pass: "get rid of the show my work button its redundant".
+- **This direction supersedes the scroll-down and ordinary-page fallback.** The earlier checkpoints below built these, and all of them are gone:
+  - Work, About, Résumé and Contact as sections below the lab;
+  - the stacked page for windows the lab doesn't open in;
+  - "Open ordinary page", and the redirect to the ordinary page for small windows;
+  - the site header, phone tab bar, footer, skip link and ⌘K search.
+
+  The lab is the whole homepage, and the portfolio lives only inside the computer. Where the earlier sections say otherwise, this one wins.
+- **What to judge:** `docs/evidence/lab-computer-2026-09-29/`:
+  - `screens/`;
+  - `video/lab-1280x800.webm`: 19 s, the flight in and out;
+  - `logs/validate.log`.
+
+### What changed
+
+1. **The homepage is the lab and nothing else** (`src/pages/index.astro`).
+   - **The opening has four things:**
+     - the name;
+     - "Software engineer" (`profile.title`);
+     - a discreet Settings control (Motion);
+     - the monitor, which is the way in.
+   - **Nothing else:** no ticker, introduction, Résumé or Contact buttons, nav, tab bar, sections below, footer, skip link or "Open ordinary page".
+   - **The monitor is the only way in.** A "Show my work" pill was added for this brief and then removed at the owner's request, as redundant.
+   - **One `<main>`, in reading order:**
+     - the `h1` (the name);
+     - the room, with its one link;
+     - Settings.
+   - The page fills the window (`100dvh`, safe-area padding). With enlarged text or a very short window, it grows and scrolls rather than clipping.
+2. **The monitor is the destination** (`src/scripts/lab/scene.ts`).
+   - **The desk moved to the front, a little left of centre:** `DESK = { x: 0.1, z: 3.5, yaw: 0.22 }`, from `x: -1.35, z: 3.3, yaw: 0.5`.
+   - **The dancers moved round it.** Graphite stands behind the monitor's left (`at: [-1.55, 0.35, 0.55]`) and Terracotta to its right (`[1.85, 1.0, -0.55]`). Ivory stays further back.
+   - **Tall windows get a monitor-first fit.** The monitor takes a share of the width, from 12% at 1.3:1 up to 52%. The camera comes in until it does, the room crops, and the picture slides to put the monitor just below the middle.
+   - **Measured share of the window's width:**
+     - 18–20% at 1024–1920 wide;
+     - 40% at 820×1180;
+     - 51% at 390×844;
+     - 46% at 360×640.
+   - **No new props or models.** The gentle pointer look, bounded drag-to-look, click versus drag, the monitor brightening under the pointer and the once-only idle hint are unchanged.
+   - **The scene tells the page where the monitor is** (`LabScene`):
+     - `onFit` gives the bezel each time the opening is fitted;
+     - `monitor()` gives it as drawn now;
+     - `highlight()` brightens it as hover does.
+   - The monitor's own picture of the bar now reads "← Back to room".
+3. **The monitor's link** (`src/components/LabStage.astro`).
+   - **A real link:** `<a href="/computer/work/" aria-label="Explore my work">`.
+   - **Where it stands:**
+     - over the still's monitor, from CSS properties (`--still-*`, `--mon-*`), until the scene draws;
+     - then over the drawn monitor (`onFit`).
+   - **Once the scene has drawn, it passes the pointer through** (`pointer-events: none`). The scene picks the monitor, so a drag that ends on it is a look, not a click.
+   - **Clicks:**
+     - a plain click goes in;
+     - Cmd-, Ctrl- or Shift-click, and a middle click, open the link's own address in a new tab, as the link would.
+   - **Keyboard focus rings the drawn monitor and brightens it.** The ring follows the monitor as the room sways, including when the focus arrives before the scene has drawn.
+4. **Stills from the scene** (`public/lab/opening-{wide,tall}.webp`, 40 KB and 16 KB).
+   - Each is rendered from the built site under reduced motion (the held moment), with the name hidden.
+   - The page shows one until the scene draws. It stays without WebGL, without JavaScript, and under Save-Data until the lab is entered.
+   - **Which still:**
+     - tall windows (4:5 or narrower) get `opening-tall`;
+     - wider windows get `opening-wide`.
+   - Windows more than twice as wide as tall show the still lower (`--still-py: 0.75`), which keeps its monitor in view.
+   - Retake them whenever the opening changes (see "Retaking the stills" below).
+5. **The computer holds the portfolio** (`src/scripts/lab/computer.ts`, `src/layouts/Screen.astro`).
+   - **Going in lands on Work.** The four places are Work, About, Résumé (with the PDF) and Contact, under one slim bar: the name, the four, and "Back to room". It's a clean website, not a fake OS.
+   - **Reading is stable.** The page is flat and front-facing, in whole pixels, so its text is sharp and selectable. Only the reader scrolls; the camera doesn't move and the robots come to rest.
+   - **Small windows read across the whole window**, inside the safe areas (`data-pc-full`). That's under 64rem wide or 36rem tall: phones, narrow or short windows. There's no touch capture; the page scrolls natively.
+   - **This replaces the redirect** to an ordinary page or the stacked homepage.
+   - **Leaving:** "Back to room" and Escape go back to the entry the lab was opened from and restore the focus.
+     - After a keyboard exit, the focus returns ringed.
+     - After a clicked or tapped "Back to room", it returns without the ring: Chrome honours `focusVisible: false`, and a browser without it shows the ring.
+   - **Other pages:** `/projects/<id>/` and the 404 use the same bar, leading into the computer and back to the room.
+6. **The document shell** (`src/layouts/Base.astro`) is only the head:
+   - title, description, link preview and canonical;
+   - `viewport-fit=cover`;
+   - the Motion setting applied before first paint;
+   - fonts.
+
+   Settings is its own component (`src/components/Settings.astro`). Escape closes it wherever the focus is, and a press inside it (on its note) keeps it open.
+7. **Removed:**
+   - `src/lib/build.ts`: the footer's build stamp. Its two type errors are gone, and `tsc` is now clean.
+   - The header, tab bar, footer and search markup and scripts.
+   - The CSS that only they used.
+8. **`public/og.jpg`** is re-rendered as the new opening (1200×630): the name, title, Settings and the monitor at the centre.
+9. **Docs:**
+   - `README.md` is updated for the new site;
+   - `docs/lab-cinematic-status.md` points here.
+
+### Addresses
+
+| Address | Now |
+|---|---|
+| `/` | The lab: the name, title, Settings and the monitor. Indexable. |
+| `/?computer=<path>` | The lab reading that page (`work`, `work/<id>`, `about`, `resume`, `contact`). A reload or shared link opens it at once, without the camera's entrance. A small window reads across the window, not by redirect. An unknown path is dropped from the address. |
+| `/#work`, `/#about`, `/#resume`, `/#contact` | Old anchors: made `/?computer=<page>` before first paint (typed on the opening too, via `hashchange`). |
+| `/computer/<path>/` | The page the monitor's frame loads. `noindex`, canonical to `/projects/<id>/` for a case study or to itself. Opened on its own with JavaScript, it goes to `/?computer=<path>`. Without JavaScript it stands alone, linked to the other three and back to `/`. |
+| `/projects/<id>/` | Unchanged address: the case study, indexable, under the computer's bar. |
+| `/?sel=…`, `/systems/`, `/systems/screen/` | `?sel=project:<known id>` → `/projects/<id>/`. Any other selection → `/?computer=work` (was `/#work`). None → `/`. |
+| `/prototype/`, `/prototype/work/<id>/` | Unchanged: → `/` (keeping `?computer=` and the anchor) and → `/projects/<id>/`. |
+| Unknown | The 404 page, under the computer's bar: "Explore my work", "Back to room" and recent case studies. |
+
+History: going in adds one entry, and each page opened inside adds one. Back and Forward move between them and out of the lab, with each page's scroll restored. "Back to room" and Escape go back to the opening entry in one step, or, for a lab opened at once, replace the entry with `/`.
+
+### Review fixes
+
+An adversarial review ran three lenses over the uncommitted change, each finding checked by a separate verifier:
+- brief, routes and content;
+- accessibility, fallbacks and layout;
+- entry, focus and history.
+
+Everything confirmed is fixed, and most fixes have a check in `validate.cjs`. The copy fixes are comments and docs only.
+
+- **Focus and keyboard:**
+  - The ring didn't appear when the link was focused before the scene drew. It now rings the monitor once the scene has drawn.
+  - The focus didn't come back when Escape followed an entry that opened at once. It does now.
+  - The ring drifted off the swaying monitor. It follows it now.
+  - A clicked "Back to room" left a keyboard ring. It no longer does.
+  - The focus could come back to a Settings switch whose panel had shut. It now falls back to the monitor's link.
+- **Landmarks:** the room sat outside `<main>`. It's now inside, after the `h1`.
+- **The monitor:**
+  - Modified and middle clicks on the drawn monitor did nothing. They open a new tab now.
+  - In very wide windows, the still's monitor fell partly out of view. It stays in view now.
+- **Settings:**
+  - A click on its note closed the panel.
+  - Escape didn't close it after a click in Safari, or in Firefox on a Mac.
+- **Leaving:**
+  - **A dialog the browser shuts** (a close request the page may not refuse) called leave twice, which could step back through history twice. It also flew the camera back behind a closed dialog. It now takes one step and is instant.
+  - **A leave asked for during a move** could drop a Back or Forward that came in the same move, leaving the lab out of step with the address. It now catches up with the address.
+  - **A close request with no Escape behind it** (Android's Back, when the room's document has the focus) left the lab. It now goes back one page.
+    - The verifier refuted the general claim: while reading, the focus is in the frame, and Chrome gives Back to the history.
+    - The narrow case is handled anyway.
+- **Resize or loss of the room during the flight** was dropped. The page now lands in the layout the window has.
+- **Reduced motion** waited for the scene to load, only to cut in. It now cuts in at once.
+- **Copy:** stale comments that mentioned the retired header, footer and homepage sections, and the stills' retake procedure (below).
+
+### Validation on the final build
+
+- **Machine:** Apple M5 Pro, Darwin 25.5.0.
+- **Browser:** headless Chrome 154.0.8037.58 (installed Chrome, through Playwright 1.63.0). WebGL is ANGLE Metal on the Mac's GPU: "ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)". The log's first line records this.
+- **Not covered:** no SwiftShader run, and no Safari, Firefox, Playwright WebKit, real phone or screen reader.
+- **Site:** `dist/` from `npm run build`, served straight from disk into the browser (`harness/serve.cjs`, GitHub Pages' rules: directory index, `404.html`). No server.
+- **Build:** 42 pages, with only the three.js chunk-size warning, which is older than this pass.
+- **Type check:** `tsc --noEmit -p .` (tsc 5.9.3) is clean (`logs/tsc.log` is empty).
+- **Measured vs inferred:** everything in the table is measured on the final build, unless it says otherwise.
+- **Final source edit:** a comment. Before and after it, every built HTML, CSS and JavaScript file is byte-identical (SHA-256).
+
+`harness/validate.cjs` runs 132 checks in 15 groups. Result: 132/132 (`logs/validate.log`).
+
+| Area | Result |
+|---|---|
+| Opening, at 1440×900, 1920×1080, 1280×800, 1024×768, 820×1180, 390×844 and 360×640 | Only the name and title are shown, and only two controls: the monitor's link and Settings. There are no sections, nav, footer, tab bar, anchors, or skip or ordinary-page links, and no outer scrolling. The monitor is wholly in view without looking around. Its link lies on the drawn bezel (to the pixel) and clear of the name and Settings. |
+| Keyboard and landmarks | Tab goes to the monitor's link, then Settings, both ringed. The link is in `main`, after the `h1`. Focus rings the drawn monitor and brightens it: mean screen luminance 32.6 → 41.6 (hover: 32.7 → 41.7). A focus that arrives before the scene draws gets the ring once it has, following the swaying monitor within 0.5 px. Enter goes in on Work (2.18 s with the flight), with the focus in the page. The room behind is inert. Escape comes back to the address it was opened from, with the focus ringed on the link. |
+| Pointer | A drag ending on the monitor looks and doesn't go in. Hover brightens the monitor, with a pointer cursor. A click goes in. Cmd-click and middle click open `/?computer=work` in a new tab and leave the lab closed. |
+| Inside | About from the bar changes the address, and the camera and frame don't move. The wheel scrolls the page (60 px) and not the window (0). Résumé links the PDF. Back returns to About where it was scrolled, and Forward to Résumé. A refresh reopens on the monitor. A clicked "Back to room" returns the focus without a ring. Case study → Back → Work → Back reaches the room, and Forward opens Work again. |
+| Leaving and close requests | Escape inside a case study (two pages in) leaves for the room. A close request with no Escape (`dialog.requestClose()`, standing in for Android's Back) goes back one page, then to the room. A dialog shut by the browser leaves at once (no return flight), one step back, not past the opening. Narrowed during the flight in, it lands across the window. Opened with the focus on a Settings switch, the focus comes back to the monitor's link. |
+| Resize while reading | 1440 → 700 wide reads across the window. Back to 1440, it's on the monitor again, on the same page. |
+| Phone (390×844, 360×640, touch) | Reads across the window, with no outer scroll. The page scrolls inside (`touch-action: auto`) and "Back to room" is shown. Tapping it returns to the opening. |
+| Addresses | All four anchors open the computer on their page. `?computer=work/<id>` opens the case study. `?computer=bogus` is dropped. `?sel=project:<id>` goes to the case study and other selections to Work. `/systems/` → `/`. `/prototype/?computer=about` keeps the address and `/prototype/work/<id>/` goes to the case study. `/computer/about/` on its own goes to the lab reading it. `/projects/<id>/` stays, indexable, and links to no `/#…` anchor. |
+| Reduced motion and Motion | Reduced motion: the room holds still, with no idle hint, and going in cuts (87 ms to reading). Motion off in Settings stops the room, is remembered, and survives a reload. With the scene not yet loaded (Save-Data), reduced motion cuts in without loading it (70 ms). |
+| Idle hint | It shows once, peak 0.999, when the page is left alone. A press cancels it. |
+| No WebGL (context refused) at 1440×900, 390×844, 1440×400, 2560×900 and 3840×950 | The still shows, and its monitor's link lies on the pictured monitor (within 1.5 px), in view with room for the ring. The link is what a click at its centre hits. A click or tap opens the computer across the window. Escape returns the focus to the link, and Enter goes in again. |
+| No JavaScript (1440×900, 390×844) | The monitor, a link to `/computer/work/`, is the only control: Settings isn't offered. Work stands alone, with the other three places, 11 case studies and "Back to room" to `/`. |
+| Enlarged text and short windows | 1280×800 and 390×844 at 200% text, 1024×400, 740×360, and 568×320 at 150%: the name and Settings are reachable and apart, there's no sideways scroll, and the monitor is in view. Reading keeps "Back to room" in view. |
+| Save-Data | No scene until asked for; the still shows. Its monitor opens the computer. |
+| Settings | A press on its note keeps it open. Escape closes it with the focus on the page, and the focus goes to its button. A press elsewhere, or the focus moving out, closes it. |
+
+**Not measured in this pass (inferred):**
+- **Frame rate and frame time.** The scene's per-frame work is the prototype's, with the desk and two robots placed differently, so the cinematic checkpoint's GPU performance table is expected to hold.
+- **The robots' clearance.** It was measured against the old introduction's text. The opening now has only the name in its corner, fitted by the same `fitHero()` rules.
+
+**Screens** (GPU, the page's own fonts, JPEG): `docs/evidence/lab-computer-2026-09-29/screens/`:
+- **Opening:**
+  - `opening-{1440x900,1280x800,1920x1080}`;
+  - `phone-opening-390x844`;
+  - `focus-monitor-1440x900`: the keyboard's ring on the brightened monitor.
+- **Reading:**
+  - `reading-{work,about,resume,case}-1440x900`;
+  - `phone-reading-{work,case}-390x844`.
+- **Fallbacks** (taken by `validate.cjs`):
+  - `nowebgl-opening-1440x900`;
+  - `nojs-work-390x844`;
+  - `fit-1280x800-text200`: the opening at 200% text.
+
+**Recording:** `video/lab-1280x800.webm` (VP9, 1280×800, 19 s). It shows:
+- the opening;
+- the pointer finding and brightening the monitor;
+- the click and the flight in;
+- About from the bar, and a scroll;
+- Résumé;
+- "Back to room" and the flight out.
+
+It was made from Chrome's screencast frames, replayed at their own timing into MediaRecorder: no ffmpeg. `harness/frames.cjs` makes a contact sheet of it as it plays.
+
+### Retaking the stills
+
+The stills, and the link's position over them without the scene, come from the scene itself. Retake them whenever the opening changes: the desk, the robots' rest poses, the room, the lighting, the camera or the fit.
+
+1. `npm run build`.
+2. `PW=<playwright> node docs/evidence/lab-computer-2026-09-29/harness/stills.cjs <scratch>`.
+   - It renders `opening-wide.png` (1600×1000) and `opening-tall.png` (720×1440) from the built site: reduced motion, the GPU, the name hidden.
+   - For each, it prints the monitor's bezel as fractions of the still: `ml`, `mt`, `mr`, `mb`.
+3. Convert each to WebP, quality 72, method 6 (for example Pillow's `save(…, 'WEBP', quality=72, method=6)`), into `public/lab/`.
+4. Put the fractions into `LabStage.astro`: `--still-ml/mt/mr/mb` under `:root` for the wide still, and under `(max-aspect-ratio: 4/5)` for the tall one. `--still-a` (1.6 and 0.5) changes only if the render sizes do.
+5. Rebuild, then run `validate.cjs dist nowebgl`. It checks that the link lies on the pictured monitor, within 1.5 px, at five sizes, including 2560×900 and 3840×950 for the lower placement in wide windows.
+
+`harness/og.cjs` remakes the link preview in the same way:
+- render at 2x;
+- Lanczos down to 1200×630;
+- JPEG quality 86, progressive;
+- save as `public/og.jpg`.
+
+### Known limitations
+
+1. **Coverage:**
+   - headless Chrome 154 on one Mac;
+   - no Safari, Firefox, Playwright WebKit, real phone (iOS or Android) or screen-reader pass.
+
+   Android's Back is exercised only through `dialog.requestClose()` in desktop Chrome.
+2. **Right-clicking the drawn monitor gives the canvas's menu, not a link menu.** Once the scene has drawn, the link passes the pointer through so the scene can tell a click from a drag. Cmd-, Ctrl- and middle clicks still open a new tab. The keyboard, the still, and pages without JavaScript have the real link.
+3. **Browser close-request limits.** A close request the page may not refuse, when the room's document has the focus, shuts the dialog. The lab then leaves at once for the entry it was opened from, rather than going back one page. In Chrome, that's Back pressed again with no tap or key since the last one.
+4. **Focus ring after a clicked "Back to room"** uses `focus({ focusVisible: false })`. A browser without it shows the ring.
+5. **Redirects need JavaScript to be exact** (GitHub Pages can't redirect on the server). Without it:
+   - `/computer/<path>/` stands alone, by design;
+   - the retired addresses' meta refresh goes to their fixed replacement.
+6. **Reduced motion wins in the lab** (unchanged): with the system setting on, Motion in Settings brings back the page's transitions, but the room holds still.
+7. **Carried over:**
+   - the three.js chunk-size warning;
+   - the Graphite–Terracotta tap during their greeting (not re-measured after the move).
+8. **The stills are pictures of the scene.** They go stale if the opening changes without a retake (above).
+
+### Commands (from the repository root)
+
+```sh
+npm run build                          # 42 pages
+git diff --check
+tsc --noEmit -p .                      # clean (logs/tsc.log)
+
+# Playwright isn't a dependency: PW=<path to a playwright or playwright-core module>. The scripts launch
+# installed Chrome (channel 'chrome') with ANGLE Metal; validate.cjs takes --swiftshader instead. They
+# read the built site straight from dist/ (harness/serve.cjs): no server.
+E=docs/evidence/lab-computer-2026-09-29
+PW=<playwright> node $E/harness/validate.cjs dist > $E/logs/validate.log   # or: … dist <group>, e.g. close
+PW=<playwright> node $E/harness/shots.cjs                                   # → $E/screens
+PW=<playwright> node $E/harness/rec.cjs                                     # → $E/video/lab-1280x800.webm
+PW=<playwright> node $E/harness/frames.cjs $E/video/lab-1280x800.webm <scratch>/sheet.png
+PW=<playwright> node $E/harness/stills.cjs <scratch>                        # then "Retaking the stills"
+PW=<playwright> node $E/harness/og.cjs <scratch>/og.png                     # then down to public/og.jpg
+```
+
+## Earlier checkpoint: the lab becomes the homepage, `b4f5a5c` (Claude)
+
+**Superseded by the full-screen lab above.** Its sections below the lab, stacked page for small windows, "Open ordinary page", site header, tab bar, footer and search are gone, and `/#<section>` now opens the computer. Merged to `main` as `2c1009b`.
+
+- **Branch:** `cinematic-lab-homepage`, from `cinematic-lab-prototype` at `b7800f0`. `origin/main` was still `cc1a6c4` when the branch was pushed, so it merges without conflicts.
+- **Commit:** `b4f5a5c`.
 - **Brief:** "Finish the cinematic lab and make it the homepage". It's a polish and release pass on the prototype below, with no redesign. The monitor's brightness, the computer's pages, the room and the robots' designs are unchanged.
 - **What to judge:** `docs/evidence/lab-homepage-2026-09-28/screens/`. These are rendered on a real GPU (Apple M5 Pro, ANGLE Metal, headless Chrome 153) with the page's own web fonts. The earlier checkpoint's screens were set in the fallback font.
 

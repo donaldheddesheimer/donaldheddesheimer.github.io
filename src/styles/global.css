@@ -56,7 +56,7 @@
 }
 
 /* Type scale in rem, so text follows the browser's default size. 2xs is the floor for metadata
-   (uppercase mono labels, pills, the footer), sm is UI text, base is reading copy. */
+   (uppercase mono labels, pills), sm is UI text, base is reading copy. */
 @theme {
   --text-*: initial;
   --text-2xs: 0.75rem;
@@ -115,17 +115,8 @@
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
 }
 
-/* Scrolling to a target or a focused control keeps it clear of the fixed header and, on phones, the
-   bottom tab bar. */
 html {
-  scroll-padding-top: 4.5rem;
-  scroll-padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
   background: var(--bg);
-}
-@media (width >= 48rem) {
-  html {
-    scroll-padding-bottom: 3rem;
-  }
 }
 
 body {
@@ -150,14 +141,9 @@ table {
 input {
   caret-color: var(--blue-3);
 }
-/* Scroll areas keep room for their scrollbar, so content doesn't shift when it appears. */
-#cmdk-list {
-  scrollbar-gutter: stable;
-}
-
 /* One timing for state changes on every interactive surface; zero specificity, so a component
    that animates something else (the Motion switch's knob) still sets its own. */
-:where(.btn, .tab-btn, .motion-switch, .cmdk-opt) {
+:where(.btn, .motion-switch) {
   transition-property: background-color, border-color, color, box-shadow;
   transition-duration: var(--dur-1);
   transition-timing-function: var(--ease);
@@ -168,41 +154,13 @@ input {
   scrollbar-color: var(--line-2) transparent;
 }
 
-/* In the base layer so a utility (outline-none on the palette input) can opt out. */
+/* In the base layer so a utility can opt out. */
 @layer base {
   :focus-visible {
     outline: 2px solid var(--blue-3);
     outline-offset: 2px;
   }
 }
-/* Links in the header and the tab bar's buttons draw the ring inside, so the bar never cuts it off. */
-body > header a:focus-visible,
-.tab-btn:focus-visible {
-  outline-offset: -2px;
-}
-
-/* Very short screens (landscape phones, 400% zoom): the bars scroll with the page instead of
-   covering half of it. */
-@media (max-height: 30rem) {
-  html {
-    scroll-padding-top: 1rem;
-  }
-  body > header {
-    position: absolute;
-  }
-}
-@media (max-height: 30rem) and (width < 48rem) {
-  html {
-    scroll-padding-bottom: 1rem;
-  }
-  body > main {
-    padding-bottom: 1rem;
-  }
-  .tabbar {
-    position: static;
-  }
-}
-
 @layer components {
   .kicker {
     font-family: var(--font-mono);
@@ -567,8 +525,8 @@ html[data-motion='off'] *::after {
 }
 
 /* ------------------------------------------------------------------------------------------------
-   Homepage. One edge lines up the opening's text with every section below it: the inset, or on very
-   wide screens enough to centre a --home-max column. */
+   The pages' edge (the computer's pages, the case studies, the 404): the inset, or on very wide
+   screens enough to centre a --home-max column. */
 :root {
   --home-inset: 1rem;
   --home-max: 100rem;
@@ -585,44 +543,12 @@ html[data-motion='off'] *::after {
   }
 }
 
-/* The opening's kicker line and its actions (index.astro), over the lab. */
-.hero-kicker {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.5rem;
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.hero-kicker span {
-  white-space: nowrap;
-}
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-}
-
 /* A card's one link covers the whole card (the Work section's cards). */
 .stretched::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 1;
-}
-
-/* --- ⌘K palette --------------------------------------------------------------------------------- */
-/* The active row, moved by the arrow keys or the pointer, is drawn like a selection; on the tint its
-   dim text steps up to muted so it keeps 4.5:1. */
-.cmdk-opt[aria-selected='true'] {
-  background: var(--sel-bg);
-  box-shadow: inset 2px 0 0 var(--sel-bar);
-}
-.cmdk-opt[aria-selected='true'] .text-dim {
-  color: var(--muted);
 }
 
 /* 44px touch targets on coarse pointers. Small text links get theirs in the markup

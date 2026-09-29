@@ -1,31 +1,42 @@
 ---
-// The lab computer's screen: one page of the portfolio (Work, a case study, About, Résumé or Contact) as
-// the monitor on the homepage shows it, in the frame src/scripts/lab/computer.ts lays over the screen.
-// The content is the site's own (src/components/Folio*.astro, CaseStudy.astro); this layout gives it the
-// computer's one slim bar.
+// The lab computer's screen: one page of the portfolio (Work, a case study, About, Résumé or Contact) with
+// the computer's one slim bar: the name, the four places, and "Back to room". The content is the site's
+// own (src/components/Folio*.astro, CaseStudy.astro).
 //
-// The lab owns the address (/?computer=<path>) and the history; this page never navigates itself. A
-// plain click on a link to another page the computer has asks the lab to go there (pc:go); a modified
-// click opens that page's own address in a new tab. Links the computer has no page for open in a new
-// tab, so the lab stays; downloads and mail links do what they do. "Leave computer" and Escape ask the
-// lab to close (pc:leave, pc:escape); "Open ordinary page" leaves the lab for the page with the same
-// content. These pages are the frame's, not addresses of their own (noindex, canonical to the ordinary
-// page): opened on their own (a copied frame address), each goes to the lab reading it, or to its
-// ordinary page in a window the lab doesn't open in.
-import '../styles/global.css';
+// The computer's own pages (/computer/<path>/, `path` set) are what the monitor's frame loads
+// (src/scripts/lab/computer.ts). There the lab owns the address (/?computer=<path>) and the history, and
+// this page never navigates itself: a plain click on a link to another page the computer has asks the
+// lab to go there (pc:go); a modified click opens that page's own address in a new tab. Links the
+// computer has no page for open in a new tab, so the lab stays; downloads and mail links do what they
+// do. "Back to room" and Escape ask the lab to close (pc:leave, pc:escape). Opened on their own with
+// JavaScript, these pages go to the lab reading them; without it they stand alone, linked to each other
+// and back to the room (/). They are kept out of search results; a case study's canonical page is
+// /projects/<id>/.
+//
+// The same layout serves the site's few pages of their own (a case study's /projects/<id>/, the 404),
+// which stay where they are: their bar leads into the computer and back to the room.
+import Base from './Base.astro';
 import Mark from '../components/Mark.astro';
+import Icon from '../components/Icon.astro';
 import { profile } from '../data/site';
-import { labHref, ordinaryHref } from '../scripts/lab/routes';
+import { canonicalHref, labHref, pageHref } from '../scripts/lab/routes';
 
 interface Props {
   title: string;
-  /** This page's computer path (routes.ts). */
-  path: string;
+  /** The computer path (routes.ts) of one of the computer's own pages. */
+  path?: string;
+  /** A page of its own: which of the four places it belongs to, if any. */
+  section?: string;
+  description?: string;
+  /** A page of its own: its canonical address, or false for none (the 404). */
+  canonical?: string | false;
+  noindex?: boolean;
 }
-const { title, path } = Astro.props;
-const page = ordinaryHref(path);
-const lab = labHref(path);
-const section = path.split('/')[0];
+const { title, path, description } = Astro.props;
+const framed = path != null;
+const section = framed ? path.split('/')[0] : Astro.props.section;
+const canonical = framed ? canonicalHref(path) : Astro.props.canonical;
+const lab = framed ? labHref(path) : null;
 const nav = [
   ['work', 'Work'],
   ['about', 'About'],
@@ -34,217 +45,200 @@ const nav = [
 ] as const;
 ---
 
-<!doctype html>
-<html lang="en" data-embed data-screen>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <meta name="robots" content="noindex" />
-    <link rel="canonical" href={new URL(page, Astro.site).href} />
+<Base title={title} description={description} canonical={canonical} noindex={framed || Astro.props.noindex} screen>
+  <Fragment slot="head">
     <base target="_top" />
-    <script is:inline define:vars={{ page, lab }}>
-      if (window.top === window.self) {
-        var roomy = matchMedia('(width >= 64rem) and (height >= 36rem) and (min-aspect-ratio: 3/2)').matches;
-        location.replace(roomy ? lab : page);
-      }
-      (function () {
-        var h = document.documentElement;
-        h.classList.add('js');
-        var saved = null;
-        try {
-          saved = localStorage.getItem('motion');
-        } catch (e) {}
-        h.dataset.motion = saved || (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'off' : 'on');
-      })();
+    <script is:inline define:vars={{ lab }}>
+      if (lab && window.top === window.self) location.replace(lab + location.hash);
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-    />
-  </head>
-  <body data-path={path}>
+  </Fragment>
+  <div class="scr" data-path={path}>
     <header class="scr-bar">
-      <a href={labHref('work')} class="scr-home" aria-label={`${profile.name}, work`}>
+      <a href={pageHref('work')} class="scr-home" aria-label={`${profile.name}, work`}>
         <Mark class="size-5 shrink-0" />
         <span class="scr-name">{profile.name}</span>
       </a>
       <nav class="scr-nav" aria-label="Portfolio">
         {
           nav.map(([id, label]) => (
-            <a href={labHref(id)} aria-current={path === id ? 'page' : section === id ? 'true' : undefined}>
+            <a href={pageHref(id)} aria-current={path === id ? 'page' : section === id ? 'true' : undefined}>
               {label}
             </a>
           ))
         }
       </nav>
-      <div class="scr-end">
-        <a href={page} class="scr-quiet" data-top>Open ordinary page</a>
-        <button type="button" class="scr-leave" data-leave aria-label="Leave computer">Leave<span class="scr-more">&nbsp;computer</span></button>
-      </div>
+      <a href="/" class="scr-back" data-leave aria-label="Back to room">
+        <Icon name="arrow-left" class="size-3.5 shrink-0" />Back<span class="scr-more">&nbsp;to room</span>
+      </a>
     </header>
     <main id="main" class="scr-main">
       <slot />
     </main>
+  </div>
+</Base>
 
-    <script>
-      import { pathOf } from '../scripts/lab/routes';
+<script>
+  import { pathOf } from '../scripts/lab/routes';
 
-      const html = document.documentElement;
-      const here = document.body.dataset.path!;
-      const post = (msg: object) => parent !== window && parent.postMessage(msg, location.origin);
+  const html = document.documentElement;
+  const here = document.querySelector<HTMLElement>('.scr')?.dataset.path;
+  // On the lab's monitor: the frame of the homepage's computer, and nowhere else.
+  const framed = !!here && window.parent !== window;
+  const post = (msg: object) => parent.postMessage(msg, location.origin);
 
-      const smooth = () => html.dataset.motion !== 'off' && !matchMedia('(prefers-reduced-motion: reduce)').matches;
-      function scrollToHash(hash: string) {
-        const el = hash.length > 1 ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
-        if (el instanceof HTMLDetailsElement) el.open = true;
-        if (el) el.scrollIntoView({ block: 'start', behavior: smooth() ? 'smooth' : 'auto' });
-        else scrollTo({ top: 0, behavior: smooth() ? 'smooth' : 'auto' });
-      }
+  const smooth = () => html.dataset.motion !== 'off' && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function scrollToHash(hash: string) {
+    const el = hash.length > 1 ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
+    if (el instanceof HTMLDetailsElement) el.open = true;
+    if (el) el.scrollIntoView({ block: 'start', behavior: smooth() ? 'smooth' : 'auto' });
+    else scrollTo({ top: 0, behavior: smooth() ? 'smooth' : 'auto' });
+  }
 
-      document.addEventListener('click', (e) => {
-        if (e.defaultPrevented || e.button !== 0) return;
-        const a = (e.target as Element).closest<HTMLAnchorElement>('a[href]');
-        if (!a || a.hasAttribute('download') || a.hasAttribute('data-top') || a.target === '_blank') return;
-        const u = new URL(a.href);
-        if (u.protocol !== 'https:' && u.protocol !== 'http:') return; // mail links
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // the link's own address, in a new tab or window
-        e.preventDefault();
-        const to = pathOf(u, location.origin);
-        if (!to) window.open(u.href, '_blank', 'noopener');
-        else if (to === here) scrollToHash(u.hash);
-        else post({ type: 'pc:go', path: to, hash: u.hash });
-      });
-      document.querySelector('[data-leave]')?.addEventListener('click', () => post({ type: 'pc:leave' }));
+  if (framed) {
+    document.addEventListener('click', (e) => {
+      if (e.defaultPrevented || e.button !== 0) return;
+      const a = (e.target as Element).closest<HTMLAnchorElement>('a[href]');
+      if (!a || a.hasAttribute('download') || a.target === '_blank') return;
+      const u = new URL(a.href);
+      if (u.protocol !== 'https:' && u.protocol !== 'http:') return; // mail links
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // the link's own address, in a new tab or window
+      e.preventDefault();
+      const to = a.hasAttribute('data-leave') ? null : pathOf(u, location.origin);
+      // (A click with no count is the keyboard's: the lab rings the focus it gives back only then.)
+      if (a.hasAttribute('data-leave')) post({ type: 'pc:leave', pointer: e.detail > 0 });
+      else if (!to) window.open(u.href, '_blank', 'noopener');
+      else if (to === here) scrollToHash(u.hash);
+      else post({ type: 'pc:go', path: to, hash: u.hash });
+    });
 
-      // Tell the lab which page this is, and pass Escape up to it unless something here is using it.
-      post({ type: 'pc:page', path: here, title: document.title });
-      addEventListener(
-        'keydown',
-        (e) => {
-          if (e.key !== 'Escape' || e.defaultPrevented || document.querySelector('dialog[open]')) return;
-          post({ type: 'pc:escape' });
-        },
-        true,
-      );
-      if (location.hash) requestAnimationFrame(() => scrollToHash(location.hash));
-    </script>
+    // Tell the lab which page this is, and pass Escape up to it unless something here is using it.
+    post({ type: 'pc:page', path: here, title: document.title });
+    addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key !== 'Escape' || e.defaultPrevented || document.querySelector('dialog[open]')) return;
+        post({ type: 'pc:escape' });
+      },
+      true,
+    );
+  }
+  if (location.hash) requestAnimationFrame(() => scrollToHash(location.hash));
+</script>
 
-    <style>
-      /* The computer's own bar: whose it is, its four places, and the way out. */
-      .scr-bar {
-        position: sticky;
-        top: 0;
-        z-index: 40;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        height: 2.75rem;
-        padding: 0 var(--home-edge);
-        border-bottom: 1px solid var(--line);
-        background: rgb(19 18 17 / 0.94);
-        backdrop-filter: blur(8px);
-        font-size: var(--text-sm);
-      }
-      .scr-home {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        min-height: 2rem;
-        font-weight: 600;
-        color: var(--text);
-        white-space: nowrap;
-      }
-      .scr-nav {
-        display: flex;
-        gap: 0.125rem;
-        margin-left: auto;
-      }
-      .scr-nav a,
-      .scr-end > * {
-        display: inline-flex;
-        align-items: center;
-        min-height: 2rem;
-        padding: 0 0.625rem;
-        border-radius: var(--radius-2);
-        white-space: nowrap;
-      }
-      .scr-nav a {
-        color: var(--muted);
-      }
-      .scr-nav a:hover,
-      .scr-end > *:hover {
-        color: var(--text);
-        background: var(--hover-bg);
-      }
-      .scr-nav a[aria-current] {
-        color: var(--text);
-        box-shadow: inset 0 -2px 0 var(--text);
-        border-radius: 0;
-      }
-      .scr-end {
-        display: flex;
-        gap: 0.25rem;
-        margin-left: 0.75rem;
-        padding-left: 0.75rem;
-        border-left: 1px solid var(--line);
-      }
-      .scr-quiet {
-        color: var(--dim);
-      }
-      .scr-leave {
-        color: var(--muted);
-      }
-      /* A narrow screen: the name goes first, then the ordinary page's link, and the rest closes up. The
-         places scroll inside the bar before the bar would push "Leave" out of the window. */
-      @media (width < 56rem) {
-        .scr-name {
-          display: none;
-        }
-      }
-      @media (width < 44rem) {
-        .scr-bar {
-          gap: 0.5rem;
-        }
-        .scr-nav {
-          min-width: 0;
-          overflow-x: auto;
-          scrollbar-width: none;
-        }
-        .scr-nav a,
-        .scr-end > * {
-          padding: 0 0.4375rem;
-        }
-        .scr-end {
-          flex-shrink: 0;
-          margin-left: 0;
-          padding-left: 0.375rem;
-        }
-        .scr-end > .scr-quiet,
-        .scr-more {
-          display: none;
-        }
-      }
-      @media (width < 24rem) {
-        .scr-nav a,
-        .scr-end > * {
-          padding: 0 0.3125rem;
-        }
-      }
-      .scr-main {
-        --cs-under: 2.75rem;
-        padding-bottom: 2rem;
-      }
-      /* A screen is narrower than the windows the page's edge is set for; anchors land under the bar. */
-      :global(html[data-screen]) {
-        --home-inset: clamp(1.25rem, 4vw, 2.5rem);
-        scroll-padding-top: 3.5rem;
-      }
-      :global(html[data-screen] .folio) {
-        padding-top: clamp(2rem, 5vw, 3.5rem);
-      }
-    </style>
-  </body>
-</html>
+<style>
+  /* The computer's own bar: whose it is, its four places, and the way back to the room. On a page
+     standing alone, the window's safe area (a phone's notch and home bar) is kept clear. */
+  .scr-bar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    padding: env(safe-area-inset-top) max(var(--home-edge), env(safe-area-inset-right)) 0 max(var(--home-edge), env(safe-area-inset-left));
+    border-bottom: 1px solid var(--line);
+    background: rgb(19 18 17 / 0.94);
+    backdrop-filter: blur(8px);
+    font-size: var(--text-sm);
+  }
+  .scr-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .scr-nav {
+    display: flex;
+    gap: 0.125rem;
+    margin-left: auto;
+  }
+  .scr-nav a,
+  .scr-back {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0 0.625rem;
+    border-radius: var(--radius-2);
+    white-space: nowrap;
+  }
+  .scr-nav a {
+    color: var(--muted);
+  }
+  .scr-nav a:hover,
+  .scr-back:hover {
+    color: var(--text);
+    background: var(--hover-bg);
+  }
+  .scr-nav a[aria-current] {
+    color: var(--text);
+    box-shadow: inset 0 -2px 0 var(--text);
+    border-radius: 0;
+  }
+  .scr-back {
+    gap: 0.375rem;
+    flex-shrink: 0;
+    margin-left: 0.75rem;
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--line);
+    border-radius: 0 var(--radius-2) var(--radius-2) 0;
+    color: var(--muted);
+  }
+  @media (pointer: coarse) {
+    .scr-home,
+    .scr-nav a,
+    .scr-back {
+      min-height: var(--h-touch);
+    }
+  }
+  /* A narrow screen: the name goes first, then "to room", and the rest closes up. The places scroll
+     inside the bar before the bar would push "Back" out of the window. */
+  @media (width < 56rem) {
+    .scr-name {
+      display: none;
+    }
+  }
+  @media (width < 44rem) {
+    .scr-bar {
+      gap: 0.5rem;
+    }
+    .scr-nav {
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .scr-nav a,
+    .scr-back {
+      padding: 0 0.4375rem;
+    }
+    .scr-back {
+      margin-left: 0;
+      padding-left: 0.5rem;
+    }
+    .scr-more {
+      display: none;
+    }
+  }
+  @media (width < 24rem) {
+    .scr-nav a,
+    .scr-back {
+      padding: 0 0.3125rem;
+    }
+  }
+  .scr-main {
+    --cs-under: 2.75rem;
+    padding: 0 env(safe-area-inset-right) calc(2rem + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+  }
+  /* A screen is narrower than the windows the page's edge is set for; anchors land under the bar. */
+  :global(html[data-screen]) {
+    --home-inset: clamp(1.25rem, 4vw, 2.5rem);
+    scroll-padding-top: 3.5rem;
+    scroll-padding-bottom: 1rem;
+  }
+  :global(html[data-screen] .folio) {
+    padding-top: clamp(2rem, 5vw, 3.5rem);
+  }
+</style>

@@ -6,9 +6,9 @@ import { workLede, workMeta as meta, workProjects } from '../lib/folio';
 import '../styles/folio.css';
 
 interface Props {
-  /** Where a project's case study is (the computer's page, or the ordinary one). */
+  /** Where a project's case study is (the computer's page, or its own at /projects/<id>/). */
   href: (id: string) => string;
-  /** The section heading's level: 1 on a page of its own, 2 on the page with all four. */
+  /** The heading's level: 1 on a page of its own (the computer's), 2 under another page's heading. */
   level?: 1 | 2;
 }
 const { href, level = 2 } = Astro.props;

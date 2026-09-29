@@ -1,6 +1,6 @@
 ---
 // Old systems-map links (?sel=<entity id>, on /, /systems/ and /systems/screen/). The map is retired:
-// a project's selection goes to its case study, and any other selection to Work. Only a known project
+// a project's selection goes to its case study, and any other selection to Work on the computer. Only a known project
 // id makes an address; nothing else from the query reaches one. `bare` is where a link without a
 // selection goes (by default it stays).
 import { getCollection } from 'astro:content';
@@ -15,6 +15,6 @@ const projects = (await getCollection('projects')).map((p) => p.id);
 <script is:inline define:vars={{ projects, bare }}>
   var sel = new URLSearchParams(location.search).get('sel');
   var m = sel && /^project:([\w-]+)$/.exec(sel);
-  var to = sel ? (m && projects.indexOf(m[1]) >= 0 ? '/projects/' + m[1] + '/' : '/#work') : bare;
+  var to = sel ? (m && projects.indexOf(m[1]) >= 0 ? '/projects/' + m[1] + '/' : '/?computer=work') : bare;
   if (to) location.replace(to);
 </script>

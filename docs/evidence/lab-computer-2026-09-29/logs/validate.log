@@ -1,0 +1,135 @@
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  opening 1440x900: name and title  Donald Heddesheimer / Software engineer
+PASS  opening 1440x900: the monitor's link ("Explore my work") and Settings are the only controls  ["Explore my work","Settings"]
+PASS  opening 1440x900: no sections, nav, footer, tab bar, anchors or skip/ordinary links  {"sections":0,"skip":false}
+PASS  opening 1440x900: monitor wholly in view without looking around  {"monShare":0.2}
+PASS  opening 1440x900: the link lies on the drawn monitor, clear of the name and Settings  {"link":{"x":489,"y":530,"w":288,"h":180},"mon":{"x":489,"y":530,"w":288,"h":180}}
+PASS  opening 1440x900: no outer scrolling  {"dy":0,"dx":0}
+PASS  opening 1920x1080: name and title  Donald Heddesheimer / Software engineer
+PASS  opening 1920x1080: the monitor's link ("Explore my work") and Settings are the only controls  ["Explore my work","Settings"]
+PASS  opening 1920x1080: no sections, nav, footer, tab bar, anchors or skip/ordinary links  {"sections":0,"skip":false}
+PASS  opening 1920x1080: monitor wholly in view without looking around  {"monShare":0.19}
+PASS  opening 1920x1080: the link lies on the drawn monitor, clear of the name and Settings  {"link":{"x":672,"y":640,"w":359,"h":223},"mon":{"x":672,"y":640,"w":359,"h":223}}
+PASS  opening 1920x1080: no outer scrolling  {"dy":0,"dx":0}
+PASS  opening 1280x800: name and title  Donald Heddesheimer / Software engineer
+PASS  opening 1280x800: the monitor's link ("Explore my work") and Settings are the only controls  ["Explore my work","Settings"]
+PASS  opening 1280x800: no sections, nav, footer, tab bar, anchors or skip/ordinary links  {"sections":0,"skip":false}
+PASS  opening 1280x800: monitor wholly in view without looking around  {"monShare":0.2}
+PASS  opening 1280x800: the link lies on the drawn monitor, clear of the name and Settings  {"link":{"x":434,"y":471,"w":256,"h":160},"mon":{"x":434,"y":471,"w":256,"h":160}}
+PASS  opening 1280x800: no outer scrolling  {"dy":0,"dx":0}
+PASS  opening 1024x768: name and title  Donald Heddesheimer / Software engineer
+PASS  opening 1024x768: the monitor's link ("Explore my work") and Settings are the only controls  ["Explore my work","Settings"]
+PASS  opening 1024x768: no sections, nav, footer, tab bar, anchors or skip/ordinary links  {"sections":0,"skip":false}
+PASS  opening 1024x768: monitor wholly in view without looking around  {"monShare":0.18}
+PASS  opening 1024x768: the link lies on the drawn monitor, clear of the name and Settings  {"link":{"x":360,"y":436,"w":189,"h":118},"mon":{"x":360,"y":436,"w":189,"h":118}}
+PASS  opening 1024x768: no outer scrolling  {"dy":0,"dx":0}
+PASS  opening 820x1180: name and title  Donald Heddesheimer / Software engineer
+PASS  opening 820x1180: the monitor's link ("Explore my work") and Settings are the only controls  ["Explore my work","Settings"]
+PASS  opening 820x1180: no sections, nav, footer, tab bar, anchors or skip/ordinary links  {"sections":0,"skip":false}
+PASS  opening 820x1180: monitor wholly in view without looking around  {"monShare":0.4}
+PASS  opening 820x1180: the link lies on the drawn monitor, clear of the name and Settings  {"link":{"x":245,"y":535,"w":329,"h":205},"mon":{"x":245,"y":535,"w":329,"h":205}}
+PASS  opening 820x1180: no outer scrolling  {"dy":0,"dx":0}
+PASS  opening 390x844: name and title  Donald Heddesheimer / Software engineer
+PASS  opening 390x844: the monitor's link ("Explore my work") and Settings are the only controls  ["Explore my work","Settings"]
+PASS  opening 390x844: no sections, nav, footer, tab bar, anchors or skip/ordinary links  {"sections":0,"skip":false}
+PASS  opening 390x844: monitor wholly in view without looking around  {"monShare":0.51}
+PASS  opening 390x844: the link lies on the drawn monitor, clear of the name and Settings  {"link":{"x":96,"y":393,"w":199,"h":125},"mon":{"x":96,"y":393,"w":199,"h":125}}
+PASS  opening 390x844: no outer scrolling  {"dy":0,"dx":0}
+PASS  opening 360x640: name and title  Donald Heddesheimer / Software engineer
+PASS  opening 360x640: the monitor's link ("Explore my work") and Settings are the only controls  ["Explore my work","Settings"]
+PASS  opening 360x640: no sections, nav, footer, tab bar, anchors or skip/ordinary links  {"sections":0,"skip":false}
+PASS  opening 360x640: monitor wholly in view without looking around  {"monShare":0.46}
+PASS  opening 360x640: the link lies on the drawn monitor, clear of the name and Settings  {"link":{"x":96,"y":293,"w":167,"h":104},"mon":{"x":96,"y":293,"w":167,"h":104}}
+PASS  opening 360x640: no outer scrolling  {"dy":0,"dx":0}
+PASS  keyboard: tab order is the monitor's link, then Settings  ["Explore my work [ring]","Settings [ring]","Donald HeddesheimerSoftware engineerA robotics lab after hours: a computer on a desk, three robots dancing behind it, an unfinished one on its stand. Illustration.Motion The lab's robots and camera, and the page's transitions. It starts off if your system asks for reduced motion, and the robots and camera then stay still.var e=document.documentElement,t=document.querySelector(`[data-settings]`),n=t?.querySelector(`[data-settings-toggle]`),r=t?.querySelector(`#settings`),i=t?.querySelector(`[data-motion-toggle]`);if(t&&n&&r&&i){let a=()=>i.setAttribute(`aria-checked`,String(e.dataset.motion!==`off`));a(),i.addEventListener(`click`,()=>{let t=e.dataset.motion===`off`?`on`:`off`;e.dataset.motion=t;try{localStorage.setItem(`motion`,t)}catch{}a()});let o=e=>{r.hidden=!e,n.setAttribute(`aria-expanded`,String(e))};n.addEventListener(`click`,()=>o(r.hidden)),document.addEventListener(`keydown`,e=>{e.key!==`Escape`||r.hidden||(e.preventDefault(),o(!1),n.focus())}),t.addEventListener(`focusout`,e=>{let n=e.relatedTarget;n&&!t.contains(n)&&o(!1)}),document.addEventListener(`pointerdown`,e=>{!r.hidden&&!t.contains(e.target)&&o(!1)})}"]
+PASS  landmark: the monitor's link is in main, after the h1 and before Settings; nothing shown outside main  {"inMain":true,"afterH1":true,"beforeSettings":true,"outside":[]}
+PASS  keyboard: the link rings the monitor where it is drawn  {"el":"Explore my work","fv":true,"outline":"solid 2px","onMonitor":true,"link":[518,534,294,184],"mon":[518,534,294,184]}
+PASS  keyboard: focus brightens the monitor  {"before":32.6,"focused":41.6}
+PASS  keyboard: Enter goes in on Work  {"at":"/?computer=work","ms":2175}
+PASS  keyboard: focus is inside the computer
+PASS  reading: the name and Settings hidden, the room (and its link) inert behind the modal  {"hidden":["hidden","hidden"],"inert":true}
+PASS  computer: four places and "Back to room"  {"nav":["Work","About","Résumé","Contact"],"back":"Back to room","leads":["Traffic Operations Center","cuCadence","claude-status","Smart Bin"],"pdf":false}
+PASS  keyboard: Escape back to the room, focus on the monitor's link (ringed), the address it was opened from  {"at":"/?probe","focus":"Explore my work","fv":true}
+PASS  keyboard before the room draws: once it has, the ring follows the monitor and the monitor brightens  {"early":{"drawn":false,"focus":"Explore my work","ring":true},"worstOffPx":0.5,"focused":41.6,"blurred":32.7}
+PASS  pointer: a drag ending on the monitor looks around and does not go in  {"pc":null,"az":-0.02483780263535759}
+PASS  pointer: hovering the monitor brightens it (pointer cursor)  {"before":32.7,"hover":41.7,"cursor":"pointer"}
+PASS  pointer: Cmd-click on the drawn monitor opens its address in a new tab, the lab stays closed  {"tab":"/?computer=work","here":null}
+PASS  pointer: middle click on the drawn monitor opens its address in a new tab, the lab stays closed  {"tab":"/?computer=work","here":null}
+PASS  pointer: a click on the drawn monitor goes in
+PASS  inside: About from the bar: address ?computer=about, camera and frame unmoved  {"running":"true"}
+PASS  inside: the wheel scrolls inside the computer only  {"inner":60,"outer":0}
+PASS  inside: Résumé has a PDF download  ["Download PDF"]
+PASS  inside: Back returns to About, where it was scrolled  {"left":60,"restored":60}
+PASS  inside: Forward returns to Résumé
+PASS  inside: refresh reopens Résumé on the monitor
+PASS  inside: "Back to room" closes (refreshed entry: address /)  /
+PASS  inside: "Back to room" clicked gives the focus back to the monitor's link, without the keyboard's ring  {"focus":"Explore my work","fv":false,"outline":"none"}
+PASS  inside: case study, Back to Work, Back to the room  {"cs":"/?computer=work/traffic-ops-center","now":"/"}
+PASS  inside: Forward from the room opens Work again
+PASS  resize: narrowed while reading, it reads across the window  {"full":true,"fr":[0,0,700,900],"outer":0}
+PASS  resize: widened again, back on the monitor, same page  {"full":false,"pc":"read","at":"?computer=about"}
+PASS  phone 390x844: reads across the window, scrolls inside, "Back to room" shown  {"full":true,"outer":0,"scrollable":true,"touch":"auto","back":true}
+PASS  phone 390x844: "Back to room" returns to the opening
+PASS  phone 360x640: reads across the window, scrolls inside, "Back to room" shown  {"full":true,"outer":0,"scrollable":true,"touch":"auto","back":true}
+PASS  phone 360x640: "Back to room" returns to the opening
+PASS  legacy: /#work opens the computer on it  {"at":"/?computer=work","pc":"read"}
+PASS  legacy: /#about opens the computer on it  {"at":"/?computer=about","pc":"read"}
+PASS  legacy: /#resume opens the computer on it  {"at":"/?computer=resume","pc":"read"}
+PASS  legacy: /#contact opens the computer on it  {"at":"/?computer=contact","pc":"read"}
+PASS  legacy: /?computer=work/traffic-ops-center opens the case study
+PASS  legacy: /?computer=bogus is dropped (the room, no dead address)
+PASS  legacy: /?sel=project:traffic-ops-center goes to its case study
+PASS  legacy: /?sel=anything-else goes to Work
+PASS  legacy: /systems/ goes to /
+PASS  legacy: /prototype/?computer=about keeps the address
+PASS  legacy: /prototype/work/traffic-ops-center/ goes to the case study
+PASS  legacy: /computer/about/ opened on its own goes to the lab reading it
+PASS  legacy: /projects/traffic-ops-center/ stays (shareable, indexable)
+PASS  legacy: the case study links nowhere dead (no /#… anchors)  ["/computer/work/","/computer/work/","/computer/about/","/computer/resume/","/computer/contact/","/","/computer/work/","/projects/travelmate/"]
+PASS  reduced motion: the room holds still, no idle hint  {"running":"false","hint":0}
+PASS  reduced motion: going in cuts (no flight)  {"first":"read","ms":87}
+PASS  Motion setting: off stops the room and is remembered  {"motion":"off","stored":"off","running":"false"}
+PASS  Motion setting: off survives a reload
+PASS  hint: shows once when left idle  {"peak":0.9994314024344275}
+PASS  hint: a press cancels it  {"peak":0}
+PASS  no WebGL 1440x900: the still shows, its monitor a link over the pictured monitor, in view with room for the ring  {"still":true,"src":"opening-wide.webp","link":[488,530,289,180],"pictured":[488,530,289,180],"onPicture":true,"inView":true,"hit":true}
+PASS  no WebGL 1440x900: the still's monitor opens the computer (across the window)
+PASS  no WebGL 1440x900: Escape returns focus to the link, and Enter on it goes in again  {"focus":"Explore my work"}
+PASS  no WebGL 390x844: the still shows, its monitor a link over the pictured monitor, in view with room for the ring  {"still":true,"src":"opening-tall.webp","link":[91,391,208,130],"pictured":[91,391,208,130],"onPicture":true,"inView":true,"hit":true}
+PASS  no WebGL 390x844: the still's monitor opens the computer (across the window)
+PASS  no WebGL 390x844: Escape returns focus to the link, and Enter on it goes in again  {"focus":"Explore my work"}
+PASS  no WebGL 1440x400: the still shows, its monitor a link over the pictured monitor, in view with room for the ring  {"still":true,"src":"opening-wide.webp","link":[488,155,289,180],"pictured":[488,155,289,180],"onPicture":true,"inView":true,"hit":true}
+PASS  no WebGL 1440x400: the still's monitor opens the computer (across the window)
+PASS  no WebGL 1440x400: Escape returns focus to the link, and Enter on it goes in again  {"focus":"Explore my work"}
+PASS  no WebGL 2560x900: the still shows, its monitor a link over the pictured monitor, in view with room for the ring  {"still":true,"src":"opening-wide.webp","link":[868,417,513,319],"pictured":[868,417,513,319],"onPicture":true,"inView":true,"hit":true}
+PASS  no WebGL 2560x900: the still's monitor opens the computer (across the window)
+PASS  no WebGL 2560x900: Escape returns focus to the link, and Enter on it goes in again  {"focus":"Explore my work"}
+PASS  no WebGL 3840x950: the still shows, its monitor a link over the pictured monitor, in view with room for the ring  {"still":true,"src":"opening-wide.webp","link":[1303,326,770,479],"pictured":[1303,326,770,479],"onPicture":true,"inView":true,"hit":true}
+PASS  no WebGL 3840x950: the still's monitor opens the computer (across the window)
+PASS  no WebGL 3840x950: Escape returns focus to the link, and Enter on it goes in again  {"focus":"Explore my work"}
+PASS  no JS 1440x900: the monitor, a link to the Work page, is the one control (Settings not offered)  {"href":"/computer/work/","vis":["Explore my work"]}
+PASS  no JS 1440x900: the Work page stands alone, with its places and the way back  {"at":"/computer/work/","nav":["Work","About","Résumé","Contact"],"back":"/","cards":11}
+PASS  no JS 390x844: the monitor, a link to the Work page, is the one control (Settings not offered)  {"href":"/computer/work/","vis":["Explore my work"]}
+PASS  no JS 390x844: the Work page stands alone, with its places and the way back  {"at":"/computer/work/","nav":["Work","About","Résumé","Contact"],"back":"/","cards":11}
+PASS  fit 1280x800 text 200%: name and Settings reachable, apart, no sideways scroll; the monitor in view  {"within":true,"overlap":false,"monUnder":false,"inView":true,"scroll":0,"scrollX":0}
+PASS  fit 1280x800 text 200%: reading, "Back to room" in view  {"back":true,"scroll":true}
+PASS  fit 390x844 text 200%: name and Settings reachable, apart, no sideways scroll; the monitor in view  {"within":true,"overlap":false,"monUnder":false,"inView":true,"scroll":0,"scrollX":0}
+PASS  fit 390x844 text 200%: reading, "Back to room" in view  {"back":true,"scroll":true}
+PASS  fit 1024x400 text 100%: name and Settings reachable, apart, no sideways scroll; the monitor in view  {"within":true,"overlap":false,"monUnder":false,"inView":true,"scroll":0,"scrollX":0}
+PASS  fit 1024x400 text 100%: reading, "Back to room" in view  {"back":true,"scroll":true}
+PASS  fit 740x360 text 100%: name and Settings reachable, apart, no sideways scroll; the monitor in view  {"within":true,"overlap":false,"monUnder":false,"inView":true,"scroll":0,"scrollX":0}
+PASS  fit 740x360 text 100%: reading, "Back to room" in view  {"back":true,"scroll":true}
+PASS  fit 568x320 text 150%: name and Settings reachable, apart, no sideways scroll; the monitor in view  {"within":true,"overlap":false,"monUnder":false,"inView":true,"scroll":0,"scrollX":0}
+PASS  fit 568x320 text 150%: reading, "Back to room" in view  {"back":true,"scroll":true}
+PASS  Save-Data: no scene until asked for, the still shows  {"canvas":false,"still":true}
+PASS  Save-Data: the still's monitor opens the computer
+PASS  settings: a press on its note keeps it open; Escape (focus on the page) closes it, focus on its button  {"afterNote":true,"afterEsc":{"open":false,"focus":"Settings"}}
+PASS  settings: a press elsewhere closes it; so does the focus moving out  {"afterElsewhere":false,"openedByKey":true,"afterShiftTab":{"open":false,"focus":"Explore my work"}}
+PASS  close: Escape in a case study (two pages in) leaves for the room  /
+PASS  close: a close request with no Escape (platform Back) goes back one page, then to the room  {"requestClose":true,"one":{"pc":"read","open":true},"now":"/"}
+PASS  close: shut by the browser, it leaves at once for the opening, one step back  {"at":"/","pcs":["-"],"dialog":false}
+PASS  close: narrowed during the flight in, it lands across the window  {"full":true,"fr":[0,700]}
+PASS  close: opened with the focus on a Settings switch, it comes back to the monitor's link  {"focus":"Explore my work"}
+PASS  close: reduced motion, the scene not loaded: it cuts in without loading it first  {"ms":70,"scene":false}
+
+all passed
