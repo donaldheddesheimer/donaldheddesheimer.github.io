@@ -2,7 +2,9 @@
 
 ## Current checkpoint: project details in the terminal, and a workshop with character, 2026-09-30 (Claude)
 
-**Status: five local commits on `terminal-workshop-polish`, from `main` at `f6a7150`.** Not pushed, no pull request, not merged, not deployed. Publishing waits on the owner's go-ahead.
+**Status: implementation complete on `terminal-workshop-polish`, from `main` at `f6a7150`.** The five workshop commits below are followed by a dismissible viewing suggestion for mobile and narrow windows.
+
+- **Viewing suggestion:** the opening says “The lab is best experienced in a wider, horizontal view.” It appears below the name on narrow/short viewports and touch devices, hides with the opening while using the terminal, and remembers dismissal for the tab's session. Codex verified narrow-view visibility, normal desktop hiding, dismissal across reload, and the build. This addition does not change the terminal or scene geometry.
 
 - **Commits, in order** (each builds on its own, and each can be reviewed and reverted alone):
   1. `7745081` Render project details within the portfolio terminal.
