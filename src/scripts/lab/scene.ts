@@ -637,6 +637,55 @@ function react(o: Pose, b: Build, beat: number) {
   }
 }
 
+// --- Caught dancing --------------------------------------------------------------------------------
+// The first opening of a session, with motion on: the robots are mid-routine when the visitor arrives,
+// and are caught at it. In seconds from the first frame:
+// - Terracotta notices (2.0): it stops, straightens and turns square on, eyes wide.
+// - Graphite freezes where it is (2.35), arms out; after a beat its head creaks round, in two stiff steps.
+// - Ivory stops (2.75) and turns to look, its head on one side.
+// - Terracotta waves (3.7 to 5.5), and all three drop back into the routine (5.7 to 6.7).
+// Nothing waits on it: the computer answers throughout, and entering it quiets the robots as ever.
+const CAUGHT = { resume: 5.7, end: 6.7 };
+const FREEZE: Record<string, number> = { terracotta: 2.0, graphite: 2.35, ivory: 2.75 };
+const VISITOR = [0.85, 6.8] as const; // where the opening's camera stands, on the floor
+
+/** Over the routine's pose `o`, the moment of being caught, `s` seconds in. Returns how wide the eyes are. */
+function caught(o: Pose, held: Pose, tmp: Pose, b: Build, s: number) {
+  const f = FREEZE[b.name];
+  if (f === undefined || s < f || s >= CAUGHT.end) return 0;
+  const k = win(s, f, f + 0.12, CAUGHT.resume, CAUGHT.end);
+  // Held as the step was when it stopped: the routine's pose at that moment.
+  const fb = (f * BPM) / 60;
+  choreograph(held, tmp, (((fb - b.persona.lag) % BEATS) + BEATS) % BEATS, b.persona);
+  react(held, b, fb % BEATS);
+  for (const c of CH) o[c] = lerp(o[c], held[c], k);
+  const [vx, vz] = VISITOR;
+  if (b.name === 'terracotta') {
+    for (const c of CH) o[c] *= 1 - 0.75 * k;
+    face(o, b.at, vx, vz, k, 0.6);
+    o.hPitch -= 0.14 * k;
+    const wave = win(s, 3.7, 4.1, 5.2, 5.6);
+    blendArm(o, 'r', WAVE, wave);
+    o.rE += Math.sin(TAU * 1.7 * (s - 3.7)) * 0.45 * wave;
+    o.hRoll += 0.14 * wave;
+    o.cRoll -= 0.05 * wave;
+    return win(s, f, f + 0.1, 3.3, 3.9);
+  }
+  if (b.name === 'graphite') {
+    const creak = steps((s - 3.1) / 0.7, 2) * k;
+    face(o, b.at, vx, vz, creak, 0);
+    o.hPitch -= 0.1 * creak;
+    o.hRoll -= 0.14 * creak;
+    return 0;
+  }
+  const turn = win(s, f + 0.1, f + 0.6, CAUGHT.resume, CAUGHT.end);
+  for (const c of CH) o[c] *= 1 - 0.45 * turn;
+  face(o, b.at, vx, vz, turn, 0.5);
+  o.hRoll += 0.28 * turn;
+  o.hPitch -= 0.08 * turn;
+  return 0;
+}
+
 const UP = new THREE.Vector3(0, 1, 0);
 const X_AXIS = new THREE.Vector3(1, 0, 0);
 const v1 = new THREE.Vector3();
@@ -678,6 +727,7 @@ class Robot {
   private readonly legs: Leg[] = [];
   private readonly pose = newPose();
   private readonly tmp = newPose();
+  private readonly held = newPose();
   private readonly L: number;
   private readonly hipY: number;
   private readonly blinkAt: number;
@@ -860,11 +910,13 @@ class Robot {
     );
   }
 
-  /** `rest` (0 to 1) eases every joint to standing still, arms down: the robots quiet while reading. */
-  update(beat: number, time: number, rest = 0) {
+  /** `rest` (0 to 1) eases every joint to standing still, arms down: the robots quiet while reading.
+   *  `intro`, the seconds into the opening's caught moment (caught()), or -1 for none. */
+  update(beat: number, time: number, rest = 0, intro = -1) {
     const b = this.b;
     const p = b.persona;
     const o = this.pose;
+    let wide = 0;
     if (b.schematic) {
       // On the stand: arms held out a little for fitting, and a calibration run through, joint by joint,
       // in steps, every 12 s: the head across in four and back, the right elbow in two and back, a flick
@@ -890,6 +942,7 @@ class Robot {
         o.hRoll += roll * p.curious * between;
       }
       react(o, b, beat % BEATS);
+      if (intro >= 0) wide = caught(o, this.held, this.tmp, b, intro);
       if (p.close)
         for (const s of ['l', 'r'] as const) {
           const A = ch(s, 'A');
@@ -914,7 +967,8 @@ class Robot {
     // Blink every few seconds; the unfinished one's status light pulses slowly instead.
     const bt = (time + this.blinkAt) % 4.3;
     this.eyes.scale.setScalar(b.schematic ? (Math.sin(time * 1.6) > -0.2 ? 1 : 0.001) : 1);
-    if (!b.schematic) this.eyes.scale.y = bt < 0.12 ? 0.15 : 1;
+    if (!b.schematic) this.eyes.scale.y = bt < 0.12 && !wide ? 0.15 : 1;
+    if (wide) this.eyes.scale.multiplyScalar(1 + 0.35 * wide);
 
     this.pelvis.updateMatrix();
     const [, fh] = b.foot;
@@ -1966,7 +2020,17 @@ function buildStore(mats: Mats, room: { low: THREE.MeshLambertMaterial; high: TH
     add(boxGeo(0.05, 0.05, 0.3), mats.steel, D.x + s * 0.28, 1.45, D.z + 0.2);
     add(boxGeo(0.05, 0.12, 0.05), mats.steel, D.x + s * 0.28, 1.5, D.z + 0.33);
   }
-  add(boxGeo(0.16, 0.5, 0.04), mats.plastic, D.x + 0.35, 1.05, D.z + 0.07);
+  add(boxGeo(0.16, 0.5, 0.04), mats.plastic, D.x - 0.36, 1.05, D.z + 0.07);
+  // Where the equipment's status lights go (one instanced mesh, lit in animate()): four up the bay's
+  // column, and the scope's.
+  const ledAt: THREE.Object3D[] = [];
+  const led = (parent: THREE.Object3D, x: number, y: number, z: number) => {
+    const o = new THREE.Object3D();
+    o.position.set(x, y, z);
+    parent.add(o);
+    ledAt.push(o);
+  };
+  for (let i = 0; i < 4; i++) led(group, D.x - 0.36, 0.9 + i * 0.1, D.z + 0.092);
   const plugs: THREE.Vector3[] = [];
   for (const [i, dx] of [-0.2, 0.0, 0.18].entries()) {
     const a = new THREE.Vector3(D.x + dx, 1.62, D.z + 0.08);
@@ -2010,6 +2074,7 @@ function buildStore(mats: Mats, room: { low: THREE.MeshLambertMaterial; high: TH
   cadd(new THREE.PlaneGeometry(0.2, 0.14), trace, -0.08, 0.13, 0.157, scope);
   for (let i = 0; i < 6; i++) cadd(new THREE.CylinderGeometry(0.012, 0.012, 0.02, 12), mats.plastic, 0.08 + (i % 2) * 0.06, 0.2 - Math.floor(i / 2) * 0.05, 0.155, scope).rotation.x = Math.PI / 2;
   for (const [x, mat] of [[0.08, bins[1]], [0.14, bins[0]]] as const) cadd(new THREE.CylinderGeometry(0.01, 0.01, 0.02, 10), mat, x, 0.04, 0.155, scope).rotation.x = Math.PI / 2;
+  led(scope, 0.19, 0.215, 0.153);
   // A probe from the front, down to the board beside it.
   const probeWire = new THREE.CatmullRomCurve3([new THREE.Vector3(0.18, 0.915, 0.12), new THREE.Vector3(0.24, 0.9, 0.2), new THREE.Vector3(0.3, 0.885, 0.16)]);
   cadd(new THREE.TubeGeometry(probeWire, 12, 0.004, 5), bins[1], 0, 0, 0);
@@ -2071,9 +2136,51 @@ function buildStore(mats: Mats, room: { low: THREE.MeshLambertMaterial; high: TH
   ]);
   add(new THREE.TubeGeometry(cord, 16, 0.008, 5), mats.rubber, 0, 0, 0);
 
+  const leds = new THREE.InstancedMesh(boxGeo(0.03, 0.03, 0.008), new THREE.MeshBasicMaterial({ toneMapped: false }), ledAt.length);
+  leds.userData.live = true;
+  group.updateMatrixWorld(true);
+  ledAt.forEach((o, i) => {
+    leds.setMatrixAt(i, o.matrixWorld);
+    leds.setColorAt(i, LED.off);
+    o.removeFromParent();
+  });
+  group.add(leds);
+
   bake(group);
-  return { group, textures, fan: rotor, spare, eyes: eyeMat };
+  const yaw0 = spare.rotation.y;
+  const lit = new THREE.Color();
+  let ledKey = '';
+  /** The room's small life, at scene time `t` (held with the robots when motion is off): the fan at
+   *  `spin`, the bay charging, the scope's light now and then, and every so often the spare head on the
+   *  shelf waking for a look round before it dozes off again. */
+  const animate = (t: number, spin: number) => {
+    rotor.rotation.z = -spin;
+    const level = Math.floor((t % 7) / 1.4);
+    const blink = t % 1 < 0.5;
+    const states: string[] = [0, 1, 2, 3].map((i) => (i < level ? 'g' : i === level && blink ? 'a' : '-'));
+    states.push(t % 3.3 < 0.14 ? 'r' : '-');
+    const key = states.join('');
+    if (key !== ledKey) {
+      ledKey = key;
+      states.forEach((s, i) => leds.setColorAt(i, s === 'g' ? LED.green : s === 'a' ? LED.amber : s === 'r' ? LED.red : LED.off));
+      leds.instanceColor!.needsUpdate = true;
+    }
+    const u = (t + 13) % 21;
+    let wake = win(u, 0, 0.3, 2.5, 2.9);
+    if (u < 0.35) wake *= Math.floor(u * 22) % 2 ? 1 : 0.25;
+    eyeMat.color.copy(lit.lerpColors(LED.off, LED.eye, wake));
+    spare.rotation.y = yaw0 + wake * (0.35 * smooth(0.5, 0.9, u) - 0.55 * smooth(1.4, 1.9, u));
+    spare.rotation.z = 0.07 * wake * smooth(1.4, 1.9, u);
+  };
+  return { group, textures, animate };
 }
+const LED = {
+  off: new THREE.Color(0x1d1a17),
+  green: new THREE.Color(0x5fe08a),
+  amber: new THREE.Color(0xffb347),
+  red: new THREE.Color(0xff4a3a),
+  eye: new THREE.Color(0x8fe3ff),
+};
 
 // --- Workstation ---------------------------------------------------------------------------------
 // The desk at the front, a little left of centre and turned toward the room: whoever sits there looks
@@ -2240,6 +2347,7 @@ const LOOK = { az: 0.16, down: 0.05, up: 0.07 };
 const DRAG_PX = 6; // a press that moves further than this is a drag, not a click
 // The monitor brightens once, gently, if nobody has touched anything for a while.
 const IDLE_MS = 5000;
+const INTRO_KEY = 'lab:caught';
 const HINT_MS = 2200;
 
 // The opening: from the front and a little right, looking into the room, the desk nearest at the left.
@@ -2435,6 +2543,18 @@ export function mountLab(
   let lost = false;
   let quietOn = false;
   let rest = 0;
+  let spin = 0; // the fan's blades
+  // The caught moment (caught()) plays once a session, from a moving start: motion off opens on the
+  // moment held, and turning motion off cancels it.
+  let intro = false;
+  if (intent) {
+    try {
+      intro = !sessionStorage.getItem(INTRO_KEY);
+      sessionStorage.setItem(INTRO_KEY, '1');
+    } catch {
+      intro = true;
+    }
+  }
   let frames = 0;
   let flight: {
     from: View;
@@ -2619,8 +2739,10 @@ export function mountLab(
 
   function render(now = performance.now()) {
     const beat = ((t * BPM) / 60) % BEATS;
-    for (const r of robots) r.update(beat, t, rest);
+    const s = intro && t < CAUGHT.end ? t : -1;
+    for (const r of robots) r.update(beat, t, rest, s);
     proto.update(0, t, rest);
+    store.animate(t, spin);
     moveDust(t);
     dust.visible = mode !== 'read' || !!flight;
     let p = 1;
@@ -2660,7 +2782,10 @@ export function mountLab(
     raf = requestAnimationFrame(frame);
     const dt = Math.min(0.1, Math.max(0, (now - last) / 1000));
     last = now;
-    if (intent) t += dt;
+    if (intent) {
+      t += dt;
+      spin += dt * 14 * (1 - rest);
+    }
     rest = quietOn ? Math.min(1, rest + dt / 0.9) : Math.max(0, rest - dt / 0.9);
     steer(dt);
     hint(now, dt);
@@ -2717,6 +2842,7 @@ export function mountLab(
     if (!intent) {
       endHint();
       unlook();
+      intro = false;
       t = STILL_T;
       hintK = 0;
       light();
@@ -2807,7 +2933,7 @@ export function mountLab(
     });
   }
   function hint(now: number, dt: number) {
-    if (hintState === 'wait' && drawn && inView && intent && mode === 'hero' && !flight && !html.dataset.pc && !press && now - idleFrom >= IDLE_MS && screenShown()) {
+    if (hintState === 'wait' && drawn && inView && intent && mode === 'hero' && !flight && !html.dataset.pc && !press && now - idleFrom >= IDLE_MS && !(intro && t < CAUGHT.end) && screenShown()) {
       hintState = 'on';
       hintStart = now;
       root.dataset.hint = 'on';
