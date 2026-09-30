@@ -2649,10 +2649,13 @@ function hash3(a: number, b: number, c: number) {
   h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35);
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
-// Sparks: a small pool, each slot firing again every `every` s while the arc is on (or skipping a
-// turn, at random, so they come in spits), and flying for under half a second, down and a little out:
-// they're gone well above anything below. Worked out afresh from the clock each frame, no state.
-const SPARK = { n: 36, every: 0.5, life: [0.22, 0.46], fall: 5.5 };
+// Sparks: a pool, each slot firing again every `every` s while the arc is on (or skipping a turn, at
+// random, so they come in spits; `every` is the longest life, so a spark is gone before its slot fires
+// again, and `n` over it is how many a second). Thrown out and a little up, they fall most of the way
+// down the wall past the clock, for up to a second and a half. Each is drawn as a short streak: `trail`
+// points back along its path over its last `len` m (or less, just out of the torch), dimming to the
+// tail. Worked out afresh from the clock each frame, no state.
+const SPARK = { n: 160, every: 1.5, life: [0.5, 1.5], fall: 7, drag: 1.3, trail: 8, len: 0.16 };
 
 const COLD = new THREE.Color(0x2c2420);
 const EMBER = [new THREE.Color(0xb3300c), new THREE.Color(0xffd79a)];
@@ -2699,20 +2702,20 @@ function buildRigger(mats: Mats) {
   add(new THREE.PlaneGeometry(0.32, 0.26), soot, SEAM.x, SEAM.y, WALL_Z + 0.004);
   // A bead of weld at each spot, cold metal until the torch heats it: live.
   const beads = WELDS.map((p) => add(new THREE.SphereGeometry(0.012, 10, 8), new THREE.MeshBasicMaterial({ color: COLD, toneMapped: false }), p.x, p.y, p.z));
-  // The arc's glow at the torch's tip (small, and warm, not a flash), and the sparks.
+  // The arc's glow at the torch's tip (warm, and bright enough to catch the eye), and the sparks.
   const arcMat = new THREE.SpriteMaterial({ map: radialTexture([[0, 'rgba(255,244,222,1)'], [0.18, 'rgba(255,196,120,0.55)'], [1, 'rgba(255,140,60,0)']], 64), color: 0xffffff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0, toneMapped: false });
   const arc = new THREE.Sprite(arcMat);
-  arc.scale.setScalar(0.17);
+  arc.scale.setScalar(0.24);
   arc.visible = false;
   group.add(arc);
-  const sparkPos = new Float32Array(SPARK.n * 3);
-  const sparkCol = new Float32Array(SPARK.n * 3);
+  const sparkPos = new Float32Array(SPARK.n * SPARK.trail * 3);
+  const sparkCol = new Float32Array(SPARK.n * SPARK.trail * 3);
   const sparkGeo = new THREE.BufferGeometry();
   sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3).setUsage(THREE.DynamicDrawUsage));
   sparkGeo.setAttribute('color', new THREE.BufferAttribute(sparkCol, 3).setUsage(THREE.DynamicDrawUsage));
   const sparks = new THREE.Points(
     sparkGeo,
-    new THREE.PointsMaterial({ size: 0.075, map: radialTexture([[0, 'rgba(255,255,255,1)'], [0.35, 'rgba(255,255,255,0.8)'], [1, 'rgba(255,255,255,0)']], 32), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }),
+    new THREE.PointsMaterial({ size: 0.07, map: radialTexture([[0, 'rgba(255,255,255,1)'], [0.35, 'rgba(255,255,255,0.8)'], [1, 'rgba(255,255,255,0)']], 32), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }),
   );
   sparks.frustumCulled = false;
   sparks.visible = false;
@@ -2880,23 +2883,37 @@ function buildRigger(mats: Mats) {
       const born = c * SPARK.every + phase;
       const age = t - born;
       const life = lerp(SPARK.life[0], SPARK.life[1], hash3(c, i, 4));
-      const on = k > 0 && age < life && hash3(c, i, 0) < 0.7 && arcAt(born) > 0.6;
+      const on = k > 0 && age < life && hash3(c, i, 0) < 0.8 && arcAt(born) > 0.6;
+      const at = i * SPARK.trail * 3;
       if (!on) {
-        sparkCol.fill(0, i * 3, i * 3 + 3);
+        sparkCol.fill(0, at, at + SPARK.trail * 3);
         continue;
       }
       any = true;
-      // Out of the spot, mostly down and away from the wall, a few kicked up first; slowed as they go.
-      const vx = (hash3(c, i, 1) - 0.4) * 0.9;
-      const vy = -0.1 + hash3(c, i, 2) * 0.5;
-      const vz = 0.15 + hash3(c, i, 3) * 0.45;
-      const d = age * (1 - 0.35 * age);
-      sparkPos[i * 3] = src.x + vx * d;
-      sparkPos[i * 3 + 1] = src.y + vy * d - 0.5 * SPARK.fall * age * age;
-      sparkPos[i * 3 + 2] = src.z + vz * d;
-      const f = age / life;
-      col.copy(EMBER[1]).lerp(EMBER[0], f).multiplyScalar(1.6 * k * (1 - f) ** 0.8);
-      col.toArray(sparkCol, i * 3);
+      // Out of the spot, fanned away from the wall, many kicked up first, then down; the air slows
+      // them across, not the fall.
+      const vx = (hash3(c, i, 1) - 0.4) * 2;
+      const vy = -0.2 + hash3(c, i, 2) * 1.2;
+      const vz = 0.2 + hash3(c, i, 3) * 0.9;
+      const hot = hash3(c, i, 5);
+      // How fast it's going now, so the streak's points are `len` over `trail` apart, however fast.
+      const slow = Math.exp(-SPARK.drag * age);
+      const speed = Math.hypot(vx * slow, vy * slow - SPARK.fall * age, vz * slow);
+      const dt = SPARK.len / SPARK.trail / Math.max(speed, 0.5);
+      for (let j = 0; j < SPARK.trail; j++) {
+        const a = Math.max(0, age - j * dt);
+        const d = (1 - Math.exp(-SPARK.drag * a)) / SPARK.drag;
+        const o = at + j * 3;
+        sparkPos[o] = src.x + vx * d;
+        sparkPos[o + 1] = src.y + vy * d - 0.5 * SPARK.fall * a * a;
+        sparkPos[o + 2] = src.z + vz * d;
+        // Near white at the head, cooling to orange and red down the trail and with age.
+        const f = a / life;
+        const tail = j / SPARK.trail;
+        col.copy(EMBER[1]).lerp(EMBER[0], Math.min(1, f + tail * 0.6));
+        col.multiplyScalar(k * (2.4 + hot) * (1 - f) ** 0.5 * (1 - tail) ** 1.4);
+        col.toArray(sparkCol, o);
+      }
     }
     sparks.visible = any;
     sparkGeo.attributes.position.needsUpdate = true;
