@@ -332,6 +332,14 @@ export function initTerminal(
   }
   input.addEventListener('input', unlist);
   input.addEventListener('blur', unlist);
+  // The list is for what's up to the caret at the end: moved off it (arrows, Home, a click in the
+  // field) or something selected, and it goes too.
+  const moved = () => {
+    const n = input.value.length;
+    if (listed && (input.selectionStart !== n || input.selectionEnd !== n)) unlist();
+  };
+  for (const type of ['select', 'keyup', 'pointerup']) input.addEventListener(type, moved);
+  document.addEventListener('selectionchange', () => document.activeElement === input && moved());
 
   // --- The prompt's cursor ----------------------------------------------------------------------
 
