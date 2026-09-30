@@ -1,9 +1,10 @@
 // The robotics lab of the homepage's opening (/), where the computer on the desk holds the portfolio. It
-// began as a fork of the first homepage's robot stage; the rig and the routine are the same. The room: a
+// began as a fork of the first homepage's robot stage; the rig and the routine's shape are the same. The room: a
 // concrete floor with the dance area taped out, a block wall with a high window, a workbench under a
 // pendant, an unfinished robot on a service stand, two props (a task chair pushed aside, a tool cart), a
-// tripod work light as the key, and the three dancers, given characters through proportion, timing,
-// where they stand and how they answer each other. Two camera views: the opening, which the pointer may
+// tripod work light as the key, and the three dancers, given characters through proportion, their own
+// timing and their own versions of the routine's moves, where they stand and how they answer each other;
+// the unfinished one on its stand runs a calibration now and then. Two camera views: the opening, which the pointer may
 // look around a little (lookAround), and reading, square on to the monitor, whose screen the terminal
 // covers in real HTML (computer.ts). One flight joins them. Simple geometry throughout.
 import * as THREE from 'three';
@@ -15,8 +16,9 @@ const TAU = Math.PI * 2;
 const BPM = 112;
 const BEATS = 32;
 const RAMP = 0.35; // beats of crossfade either side of a section boundary
-// Reduced motion (or Motion off) holds this moment: each robot in character, arms clear of the opening's text.
-const STILL_BEAT = 21.2;
+// Reduced motion (or Motion off) holds this moment: each robot in character (Graphite's arms open wide,
+// Ivory mid-tut, Terracotta with an arm thrown up), arms clear of the opening's text.
+const STILL_BEAT = 11.5;
 const STILL_T = (STILL_BEAT * 60) / BPM; // the same moment, in seconds
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
@@ -26,6 +28,12 @@ const smooth = (a: number, b: number, x: number) => {
 };
 const win = (x: number, a: number, b: number, c: number, d: number) => smooth(a, b, x) * (1 - smooth(c, d, x));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+// 0 to 1 as x goes 0 to 1, in n quick ticks.
+const steps = (x: number, n: number) => {
+  const s = clamp01(x) * n;
+  const i = Math.min(n - 1, Math.floor(s));
+  return (i + smooth(0, 0.25, s - i)) / n;
+};
 // Seeded, so every visit (and every screenshot) gets the same dust, blinks and concrete.
 function rng(seed: number) {
   return () => {
@@ -113,9 +121,13 @@ interface Persona {
   hop: number;
   /** Looks around between moves: 0 to 1. */
   curious: number;
-  /** Keeps its arms close, 0 to 1: raised straight up rather than out, and swung past the shoulder in
-   *  front, elbows bent. */
+  /** Keeps its arms close, 0 to 1: raised straight up rather than out to the side. */
   close: number;
+  /** Its own sense of time (the routine's beat in, its own out, a loop still a loop): holding at the end
+   *  of each bar, or snapping to each half beat. */
+  feel?: (beat: number) => number;
+  /** Its own version of a section of the routine. */
+  own?: Partial<Record<SectionName, Section>>;
 }
 
 function groove(o: Pose, g: number, p: Persona, k = 1) {
@@ -246,16 +258,116 @@ const travel: Section = (o, u, g, p) => {
   o.rW += open * 0.4;
 };
 
-const SECTIONS: readonly [start: number, end: number, fn: Section][] = [
-  [0, 8, warmUp],
-  [8, 16, gestures],
-  [16, 24, canon],
-  [24, 32, travel],
+// --- Each dancer's own ---------------------------------------------------------------------------
+// Graphite's timing: each bar's move in three beats, then it all but stops for the fourth, and its
+// gestures are broad, whole-arm and slow, with a held shape at the end of each bar.
+const barHold = (beat: number) => {
+  const bar = Math.floor(beat / 4) * 4;
+  return lerp(beat, bar + 4 * smooth(0, 3, beat - bar), 0.85);
+};
+const GATHER: Arm = [1.1, 0.45, 0, 1.45, 0];
+const OPEN: Arm = [0.55, 1.25, 0, 0.3, 0];
+const PUSH: Arm = [1.35, 0.3, 0, 0.2, -0.45];
+const PRESS: Arm = [0.45, 0.55, 0, 0.5, 0.9];
+const BROAD: readonly Key[] = [[-1, ARM.pump, 1], [0, GATHER, 1.1], [1.5, OPEN, 1.4], [4, PUSH, 1.1], [6, PRESS, 1.1]];
+const broad: Section = (o, u, g, p) => {
+  groove(o, g, p, 0.6);
+  armKeys(o, 'r', BROAD, u, 1);
+  // The left a little behind the right: the weight of it.
+  armKeys(o, 'l', BROAD, u - 0.3, 1);
+  const open = win(u, 1.5, 3, 3.9, 4.6);
+  const push = win(u, 4, 5, 5.9, 6.6);
+  const press = win(u, 6, 7, 7.7, 8.3);
+  o.cPitch += push * 0.14 + press * 0.1 - open * 0.06;
+  o.pPitch += push * 0.05;
+  o.hPitch += press * 0.16 - open * 0.1;
+  o.py += press * 0.05 + push * 0.02;
+  o.pz += push * 0.04;
+};
+
+// Ivory's timing: every move lands on a half beat, fast, and holds. Its gestures are small and exact: a
+// tut, one forearm set at a time (right on the beat, left on the one after), the head following each.
+// No two forearms ever lie across the body at one height.
+const halfSnap = (beat: number) => {
+  const half = Math.floor(beat * 2) / 2;
+  return lerp(beat, half + 0.5 * smooth(0, 0.2, beat - half), 0.9);
+};
+const TUT_UP: Arm = [1.45, 0.45, 0, 1.57, 0];
+const TUT_ACROSS: Arm = [1.5, 0.12, -1.45, 1.57, 0];
+const TUT_LOW: Arm = [0.05, 0.25, -1.45, 1.57, 0];
+const TUT_OUT: Arm = [0.05, 0.25, 1.45, 1.57, 0];
+const TUT_TRAY: Arm = [0.05, 0.18, 0, 1.57, 0];
+const TUT: Record<Side, readonly Key[]> = {
+  r: [[-1, ARM.pump, 1], [0, TUT_UP, 0.25], [2, TUT_ACROSS, 0.25], [4, TUT_OUT, 0.25], [6, TUT_LOW, 0.25]],
+  l: [[-1, ARM.pump, 1], [1, TUT_TRAY, 0.25], [3, TUT_LOW, 0.25], [5, TUT_UP, 0.25], [7, TUT_ACROSS, 0.25]],
+};
+const tut: Section = (o, u, g, p) => {
+  groove(o, g, p, 0.5);
+  armKeys(o, 'r', TUT.r, u, 1);
+  armKeys(o, 'l', TUT.l, u, 1);
+  // To the arm that moved: the robot's right is its -x, and a turn to its right is negative.
+  const n = Math.floor(u);
+  const side = n % 2 ? 1 : -1;
+  const to = lerp(-side, side, smooth(0, 0.15, u - n));
+  const on = win(u, -0.2, 0.2, 7.8, 8.2);
+  o.hYaw += to * 0.26 * on;
+  o.hPitch += 0.1 * on;
+  o.cYaw += to * 0.05 * on;
+};
+
+// Terracotta's warm-up: a kick on every off-beat, a flick of the head and one elbow (the other each
+// time), and it lets go at once.
+const accent = (x: number) => (x < 0.05 ? x / 0.05 : Math.exp(-(x - 0.05) * 10));
+const kick: Section = (o, u, g, p) => {
+  warmUp(o, u, g, p);
+  const x = (((g + 0.5) % 1) + 1) % 1;
+  const a = accent(x) * win(u, -0.2, 0.3, 7.7, 8.2);
+  const side = Math.floor(g + 0.5) % 2 ? 1 : -1;
+  o.hPitch += a * 0.16;
+  o.cRoll += side * a * 0.07;
+  o.lE += (side > 0 ? a : 0) * 0.6;
+  o.rE += (side < 0 ? a : 0) * 0.6;
+};
+
+// Terracotta's canon, overdone: a hop and a spin a good way past round, a wobble, arms out, a foot out
+// to catch it, a hop back to the front, a shake of the head, and the pose it meant to end on.
+const BALANCE: Arm = [0.1, 1.45, 0, 0.35, 0];
+const overdo: Section = (o, u, g, p) => {
+  canon(o, u, g, p);
+  const a = smooth(3.6, 4.2, u) * (TAU + 0.8) - smooth(5.0, 5.5, u) * 0.8;
+  o.turn += Math.atan2(Math.sin(a), Math.cos(a));
+  const lift = Math.sin(Math.PI * clamp01((u - 3.55) / 0.7)) * 0.11 + Math.sin(Math.PI * clamp01((u - 4.95) / 0.6)) * 0.07;
+  o.lfy += lift;
+  o.rfy += lift;
+  o.py -= lift;
+  const since = u - 4.2;
+  const wob = since > 0 ? Math.exp(-since * 2.4) * Math.sin(TAU * 1.6 * since) * (1 - smooth(4.9, 5.2, u)) : 0;
+  const reel = win(u, 4.1, 4.3, 5.0, 5.4);
+  o.pRoll += wob * 0.12;
+  o.cRoll -= wob * 0.1;
+  for (const s of ['l', 'r'] as const) blendArm(o, s, BALANCE, reel);
+  o.lA += wob * 0.35;
+  o.rA -= wob * 0.35;
+  o.rfx -= 0.22 * reel;
+  o.px -= 0.1 * reel;
+  const shake = win(u, 5.45, 5.6, 6.0, 6.15) * Math.sin(TAU * 3 * (u - 5.45));
+  o.hYaw += shake * 0.3;
+};
+
+type SectionName = 'warmUp' | 'gestures' | 'canon' | 'travel';
+const ROUTINE: Record<SectionName, Section> = { warmUp, gestures, canon, travel };
+const SECTIONS: readonly [start: number, end: number, name: SectionName][] = [
+  [0, 8, 'warmUp'],
+  [8, 16, 'gestures'],
+  [16, 24, 'canon'],
+  [24, 32, 'travel'],
 ];
 
 function choreograph(out: Pose, tmp: Pose, beat: number, p: Persona) {
   clear(out);
-  for (const [start, end, fn] of SECTIONS)
+  if (p.feel) beat = p.feel(beat);
+  for (const [start, end, name] of SECTIONS) {
+    const fn = p.own?.[name] ?? ROUTINE[name];
     for (const k of [-BEATS, 0, BEATS]) {
       const x = beat + k;
       const w = win(x, start - RAMP, start + RAMP, end - RAMP, end + RAMP);
@@ -264,6 +376,7 @@ function choreograph(out: Pose, tmp: Pose, beat: number, p: Persona) {
       fn(tmp, x - start, x, p);
       for (const c of CH) out[c] += tmp[c] * w;
     }
+  }
 }
 
 // Where a curious robot looks between moves (head yaw, roll), a new place every 2.6 s, turning there
@@ -310,14 +423,17 @@ interface Build {
 
 const STILL: Persona = { lag: 0, canon: 0, sway: 0, bounce: 0, arm: 0, twist: 0, tilt: 0, look: 0, dir: 1, groove: 1, dip: 1, pace: 1, low: 0, hop: 1, curious: 0, close: 0 };
 
-// Graphite: heavy, grounded, deliberate. The broadest build, thick limbs and a wide low stance; it
-// sways at half time, bounces every other beat and arrives late on every arm move, and keeps its arms
-// close. It dances just behind the monitor, left of it.
-// Ivory: precise, curious, attentive. Tall, slim and long-necked; snaps to each arm key and looks
-// around (and tilts its head) between moves. It stands back by the service stand, and leaves the step
-// now and then to inspect the unfinished robot on it.
-// Terracotta: small, energetic, playful. Bounces twice a beat, hops its steps and throws its arms wide.
-// It has the front of the floor, right of the monitor, and starts the exchanges (react()).
+// Graphite: heavy, grounded, deliberate. The broadest build, thick limbs and a wide, low, bent-kneed
+// stance; it sways at half time, bounces every other beat, moves for three beats of each bar and pauses
+// on the fourth (barHold), and its gestures are broad and whole-armed, leaning into them (broad). It
+// dances just behind the monitor, left of it.
+// Ivory: precise, curious, attentive. Tall, slim and long-necked; every move lands on a half beat
+// (halfSnap), its gestures are a small, exact tut (tut), and it looks around (and tilts its head)
+// between moves. It stands back by the service stand, and leaves the step now and then to inspect the
+// unfinished robot on it.
+// Terracotta: small, energetic, playful. Bounces twice a beat, kicks every off-beat (kick), hops its
+// steps and throws its arms wide, and overdoes its spin, and recovers (overdo). It has the front of
+// the floor, right of the monitor, and starts the exchanges (react()).
 // The three stand as a loose triangle round the monitor, not a line: Graphite and Terracotta either side
 // of it and a little behind, turned partly toward each other, Ivory further back.
 const BUILDS: Build[] = [
@@ -344,7 +460,7 @@ const BUILDS: Build[] = [
     head: 'dome',
     headSize: [0.4, 0.26, 0.33],
     pads: true,
-    persona: { lag: 0.12, canon: 0, sway: 0.05, bounce: 0.05, arm: 0.7, twist: 1.2, tilt: 0.3, look: 0.12, dir: 1, groove: 0.5, dip: 0.5, pace: 1.9, low: 0.06, hop: 0.5, curious: 0, close: 1 },
+    persona: { lag: 0.12, canon: 0, sway: 0.05, bounce: 0.05, arm: 0.7, twist: 1.2, tilt: 0.3, look: 0.12, dir: 1, groove: 0.5, dip: 0.5, pace: 1.9, low: 0.09, hop: 0.5, curious: 0, close: 1, feel: barHold, own: { gestures: broad } },
   },
   {
     name: 'ivory',
@@ -369,7 +485,7 @@ const BUILDS: Build[] = [
     head: 'box',
     headSize: [0.34, 0.27, 0.28],
     antenna: true,
-    persona: { lag: 0, canon: 1, sway: 0.05, bounce: 0.05, arm: 0.95, twist: 0.8, tilt: 0.9, look: 0, dir: -1, groove: 1, dip: 1, pace: 0.5, low: 0, hop: 1, curious: 1, close: 0 },
+    persona: { lag: 0, canon: 1, sway: 0.035, bounce: 0.04, arm: 0.6, twist: 0.8, tilt: 0.9, look: 0, dir: -1, groove: 1, dip: 1, pace: 0.5, low: 0, hop: 1, curious: 1, close: 0, feel: halfSnap, own: { gestures: tut } },
   },
   {
     name: 'terracotta',
@@ -393,7 +509,7 @@ const BUILDS: Build[] = [
     neck: 0.05,
     head: 'ball',
     headSize: [0.37, 0.37, 0.37],
-    persona: { lag: -0.05, canon: 2, sway: 0.085, bounce: 0.05, arm: 1.45, twist: 0.9, tilt: 1.6, look: -0.12, dir: 1, groove: 1, dip: 2, pace: 0.8, low: 0.02, hop: 2.4, curious: 0.3, close: 0 },
+    persona: { lag: -0.05, canon: 2, sway: 0.085, bounce: 0.05, arm: 1.45, twist: 0.9, tilt: 1.6, look: -0.12, dir: 1, groove: 1, dip: 2, pace: 0.8, low: 0.02, hop: 2.4, curious: 0.3, close: 0, own: { warmUp: kick, canon: overdo } },
   },
 ];
 
@@ -430,6 +546,8 @@ const PROTO: Build = {
 //   to 9.4).
 // - Between the gestures and the canon, Terracotta hops round to Ivory, behind it (13.8 to 14.8), shimmies
 //   at it and hops back (15.9 to 16.9); Ivory glances over.
+// - Terracotta overdoes its spin in the canon (19.6 to 22.2): Graphite turns, slowly, to watch it (20.2 to
+//   22.6), and Ivory tilts its head at it (20.3 to 21.9).
 // - Late in the travel, Ivory leaves the step to inspect the unfinished robot on its stand (25.6 to 31.8):
 //   it turns to it, leans in, head tilted, one hand raised to its chin.
 const spot = (name: string) => BUILDS.find((b) => b.name === name)!.at;
@@ -478,7 +596,7 @@ function react(o: Pose, b: Build, beat: number) {
     const [there, up] = hops(beat, 13.8, 14.8);
     const [back, down] = hops(beat, 15.9, 16.9);
     const round = there * (1 - back);
-    o.turn = bearing(at, iv[0], iv[1]) * 0.85 * round;
+    o.turn += bearing(at, iv[0], iv[1]) * 0.85 * round;
     face(o, at, iv[0], iv[1], round, 0.35);
     const lift = (up + down) * 0.12;
     o.lfy += lift;
@@ -494,9 +612,13 @@ function react(o: Pose, b: Build, beat: number) {
     const nod = win(beat, 6.5, 7, 7.5, 8.2);
     o.hPitch += nod * 0.34;
     o.cPitch += nod * 0.07;
+    face(o, at, t[0], t[1], win(beat, 20.2, 21.2, 22, 22.6), 0.3);
   } else if (b.name === 'ivory') {
     const t = spot('terracotta');
     face(o, at, t[0], t[1], win(beat, 14.5, 14.9, 16, 16.5), 0.2);
+    const tilt = win(beat, 20.3, 20.6, 21.5, 21.9);
+    face(o, at, t[0], t[1], tilt, 0.1);
+    o.hRoll += tilt * 0.2;
     const look = win(beat, 25.6, 26.6, 30.8, 31.8);
     if (look > 0) {
       // Out of the step: feet back under it, the travel's drift gone, arms easing down.
@@ -743,13 +865,21 @@ class Robot {
     const p = b.persona;
     const o = this.pose;
     if (b.schematic) {
-      // On the stand: arms held out a little for fitting, the head scanning slowly.
+      // On the stand: arms held out a little for fitting, and a calibration run through, joint by joint,
+      // in steps, every 12 s: the head across in four and back, the right elbow in two and back, a flick
+      // of the left wrist, a nod, then a rest (the moment held with motion off is in the rest). Reading
+      // quiets it with the others.
       clear(o);
       o.lA = o.rA = 0.34;
       o.lE = o.rE = 0.4;
       o.lF = o.rF = 0.1;
-      o.hYaw = Math.sin(time * 0.32) * 0.45;
-      o.hPitch = -0.06 + Math.sin(time * 0.21) * 0.04;
+      o.hPitch = -0.06;
+      const c = (((time - STILL_T + 10) % 12) + 12) % 12;
+      const k = 1 - smooth(0, 1, rest);
+      o.hYaw += 0.5 * steps(c / 2, 4) * (1 - smooth(2.6, 3.1, c)) * k;
+      o.rE += 0.55 * steps(c - 4, 2) * (1 - smooth(5.8, 6.3, c)) * k;
+      o.lW += Math.sin(TAU * 2 * (c - 7)) * 0.35 * win(c, 7, 7.1, 7.9, 8) * k;
+      o.hPitch += 0.16 * win(c, 9, 9.15, 9.6, 10) * k;
     } else {
       choreograph(o, this.tmp, (((beat - p.lag) % BEATS) + BEATS) % BEATS, p);
       if (p.curious) {
@@ -763,12 +893,9 @@ class Robot {
         for (const s of ['l', 'r'] as const) {
           const A = ch(s, 'A');
           o[A] += (Math.PI - 0.12 - o[A]) * 0.7 * p.close * smooth(1.6, 2.4, o[A]);
-          const level = Math.max(0, Math.sin(o[A])) ** 2;
-          o[ch(s, 'E')] = Math.max(o[ch(s, 'E')], 1.4 * p.close * level);
-          o[ch(s, 'F')] = Math.max(o[ch(s, 'F')], 0.9 * p.close * level);
         }
+      if (rest > 0) for (const c of CH) o[c] *= 1 - smooth(0, 1, rest);
     }
-    if (rest > 0) for (const c of CH) o[c] *= 1 - smooth(0, 1, rest);
     // The whole robot turns about its spot (the unfinished one is held by its stand).
     if (!b.schematic) this.root.rotation.y = b.at[2] + o.turn;
     const L = this.L;
@@ -1622,8 +1749,8 @@ export function mountLab(
   // (reachPoints) the dancers' elbows and hands wherever the routine takes them, sampled over one loop.
   const clearPoints = [...robots.map((r) => new THREE.Vector3(r.root.position.x - 0.6, 2.05, r.root.position.z)), desk.group.localToWorld(new THREE.Vector3(-0.4, 1.4, -0.15))];
   const reachPoints: THREE.Vector3[] = [];
-  for (let i = 0; i < 64; i++) {
-    const beat = (i / 64) * BEATS;
+  for (let i = 0; i < 128; i++) {
+    const beat = (i / 128) * BEATS;
     for (const r of robots) {
       r.update(beat, (beat * 60) / BPM);
       reachPoints.push(...r.reach());
@@ -1866,7 +1993,7 @@ export function mountLab(
   function render(now = performance.now()) {
     const beat = ((t * BPM) / 60) % BEATS;
     for (const r of robots) r.update(beat, t, rest);
-    proto.update(0, t);
+    proto.update(0, t, rest);
     moveDust(t);
     dust.visible = mode !== 'read' || !!flight;
     let p = 1;
@@ -2324,6 +2451,7 @@ export function mountLab(
         bufferH: canvas.height,
         pixelRatio: renderer.getPixelRatio(),
         frames,
+        beat: ((t * BPM) / 60) % BEATS,
         hint: hintK,
         heroDist,
         heroFramed,
