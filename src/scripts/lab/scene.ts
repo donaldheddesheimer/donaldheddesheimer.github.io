@@ -1802,6 +1802,8 @@ const SIDE_X = -7.0;
 const SHELF = { x0: -6.6, x1: -4.2, z: WALL_Z + 0.3, d: 0.5, levels: [0.12, 0.55, 0.98, 1.41, 1.84] };
 const DOCK = { x: -3.05, z: WALL_Z };
 const SCOPE_CART = { x: -3.3, z: -0.55, yaw: 0.55 };
+// The floor lamp, in the gap between the shelving and the bay: the warm light of the room's left.
+const LAMP = { x: -3.78, z: WALL_Z + 0.75, y: 1.42 };
 
 function buildStore(mats: Mats, room: { low: THREE.MeshLambertMaterial; high: THREE.MeshLambertMaterial }) {
   const group = new THREE.Group();
@@ -1941,9 +1943,9 @@ function buildStore(mats: Mats, room: { low: THREE.MeshLambertMaterial; high: TH
   for (const [x, y] of [[-6.17, 2.64], [-5.53, 2.66], [-5.26, 2.57], [-4.73, 2.56]]) add(new THREE.SphereGeometry(0.012, 8, 6), bins[2], x, y, WALL_Z + 0.015);
   // Cable coils on two hooks, between the shelving and the bay.
   for (const [x, mat, s] of [[-3.95, cable, 1], [-3.72, mats.rubber, 0.8]] as const) {
-    add(new THREE.CylinderGeometry(0.01, 0.01, 0.1, 8), mats.steel, x, 1.78, WALL_Z + 0.05).rotation.x = Math.PI / 2;
+    add(new THREE.CylinderGeometry(0.01, 0.01, 0.1, 8), mats.steel, x, 1.98, WALL_Z + 0.05).rotation.x = Math.PI / 2;
     for (let i = 0; i < 4; i++) {
-      const m = add(new THREE.TorusGeometry(0.14 * s, 0.012, 6, 28), mat, x + (i - 1.5) * 0.008, 1.66 - 0.14 * s + 0.12, WALL_Z + 0.07 + i * 0.012);
+      const m = add(new THREE.TorusGeometry(0.14 * s, 0.012, 6, 28), mat, x + (i - 1.5) * 0.008, 1.86 - 0.14 * s + 0.12, WALL_Z + 0.07 + i * 0.012);
       m.scale.y = 1.35;
     }
   }
@@ -2053,6 +2055,21 @@ function buildStore(mats: Mats, room: { low: THREE.MeshLambertMaterial; high: TH
   const lead = new THREE.CatmullRomCurve3([new THREE.Vector3(-2.2, 0.03, 2.3), new THREE.Vector3(-2.6, 0.012, 1.95), new THREE.Vector3(-3.2, 0.012, 1.2), new THREE.Vector3(-3.4, 0.012, 0.4)]);
   add(new THREE.TubeGeometry(lead, 40, 0.012, 6), cable, 0, 0, 0);
   add(rbox(0.12, 0.05, 0.06, 0.01), bins[1], -3.42, 0.025, 0.36);
+
+  // The floor lamp: a weighted base, a pole, and a linen drum shade lit from inside.
+  add(new THREE.CylinderGeometry(0.16, 0.18, 0.03, 24), mats.darkSteel, LAMP.x, 0.015, LAMP.z);
+  add(new THREE.CylinderGeometry(0.012, 0.012, LAMP.y - 0.02, 8), mats.steel, LAMP.x, LAMP.y / 2, LAMP.z);
+  const shade = new THREE.MeshBasicMaterial({ color: 0xe39a55, side: THREE.DoubleSide });
+  add(new THREE.CylinderGeometry(0.17, 0.2, 0.26, 28, 1, true), shade, LAMP.x, LAMP.y + 0.06, LAMP.z);
+  add(new THREE.TorusGeometry(0.2, 0.006, 6, 28), mats.darkSteel, LAMP.x, LAMP.y - 0.07, LAMP.z).rotation.x = Math.PI / 2;
+  add(new THREE.SphereGeometry(0.045, 14, 10), mats.bulb, LAMP.x, LAMP.y, LAMP.z);
+  // Its cord, across the floor to the wall.
+  const cord = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(LAMP.x + 0.1, 0.01, LAMP.z + 0.1),
+    new THREE.Vector3(LAMP.x + 0.35, 0.008, LAMP.z - 0.2),
+    new THREE.Vector3(LAMP.x + 0.4, 0.008, WALL_Z + 0.06),
+  ]);
+  add(new THREE.TubeGeometry(cord, 16, 0.008, 5), mats.rubber, 0, 0, 0);
 
   bake(group);
   return { group, textures, fan: rotor, spare, eyes: eyeMat };
@@ -2272,16 +2289,16 @@ export function mountLab(
   };
   let env = makeEnv();
   scene.environment = env.texture;
-  scene.environmentIntensity = 0.12;
+  scene.environmentIntensity = 0.22;
   scene.fog = new THREE.Fog(0x0b0a09, 11, 24);
 
   const camera = new THREE.PerspectiveCamera(HERO_FOV, 1, 0.08, 60);
   const mats = materials();
 
-  // Six lights: the work light (warm key, the one shadow), the moon through the window (the one cool
+  // Seven lights: the work light (warm key, the one shadow), the moon through the window (the one cool
   // light, down across the floor right of the monitor), the pendant (warm, on the bench and the
-  // unfinished robot), the desk lamp, the screen's glow, and a low fill so nothing falls to pure black.
-  // The key is kept to the floor and the dancers: the wall above them, and the room's corners, stay dark.
+  // unfinished robot), the floor lamp (warm, over the storage and Graphite), the desk lamp, the screen's
+  // glow, and a fill, lifted enough that the room reads as lived in after hours rather than shut up.
   const props = buildProps(mats);
   props.tripod.position.set(-4.6, 0, 3.0); // out of every view: its light, not its lamp, is in the picture
   props.tripod.lookAt(0.2, 0, -0.3);
@@ -2298,7 +2315,10 @@ export function mountLab(
   key.shadow.bias = -0.0004;
   key.shadow.normalBias = 0.02;
   key.shadow.radius = 4;
-  scene.add(key, key.target, new THREE.HemisphereLight(0x2c2e33, 0x0c0b0a, 0.35));
+  scene.add(key, key.target, new THREE.HemisphereLight(0x5a5650, 0x201a14, 0.8));
+  const floorLamp = new THREE.PointLight(0xffa860, 13, 8, 2);
+  floorLamp.position.set(LAMP.x, LAMP.y + 0.02, LAMP.z);
+  scene.add(floorLamp);
 
   const room = buildRoom(random, mats);
   scene.add(room.group);
