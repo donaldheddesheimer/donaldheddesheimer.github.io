@@ -15,12 +15,16 @@
 // addresses for a project (computer.ts) name the output they showed by its number, so going back to one
 // finds that output again rather than printing it twice.
 //
+// Tab completes what's typed at the prompt, as a shell's does: a command's name, or a project's id
+// after `work `. It only fills the prompt in, never runs it; and where there's nothing to complete, Tab
+// moves on through the page as ever.
+//
 // Motion: the startup (the first line typed out, then the second and the prompt: about a second, once
 // a session), help's lines one after another, each output coming in. All of it is decoration: the text
 // is all there from the start (a screen reader reads it whole), a key or a tap ends the startup, and a
 // new command settles the one before. Reduced motion, or Motion off in Settings: all at once, with a
 // steady cursor.
-import { isCommand, labHref } from './routes';
+import { COMMANDS, isCommand, labHref } from './routes';
 import { EXIT, NO_PROJECT } from '../../lib/terminal';
 
 const STORE = 'lab:terminal';
@@ -80,6 +84,7 @@ export function initTerminal(
   const cursor = root.querySelector<HTMLElement>('[data-term-cursor]')!;
   const measure = root.querySelector<HTMLElement>('[data-term-measure]')!;
   const status = root.querySelector<HTMLElement>('[data-term-status]')!;
+  const matches = root.querySelector<HTMLElement>('[data-term-matches]')!;
   const inner = log.parentElement!;
   // What the prompt covers at the screen's foot, so a link reached with Tab scrolls clear of it
   // (terminal.css, scroll-margin).
@@ -238,6 +243,7 @@ export function initTerminal(
     save();
     input.value = '';
     recall = -1;
+    unlist();
     caret();
     // (Told before the output is scrolled to: the place it was run from is still in view.)
     if (by !== 'address') {
@@ -269,9 +275,63 @@ export function initTerminal(
     recall = Math.min(list.length, Math.max(0, recall + by));
     input.value = recall === list.length ? draft : list[recall];
     if (recall === list.length) recall = -1;
+    unlist();
     input.setSelectionRange(input.value.length, input.value.length);
     caret();
   }
+
+  // --- Completion -------------------------------------------------------------------------------
+
+  // Tab, the caret at the end of something typed (nothing selected): the command names help lists (and
+  // help), or after `work `, the projects' ids, that start with it. One fills the prompt in (`work`
+  // with a space after it, for an id); several fill in as much as they share, or, sharing no more, are
+  // listed over the prompt, and told, until the next key. Nothing to complete, or the same Tab again
+  // with the list already up, and Tab isn't taken: it moves on.
+  const names = ['help', ...COMMANDS];
+  let listed = '';
+  function complete() {
+    const v = input.value;
+    const end = v.length;
+    if (!v.trim() || input.selectionStart !== end || input.selectionEnd !== end) return false;
+    const arg = v.match(/^\s*work\s+(\S+)$/i);
+    const typed = arg ? arg[1].toLowerCase() : v.trimStart().toLowerCase();
+    if (!arg && /\s/.test(typed)) return false;
+    const hits = (arg ? projects.map((p) => p.id) : names).filter((c) => c.startsWith(typed));
+    if (!hits.length) return false;
+    const head = arg ? 'work ' : '';
+    if (hits.length === 1) {
+      const to = head + hits[0] + (hits[0] === 'work' ? ' ' : '');
+      if (to === v) return false;
+      fill(to);
+      announce(to.trim());
+      return true;
+    }
+    let shared = hits[0];
+    for (const h of hits) while (!h.startsWith(shared)) shared = shared.slice(0, -1);
+    if (shared.length > typed.length) {
+      fill(head + shared);
+      return true;
+    }
+    if (listed === hits.join(' ')) return false;
+    listed = hits.join(' ');
+    matches.textContent = hits.join('  ');
+    matches.hidden = false;
+    announce(`${hits.length} matches: ${hits.join(', ')}.`);
+    return true;
+  }
+  function fill(to: string) {
+    input.value = to;
+    input.setSelectionRange(to.length, to.length);
+    unlist();
+    caret();
+  }
+  function unlist() {
+    listed = '';
+    matches.hidden = true;
+    matches.textContent = '';
+  }
+  input.addEventListener('input', unlist);
+  input.addEventListener('blur', unlist);
 
   // --- The prompt's cursor ----------------------------------------------------------------------
 
@@ -302,6 +362,8 @@ export function initTerminal(
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       e.preventDefault();
       step(e.key === 'ArrowUp' ? -1 : 1);
+    } else if (e.key === 'Tab') {
+      if (!e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey && complete()) e.preventDefault();
     } else requestAnimationFrame(caret);
   });
 
@@ -438,6 +500,7 @@ export function initTerminal(
       // A startup that has begun is done; one never seen waits for next time.
       if (root.dataset.boot === 'play') endBoot();
       settle();
+      unlist();
       if (root.clientHeight) saved.y = place();
       save();
     },

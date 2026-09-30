@@ -411,6 +411,16 @@
   background: linear-gradient(to top, var(--t-bg), rgb(23 21 19 / 0));
   pointer-events: none;
 }
+/* What Tab found, several of them: a line over the prompt, dim, until the next key (terminal.ts). */
+.term-matches {
+  flex: 1 0 100%;
+  margin: 0 0 0.2em;
+  color: var(--t-dim);
+  white-space: pre-wrap;
+}
+.term-matches[hidden] {
+  display: none;
+}
 /* (Under the prompt's name where they won't both fit: enlarged text on a phone.) */
 .term-field {
   position: relative;
