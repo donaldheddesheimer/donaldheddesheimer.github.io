@@ -866,14 +866,20 @@ function copycat(o: Pose, b: Build, u: number, f: Expr) {
     gaze(f, watch, G);
     o.hPitch += 0.14 * counts(u, 5.7, 0.85) * watch;
     feel(f, win(u, 8.1, 8.3, 8.6, 8.9), GLEE);
-    // Ivory is behind it: it turns, in two hops, to watch, and spins back round, in two, for the take.
+    // Ivory is behind it: it turns, in two hops, three-quarters round to watch (its face still to the
+    // room, its eyes doing the rest), looks back to the visitor a moment ("see this?"), and spins back
+    // round, in two, for the take.
     const [there, up] = hops(u, 8.5, 9.1);
     const [back, down] = hops(u, 11.25, 11.7);
     const round = there * (1 - back);
-    o.turn += bearing(at, I[0], I[1]) * 0.6 * round;
-    face(o, at, I[0], I[1], round, 0.35);
+    o.turn += bearing(at, I[0], I[1]) * 0.25 * round;
+    face(o, at, I[0], I[1], round * 0.4, 0.35);
     gaze(f, round, I);
     feel(f, round, KEEN);
+    const peek = win(u, 9.45, 9.75, 10.6, 10.95) * round;
+    face(o, at, VISITOR[0], VISITOR[1], peek * 0.7, 0.2);
+    gaze(f, peek, VISITOR);
+    feel(f, peek, SLY);
     const lift = (up + down) * 0.1;
     o.lfy += lift;
     o.rfy += lift;
@@ -1875,7 +1881,7 @@ function paneTexture() {
     (g) => {
       g.filter = 'blur(5px)';
       g.fillStyle = '#fff';
-      for (let c = 0; c < 3; c++) g.fillRect(8 + c * 82, 8, 76, 88);
+      for (let c = 0; c < 3; c++) g.fillRect(5 + c * 83, 5, 80, 94);
       g.filter = 'none';
       g.globalCompositeOperation = 'destination-in';
       const fade = g.createLinearGradient(0, 0, 256, 0);
@@ -2025,16 +2031,16 @@ function buildRoom(random: () => number, mats: Mats) {
   add(boxGeo(16, 0.1, 0.03), mats.darkSteel, 0, 0.05, WALL_Z + 0.015);
   add(boxGeo(16, 0.04, 0.03), mats.darkSteel, 0, 1.2, WALL_Z + 0.015);
 
-  // The window: broad and high, three tall panes in a heavy steel frame, the city beyond at blue hour
-  // (its own light, not the room's).
+  // The window: broad and high, three tall panes in a slim steel frame, the city beyond at blue hour
+  // (its own light, not the room's), an outlook more than a picture.
   const W = { x: 0.1, y: 2.88, w: 3.2, h: 1.3 };
   const city = cityTexture();
   textures.push(city);
   const glass = add(new THREE.PlaneGeometry(W.w, W.h), new THREE.MeshBasicMaterial({ map: city, color: 0xa6a6a6, toneMapped: false }), W.x, W.y, WALL_Z + 0.005);
   glass.userData.live = true;
-  const bar = 0.1;
+  const bar = 0.055;
   for (const dx of [-1, 1]) add(boxGeo(bar, W.h + bar, 0.08), mats.darkSteel, W.x + (dx * (W.w + bar)) / 2, W.y, WALL_Z + 0.04);
-  for (const dx of [-1 / 3, 1 / 3]) add(boxGeo(0.08, W.h, 0.07), mats.darkSteel, W.x + (dx * W.w) / 2, W.y, WALL_Z + 0.035);
+  for (const dx of [-1 / 3, 1 / 3]) add(boxGeo(0.04, W.h, 0.06), mats.darkSteel, W.x + (dx * W.w) / 2, W.y, WALL_Z + 0.03);
   for (const dy of [-1, 1]) add(boxGeo(W.w + bar * 2, bar, 0.08), mats.darkSteel, W.x, W.y + (dy * (W.h + bar)) / 2, WALL_Z + 0.04);
   add(boxGeo(W.w + 0.36, 0.06, 0.2), mats.steel, W.x, W.y - W.h / 2 - bar - 0.03, WALL_Z + 0.1);
   // The traffic on the city's road, far off: a car's lights now and then, headlights one way and
@@ -2054,7 +2060,7 @@ function buildRoom(random: () => number, mats: Mats) {
   const carGeo = new THREE.BufferGeometry();
   carGeo.setAttribute('position', new THREE.BufferAttribute(carPos, 3));
   carGeo.setAttribute('color', new THREE.BufferAttribute(carCol, 3));
-  const carLights = new THREE.Points(carGeo, new THREE.PointsMaterial({ size: 2.5, sizeAttenuation: false, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: false }));
+  const carLights = new THREE.Points(carGeo, new THREE.PointsMaterial({ size: 3.5, sizeAttenuation: false, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: false }));
   carLights.frustumCulled = false;
   const lamp = [new THREE.Color(0xfff0cc), new THREE.Color(0xff4436)];
   function traffic(t: number) {
@@ -2064,7 +2070,7 @@ function buildRoom(random: () => number, mats: Mats) {
       const loop = W.w * (1 + c.every / 5);
       const d = (((t + c.at * 10) * c.v) % loop) - 0.05;
       const x = c.lane ? wr - d : wl + d;
-      const k = d < 0 || d > W.w ? 0 : Math.min(1, d / 0.3, (W.w - d) / 0.3) * 0.8;
+      const k = d < 0 || d > W.w ? 0 : Math.min(1, d / 0.3, (W.w - d) / 0.3);
       carPos.set([x, deckY + 0.004 + c.lane * 0.006, WALL_Z + 0.008], i * 3);
       carCol.set([lamp[c.lane].r * k, lamp[c.lane].g * k, lamp[c.lane].b * k], i * 3);
     });
