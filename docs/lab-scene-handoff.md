@@ -1,5 +1,68 @@
 # Robotics lab implementation handoff
 
+## Current checkpoint: a lived-in workshop, caught dancing, 2026-09-30 (Claude)
+
+**Status: implementation complete on `lively-workshop`, from `main` at `f121bc7`.** Not merged or deployed. The opening room was dark and empty on the left. It is now furnished, warmer, and a little alive, and the terminal behaves exactly as before.
+
+- **Commits, in order** (each builds on its own):
+  1. `22a0de7` Fill out the left side of the workshop.
+  2. `3503587` Warm the workshop with a floor lamp and a lifted fill.
+  3. `5e87d63` Catch the robots dancing when a visitor arrives.
+  4. The one that adds this section: stills, social preview, evidence.
+- **What changed** (all in `src/scripts/lab/scene.ts`):
+  - **The left side** (`buildStore`) is a storage and experimentation corner:
+    - a side wall and two bays of metal shelving with cases, parts bins, spare robot heads, boxes, a desk fan and a trailing plant;
+    - assembly drawings below the name, cable coils on hooks and a clock;
+    - a charging bay behind Graphite with hanging cables and a pad;
+    - a scope cart;
+    - an open equipment case and a coiled extension cable in front.
+
+    The props are baked into merged meshes, except for the fan rotor, the one spare head that moves, and one instanced mesh for the status lights.
+  - **Lighting:**
+    - a floor lamp with a warm point light, between the shelving and the bay;
+    - the hemisphere fill raised from 0.35 to 0.8, and the environment from 0.12 to 0.22;
+    - the moonlight and the bench pendant unchanged.
+  - **The caught moment** (`caught()`, `CAUGHT`, `FREEZE`) plays on the first opening of a tab session (`sessionStorage` `lab:caught`), with motion on. In seconds from the first draw:
+    - at about 2, Terracotta notices the visitor and straightens, eyes wide;
+    - at about 2.35, Graphite freezes mid-move, and its head creaks round in two steps;
+    - at about 2.75, Ivory turns to look, head tilted;
+    - from 3.7 to 5.5, Terracotta waves;
+    - by about 6.7, all three are back in the routine.
+
+    The poses come from the routine's own poses and `face()` and `WAVE`. It never blocks the computer: entering quiets the robots as before. The idle hint waits until the moment is over. With reduced motion or Motion off, the room opens on the same composed pose as before. Turning motion off mid-moment cancels it.
+  - **Background life** (`store.animate(t, spin)`), on the scene clock, so it holds with motion off and stops when the scene pauses:
+    - the fan turns, and eases to a stop while reading;
+    - the bay's four status lights count up;
+    - the scope's light blinks every 3.3 s;
+    - every 21 s (first at about 8 s), the spare head lights its eyes, looks round and dozes off.
+- **Stills and preview** were regenerated: `public/lab/opening-{wide,tall}.webp` and `public/og.jpg`. The monitor's bezel fractions didn't move, so `LabStage.astro` is unchanged.
+- **What to judge:** `docs/evidence/lively-workshop-2026-09-30/`:
+  - `screens/` holds:
+    - the held opening at 1440×900, 1920×1080, 1920×640 and 390×844;
+    - three frames of the caught moment;
+    - a reload that doesn't replay it;
+    - the monitor entered during the moment, and after Escape;
+    - the phone terminal entered during the moment.
+  - `video/caught-1280x800.webm` is the moment, 9.2 s.
+  - `logs/` holds the build, tsc, validate and perf logs.
+  - `harness/` holds `shots.cjs` and `caught-rec.cjs`, which use the lab-terminal pass's `serve.cjs`.
+- **Checks** (headless Chrome 154, ANGLE Metal, Apple M5 Pro):
+  - The build and tsc are clean.
+  - `validate.cjs` passes 215 checks with no failures, through startup, leave, motion, history, phone and most of `fit`.
+    - It stops in `fit` at 360×640 with 200% text: the monitor tap never reaches reading. **This stop is the same on main's build**, so it predates this pass. It is logged, not fixed.
+    - The `nowebgl` group passes with the new stills.
+  - The monitor pick passes at all five points at every size. The monitor rect and the camera distances are unchanged from main.
+- **Cost** (measured at 1440×900 while dancing, same machine):
+  - draw calls rise from 321 to 356, and triangles from 101k to 124k;
+  - frames stay at 16.7 ms, with none over 25 ms;
+  - the JS callback p50 goes from 1.7 to 2.0 ms;
+  - the synced frame p95 goes from 3.4 to 4.2 ms.
+
+  SwiftShader and phone hardware were not measured.
+- **Open questions:**
+  - The caught moment's timings are tuned by eye. On a slow first load, the opening's settle can overlap its start.
+  - The far left of 1920×640 is still a plain dark wall past the shelving.
+
 ## Current checkpoint: project details in the terminal, and a workshop with character, 2026-09-30 (Claude)
 
 **Status: implementation complete on `terminal-workshop-polish`, from `main` at `f6a7150`.** The five workshop commits below are followed by a dismissible viewing suggestion for mobile and narrow windows.
