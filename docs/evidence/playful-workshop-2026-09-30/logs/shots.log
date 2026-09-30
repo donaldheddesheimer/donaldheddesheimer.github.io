@@ -1,0 +1,26 @@
+# PW=<playwright> node docs/evidence/playful-workshop-2026-09-30/harness/shots.cjs <scratch>/ev4 (PNGs, then JPEG q85 into screens/)
+first entry: {
+  pc: 'read',
+  boot: 'done',
+  at: '/?computer',
+  first: 'New terminal started.',
+  entries: 0
+}
+reentry: {
+  pc: 'read',
+  boot: 'done',
+  at: '/?computer',
+  first: 'New terminal started.',
+  entries: 1
+} boot states seen: [ 'done' ]
+reduced motion: 150 ms after the click read ; 150 ms after Escape null
+shared link /?computer=work/cucadence: {
+  at: '?computer=work/cucadence',
+  last: 'donald@lab:~$work cucadence',
+  title: 'cuCadence · Terminal · Donald Heddesheimer'
+}
+phone: tapped the monitor, pc: read
+page errors: none
+
+# PW=<playwright> node docs/evidence/playful-workshop-2026-09-30/harness/rec.cjs
+playful-1280x800.webm 619 frames over 32.2 s (1.3 MB; the replay reads 32.16 s)
