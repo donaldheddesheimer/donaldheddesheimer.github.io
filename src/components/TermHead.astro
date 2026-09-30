@@ -1,0 +1,19 @@
+---
+// A view's opening lines in the terminal (TermOutput.astro, TermProject.astro): where it is, as the
+// prompt says it (~/work/cucadence, decoration), and its title, the view's heading. The lab's terminal
+// moves the focus to that heading where a tap opened the view (terminal.ts). Anything slotted follows
+// the title (a line saying what the view is).
+import { where } from '../lib/terminal';
+
+interface Props {
+  view: string;
+  title: string;
+}
+const { view, title } = Astro.props;
+---
+
+<header class="t-head">
+  <p class="t-crumb" aria-hidden="true">{where(view)}</p>
+  <h2 class="t-title" tabindex="-1">{title}</h2>
+  <slot />
+</header>

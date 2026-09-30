@@ -11,19 +11,19 @@
 // without motion). A window resized either way while reading moves between the two.
 //
 // The address names what the computer shows (routes.ts): /?computer (the terminal) or
-// /?computer=work/<id> (a project, `work <id>`'s output in the terminal). Going in adds an entry, and so
-// does each project run from the prompt; running anything else there makes the entry the terminal's
-// again. Back and Forward move between them, each entry finding the terminal where it was left (a
-// project's output, where it was being read), and out of the lab: the terminal's history stays as it is,
-// nothing printed twice. A project's address, shared or reloaded, opens the computer on it, printing it
-// if the terminal hasn't (at the section its #anchor names). Escape, the terminal's `exit` and, on a
+// /?computer=work/<id> (a project, the terminal showing `work <id>`). Going in adds an entry, and so
+// does each project opened from the prompt; anything else asked for there makes the entry the
+// terminal's again, showing that. Back and Forward move between them, each entry finding its view in the
+// terminal where it was left, and out of the lab. A project's address, shared or reloaded, opens the
+// computer on it (at the section its #anchor names, shared). Escape, the terminal's `exit` and, on a
 // touch screen, the power button on the monitor's bezel go back to the entry the lab was opened from,
 // and put the focus back on the monitor (ringed, unless the button was tapped). A reload or a shared link
 // opens the computer at once, without the camera's entrance; so do the old pages' addresses
 // (/?computer=about, /#about…), which run their command. history.state is { pc: path, back: entries
-// since the opening (0: the lab was opened here), d: entries since the lab's first, n: the number of a
-// project's output (terminal.ts), y: the terminal's scroll when last left, k: the entry's own key }. The
-// terminal keeps its own (terminal.ts).
+// since the opening (0: the lab was opened here), d: entries since the lab's first, v: the terminal's
+// view it shows (terminal.ts; a project's is its path), k: the entry's own key }. Each view's place is
+// the terminal's to keep (terminal.ts). (Entries from before views had n and y instead: v is found for
+// them as they're shown.)
 import type { LabScene, Quad, Rect } from './scene';
 import { initTerminal, type Focus } from './terminal';
 import { TERMINAL, isCommand, labHref, parse } from './routes';
@@ -33,8 +33,7 @@ interface Entry {
   pc?: string;
   back?: number;
   d?: number;
-  n?: number;
-  y?: number;
+  v?: string;
   k?: string;
 }
 
@@ -115,36 +114,14 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   addEventListener('pointerdown', (e) => (used = e.pointerType || 'mouse'), true);
 
   const term = initTerminal(termRoot, dialog, {
-    project: opened,
-    ran,
+    went,
     exit: () => leave(),
     motion: motionOK,
   });
 
-  // --- The terminal's scroll, kept in each entry for Back and Forward (and a reload) to return to -------
+  // --- The views, in the address and its entries ------------------------------------------------------
 
-  const remember = () => {
-    if (state !== 'read' || !current() || entry().k !== shownKey) return;
-    const e = entry();
-    const y = term.scroll();
-    if (e.k) left.set(e.k, y);
-    history.replaceState({ ...e, y }, '');
-  };
-  // And as it scrolls, since Back and Forward leave an entry without asking.
-  let keepTimer = 0;
-  termRoot.addEventListener(
-    'scroll',
-    () => {
-      clearTimeout(keepTimer);
-      keepTimer = window.setTimeout(remember, 150);
-    },
-    { passive: true },
-  );
-  // Back or Forward can come before that (a scroll a moment old, or one still moving), and by the time
-  // popstate says so the entry left can't be written: its scroll is kept here, by its key, instead.
-  const left = new Map<string, number>();
   const newKey = () => Math.random().toString(36).slice(2, 10);
-  const scrollOf = (e: Entry) => (e.k ? left.get(e.k) : undefined) ?? e.y ?? null;
   // The project command each entry was left by (tapped or clicked), for the focus to come back to.
   const openers = new Map<string, HTMLElement>();
 
@@ -154,54 +131,48 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     return id && titles[id] ? `${titles[id]} · ${termTitle}` : termTitle;
   };
 
-  // The terminal as the address's entry has it: where it was left, or, for a project's, its output
-  // (printed now if the terminal no longer has it, or never did: a link or an address typed).
+  // The terminal as the address's entry has it: a project's address, that project; the terminal's, the
+  // view the entry showed (or, new, whatever the terminal was showing: coming back from the room finds
+  // it as it was left, a project's address again if that's a project). Each where it was left; a
+  // project's address new to this tab (shared, typed, or an anchor edited into it), at the section its
+  // #anchor names.
   function show() {
-    const path = current();
+    let path = current();
     if (!path) return;
     let e = entry();
+    const fresh = !e.k;
     // An anchor edited into the address while reading: the browser's own new entry, one on from the one
-    // shown, showing the same (not printed again, and Escape still leaves).
+    // shown, showing the same (and Escape still leaves).
     if (history.state == null && state === 'read' && shown) {
-      e = { pc: path, back: shown.back ? shown.back + 1 : 0, d: (shown.d ?? 0) + 1, n: shown.pc === path ? shown.n : undefined, k: newKey() };
-      history.replaceState(e, '');
+      e = { pc: path, back: shown.back ? shown.back + 1 : 0, d: (shown.d ?? 0) + 1, v: shown.pc === path ? shown.v : undefined };
     }
-    if (!e.k) history.replaceState((e = { ...e, k: newKey() }), '');
+    term.open(project(path) ? path : (e.v ?? term.current()), fresh ? location.hash : '');
+    const v = term.current();
+    if (path === TERMINAL && project(v)) path = v;
+    e = { pc: path, back: e.back, d: e.d, v, k: e.k ?? newKey() };
+    history.replaceState(e, '', path === current() ? undefined : labHref(path));
     shownKey = e.k;
-    const id = project(path);
-    const y = scrollOf(e);
-    if (id && !(e.n && term.has(e.n, `work ${id}`))) {
-      const n = term.run(`work ${id}`, y == null ? location.hash : '');
-      history.replaceState((e = { ...e, n, y: undefined }), '');
-      if (e.k) left.delete(e.k);
-    } else if (y != null) term.scroll(y);
-    else if (id && e.n) term.show(e.n, location.hash);
     shown = e;
     if (state === 'read') document.title = titleOf(path);
   }
-  // A project run from the prompt: a new entry for it, the one left keeping its place.
-  function opened(id: string, n: number, from: HTMLElement | null) {
+  // A view asked for at the prompt. A project: a new entry for it (unless it's the one being read).
+  // Anything else: the entry's own, now the terminal's (a project isn't what's being read now).
+  function went(view: string, from: HTMLElement | null) {
     if (state !== 'read' || !current()) return;
-    remember();
     const e = entry();
-    // (Typed, it has none: the focus stays in the prompt, coming back.)
-    if (e.k && from) openers.set(e.k, from);
-    else if (e.k) openers.delete(e.k);
-    const path = `work/${id}`;
-    const k = newKey();
-    shown = { pc: path, back: e.back ? e.back + 1 : 0, d: (e.d ?? 0) + 1, n, k };
-    history.pushState(shown, '', labHref(path));
-    shownKey = k;
-    document.title = titleOf(path);
-  }
-  // Anything else run from the prompt, with a project's address: the terminal's (the project isn't what's
-  // being read now).
-  function ran() {
-    const e = entry();
-    if (state !== 'read' || !project(current() ?? '')) return;
-    shown = { ...e, pc: TERMINAL, n: undefined };
-    history.replaceState(shown, '', labHref(TERMINAL));
-    document.title = termTitle;
+    if (project(view)) {
+      if (current() === view) return;
+      // (Typed, it has none: the focus stays in the prompt, coming back.)
+      if (e.k && from) openers.set(e.k, from);
+      else if (e.k) openers.delete(e.k);
+      shown = { pc: view, back: e.back ? e.back + 1 : 0, d: (e.d ?? 0) + 1, v: view, k: newKey() };
+      history.pushState(shown, '', labHref(view));
+    } else {
+      shown = { ...e, pc: TERMINAL, v: view };
+      history.replaceState(shown, '', current() === TERMINAL ? undefined : labHref(TERMINAL));
+    }
+    shownKey = shown.k;
+    document.title = titleOf(current());
   }
 
   // --- Where the screen is ----------------------------------------------------------------------------
@@ -358,7 +329,6 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   async function close(instant = false) {
     if (state !== 'read') return after();
     state = 'moving';
-    remember();
     term.leave();
     full = false;
     html.removeAttribute('data-pc-full');
@@ -404,7 +374,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     history.replaceState({ ...entry(), pc: TERMINAL, d: 0 } satisfies Entry, '', labHref(TERMINAL));
   }
   function runPending() {
-    if (!pending || state !== 'read' || current() !== TERMINAL) return;
+    if (!pending || state !== 'read' || !current()) return;
     const cmd = pending;
     pending = null;
     term.run(cmd);
@@ -457,7 +427,6 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     if (state !== 'read') return sync();
     if (going != null) return;
     if (current()) {
-      remember();
       const e = entry();
       if (e.back) {
         going = instant;
@@ -529,9 +498,6 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     else leave(true);
   });
   addEventListener('popstate', () => {
-    // The entry left: where the terminal was (it hasn't moved yet).
-    clearTimeout(keepTimer);
-    if (state === 'read' && shownKey) left.set(shownKey, term.scroll());
     if (strip) {
       strip = false;
       history.replaceState(null, '', location.pathname);
@@ -547,9 +513,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     sync(true);
   });
   addEventListener('pagehide', () => {
-    if (state !== 'read') return;
-    remember();
-    term.leave();
+    if (state === 'read') term.leave();
   });
   // An old anchor typed or followed on the opening (/#about): the terminal, running it.
   addEventListener('hashchange', () => {
@@ -602,7 +566,8 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   const path = current();
   if (path && html.dataset.pc === 'read') {
     const e = entry();
-    if (e.pc !== path) history.replaceState({ pc: path, back: 0, d: 0, k: newKey() } satisfies Entry, '');
+    // (Keyless: new to this tab, shown at its #anchor. show() gives it its key.)
+    if (e.pc !== path) history.replaceState({ pc: path, back: 0, d: 0 } satisfies Entry, '');
     open(path, false);
   } else if (html.dataset.pc) delete html.dataset.pc;
 }

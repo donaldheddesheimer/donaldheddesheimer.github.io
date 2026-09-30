@@ -8,7 +8,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import TermProject from '../../../components/TermProject.astro';
 import { profile } from '../../../data/site';
-import { PS1 } from '../../../lib/terminal';
+import { PS1, ps1 } from '../../../lib/terminal';
 import { canonicalHref, labHref } from '../../../scripts/lab/routes';
 import '../../../styles/terminal.css';
 
@@ -39,13 +39,13 @@ const lab = labHref(path);
   <main id="main" class="t-static">
     <h1 class="sr-only">{profile.name}: the portfolio's terminal</h1>
     <div class="term-log">
-      <section class="term-entry" aria-labelledby="work-cmd">
-        <h2 class="term-echo" id="work-cmd"><span class="term-ps1" aria-hidden="true">{PS1}</span>work {project.id}</h2>
+      <section class="term-entry">
+        <p class="term-echo" aria-hidden="true"><span class="term-ps1">{PS1}</span>work {project.id}</p>
         <TermProject project={project} live={false} />
       </section>
     </div>
     <p class="t-static-prompt" aria-hidden="true">
-      <span class="term-ps1">{PS1}</span><span class="t-static-cursor"></span>
+      <span class="term-ps1">{ps1(path)}</span><span class="t-static-cursor"></span>
     </p>
     <p class="t-static-back"><a href="/">Back to the lab</a></p>
   </main>

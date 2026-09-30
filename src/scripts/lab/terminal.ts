@@ -1,43 +1,50 @@
 // The lab computer's terminal (src/components/Terminal.astro): a prompt that takes a handful of
-// commands and prints what the portfolio has to say. A small dispatcher, not a shell: what's typed is
+// commands and shows what the portfolio has to say. A small dispatcher, not a shell: what's typed is
 // trimmed, lower-cased and compared with the commands' names, never run, and shown back only as text.
-// `work <id>` prints a project (its id matched against the projects'). What a command prints was
-// rendered with the page (TermOutput.astro, TermProject.astro) and is copied out of its <template>.
+// `work <id>` shows a project (its id matched against the projects'). What a command shows was rendered
+// with the page (TermOutput.astro, TermProject.astro) and is copied out of its <template> the first time.
 //
-// The history reads top to bottom, a command and its output after the one before, with the prompt
-// after them all (held at the screen's foot once they run past it). Each command scrolls once, to show
-// its output: all of it with the prompt under it where it fits, or else from its start. Nothing pulls
-// the view after that.
+// One view at a time, over the prompt, which keeps to the screen's foot: the startup's lines until
+// something is asked for, then help, a section or a project, whichever was asked for last. Asking for
+// another puts it in the first's place; asking for the same again leaves it be. Each view keeps its own
+// place and what was unfolded in it, for coming back to. A mistake (a command there isn't, a project
+// that isn't there) is said on a line over the prompt, leaving the view as it was, until the next
+// command. Nothing pulls the view after it's shown.
 //
-// It remembers, for the tab's session (sessionStorage; in memory where that's refused): what was run,
-// where it was being read, the figures unfolded, and that the startup has played. Leaving the computer
-// and coming back, or reloading, finds it as it was. Each command run is numbered, once, for the session: the lab's
-// addresses for a project (computer.ts) name the output they showed by its number, so going back to one
-// finds that output again rather than printing it twice.
-//
-// Tab completes what's typed at the prompt, as a shell's does: a command's name, or a project's id
+// Up and Down bring back what was typed before, as a shell's history does: that list is its own, apart
+// from the views. Tab completes what's typed, as a shell's does: a command's name, or a project's id
 // after `work `. It only fills the prompt in, never runs it; and where there's nothing to complete, Tab
 // moves on through the page as ever.
 //
+// It remembers, for the tab's session (sessionStorage; in memory where that's refused): what was typed,
+// the view being read, each view's place and what was unfolded in it, and that the startup has played.
+// Leaving the computer and coming back, or reloading, finds it as it was. The first version kept the
+// transcript itself (lab:terminal): read once, for what was typed and the last view it showed.
+//
 // Motion: the startup (the first line typed out, then the second and the prompt: about a second, once
-// a session), help's lines one after another, each output coming in. All of it is decoration: the text
-// is all there from the start (a screen reader reads it whole), a key or a tap ends the startup, and a
-// new command settles the one before. Reduced motion, or Motion off in Settings: all at once, with a
-// steady cursor.
+// a session), a new view coming in quickly (help's lines one after another). All of it is decoration:
+// the text is all there from the start (a screen reader reads it whole), a key or a tap ends the
+// startup, and the next view settles the one before. Reduced motion, or Motion off in Settings: all at
+// once, with a steady cursor.
 import { COMMANDS, isCommand, labHref } from './routes';
-import { EXIT, NO_PROJECT } from '../../lib/terminal';
+import { EXIT, NOT_FOUND, NO_PROJECT, ps1 } from '../../lib/terminal';
 
-const STORE = 'lab:terminal';
-const KEEP = 60; // commands kept in the history
+const STORE = 'lab:terminal:2';
+const OLD = 'lab:terminal'; // the first version's, the transcript
+const KEEP = 60; // commands kept for Up and Down
 const BOOT_MS = 900; // the startup's length (terminal.css)
+const START = ''; // the startup's view
 
+interface Place {
+  y?: number; // where it was scrolled to
+  open?: number[]; // its disclosures unfolded, by their order in it
+}
 interface Saved {
+  v: 2;
   boot?: boolean;
-  log?: string[];
-  n?: number; // commands run in the session (the last in `log` is number n)
-  y?: number;
-  cut?: number; // the height of the oldest outputs, gone once there were many (places are kept past them)
-  open?: string[]; // the figures unfolded: 'n:i', output n's i-th
+  recall?: string[];
+  view?: string;
+  views?: Record<string, Place>;
 }
 
 /** A command as it's matched: trimmed, lower-cased, its words one space apart. */
@@ -52,60 +59,41 @@ export interface Terminal {
   enter(focus: Focus): void;
   /** Off screen: its place kept, its motion settled. */
   leave(): void;
-  /** Back to its place (the screen has been laid out again). */
+  /** Back to the view's place (the screen has been laid out again). */
   restore(): void;
-  /** A command, as if typed (an address names it), at once, without the startup; its output shown
-   *  from its start, or at the section `anchor` names. Returns its number. */
-  run(cmd: string, anchor?: string): number;
-  /** Whether the history still holds output number `n`, and it's `cmd`'s. */
-  has(n: number, cmd: string): boolean;
-  /** Output number `n` shown, at once: from its start, or at the section `anchor` names. */
-  show(n: number, anchor?: string): void;
-  /** Where the history is scrolled to; given a place, scrolled there first. (A place stays the same
-   *  place when the oldest outputs go.) */
-  scroll(y?: number): number;
+  /** A command, as if typed (an old address names it), at once, without the startup. */
+  run(cmd: string): void;
+  /** A view shown, at once, as an address has it ('help', a section, 'work/<id>', or '' for the
+   *  startup): where it was left, or at the section `anchor` names. False if there's no such view. */
+  open(view: string, anchor?: string): boolean;
+  /** The view being read. */
+  current(): string;
 }
 
 export function initTerminal(
   root: HTMLElement,
   templates: ParentNode,
   hooks: {
-    /** A project run from the prompt (typed, or its command tapped or clicked: `from`) as output `n`. */
-    project: (id: string, n: number, from: HTMLElement | null) => void;
-    /** Anything else run from the prompt. */
-    ran: () => void;
+    /** A view asked for at the prompt (typed, or its command tapped or clicked: `from`), or by an old
+     *  address's command. */
+    went: (view: string, from: HTMLElement | null) => void;
     exit: () => void;
     motion: () => boolean;
   },
 ): Terminal {
-  const log = root.querySelector<HTMLElement>('[data-term-log]')!;
+  const area = root.querySelector<HTMLElement>('[data-term-views]')!;
   const form = root.querySelector<HTMLFormElement>('[data-term-form]')!;
   const input = root.querySelector<HTMLInputElement>('[data-term-input]')!;
+  const prompt = root.querySelector<HTMLElement>('[data-term-ps1]')!;
   const cursor = root.querySelector<HTMLElement>('[data-term-cursor]')!;
   const measure = root.querySelector<HTMLElement>('[data-term-measure]')!;
   const status = root.querySelector<HTMLElement>('[data-term-status]')!;
   const matches = root.querySelector<HTMLElement>('[data-term-matches]')!;
-  const inner = log.parentElement!;
+  const note = root.querySelector<HTMLElement>('[data-term-note]')!;
+  const inner = area.parentElement!;
   // What the prompt covers at the screen's foot, so a link reached with Tab scrolls clear of it
   // (terminal.css, scroll-margin).
   new ResizeObserver(() => root.style.setProperty('--t-prompt', `${form.offsetHeight}px`)).observe(form);
-
-  let saved: Saved = {};
-  try {
-    saved = JSON.parse(sessionStorage.getItem(STORE) ?? '{}') ?? {};
-  } catch {}
-  const save = () => {
-    try {
-      sessionStorage.setItem(STORE, JSON.stringify(saved));
-    } catch {}
-  };
-
-  let pointer = 'mouse'; // the last pointer used on the terminal
-  let bootTimer = 0;
-  let seq = 0;
-  let count = Math.max(saved.n ?? 0, saved.log?.length ?? 0);
-
-  // --- The history ------------------------------------------------------------------------------
 
   const clone = (name: string) => {
     const t = templates.querySelector<HTMLTemplateElement>(`template[data-term-out="${name}"]`);
@@ -117,6 +105,7 @@ export function initTerminal(
     id: t.dataset.termOut!.slice(5),
     name: (t.dataset.title ?? '').toLowerCase().replace(/\s+/g, '-'),
   }));
+  const ids = new Set(projects.map((p) => p.id));
   const projectCmd = (id: string) => {
     const a = document.createElement('a');
     a.className = 't-cmd';
@@ -125,103 +114,146 @@ export function initTerminal(
     return a;
   };
 
-  // What a command prints: its template's copy; for a project the site doesn't have, the answer naming
-  // what was asked for, with the likeliest few it may have meant (their ids or names holding it, or it
-  // holding their id).
-  function output(cmd: string) {
-    if (!cmd || cmd === EXIT) return null;
-    if (cmd === 'help' || isCommand(cmd)) return clone(cmd);
-    const id = cmd.match(/^work (.+)$/)?.[1];
-    if (id == null) return clone('not-found');
-    const out = (/^[\w-]+$/.test(id) && clone(`work/${id}`)) || clone('no-project');
-    if (!out || out.dataset.project) return out;
-    out.querySelector('[data-term-arg]')!.textContent = id;
-    out.dataset.announce = `${NO_PROJECT[0]}${id}${NO_PROJECT[1]}work${NO_PROJECT[2]}`;
-    const q = id.replace(/ /g, '-');
-    const near = q.length < 2 ? [] : projects.filter((p) => p.id.includes(q) || p.name.includes(q) || q.includes(p.id)).slice(0, 3);
-    const guess = out.querySelector<HTMLElement>('[data-term-guess]');
-    const list = guess?.querySelector('[data-term-guesses]');
-    if (near.length && guess && list) {
-      near.forEach((p, i) => list.append(...(i ? [i === near.length - 1 ? ' or ' : ', '] : []), projectCmd(p.id)));
-      guess.hidden = false;
+  /** The view a command shows (a command as matched), or null for none. */
+  function viewOf(cmd: string) {
+    if (cmd === 'help' || isCommand(cmd)) return cmd;
+    const id = cmd.match(/^work ([\w-]+)$/)?.[1];
+    return id && ids.has(id) ? `work/${id}` : null;
+  }
+  const isView = (v: unknown): v is string => v === START || (typeof v === 'string' && viewOf(v.replace('/', ' ')) === v);
+
+  // --- The session ------------------------------------------------------------------------------
+
+  // What was kept, checked, as another version (or a hand) may have written it; or else the first
+  // version's transcript, read for what was typed and the last view it showed, and left as it was.
+  const read = (key: string) => {
+    try {
+      const v = JSON.parse(sessionStorage.getItem(key) ?? 'null');
+      return v && typeof v === 'object' ? (v as Record<string, unknown>) : null;
+    } catch {
+      return null;
     }
-    return out;
+  };
+  const lines = (a: unknown) => (Array.isArray(a) ? a.filter((s): s is string => typeof s === 'string' && !!s.trim()) : []);
+  function load(): Saved {
+    const now = read(STORE);
+    if (now?.v === 2) {
+      const views: Record<string, Place> = {};
+      for (const [v, p] of Object.entries(now.views && typeof now.views === 'object' ? now.views : {})) {
+        if (!isView(v) || !p || typeof p !== 'object') continue;
+        const { y, open } = p as Place;
+        views[v] = {
+          y: Number.isFinite(y) ? Math.max(0, y!) : undefined,
+          open: Array.isArray(open) ? open.filter((i) => Number.isInteger(i) && i >= 0) : undefined,
+        };
+      }
+      return { v: 2, boot: now.boot === true, recall: lines(now.recall).slice(-KEEP), view: isView(now.view) ? now.view : START, views };
+    }
+    const old = read(OLD);
+    const recall = lines(old?.log)
+      .map((s) => s.trim())
+      .slice(-KEEP);
+    const last = recall.flatMap((s) => viewOf(norm(s)) ?? []).at(-1);
+    return { v: 2, boot: old?.boot === true, recall, view: last ?? START, views: {} };
+  }
+  const saved = load();
+  const save = () => {
+    try {
+      sessionStorage.setItem(STORE, JSON.stringify(saved));
+    } catch {}
+  };
+  const place = (view: string) => ((saved.views ??= {})[view] ??= {});
+
+  let pointer = 'mouse'; // the last pointer used on the terminal
+  let bootTimer = 0;
+
+  // --- The views ---------------------------------------------------------------------------------
+
+  // Each view asked for so far, its element: the one being read shown, the others kept as they were.
+  const mounted = new Map<string, HTMLElement>([[START, area.querySelector<HTMLElement>(`[data-view="${START}"]`)!]]);
+  let cur = START;
+  const disclosures = (el: Element) => [...el.querySelectorAll<HTMLDetailsElement>('details')];
+
+  // A figure unfolded: its video's poster now (not before).
+  const unfold = (d: HTMLDetailsElement) => {
+    for (const v of d.querySelectorAll<HTMLVideoElement>('video[data-poster]')) {
+      v.poster = v.dataset.poster!;
+      v.removeAttribute('data-poster');
+    }
+  };
+
+  function mount(view: string) {
+    let el = mounted.get(view);
+    if (el) return el;
+    el = clone(view) ?? undefined;
+    if (!el) return null;
+    el.dataset.view = view;
+    el.hidden = true;
+    area.append(el);
+    mounted.set(view, el);
+    // Unfolded as it was left (a reload, or the session before).
+    const open = place(view).open ?? [];
+    disclosures(el).forEach((d, i) => {
+      if (!open.includes(i)) return;
+      d.open = true;
+      unfold(d);
+    });
+    return el;
   }
 
-  // A command as typed, and what it prints, as output number `n`. `raw` is only ever text here.
-  function print(raw: string, fresh: boolean, n: number) {
-    const said = raw.trim();
-    const cmd = norm(raw);
-    const entry = document.createElement('div');
-    entry.className = 'term-entry';
-    entry.dataset.n = String(n);
-    entry.dataset.cmd = cmd;
-    const echo = document.createElement(said ? 'h2' : 'p');
-    echo.className = 'term-echo';
-    echo.id = `term-${++seq}`;
-    echo.tabIndex = -1;
-    const ps1 = document.createElement('span');
-    ps1.className = 'term-ps1';
-    ps1.setAttribute('aria-hidden', 'true');
-    ps1.textContent = root.querySelector('.term-prompt .term-ps1')?.textContent ?? '$';
-    echo.append(ps1, raw);
-    if (!said) echo.setAttribute('aria-hidden', 'true');
-    entry.append(echo);
-    const out = output(cmd);
-    if (out) entry.append(out);
-    if (fresh) entry.classList.add('is-new');
-    log.append(entry);
-    // The oldest go once there are many (the session keeps as many), what's left moving up by their height.
-    const entries = log.querySelectorAll<HTMLElement>('.term-entry');
-    const gone = entries.length - KEEP;
-    if (gone > 0) {
-      const top = entries[gone].offsetTop;
-      for (let i = 0; i < gone; i++) entries[i].remove();
-      saved.cut = (saved.cut ?? 0) + top - entries[gone].offsetTop;
-    }
-    return { entry, echo, out, said, cmd };
-  }
+  // The newest view's motion, to its end at once.
+  const settle = () => area.querySelectorAll('.is-new').forEach((e) => e.classList.remove('is-new'));
 
-  // The newest output's motion, to its end at once.
-  const settle = () => log.querySelectorAll('.is-new').forEach((e) => e.classList.remove('is-new'));
-
-  // A scroll set while a reveal is still gliding can take on the glide's last few pixels a frame later
+  // A scroll set while the screen is still moving can take on the move's last few pixels a frame later
   // (the compositor's, caught up): it's set again once they've come in.
-  let gliding = false;
-  root.addEventListener('scrollend', () => (gliding = false));
-  // A place in the history, measured from its first output, gone or not.
-  const place = () => Math.round(root.scrollTop) + (saved.cut ?? 0);
-  const goTo = (y: number) => jump(y - (saved.cut ?? 0));
   function jump(y: number) {
     root.scrollTo({ top: y, behavior: 'instant' });
-    if (!gliding) return;
-    gliding = false;
-    requestAnimationFrame(() => requestAnimationFrame(() => root.scrollTo({ top: y, behavior: 'instant' })));
+    requestAnimationFrame(() => requestAnimationFrame(() => Math.abs(root.scrollTop - y) > 1 && root.scrollTo({ top: y, behavior: 'instant' })));
   }
-
-  // Show what a command printed: all of it, with the prompt under it, where it fits; else from its top;
-  // or from a section of it (`at`). (The end, where all from the result's top down, the prompt too, fits
-  // in the view: the end is then above its top.) Layout offsets, not the screen's: it may be riding the
-  // monitor in flight, transformed.
-  function reveal(entry: HTMLElement, at: HTMLElement | null = null, instant = false) {
-    let top = -12;
-    for (let el: HTMLElement | null = at ?? entry; el && el !== root; el = el.offsetParent as HTMLElement | null) top += el.offsetTop;
-    const end = root.scrollHeight - root.clientHeight;
-    const y = at ? top : Math.min(top, end);
-    if (hooks.motion() && !instant) {
-      gliding = true;
-      root.scrollTo({ top: y, behavior: 'smooth' });
-    } else jump(y);
-  }
-  const entryOf = (n: number) => log.querySelector<HTMLElement>(`.term-entry[data-n="${n}"]`);
-  // A section of a project's output, by the anchor a link to it names (its heading's id on its page).
-  const section = (entry: HTMLElement, anchor = '') => {
+  // A section of a project, by the anchor a link to it names (its heading's id on its page).
+  const section = (el: HTMLElement, anchor = '') => {
     let a = anchor.replace(/^#/, '');
     try {
       a = decodeURIComponent(a);
     } catch {}
-    return a ? entry.querySelector<HTMLElement>(`[data-anchor="${CSS.escape(a)}"]`) : null;
+    return a ? el.querySelector<HTMLElement>(`[data-anchor="${CSS.escape(a)}"]`) : null;
   };
+  // Layout offsets, not the screen's: it may be riding the monitor in flight, transformed.
+  const top = (at: HTMLElement) => {
+    let y = -12;
+    for (let el: HTMLElement | null = at; el && el !== root; el = el.offsetParent as HTMLElement | null) y += el.offsetTop;
+    return y;
+  };
+  const keep = () => {
+    if (root.clientHeight) place(cur).y = Math.round(root.scrollTop);
+  };
+
+  // Show `view` in the one's place: where it was left, or where `anchor` says (unfolding what holds it).
+  // `fresh`: asked for just now, coming in.
+  function show(view: string, anchor = '', fresh = false) {
+    const el = mount(view);
+    if (!el) return null;
+    if (view !== cur) {
+      keep();
+      settle();
+      unsay();
+      mounted.get(cur)!.hidden = true;
+      el.hidden = false;
+      if (fresh && hooks.motion()) el.classList.add('is-new');
+      cur = saved.view = view;
+      prompt.textContent = ps1(view);
+      jump(place(view).y ?? 0);
+    }
+    const at = section(el, anchor);
+    if (at) {
+      for (let d = at.closest('details'); d; d = d.parentElement?.closest('details') ?? null) d.open = true;
+      jump(top(at));
+    }
+    save();
+    return el;
+  }
+
+  // --- Running ------------------------------------------------------------------------------------
 
   let say = 0;
   function announce(msg: string) {
@@ -230,40 +262,66 @@ export function initTerminal(
     say = window.setTimeout(() => (status.textContent = msg), 60);
   }
 
-  // Run what was typed or tapped. `by`: how, which decides where the focus goes after (the prompt,
-  // or, from a touch screen, the command's heading, without raising a keyboard over the output); `from`,
-  // the command tapped or clicked. An address's is shown at once, where its `anchor` says.
-  function run(raw: string, by: 'type' | 'tap' | 'click' | 'address', from: HTMLElement | null = null, anchor = '') {
+  // A mistake, over the prompt: what was asked for, and what to run instead. Cleared by the next command.
+  function unsay() {
+    note.replaceChildren();
+    note.hidden = true;
+  }
+  function mistake(raw: string, cmd: string) {
+    unsay();
+    const id = cmd.match(/^work (.+)$/)?.[1];
+    const out = clone(id == null ? 'not-found' : 'no-project');
+    if (!out) return;
+    out.querySelector('[data-term-arg]')!.textContent = id ?? raw.trim();
+    let told = id == null ? `${raw.trim()}${NOT_FOUND[0]}help${NOT_FOUND[1]}` : `${NO_PROJECT[0]}${id}${NO_PROJECT[1]}work${NO_PROJECT[2]}`;
+    // For a project the site doesn't have, the likeliest few it may have meant (their ids or names
+    // holding it, or it holding their id).
+    const guess = out.querySelector<HTMLElement>('[data-term-guess]');
+    const list = guess?.querySelector('[data-term-guesses]');
+    const q = (id ?? '').replace(/ /g, '-');
+    const near = q.length < 2 ? [] : projects.filter((p) => p.id.includes(q) || p.name.includes(q) || q.includes(p.id)).slice(0, 3);
+    if (near.length && guess && list) {
+      near.forEach((p, i) => list.append(...(i ? [i === near.length - 1 ? ' or ' : ', '] : []), projectCmd(p.id)));
+      guess.hidden = false;
+      told += ` Did you mean ${near.map((p) => `work ${p.id}`).join(', ')}?`;
+    }
+    note.append(...out.childNodes);
+    note.hidden = false;
+    announce(told);
+  }
+
+  // Run what was typed or tapped. `by`: how, which decides where the focus goes after (the prompt, or,
+  // from a touch screen, the view's title, without raising a keyboard over it); `from`, the command
+  // tapped or clicked.
+  function run(raw: string, by: 'type' | 'tap' | 'click' | 'address', from: HTMLElement | null = null) {
     endBoot();
-    settle();
-    const n = ++count;
-    const { entry, echo, out, said, cmd } = print(raw, hooks.motion(), n);
-    saved.log = [...(saved.log ?? []), raw].slice(-KEEP);
-    saved.n = n;
-    save();
+    const said = raw.trim();
+    const cmd = norm(raw);
+    if (said) {
+      saved.recall = [...(saved.recall ?? []), said].slice(-KEEP);
+      save();
+    }
     input.value = '';
     recall = -1;
     unlist();
     caret();
-    // (Told before the output is scrolled to: the place it was run from is still in view.)
-    if (by !== 'address') {
-      if (out?.dataset.project) hooks.project(out.dataset.project, n, from);
-      else if (cmd) hooks.ran();
-    }
-    reveal(entry, section(entry, anchor), by === 'address');
-    if (by === 'tap') echo.focus({ preventScroll: true });
-    else {
-      if (by === 'click') input.focus({ preventScroll: true });
-      if (out) announce(out.dataset.announce ?? '');
-    }
-    if (said && cmd === EXIT) hooks.exit();
-    return n;
+    unsay();
+    if (!cmd) return;
+    if (cmd === EXIT) return hooks.exit();
+    const view = viewOf(cmd);
+    if (view == null) return mistake(raw, cmd);
+    const el = show(view, '', true)!;
+    // (Told before the focus moves: the place it was run from is still in view.)
+    hooks.went(view, from);
+    if (by === 'tap') el.querySelector<HTMLElement>('.t-title')?.focus({ preventScroll: true });
+    else if (by === 'click') input.focus({ preventScroll: true });
+    announce(el.dataset.announce ?? '');
   }
 
   // Earlier commands again, Up and Down, as a shell's history does: the line being typed is kept.
   let recall = -1;
   let draft = '';
-  const past = () => (saved.log ?? []).map((s) => s.trim()).filter((s, i, a) => s && s !== a[i - 1]);
+  const past = () => (saved.recall ?? []).filter((s, i, a) => s !== a[i - 1]);
   function step(by: number) {
     const list = past();
     if (!list.length) return;
@@ -407,7 +465,9 @@ export function initTerminal(
     const copy = t.closest<HTMLButtonElement>('[data-term-copy]');
     if (copy) return void copyText(copy);
     // A click on the terminal's empty space (not its text, which may be being selected) is for typing.
-    if ((t === root || t === inner || t === log) && pointer === 'mouse' && document.getSelection()?.isCollapsed !== false) input.focus({ preventScroll: true });
+    if ((t === root || t === inner || t === area || t === mounted.get(cur)) && pointer === 'mouse' && document.getSelection()?.isCollapsed !== false) {
+      input.focus({ preventScroll: true });
+    }
   });
 
   // The address, to the clipboard; where that's refused, selected, for copying by hand.
@@ -427,39 +487,31 @@ export function initTerminal(
     }
   }
 
-  // Its place, kept as it's read (a reload returns to it too).
+  // The view's place, kept as it's read (a reload returns to it too).
   let keepTimer = 0;
   root.addEventListener(
     'scroll',
     () => {
       clearTimeout(keepTimer);
       keepTimer = window.setTimeout(() => {
-        if (root.clientHeight) {
-          saved.y = place();
-          save();
-        }
+        keep();
+        save();
       }, 150);
     },
     { passive: true },
   );
 
-  // A figure unfolded: its video's poster now (not before), and kept, for a reload to unfold it again.
-  const unfold = (d: HTMLDetailsElement) => {
-    for (const v of d.querySelectorAll<HTMLVideoElement>('video[data-poster]')) {
-      v.poster = v.dataset.poster!;
-      v.removeAttribute('data-poster');
-    }
-  };
-  const figures = (entry: Element) => [...entry.querySelectorAll<HTMLDetailsElement>('details.t-fig')];
-  log.addEventListener(
+  // A disclosure unfolded or folded: a figure's video's poster now, and what's unfolded kept, for
+  // coming back to the view.
+  area.addEventListener(
     'toggle',
     (e) => {
-      const d = e.target as HTMLDetailsElement;
-      if (!d.matches('details.t-fig')) return;
+      const d = e.target;
+      if (!(d instanceof HTMLDetailsElement)) return;
+      const el = d.closest<HTMLElement>('[data-view]');
+      if (!el) return;
       if (d.open) unfold(d);
-      saved.open = [...log.querySelectorAll<HTMLElement>('.term-entry')].flatMap((entry) =>
-        figures(entry).flatMap((f, i) => (f.open ? [`${entry.dataset.n}:${i}`] : [])),
-      );
+      place(el.dataset.view!).open = disclosures(el).flatMap((f, i) => (f.open ? [i] : []));
       save();
     },
     true,
@@ -483,19 +535,10 @@ export function initTerminal(
     save();
   }
 
-  // The session so far: its history, printed as it was, without motion, its figures as they were.
+  // The session so far: the view it was reading, as it was left.
   if (saved.boot) root.dataset.boot = 'done';
-  const first = count - (saved.log?.length ?? 0) + 1;
-  (saved.log ?? []).forEach((raw, i) => print(raw, false, first + i));
-  for (const f of saved.open ?? []) {
-    const [n, i] = f.split(':').map(Number);
-    const entry = entryOf(n);
-    const d = entry && figures(entry)[i];
-    if (d) {
-      d.open = true;
-      unfold(d);
-    }
-  }
+  if (saved.view && show(saved.view)) endBoot();
+  save();
 
   return {
     enter(focus) {
@@ -509,26 +552,21 @@ export function initTerminal(
       if (root.dataset.boot === 'play') endBoot();
       settle();
       unlist();
-      if (root.clientHeight) saved.y = place();
+      keep();
       save();
     },
     restore() {
-      goTo(saved.y ?? 0);
+      jump(place(cur).y ?? 0);
       caret();
     },
-    run(cmd, anchor) {
-      return run(cmd, 'address', null, anchor);
+    run(cmd) {
+      run(cmd, 'address');
     },
-    has(n, cmd) {
-      return entryOf(n)?.dataset.cmd === norm(cmd);
+    open(view, anchor = '') {
+      if (!show(view, anchor)) return false;
+      if (view !== START) endBoot();
+      return true;
     },
-    show(n, anchor) {
-      const entry = entryOf(n);
-      if (entry) reveal(entry, section(entry, anchor), true);
-    },
-    scroll(y) {
-      if (y != null) goTo(y);
-      return place();
-    },
+    current: () => cur,
   };
 }

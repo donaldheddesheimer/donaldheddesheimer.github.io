@@ -1,12 +1,13 @@
 ---
 // The lab computer's terminal (src/scripts/lab/terminal.ts), inside the lab's dialog (LabStage.astro):
-// the startup's two lines, the history of what was run, and the prompt. What each command prints waits
-// in a <template> below it, rendered here from the site's data (TermOutput.astro; each project's,
-// `work <id>`, TermProject.astro), until it's run. (A template's pictures load only once it's printed.)
+// one view at a time over the prompt. First the startup's two lines; then whatever was last asked for:
+// help, a section, a project. Each view waits in a <template> below, rendered here from the site's data
+// (TermOutput.astro; each project's, `work <id>`, TermProject.astro), until it's first asked for.
+// (A template's pictures load only once it's shown.) Over the prompt, a line for Tab's matches and one
+// for a mistake (a command there isn't), neither of them a view.
 //
-// The history is real text for reading, selecting and copying, and headed for moving through it: each
-// command run is an h2 (the prompt beside it is decoration). New output is announced once, briefly, in
-// the status line; the history itself isn't live.
+// A view is real text for reading, selecting and copying, headed by its title (an h2). A new view is
+// announced once, briefly, in the status line; the views themselves aren't live.
 import { getCollection } from 'astro:content';
 import TermCmd from './TermCmd.astro';
 import TermOutput from './TermOutput.astro';
@@ -20,8 +21,8 @@ const projects = await getCollection('projects');
 
 <div class="term" data-term data-boot="pending" tabindex="-1">
   <div class="term-inner">
-    <div class="term-log" data-term-log>
-      <div class="term-boot">
+    <div class="term-views" data-term-views>
+      <div class="term-boot" data-view="">
         <p class="term-boot-1" style={`--n:${BOOT.first.length}`}>
           <span class="term-type">{BOOT.first}</span><span class="term-boot-cursor" aria-hidden="true"></span>
         </p>
@@ -31,8 +32,9 @@ const projects = await getCollection('projects');
       </div>
     </div>
     <form class="term-prompt" data-term-form autocomplete="off">
+      <p class="term-note" data-term-note hidden></p>
       <p class="term-matches" data-term-matches aria-hidden="true" hidden></p>
-      <label class="term-ps1" for="term-cmd" aria-hidden="true">{PS1}</label>
+      <label class="term-ps1" for="term-cmd" aria-hidden="true" data-term-ps1>{PS1}</label>
       <span class="term-field">
         <input
           id="term-cmd"

@@ -1,8 +1,8 @@
 // A project's write-up, laid out for the lab computer's terminal (TermProse.astro): the HTML the site's
 // Markdown processor renders for the project's case study (CaseStudy.astro), with
-// - its headings two levels down, under the command's (h2) and the project's name (h3), marked for the
-//   terminal's section labels; in the lab's terminal (`ids` false), their ids become data-anchor, as the
-//   same project may be printed more than once;
+// - its headings a level down, under the project's name (the view's h2), marked for the terminal's
+//   section labels; in the lab's terminal (`ids` false), their ids become data-anchor, as the page
+//   around it has ids of its own;
 // - its figures (figures.ts) folded away behind a line that says what they show, their media loading only
 //   once opened;
 // - links off the page opening in a new tab, as the terminal's other links do (↗);
@@ -15,12 +15,12 @@ export function writeUp(html: string, opts: { ids?: boolean; posters?: Record<st
   const { ids = false, posters = {} } = opts;
   return (
     html
-      // Headings: h2 → h4 (h3 → h5, h4 → h6).
+      // Headings: h2 → h3 (h3 → h4, h4 → h5).
       .replace(/<h([234])(\s[^>]*)?>/g, (_, n: string, attrs = '') => {
         const a = ids ? attrs : attrs.replace(/\sid="/, ' data-anchor="');
-        return `<h${+n + 2} class="t-section"${a}>`;
+        return `<h${+n + 1} class="t-section"${a}>`;
       })
-      .replace(/<\/h([234])>/g, (_, n: string) => `</h${+n + 2}>`)
+      .replace(/<\/h([234])>/g, (_, n: string) => `</h${+n + 1}>`)
       // Figures: the caption (its kicker, "Fig 2 · Trace · scroll →", and what it shows) is the line
       // that opens it.
       .replace(

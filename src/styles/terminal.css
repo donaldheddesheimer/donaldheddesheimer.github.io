@@ -1,5 +1,5 @@
 /* The lab computer's terminal (src/components/Terminal.astro) and its transcript, /computer/ (the same
-   outputs, standing alone). Charcoal, warm off-white type in the site's mono, and one accent, amber,
+   views, standing alone, one after another). Charcoal, warm off-white type in the site's mono, and one accent, amber,
    for the prompt and for what can be run. Sizes follow the screen: the terminal is the container
    (the lab's .pc-screen), so a larger monitor reads larger; on a touch screen the type never drops
    under 16px (the prompt's field would zoom the page on focus). */
@@ -35,7 +35,8 @@
   color: var(--t-fg);
 }
 
-/* The live terminal: the screen's whole area, scrolling inside itself and never the page. */
+/* The live terminal: the screen's whole area, scrolling inside itself and never the page. One view
+   over the prompt, which keeps to the screen's foot however short the view. */
 .term {
   position: absolute;
   inset: 0;
@@ -48,21 +49,28 @@
 }
 .term-inner {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
   padding: var(--t-pad-y) var(--t-pad-x) 0;
+}
+.term-views {
+  flex: 1 0 auto;
 }
 /* Whatever the focus reaches (a link, a button, a figure's line, a code block, a video) scrolls clear of
    the prompt and its fade, not under them. (A margin on these, not padding on .term: the prompt's own
-   input, being scrolled to as it's typed in, would otherwise pull the transcript away from where it's
+   input, being scrolled to as it's typed in, would otherwise pull the view away from where it's
    being read.) */
-.term-log :is(a, button, summary, pre, video) {
+.term-views :is(a, button, summary, pre, video) {
   scroll-margin-bottom: calc(var(--t-prompt, 4.5em) + 1.25em);
 }
+.term-views,
 .term-log,
 .term-prompt {
   max-width: 92ch;
 }
 
-/* The history: the startup's lines, then each command as typed (its heading), and what it printed. */
+/* The transcript (/computer/): the startup's lines, then each command as typed, and what it shows. */
 .term-entry {
   margin-top: var(--t-gap);
 }
@@ -84,9 +92,29 @@
   margin-right: 1ch;
 }
 
+/* A view's opening: where it is (as the prompt says it), then its title. */
+.t-crumb {
+  color: var(--t-dim);
+  font-size: 0.875em;
+}
+.t-title {
+  font-weight: 600;
+  font-size: 1.25em;
+  line-height: 1.35;
+}
+.t-head > * + * {
+  margin-top: 0.3em;
+}
+
 /* Output: lines of text, a half line between blocks, a blank line before each part. */
 .t-out {
   margin-top: 0.35em;
+}
+.term-views > .t-out {
+  margin-top: 0;
+}
+.t-out > .t-head + * {
+  margin-top: var(--t-gap);
 }
 .t-out > * + *,
 .t-list > li > * + * {
@@ -418,6 +446,18 @@
   background: linear-gradient(to top, var(--t-bg), rgb(23 21 19 / 0));
   pointer-events: none;
 }
+/* A mistake (a command there isn't): a line over the prompt, until the next command (terminal.ts). */
+.term-note {
+  flex: 1 0 100%;
+  margin: 0 0 0.35em;
+  max-width: 76ch;
+}
+.term-note[hidden] {
+  display: none;
+}
+.term-note > * + * {
+  margin-top: 0.2em;
+}
 /* What Tab found, several of them: a line over the prompt, dim, until the next key (terminal.ts). */
 .term-matches {
   flex: 1 0 100%;
@@ -532,17 +572,17 @@
   animation: term-in 180ms var(--ease) 700ms both;
 }
 
-/* A command's output comes in quickly; help's lines one after another. Only ever the newest: the
-   next command, or leaving, settles it (terminal.ts). */
-.term-entry.is-new > .t-out {
-  animation: term-in 200ms var(--ease) both;
+/* A view asked for comes in quickly; help's lines one after another. Only ever the newest: the next
+   view, or leaving, settles it (terminal.ts). */
+.term-views > .is-new {
+  animation: term-in 160ms var(--ease) both;
 }
-.term-entry.is-new > .t-out.t-stagger {
+.term-views > .is-new.t-stagger {
   animation: none;
 }
-.term-entry.is-new .t-stagger li {
+.term-views > .is-new.t-stagger li {
   animation: term-in 160ms var(--ease) both;
-  animation-delay: calc(var(--i) * 55ms + 30ms);
+  animation-delay: calc(var(--i) * 45ms + 20ms);
 }
 
 @keyframes term-type {

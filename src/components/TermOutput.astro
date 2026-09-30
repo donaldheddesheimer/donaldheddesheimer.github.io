@@ -6,9 +6,11 @@
 // commands are links to where they ran, and there's nothing to copy with).
 //
 // Plain text laid out as a terminal lays it out: a heading per part, key and value columns, "- " lists.
-// Under the entry's heading (the command, an h2), parts are h3 and entries h4.
+// Each view opens with where it is and its title, an h2 (TermHead.astro); parts are h3 and entries h4.
+// The answers to a mistake aren't views: the lab's terminal says them over its prompt (terminal.ts).
 import { getCollection } from 'astro:content';
 import TermCmd from './TermCmd.astro';
+import TermHead from './TermHead.astro';
 import { contact, education, experience, offDuty, orgs, profile, skills, socials } from '../data/site';
 import { fmtMonth } from '../lib/format';
 import { byWork, workMeta } from '../lib/folio';
@@ -33,6 +35,7 @@ const current = experience.find((e) => !e.end);
 {
   cmd === 'help' && (
     <div class="t-out t-stagger" data-announce={`Commands: ${HELP.map((h) => h.cmd).join(', ')}.`}>
+      <TermHead view="help" title="Commands" />
       <ul class="t-help">
         {HELP.map((h, i) => (
           <li style={`--i:${i}`}>
@@ -47,7 +50,8 @@ const current = experience.find((e) => !e.end);
 
 {
   cmd === 'about' && (
-    <div class="t-out" data-announce="Printed: about me.">
+    <div class="t-out" data-announce="About me.">
+      <TermHead view="about" title="About" />
       <p>
         <strong class="t-strong">{profile.name}</strong> <span class="t-dim">· {profile.headline}</span>
       </p>
@@ -80,7 +84,8 @@ const current = experience.find((e) => !e.end);
 
 {
   cmd === 'work' && (
-    <div class="t-out" data-announce={`Printed: ${projects.length} projects.`}>
+    <div class="t-out" data-announce={`Work: ${projects.length} projects.`}>
+      <TermHead view="work" title="Work" />
       <p class="t-dim">
         Projects in GPU software, robotics and simulation, and a few from before: {projects.length} in all, featured first. Run{' '}
         <span class="t-strong">work &lt;id&gt;</span> to read one here.
@@ -123,7 +128,8 @@ const current = experience.find((e) => !e.end);
 
 {
   cmd === 'resume' && (
-    <div class="t-out" data-announce="Printed: the résumé, with the PDF to download.">
+    <div class="t-out" data-announce="Résumé, with the PDF to download.">
+      <TermHead view="resume" title="Résumé" />
       <p class="t-links">
         <a href={profile.resume} download={file}>
           <span aria-hidden="true">↓ </span>Download the PDF
@@ -186,7 +192,8 @@ const current = experience.find((e) => !e.end);
 
 {
   cmd === 'contact' && (
-    <div class="t-out" data-announce="Printed: email, GitHub and LinkedIn.">
+    <div class="t-out" data-announce="Contact: email, GitHub and LinkedIn.">
+      <TermHead view="contact" title="Contact" />
       <p class="t-prose">
         {contact.title} {contact.note}
       </p>
@@ -242,8 +249,9 @@ const current = experience.find((e) => !e.end);
 
 {
   cmd === 'not-found' && (
-    <div class="t-out" data-announce={NOT_FOUND.join('help')}>
+    <div class="t-out">
       <p>
+        <span class="t-strong" data-term-arg />
         {NOT_FOUND[0]}
         <TermCmd name="help" live={live} />
         {NOT_FOUND[1]}

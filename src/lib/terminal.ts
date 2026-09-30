@@ -4,8 +4,13 @@
 // projects.
 import type { Command } from '../scripts/lab/routes';
 
-/** The prompt: whose terminal, on which machine, and where. */
-export const PS1 = 'donald@lab:~$';
+/** Where a view is, as the prompt and a view's first line say it: home for the startup and help, else
+ *  under it (~/work/cucadence). A place to read, not a directory to `cd` into. */
+export const where = (view = '') => (!view || view === 'help' ? '~' : `~/${view}`);
+
+/** The prompt: whose terminal, on which machine, and where (the view being read). */
+export const ps1 = (view = '') => `donald@lab:${where(view)}$`;
+export const PS1 = ps1();
 
 /** The startup's two lines. The second names `help`, which is tappable there. */
 export const BOOT = {
@@ -25,8 +30,8 @@ export const HELP: { cmd: Command; label: string }[] = [
  *  the second. */
 export const NO_PROJECT = ['No project called ', '. Run ', ' to list them.'] as const;
 
-/** Anything else. `help`, in the middle, is tappable. */
-export const NOT_FOUND = ['Command not found. Run ', ' for available commands.'] as const;
+/** Anything else, after what was typed. `help`, in the middle, is tappable. */
+export const NOT_FOUND = [': command not found. Run ', ' for available commands.'] as const;
 
 /** Leaves the computer, as a terminal's own `exit` would. Not listed by `help`. */
 export const EXIT = 'exit';

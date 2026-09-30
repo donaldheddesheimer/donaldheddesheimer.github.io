@@ -8,9 +8,10 @@
 // /computer/work/<id>/ prints one on a page of its own (`live` false: commands are links to their pages,
 // and the write-up's headings keep their ids, for that page's anchors).
 //
-// Under the entry's heading (the command, an h2), the project's name is an h3 and its sections h4.
+// The project's name is the view's heading, an h2 (TermHead.astro), and its sections h3.
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import TermCmd from './TermCmd.astro';
+import TermHead from './TermHead.astro';
 import TermProse from './TermProse.astro';
 import { mediaKindLabel, statusLabel } from '../lib/format';
 import { related, workMeta } from '../lib/folio';
@@ -33,8 +34,8 @@ const posters = Object.fromEntries(d.evidence.flatMap((m) => (m.poster ? [[m.src
 const brief = d.brief && ([['what', d.brief.does], ['my part', d.brief.mine], ['hard part', d.brief.hard], ['result', d.brief.shown]].filter(([, v]) => v) as [string, string][]);
 ---
 
-<div class="t-out t-project" data-announce={`Printed: ${d.title}.`} data-project={live ? project.id : undefined}>
-  <h3 class="t-strong">{d.title}</h3>
+<div class="t-out t-project" data-announce={`${d.title}.`} data-project={live ? project.id : undefined}>
+  <TermHead view={`work/${project.id}`} title={d.title} />
   <p class="t-dim">{workMeta(d)}</p>
   {
     brief ? (
