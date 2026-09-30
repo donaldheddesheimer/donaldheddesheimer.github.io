@@ -1,0 +1,2 @@
+# tsc --noEmit -p . (typescript from <scratch>, not a dependency)
+tsc exit 0

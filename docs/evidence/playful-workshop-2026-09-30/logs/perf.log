@@ -1,0 +1,22 @@
+# look.cjs at 1440x900 (held stats, reduced motion; frame cost while dancing), headless Chrome 154, ANGLE Metal, Apple M5 Pro, the same machine, two runs each, alternating.
+# main is fe97460's dist/; this branch is a911620 (the stills don't enter the scene).
+# main (fe97460) run 1:
+{"size":"1440x900","reduce":true,"calls":356,"tris":123832,"lights":7,"casters":1,"programs":16,"textures":22,"heroDist":7.48,"mon":[500,533,291,181],"pick":[true,true,true,true,true]}
+{"perf":"1440x900@1","buffer":"1440x900","intervalMs":{"p50":16.7,"p95":16.8,"max":16.8,"over25":0},"callbackMs":{"p50":2.3,"p95":2.9},"callsPerFrame":356,"syncedFrameMs":{"p50":1.9,"p95":5.1}}
+{"perf":"1440x900@2","buffer":"1800x1125","intervalMs":{"p50":16.7,"p95":16.7,"max":16.8,"over25":0},"callbackMs":{"p50":2.5,"p95":3},"callsPerFrame":356,"syncedFrameMs":{"p50":2,"p95":3.8}}
+# Chrome 154.0.8037.58 · ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+# this branch run 1:
+{"size":"1440x900","reduce":true,"calls":364,"tris":126952,"lights":7,"casters":1,"programs":16,"textures":21,"heroDist":7.48,"mon":[500,533,291,181],"pick":[true,true,true,true,true]}
+{"perf":"1440x900@1","buffer":"1440x900","intervalMs":{"p50":16.7,"p95":16.8,"max":16.8,"over25":0},"callbackMs":{"p50":1.8,"p95":2.8},"callsPerFrame":364,"syncedFrameMs":{"p50":1.9,"p95":4}}
+{"perf":"1440x900@2","buffer":"1800x1125","intervalMs":{"p50":16.7,"p95":16.8,"max":16.8,"over25":0},"callbackMs":{"p50":1.8,"p95":2.8},"callsPerFrame":364,"syncedFrameMs":{"p50":1.9,"p95":4.8}}
+# Chrome 154.0.8037.58 · ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+# main (fe97460) run 2:
+{"size":"1440x900","reduce":true,"calls":356,"tris":123832,"lights":7,"casters":1,"programs":16,"textures":22,"heroDist":7.48,"mon":[500,533,291,181],"pick":[true,true,true,true,true]}
+{"perf":"1440x900@1","buffer":"1440x900","intervalMs":{"p50":16.7,"p95":16.8,"max":16.8,"over25":0},"callbackMs":{"p50":1.8,"p95":2.6},"callsPerFrame":356,"syncedFrameMs":{"p50":1.8,"p95":4.4}}
+{"perf":"1440x900@2","buffer":"1800x1125","intervalMs":{"p50":16.7,"p95":16.7,"max":16.8,"over25":0},"callbackMs":{"p50":1.9,"p95":2.6},"callsPerFrame":356,"syncedFrameMs":{"p50":2,"p95":5.7}}
+# Chrome 154.0.8037.58 · ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+# this branch run 2:
+{"size":"1440x900","reduce":true,"calls":364,"tris":126952,"lights":7,"casters":1,"programs":16,"textures":21,"heroDist":7.48,"mon":[500,533,291,181],"pick":[true,true,true,true,true]}
+{"perf":"1440x900@1","buffer":"1440x900","intervalMs":{"p50":16.7,"p95":16.7,"max":16.8,"over25":0},"callbackMs":{"p50":2.5,"p95":3.2},"callsPerFrame":364,"syncedFrameMs":{"p50":1.7,"p95":3.8}}
+{"perf":"1440x900@2","buffer":"1800x1125","intervalMs":{"p50":16.7,"p95":16.7,"max":16.8,"over25":0},"callbackMs":{"p50":2.3,"p95":3},"callsPerFrame":364,"syncedFrameMs":{"p50":2.7,"p95":3.4}}
+# Chrome 154.0.8037.58 · ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)

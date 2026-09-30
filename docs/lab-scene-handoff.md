@@ -1,5 +1,76 @@
 # Robotics lab implementation handoff
 
+## Current checkpoint: expressive robots, a pixel screensaver and a city window, 2026-09-30 (Claude)
+
+**Status: implementation complete on `playful-workshop`, from `main` at `fe97460`.** Not pushed, merged or deployed. The robots have faces that react, and a copycat game. The monitor idles on a screensaver of our own, and the window looks out on a city at blue hour. The terminal, the opening's identity, the monitor interaction, the props and the motion setting behave as before.
+
+- **Commits, in order** (each builds on its own):
+  1. `fa43d3e` Give the workshop robots expressive faces and a copycat exchange.
+  2. `b8e0e1d` Add a colorful pixel-cat screensaver to the lab monitor.
+  3. `a911620` Open the workshop onto a city at blue hour.
+  4. The one that adds this section: stills, social preview, evidence.
+- **What changed:**
+  - **Faces** (`scene.ts`, "Faces"): each head has eyes and brows on their own mounts:
+    - Terracotta has oval eyes and arched brows;
+    - Graphite has bar eyes under heavy brows;
+    - Ivory has round eyes and thin brows.
+
+    An `Expr` (open, brow lift and tilt, a sly quirk, a happy squash, and gaze) is set each frame from a per-robot calm face plus moods. The moods are WIDE, GLEE, SLY, FOCUS, PROUD, POISE, HOPE and KEEN. The eyes lead a head turn. The greeting uses them: Terracotta goes wide-eyed and then beams as it waves, Graphite's eyes slide to the visitor before its head, and Ivory raises a brow.
+  - **The copycat exchange** (`COPY`, `copycat()`) comes first at 9.5 s, then every 48 s, and lasts 13.6 s:
+    - Terracotta shows a short move to Graphite;
+    - Graphite copies it, slower and heavier;
+    - Ivory does it crisply;
+    - Terracotta spins round, goes wide-eyed and ta-das.
+
+    It is on the scene clock, so it holds with motion off.
+  - **The screensaver** (`screensaver.ts`, new) is 128×80 pixel art of our own, drawn on a canvas and shown with nearest filtering. It has a ginger cat in a red scarf, a sine-wave rainbow trail, twinkling stars and a ringed planet. It animates at 10 steps a second, with four cat frames. No GIF, no audio, no dependency.
+    - As the camera flies in, it dissolves pixel by pixel into the terminal's charcoal. The dissolve runs from 20% to 55% of the 1.9 s flight, about 0.65 s, before the HTML terminal fades in. Leaving reverses it.
+    - It redraws only when its step or dissolve changes, and not at all while reading.
+    - With reduced motion or Motion off it shows a still frame and switches immediately.
+  - **The window** (`buildRoom`, `cityTexture()`) is 3.2×1.3 m, with three tall panes in a heavy frame. Behind it is a painted skyline at blue hour:
+    - a peach horizon fading to blue, and a few early stars;
+    - three rows of buildings from hazy to dark, with scattered lit windows;
+    - two landmark towers;
+    - an elevated road.
+
+    Five cars' lights (`traffic(t)`, one `Points` draw) cross the road now and then, on the scene clock. The window's floor light is softer, and the moonbeam haze is gone. The clock reads 7:38.
+- **Stills and preview** were regenerated: `public/lab/opening-{wide,tall}.webp` and `public/og.jpg`. The static monitor shows the screensaver's still. The bezel fractions didn't move (wide 0.347/0.5919/0.5493/0.7936; tall 0.2511/0.462/0.7489/0.618), so `LabStage.astro` is unchanged.
+- **What to judge:** `docs/evidence/playful-workshop-2026-09-30/`:
+  - `screens/` holds:
+    - the held opening at 1440×900, 1920×1080, 1920×640 and 390×844, plus the city window;
+    - the greeting at two points, and the copycat at three;
+    - the screensaver close up;
+    - the dissolve mid-entry, the terminal after startup, the screensaver back after Escape, and reentry with the transcript kept;
+    - reduced motion in and out at 150 ms;
+    - a shared project link;
+    - the phone terminal.
+  - `video/playful-1280x800.webm` (32 s, 1.3 MB) runs through the greeting, the copycat, the screensaver, entry with the startup, Escape and the screensaver's return.
+  - `logs/` holds the build, tsc, validate, perf and shots logs.
+  - `harness/` holds `shots.cjs` and `rec.cjs`, which use the lab-terminal pass's `serve.cjs`. `rec.cjs` thins frames to 25 fps and hands them over in chunks.
+- **Checks** (headless Chrome 154, ANGLE Metal, Apple M5 Pro):
+  - The build and tsc are clean.
+  - `validate.cjs` passes 215 checks with no failures, through startup, commands, links, leave, history, phone, motion, keyboard, nowebgl (the still's monitor link sits on the pictured monitor), nojs, failed, and most of `fit`.
+    - It stops at the known 360×640/200%-text case, as on main. **`fit`'s last three sizes didn't run**, so this is not a full pass.
+  - `shots.cjs` confirms:
+    - first entry plays the startup (`boot` done, no entries);
+    - reentry keeps the transcript and never replays (`boot` stays `done`);
+    - reduced motion is in `read` 150 ms after the click and out 150 ms after Escape;
+    - `/?computer=work/cucadence` opens straight into the project;
+    - the phone tap reaches `read`;
+    - there are no page errors.
+  - The monitor pick passes at all five points at every size. The monitor rect and camera distances are unchanged from main.
+- **Cost** (1440×900 while dancing, same machine, two alternating runs each; measured):
+  - draw calls go from 356 to 364, and triangles from 124k to 127k;
+  - frames stay at 16.7 ms, with none over 25 ms;
+  - the JS callback p50 is 1.8–2.5 ms on both builds, so within noise;
+  - the synced frame p95 is 3.4–4.8 ms here against 3.8–5.7 ms on main.
+
+  SwiftShader and phone hardware were not measured. The screensaver's texture upload is 128×80 at 10 per second.
+- **Open questions:**
+  - At 390×844 the window sits behind the Settings button and the end of the view hint. Both still read, helped by the hint's text shadow, but the contrast is lower than on the wall.
+  - Terracotta turns its back to watch Ivory in the copycat's third part. This is intended, but its face is hidden for about 2 s.
+  - The traffic is deliberately faint. At 2.5 px it can be missed on a high-DPI display.
+
 ## Current checkpoint: a lived-in workshop, caught dancing, 2026-09-30 (Claude)
 
 **Status: implementation complete on `lively-workshop`, from `main` at `f121bc7`.** Not merged or deployed. The opening room was dark and empty on the left. It is now furnished, warmer, and a little alive, and the terminal behaves exactly as before.

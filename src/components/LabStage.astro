@@ -29,6 +29,8 @@ const projects = Object.fromEntries((await getCollection('projects')).map((p) =>
       <source media="(max-aspect-ratio: 4/5)" srcset="/lab/opening-tall.webp" width="720" height="1440" />
       <img src="/lab/opening-wide.webp" alt="" width="1600" height="1000" fetchpriority="high" decoding="async" />
     </picture>
+    <div class="mood" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
     <a href={pageHref(TERMINAL)} class="lab-monitor" data-lab-monitor aria-label="Explore my work" draggable="false"></a>
   </div>
   <figcaption class="sr-only">A robotics lab after hours: a computer on a desk, three robots dancing behind it, an unfinished one on its stand. Illustration.</figcaption>
@@ -190,6 +192,38 @@ const projects = Object.fromEntries((await getCollection('projects')).map((p) =>
     height: 100%;
     opacity: 0;
     transition: opacity 0.7s ease;
+    filter: contrast(1.05) saturate(1.06);
+  }
+  /* The mood, over the room (the still as well as the scene): the corners in shadow, a warm cast, and a
+     film's grain, coarse and fine. Each layer blends with the room under it, so they're siblings of the
+     canvas, over it, rather than one box. The grain holds still (cheap, and quiet under reduced motion). */
+  .mood::before,
+  .mood::after,
+  .grain::before,
+  .grain::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    pointer-events: none;
+  }
+  .mood::before {
+    background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 55%, rgb(12 6 2 / 0.6));
+  }
+  .mood::after {
+    background: linear-gradient(rgb(255 176 96 / 0.1), rgb(255 140 70 / 0.1));
+    mix-blend-mode: soft-light;
+  }
+  .grain::before,
+  .grain::after {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+    opacity: 0.22;
+  }
+  .grain::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: soft-light;
+    opacity: 0.18;
   }
   [data-drawn] .lab-canvas :global(canvas) {
     opacity: 1;
@@ -204,6 +238,7 @@ const projects = Object.fromEntries((await getCollection('projects')).map((p) =>
   .lab-canvas::after {
     content: '';
     position: absolute;
+    z-index: 1;
     inset: 0;
     background: rgb(5 4 3 / 0.6);
     opacity: 0;
@@ -225,6 +260,7 @@ const projects = Object.fromEntries((await getCollection('projects')).map((p) =>
     object-fit: cover;
     object-position: 50% calc(var(--still-py) * 100%);
     transition: opacity 0.25s ease;
+    filter: contrast(1.05) saturate(1.06);
   }
   [data-drawn]:not([data-failed]) .still img {
     opacity: 0;
