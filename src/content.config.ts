@@ -9,6 +9,17 @@ const projects = defineCollection({
     code: z.string(), // e.g. "PRJ-07", numbered oldest to newest
     title: z.string(),
     summary: z.string(),
+    // How the terminal opens a project (`work <id>`), a line each: what it does, my part, the hard
+    // problem, and what it showed. Only what the write-up already supports; leave a line out rather than
+    // guess (a TODO below says what's missing). `does` also describes it in `work`'s list.
+    brief: z
+      .object({
+        does: z.string(),
+        mine: z.string().optional(),
+        hard: z.string().optional(),
+        shown: z.string().optional(),
+      })
+      .optional(),
     status: z.enum(['active', 'shipped', 'archived']),
     start: z.string().regex(/^\d{4}(-\d{2})?$/), // "2026-08" or just "2023"
     // Where it happened: an org id from src/data/site.ts (orgs), or leave out for personal projects.

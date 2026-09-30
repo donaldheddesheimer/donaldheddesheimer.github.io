@@ -2,6 +2,11 @@
 code: PRJ-10
 title: Fluxion
 summary: A top-down simulation game in C++ for learning game loops, data-oriented design, and performance engineering.
+brief:
+  does: 'A top-down simulation game in C++ on raylib, built to learn game loops, data-oriented design and performance engineering.'
+  hard: 'The goal: cache-friendly data layouts and tight update loops that keep thousands of agents on screen at once.'
+  shown: 'So far, a controllable player in a small arena, building on Linux, macOS and Windows.'
+# TODO: brief: add mine, if you want it said.
 status: active
 start: '2026-09'
 tags: [C++, Performance, Simulation, raylib, Game dev]

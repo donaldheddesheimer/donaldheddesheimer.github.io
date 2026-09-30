@@ -2,6 +2,10 @@
 code: PRJ-04
 title: TravelMate
 summary: A Django trip planner with live weather, generated packing lists, travel tips, and an AI travel assistant.
+brief:
+  does: 'A Django trip planner with itineraries, live forecasts, generated packing lists and an AI travel assistant.'
+  shown: 'Deployed on Render, with a live demo.'
+# TODO: brief: add mine, and the hard part, if there was one worth naming.
 status: shipped
 start: '2025-03'
 tags: [Python, LLMs, Django, Web]

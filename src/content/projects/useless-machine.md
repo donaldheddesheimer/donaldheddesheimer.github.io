@@ -2,6 +2,11 @@
 code: PRJ-01
 title: Useless Machine
 summary: A wooden box with a switch. Flip it, the lid opens, and a little arm flips it back. My first project ever.
+brief:
+  does: 'A wooden box with a switch: flip it, and a little arm comes out of the lid and flips it back.'
+  mine: 'My first project ever.'
+  hard: 'One switch that both starts and stops the arm: a DPDT toggle reverses the servo, and an SPDT lever switch cuts the power once the arm is home.'
+  shown: 'It works; the video is below.'
 status: shipped
 start: '2023'
 tags: [Hardware, Circuits, Woodworking]

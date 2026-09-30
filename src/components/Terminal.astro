@@ -31,6 +31,7 @@ const projects = await getCollection('projects');
       </div>
     </div>
     <form class="term-prompt" data-term-form autocomplete="off">
+      <p class="term-matches" data-term-matches aria-hidden="true" hidden></p>
       <label class="term-ps1" for="term-cmd" aria-hidden="true">{PS1}</label>
       <span class="term-field">
         <input

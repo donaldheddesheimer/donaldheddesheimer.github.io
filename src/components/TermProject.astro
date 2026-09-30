@@ -1,6 +1,7 @@
 ---
-// What `work <id>` prints: one project, in the terminal's own type. Its name, when and where, and what it
-// is; its status, source (and demo), team and tags, and its figures, in the terminal's key and value
+// What `work <id>` prints: one project, in the terminal's own type. Its name, when and where, and its
+// opening (the brief: what it does, my part, the hard problem, what it showed; or, without one, its
+// summary); its status, source (and demo), team and tags, and its figures, in the terminal's key and value
 // columns; its cover, folded away behind a line saying what it shows; its write-up, the Markdown its case
 // study (/projects/<id>/) renders, laid out as the terminal lays out text (TermProse.astro); and related
 // work, to run next. The lab's terminal holds each in a <template> until it's run (Terminal.astro);
@@ -28,12 +29,27 @@ const href = (id: string) => (live ? labHref(`work/${id}`) : `/computer/work/${i
 const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
 const posters = Object.fromEntries(d.evidence.flatMap((m) => (m.poster ? [[m.src, m.poster]] : [])));
+// The brief's lines, in order, those it has.
+const brief = d.brief && ([['what', d.brief.does], ['my part', d.brief.mine], ['hard part', d.brief.hard], ['result', d.brief.shown]].filter(([, v]) => v) as [string, string][]);
 ---
 
 <div class="t-out t-project" data-announce={`Printed: ${d.title}.`} data-project={live ? project.id : undefined}>
   <h3 class="t-strong">{d.title}</h3>
   <p class="t-dim">{workMeta(d)}</p>
-  <p class="t-prose">{d.summary}</p>
+  {
+    brief ? (
+      <dl class="t-kv t-brief">
+        {brief.map(([k, v]) => (
+          <div>
+            <dt>{k}</dt>
+            <dd>{v}</dd>
+          </div>
+        ))}
+      </dl>
+    ) : (
+      <p class="t-prose">{d.summary}</p>
+    )
+  }
   <dl class="t-kv">
     <div>
       <dt>status</dt>

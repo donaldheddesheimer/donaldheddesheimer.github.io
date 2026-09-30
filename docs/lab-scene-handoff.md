@@ -1,6 +1,96 @@
 # Robotics lab implementation handoff
 
-## Current checkpoint: expressive robots, a pixel screensaver and a city window, 2026-09-30 (Claude)
+## Current checkpoint: an overhead maintenance robot, and terminal quality of life, 2026-09-30 (Claude)
+
+**Status: implementation complete on `workshop-upkeep`, from `main` at `fe9623b` (PR #8 merged).** Pushed for review as a pull request; not merged or deployed. A small maintenance robot now hangs in a harness above the room, repairing a broken rail bracket. The terminal completes commands with Tab, and each project opens with what it does, the hard part and the result. The opening's identity, the monitor interaction, the camera fit and the motion setting behave as before.
+
+- **Commits, in order** (each builds on its own):
+  1. `0b8e02f` Add an overhead maintenance robot to the workshop.
+  2. `75bad04` Animate the maintenance robot and restrained welding sparks.
+  3. `12a68c0` Polish terminal command discovery and navigation.
+  4. `6d92303` Refine terminal project writing and output pacing.
+  5. `c9fa091` Refresh maintenance robot and terminal evidence: stills, social preview, evidence, this section.
+
+  After review:
+
+  6. `80642e1` Make the welding sparks fall in visible streaks.
+  7. `59826d3` Clear the completion list when the caret moves.
+  8. `782367d` Dispose the welding arc's sprite with the scene.
+  9. The one that brings this section and the evidence up to date with them.
+- **Recorded here for the first time: PR #8's follow-ups.** These were merged to main with PR #8 but never written up in this file:
+  - `86a1dc6` slimmed the window's frame and mullions (the floor light's pane mask matches). Terracotta now turns three-quarters round to watch Ivory and glances back to the visitor mid-watch, so its face stays readable; this settles the open question below about its back being turned. The far traffic lights are a touch larger and at full brightness. The stills and preview were regenerated.
+  - `f639573` laid a warm mood over the room: shadowed corners, a warm cast, a touch more contrast, and a still film grain. It is CSS over the canvas and the fallback still alike, so it adds no draw calls, and the grain doesn't move under reduced motion. The stills harness hides it, so the fallback images aren't graded twice.
+  - `3af3c16` made the monitor's light on the desk the screensaver's night blue, with a soft ring on the bezel (a plane outside what the pointer picks). It turns warm white again as the terminal takes over. The stills and preview were regenerated.
+- **What changed:**
+  - **The rigger** (`scene.ts`, "The rigger", `buildRigger`) is a yellow maintenance robot in a blue webbing harness. It hangs from two cables to fixed anchors, never by the neck, in the space between the shelving and the window, above the clock. It sits in the harness with its legs folded. One hand holds a wall rail; the other holds a welding torch. The rail's middle bracket has a cracked brace, whose lower piece hangs loose, with soot round the break.
+    - Most of it is baked into merged meshes: the shell, skull, visor and torch, with fixed-length capsule arms placed by two-bone IK. This keeps the cost to 25 draw calls.
+    - The visor is a hood that pivots at the temples. It is up when idle or inspecting and down when welding.
+    - On a phone held upright (the tall crop), it would sit behind the name, so it's hidden there.
+  - **The repair loop** (`REPAIR`, `RK`) runs on the scene clock, every 24 s, the first starting about 7.5 s after the first draw (after the greeting). In seconds from the first draw, the first time round:
+    - from about 9.2 to 11.5 it welds the break, having dipped its head to drop the visor;
+    - it pulls back, tosses the visor up, and leans in, head tilted, to inspect;
+    - at about 14.1 it does a double take at a missed spot;
+    - from about 15.8 to 16.7 it drops the visor for a short corrective weld, then gives two satisfied nods;
+    - from about 20 to 25 it glances down at the room, then waits for the next round.
+
+    The sway is a deterministic pendulum on the cables, with small swings as it stops, pulls back and does the double take.
+
+    The arc is one additive sprite that flickers. The sparks are one `Points` draw, spat on a fixed schedule from a hash (no `Math.random`). Review found them too restrained to register at normal size, so each is now a streak: eight points along its last 16 cm of path, spaced by distance however fast it falls, dimming and reddening to the tail. They're thrown wider and fall for up to 1.5 s, down the wall past the clock and the charge bay. The pool is 160, with the slot period set to the longest life. Before, a slot fired again every 0.5 s, so no spark outlived that whatever its lifetime said. The weld beads glow and cool.
+
+    While reading, or with the scene paused, it eases to a held pose and the loop stops. With reduced motion or Motion off it shows the composed pose: no sway, no sparks, no arc, no frozen flash. Turning motion off mid-weld drops the sparks and the arc at once.
+  - **Tab completion** (`terminal.ts`, "Completion") completes a command name (`help` and the four it lists) or, after `work `, a project's id. It applies only with the caret at the end of something typed and nothing selected.
+    - One match fills the prompt in; it never runs it.
+    - Several fill in the prefix they share, or, sharing no more, are listed dimly over the prompt and announced, until the next key, or until the caret leaves the end or something is selected (an arrow, Cmd+Left, a click in the field, select all; a review fix).
+    - With no match, nothing typed, or the same Tab again with the list up, Tab isn't taken, and focus moves on. There is no keyboard trap.
+    - Shift+Tab, modified Tab and IME composition are left alone.
+    - `exit` is not completed, and no commands were added.
+  - **Project writing** (`content.config.ts` `brief`, `TermProject.astro`, `TermOutput.astro`): each project has a brief, with up to four lines: what it does, my part, the hard part, and the result. `work <id>` opens with them under the name, each as a labeled line of prose. `work`'s list shows each project's name with its date and context across from it, then the brief's first line, then its commands. The case study pages and page descriptions still use `summary`.
+  - **Pacing** needed no change. Output already comes in at once with a 200 ms fade (help's lines staggered), with no typing queue and nothing under reduced motion. Each command scrolls once, so a reader's position, selection, focus and the prompt are left alone.
+- **Stills and preview** were regenerated: `public/lab/opening-wide.webp` and `public/og.jpg` show the robot's composed pose. `opening-tall.webp` came out byte-identical (the robot is hidden in the tall crop). The bezel fractions didn't move (wide 0.347/0.5919/0.5493/0.7936; tall 0.2511/0.462/0.7489/0.618), so `LabStage.astro` is unchanged, and the `nowebgl` group confirms the still's monitor link sits on the pictured monitor.
+- **What to judge:** `docs/evidence/maintenance-robot-2026-09-30/`:
+  - `screens/` holds:
+    - the held opening at 1440×900 and 1920×1080;
+    - the repair loop at 1440×900, in full and cropped to the robot and the sparks falling below it: the weld (10.6 s), the inspection (13.3 s), the double take (14.3 s) and the corrective weld (16.2 s);
+    - `motion-off-mid-weld-sheet.jpg`: welding, Motion off 0.4 s later and 1.5 s after that, Motion back on, just after Escape, and eased back;
+    - the terminal's `work` list, Tab listing three ids, `work cucadence`, and the room after Escape;
+    - the phone opening and terminal at 390×844.
+  - `video/repair-cycle-1280x800.webm` (24.4 s, 1.0 MB) runs from just before the first weld through the whole cycle, then entry with the startup, Escape and the room back.
+  - `logs/` holds the build, tsc, validate, perf, stills, shots, rigcheck, complete and rec logs. `validate-after-review.log` reruns the groups the review fixes touch. The screens, the sheet, the recording and the other logs were regenerated after the fixes; `validate.log`, `stills.log` and the stills are from before them (the stills hold the composed pose, with no sparks).
+  - `harness/` holds `shots.cjs`, `rigcheck.cjs`, `complete.cjs`, `perf.cjs` and `rec.cjs`, which use the lab-terminal pass's `serve.cjs`. `perf.cjs` takes `DIST` (another build) and `PERF_AT` (when to sample).
+- **Checks** (headless Chrome 154, ANGLE Metal, Apple M5 Pro):
+  - The build and tsc are clean.
+  - `validate.cjs` passes 215 checks with no failures (startup, commands, links, leave, history, phone, motion, keyboard, scroll, tap, nowebgl, nojs, failed, and `fit` up to 390×844 at 200% text). It then stops at the known 360×640/200%-text case, as on main, so `fit`'s last three sizes didn't run: not a full pass. After the review fixes, commands (26), history (52), keyboard (7) and motion (5) pass again with no failures; the full suite wasn't rerun.
+  - `complete.cjs` passes all its checks:
+    - completion of commands and `work <id>`, a shared prefix, a listed set, and the second Tab moving on;
+    - the list cleared by Left, Cmd+Left, a click in the field and select all, and kept by Right at the end, where the caret doesn't move (the first four fail on the build before the fix);
+    - no match, nothing typed, the caret short of the end, a selection, Shift/Ctrl/Alt+Tab and composition all left to the browser;
+    - nothing run by a completion, and Enter then running it once;
+    - Up/Down history;
+    - work's links, a modified click opening a new tab with nothing run here, the project's source and demo links (new tab, `noopener`), the résumé PDF (served, `download`), contact's email, GitHub and LinkedIn, copy, and a shared `/?computer=work/fluxion`.
+  - `rigcheck.cjs`: Motion off mid-weld gives the held pose with no sparks or arc, and `data-running` false; while reading, `data-running` is false; after Escape the robot eases back. No page errors.
+  - `shots.cjs`: the terminal round trip and the phone smoke check (390×844, touch: the monitor tapped reaches reading, the power button leaves) pass with no page errors.
+  - The monitor pick passes at all five points at every size. The monitor rect and camera distances are unchanged from main.
+- **Cost** (`perf.cjs` on this branch and on main's build, same machine, sampled 9–15 s after the first draw: the first weld and the inspection here, the copycat's start on main; one run each; measured):
+  - at 1440×900, draw calls go from 365 to 390 and triangles from 127k to 135k (1920×640: 370 to 395; 390×844 unchanged at 204, the robot hidden);
+  - frames stay at 16.7 ms, with none over 25 ms, at DPR 1 and 2;
+  - the JS callback goes from 1.9 to 2.6 ms at p50 and 2.8 to 3.2 ms at p95 (DPR 1);
+  - the GPU-synced frame p95 is 2.3 ms here against 4.2 ms on main at DPR 1, and 4.4 against 4.8 at DPR 2: within this measure's noise, not a saving.
+
+  After the review's heavier sparks (one run, same sizes and sample window): still one draw for them (391 calls mid-weld, the arc's sprite the one more), frames at 16.7 ms with none over 25 ms, and the JS callback 2.7 ms at p50 and 3.4 ms at p95 (DPR 1), against 2.6 and 3.2 before: within run-to-run noise.
+
+  SwiftShader and phone hardware were not measured.
+- **Missing facts, flagged rather than invented** (each has a TODO in its project's front matter):
+  - My part: Traffic Operations Center, Skyblock Bazaar, claude-status, Fluxion, nn, Smart Bin, Swerve Drive, TravelMate.
+  - The result: Bytefight (the tournament placement), Swerve Drive (how it ran on the robot); nn's could carry the GEMM vs cuBLAS numbers once measured.
+  - The hard part: TravelMate.
+  - Skyblock's numbers are marked "confirm" by an earlier TODO; the brief repeats them as the write-up states them.
+- **Limitations and open questions:**
+  - The 360×640/200%-text stop in `fit` remains, as on main: the monitor tap never reaches reading, and `fit`'s last three sizes don't run. The mobile redesign stays deferred; the phone smoke checks above passed.
+  - The robot is hidden on a phone held upright, so phones never see it.
+  - The brief repeats a project's headline numbers, which its stats list again below. That was left as is, so the opening stands alone.
+  - Tab completion is keyboard-only; on a touch screen the tappable commands do the same job.
+
+## Earlier checkpoint: expressive robots, a pixel screensaver and a city window, 2026-09-30 (Claude)
 
 **Status: implementation complete on `playful-workshop`, from `main` at `fe97460`.** Not pushed, merged or deployed. The robots have faces that react, and a copycat game. The monitor idles on a screensaver of our own, and the window looks out on a city at blue hour. The terminal, the opening's identity, the monitor interaction, the props and the motion setting behave as before.
 
@@ -71,7 +161,7 @@
   - Terracotta turns its back to watch Ivory in the copycat's third part. This is intended, but its face is hidden for about 2 s.
   - The traffic is deliberately faint. At 2.5 px it can be missed on a high-DPI display.
 
-## Current checkpoint: a lived-in workshop, caught dancing, 2026-09-30 (Claude)
+## Earlier checkpoint: a lived-in workshop, caught dancing, 2026-09-30 (Claude)
 
 **Status: implementation complete on `lively-workshop`, from `main` at `f121bc7`.** Not merged or deployed. The opening room was dark and empty on the left. It is now furnished, warmer, and a little alive, and the terminal behaves exactly as before.
 
@@ -134,7 +224,7 @@
   - The caught moment's timings are tuned by eye. On a slow first load, the opening's settle can overlap its start.
   - The far left of 1920×640 is still a plain dark wall past the shelving.
 
-## Current checkpoint: project details in the terminal, and a workshop with character, 2026-09-30 (Claude)
+## Earlier checkpoint: project details in the terminal, and a workshop with character, 2026-09-30 (Claude)
 
 **Status: implementation complete on `terminal-workshop-polish`, from `main` at `f6a7150`.** The five workshop commits below are followed by a dismissible viewing suggestion for mobile and narrow windows.
 

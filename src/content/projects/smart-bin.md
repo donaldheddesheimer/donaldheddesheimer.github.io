@@ -2,6 +2,11 @@
 code: PRJ-03
 title: Smart Bin
 summary: A deep learning classifier that sorts waste into six categories, trained on images from Western Reserve Academy.
+brief:
+  does: 'Sorts a photo of waste into cardboard, glass, metal, paper, plastic or trash, trained on images from Western Reserve Academy.'
+  hard: 'General trash, the hardest class (F1 0.89): "trash" is everything that isn''t something else.'
+  shown: '94.8% validation accuracy and an F1 of 0.943, with a ResNet50 and a custom classification head.'
+# TODO: brief: add what you did (mine): the model, the data collection, or both.
 status: shipped
 start: '2023'
 org: wra

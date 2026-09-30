@@ -1,0 +1,5 @@
+{
+  runningWithMotionOff: 'false',
+  runningWhileReading: 'false',
+  errs: []
+}
