@@ -2,14 +2,21 @@
 
 ## Current checkpoint: an overhead maintenance robot, and terminal quality of life, 2026-09-30 (Claude)
 
-**Status: implementation complete on `workshop-upkeep`, from `main` at `fe9623b` (PR #8 merged).** Not pushed, merged or deployed. A small maintenance robot now hangs in a harness above the room, repairing a broken rail bracket. The terminal completes commands with Tab, and each project opens with what it does, the hard part and the result. The opening's identity, the monitor interaction, the camera fit and the motion setting behave as before.
+**Status: implementation complete on `workshop-upkeep`, from `main` at `fe9623b` (PR #8 merged).** Pushed for review as a pull request; not merged or deployed. A small maintenance robot now hangs in a harness above the room, repairing a broken rail bracket. The terminal completes commands with Tab, and each project opens with what it does, the hard part and the result. The opening's identity, the monitor interaction, the camera fit and the motion setting behave as before.
 
 - **Commits, in order** (each builds on its own):
   1. `0b8e02f` Add an overhead maintenance robot to the workshop.
   2. `75bad04` Animate the maintenance robot and restrained welding sparks.
   3. `12a68c0` Polish terminal command discovery and navigation.
   4. `6d92303` Refine terminal project writing and output pacing.
-  5. The one that adds this section: stills, social preview, evidence.
+  5. `c9fa091` Refresh maintenance robot and terminal evidence: stills, social preview, evidence, this section.
+
+  After review:
+
+  6. `80642e1` Make the welding sparks fall in visible streaks.
+  7. `59826d3` Clear the completion list when the caret moves.
+  8. `782367d` Dispose the welding arc's sprite with the scene.
+  9. The one that brings this section and the evidence up to date with them.
 - **Recorded here for the first time: PR #8's follow-ups.** These were merged to main with PR #8 but never written up in this file:
   - `86a1dc6` slimmed the window's frame and mullions (the floor light's pane mask matches). Terracotta now turns three-quarters round to watch Ivory and glances back to the visitor mid-watch, so its face stays readable; this settles the open question below about its back being turned. The far traffic lights are a touch larger and at full brightness. The stills and preview were regenerated.
   - `f639573` laid a warm mood over the room: shadowed corners, a warm cast, a touch more contrast, and a still film grain. It is CSS over the canvas and the fallback still alike, so it adds no draw calls, and the grain doesn't move under reduced motion. The stills harness hides it, so the fallback images aren't graded twice.
@@ -28,12 +35,12 @@
 
     The sway is a deterministic pendulum on the cables, with small swings as it stops, pulls back and does the double take.
 
-    The arc is one additive sprite that flickers. The sparks are one `Points` draw from a pool of 36, warm, spat on a fixed schedule from a hash (no `Math.random`), falling and fading within half a second. The weld beads glow and cool.
+    The arc is one additive sprite that flickers. The sparks are one `Points` draw, spat on a fixed schedule from a hash (no `Math.random`). Review found them too restrained to register at normal size, so each is now a streak: eight points along its last 16 cm of path, spaced by distance however fast it falls, dimming and reddening to the tail. They're thrown wider and fall for up to 1.5 s, down the wall past the clock and the charge bay. The pool is 160, with the slot period set to the longest life. Before, a slot fired again every 0.5 s, so no spark outlived that whatever its lifetime said. The weld beads glow and cool.
 
     While reading, or with the scene paused, it eases to a held pose and the loop stops. With reduced motion or Motion off it shows the composed pose: no sway, no sparks, no arc, no frozen flash. Turning motion off mid-weld drops the sparks and the arc at once.
   - **Tab completion** (`terminal.ts`, "Completion") completes a command name (`help` and the four it lists) or, after `work `, a project's id. It applies only with the caret at the end of something typed and nothing selected.
     - One match fills the prompt in; it never runs it.
-    - Several fill in the prefix they share, or, sharing no more, are listed dimly over the prompt and announced, until the next key.
+    - Several fill in the prefix they share, or, sharing no more, are listed dimly over the prompt and announced, until the next key, or until the caret leaves the end or something is selected (an arrow, Cmd+Left, a click in the field, select all; a review fix).
     - With no match, nothing typed, or the same Tab again with the list up, Tab isn't taken, and focus moves on. There is no keyboard trap.
     - Shift+Tab, modified Tab and IME composition are left alone.
     - `exit` is not completed, and no commands were added.
@@ -43,18 +50,19 @@
 - **What to judge:** `docs/evidence/maintenance-robot-2026-09-30/`:
   - `screens/` holds:
     - the held opening at 1440×900 and 1920×1080;
-    - the repair loop at 1440×900, in full and cropped to the robot: the weld (10.6 s), the inspection (13.3 s), the double take (14.3 s) and the corrective weld (16.2 s);
+    - the repair loop at 1440×900, in full and cropped to the robot and the sparks falling below it: the weld (10.6 s), the inspection (13.3 s), the double take (14.3 s) and the corrective weld (16.2 s);
     - `motion-off-mid-weld-sheet.jpg`: welding, Motion off 0.4 s later and 1.5 s after that, Motion back on, just after Escape, and eased back;
     - the terminal's `work` list, Tab listing three ids, `work cucadence`, and the room after Escape;
     - the phone opening and terminal at 390×844.
   - `video/repair-cycle-1280x800.webm` (24.4 s, 1.0 MB) runs from just before the first weld through the whole cycle, then entry with the startup, Escape and the room back.
-  - `logs/` holds the build, tsc, validate, perf, stills, shots, rigcheck, complete and rec logs.
+  - `logs/` holds the build, tsc, validate, perf, stills, shots, rigcheck, complete and rec logs. `validate-after-review.log` reruns the groups the review fixes touch. The screens, the sheet, the recording and the other logs were regenerated after the fixes; `validate.log`, `stills.log` and the stills are from before them (the stills hold the composed pose, with no sparks).
   - `harness/` holds `shots.cjs`, `rigcheck.cjs`, `complete.cjs`, `perf.cjs` and `rec.cjs`, which use the lab-terminal pass's `serve.cjs`. `perf.cjs` takes `DIST` (another build) and `PERF_AT` (when to sample).
 - **Checks** (headless Chrome 154, ANGLE Metal, Apple M5 Pro):
   - The build and tsc are clean.
-  - `validate.cjs` passes 215 checks with no failures (startup, commands, links, leave, history, phone, motion, keyboard, scroll, tap, nowebgl, nojs, failed, and `fit` up to 390×844 at 200% text). It then stops at the known 360×640/200%-text case, as on main, so `fit`'s last three sizes didn't run: not a full pass.
+  - `validate.cjs` passes 215 checks with no failures (startup, commands, links, leave, history, phone, motion, keyboard, scroll, tap, nowebgl, nojs, failed, and `fit` up to 390×844 at 200% text). It then stops at the known 360×640/200%-text case, as on main, so `fit`'s last three sizes didn't run: not a full pass. After the review fixes, commands (26), history (52), keyboard (7) and motion (5) pass again with no failures; the full suite wasn't rerun.
   - `complete.cjs` passes all its checks:
     - completion of commands and `work <id>`, a shared prefix, a listed set, and the second Tab moving on;
+    - the list cleared by Left, Cmd+Left, a click in the field and select all, and kept by Right at the end, where the caret doesn't move (the first four fail on the build before the fix);
     - no match, nothing typed, the caret short of the end, a selection, Shift/Ctrl/Alt+Tab and composition all left to the browser;
     - nothing run by a completion, and Enter then running it once;
     - Up/Down history;
@@ -68,6 +76,8 @@
   - the JS callback goes from 1.9 to 2.6 ms at p50 and 2.8 to 3.2 ms at p95 (DPR 1);
   - the GPU-synced frame p95 is 2.3 ms here against 4.2 ms on main at DPR 1, and 4.4 against 4.8 at DPR 2: within this measure's noise, not a saving.
 
+  After the review's heavier sparks (one run, same sizes and sample window): still one draw for them (391 calls mid-weld, the arc's sprite the one more), frames at 16.7 ms with none over 25 ms, and the JS callback 2.7 ms at p50 and 3.4 ms at p95 (DPR 1), against 2.6 and 3.2 before: within run-to-run noise.
+
   SwiftShader and phone hardware were not measured.
 - **Missing facts, flagged rather than invented** (each has a TODO in its project's front matter):
   - My part: Traffic Operations Center, Skyblock Bazaar, claude-status, Fluxion, nn, Smart Bin, Swerve Drive, TravelMate.
@@ -77,7 +87,6 @@
 - **Limitations and open questions:**
   - The 360×640/200%-text stop in `fit` remains, as on main: the monitor tap never reaches reading, and `fit`'s last three sizes don't run. The mobile redesign stays deferred; the phone smoke checks above passed.
   - The robot is hidden on a phone held upright, so phones never see it.
-  - The sparks are deliberately small. On a high-DPI display at a distance they read as a glint more than a shower.
   - The brief repeats a project's headline numbers, which its stats list again below. That was left as is, so the opening stands alone.
   - Tab completion is keyboard-only; on a touch screen the tappable commands do the same job.
 

@@ -6,6 +6,11 @@ PASS  complete id + Tab moves on  {"v":"work swerve-drive","focus":"BUTTON:help"
 PASS  work t + Tab extends to tra  {"v":"work tra","focus":"input","list":null,"status":"","n":0}
 PASS  work tr + Tab lists  {"v":"work tra","focus":"input","list":"traffic-ops-center  travelmate","status":"","n":0}
 PASS  typing hides list  {"v":"work traa","focus":"input","list":null,"status":"","n":0}
+PASS  work s + Tab, then Left arrow: list gone, nothing changed  {"v":"work s","focus":"input","list":null,"status":"3 matches: skyblock-bazaar, smart-bin, swerve-drive.","n":0}
+PASS  work s + Tab, then Cmd+Left: list gone, nothing changed  {"v":"work s","focus":"input","list":null,"status":"3 matches: skyblock-bazaar, smart-bin, swerve-drive.","n":0}
+PASS  work s + Tab, then a click in the field: list gone, nothing changed  {"v":"work s","focus":"input","list":null,"status":"3 matches: skyblock-bazaar, smart-bin, swerve-drive.","n":0}
+PASS  work s + Tab, then select all: list gone, nothing changed  {"v":"work s","focus":"input","list":null,"status":"3 matches: skyblock-bazaar, smart-bin, swerve-drive.","n":0}
+PASS  work s + Tab, then Right at the end (caret unmoved): list stays  {"v":"work s","focus":"input","list":"skyblock-bazaar  smart-bin  swerve-drive","status":"3 matches: skyblock-bazaar, smart-bin, swerve-drive.","n":0}
 PASS  upper case WO + Tab  {"v":"work ","focus":"input","list":null,"status":"","n":0}
 PASS  no match + Tab moves focus  {"v":"abc","focus":"BODY:Donald HeddesheimerSoftware en","list":null,"status":"","n":0}
 PASS  empty + Tab moves focus  {"v":"","focus":"BUTTON:help","list":null,"status":"","n":0}

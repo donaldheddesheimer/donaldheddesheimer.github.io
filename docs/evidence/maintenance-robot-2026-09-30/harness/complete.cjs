@@ -1,10 +1,11 @@
 // node complete.cjs [shot.png] — the terminal's Tab completion and what it mustn't disturb, at 1440x900 on
 // the GPU: completion of commands and `work <id>`, a shared prefix, a listed set and the second Tab
-// moving on; no match, nothing typed, a caret short of the end, a selection, Shift/Ctrl/Alt+Tab and IME
-// composition all left to the browser; nothing run by a completion; history; work's links, a modified
-// click, the project's source and demo links, the résumé PDF, contact's links and copy, and a shared
-// /?computer=work/<id>. (A tab a modified click opens isn't routed to dist/ by Playwright: it's counted,
-// not loaded. The test origin isn't a secure context, so copy falls back to selecting the address.)
+// moving on; the list cleared when the caret moves or something is selected; no match, nothing typed,
+// a caret short of the end, a selection, Shift/Ctrl/Alt+Tab and IME composition all left to the
+// browser; nothing run by a completion; history; work's links, a modified click, the project's source
+// and demo links, the résumé PDF, contact's links and copy, and a shared /?computer=work/<id>. (A tab a
+// modified click opens isn't routed to dist/ by Playwright: it's counted, not loaded. The test origin
+// isn't a secure context, so copy falls back to selecting the address.)
 const { chromium } = require(process.env.PW || 'playwright');
 const { BASE, routeDist } = require(require('path').join(__dirname, '../../lab-terminal-2026-09-29/harness/serve.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -42,6 +43,20 @@ const ok = (n, c, i = '') => { if (!c) fails++; console.log(`${c ? 'PASS' : 'FAI
   s = await st(); ok('work t + Tab extends to tra', s.v === 'work tra', s);
   await p.keyboard.press('Tab'); s = await st(); ok('work tr + Tab lists', s.list === 'traffic-ops-center  travelmate', s);
   await p.keyboard.type('a'); s = await st(); ok('typing hides list', s.list === null && s.v === 'work traa', s);
+  // Moving the caret or selecting within the field clears the list: Left, to the start (Cmd+Left, as
+  // Home doesn't move it on a Mac), a click, select all.
+  for (const [keys, name] of [[['ArrowLeft'], 'Left arrow'], [['Meta+ArrowLeft'], 'Cmd+Left'], [['click'], 'a click in the field'], [['Meta+a'], 'select all']]) {
+    await reset(); await p.keyboard.type('work s'); await p.keyboard.press('Tab'); await sleep(100);
+    const up = (await st()).list !== null;
+    if (keys[0] === 'click') {
+      const r = await p.evaluate(() => (({ x, y, height }) => [x + 8, y + height / 2])(document.querySelector('[data-term-input]').getBoundingClientRect()));
+      await p.mouse.click(r[0], r[1]);
+    } else await p.keyboard.press(keys[0]);
+    await sleep(100);
+    s = await st(); ok(`work s + Tab, then ${name}: list gone, nothing changed`, up && s.list === null && s.v === 'work s' && s.focus === 'input', s);
+  }
+  await reset(); await p.keyboard.type('work s'); await p.keyboard.press('Tab'); await sleep(100); await p.keyboard.press('ArrowRight'); await sleep(100);
+  s = await st(); ok('work s + Tab, then Right at the end (caret unmoved): list stays', s.list !== null, s);
   await reset(); await p.keyboard.type('WO'); await p.keyboard.press('Tab');
   s = await st(); ok('upper case WO + Tab', s.v === 'work ', s);
   for (const [txt, name] of [['abc', 'no match'], ['', 'empty'], ['help me', 'two words'], ['   ', 'spaces']]) {
@@ -97,7 +112,7 @@ const ok = (n, c, i = '') => { if (!c) fails++; console.log(`${c ? 'PASS' : 'FAI
   await sleep(1500);
   const sh = await p2.evaluate(() => ({ at: location.search, proj: [...document.querySelectorAll('[data-term] .t-project')].at(-1)?.dataset.project }));
   ok('shared /?computer=work/fluxion opens it', sh.proj === 'fluxion', sh);
-  await p.screenshot({ path: process.argv[2] || '/dev/null' });
+  if (process.argv[2]) await p.screenshot({ path: process.argv[2] });
   console.log(fails ? `${fails} FAILED` : 'all pass');
   await b.close();
 })();

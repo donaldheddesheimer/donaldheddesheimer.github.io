@@ -17,3 +17,12 @@
 {"perf":"1440x900@1","buffer":"1440x900","intervalMs":{"p50":16.7,"p95":16.7,"max":16.8,"over25":0},"callbackMs":{"p50":1.9,"p95":2.8},"callsPerFrame":365,"syncedFrameMs":{"p50":2.1,"p95":4.2}}
 {"perf":"1440x900@2","buffer":"1800x1125","intervalMs":{"p50":16.7,"p95":16.7,"max":16.8,"over25":0},"callbackMs":{"p50":1.9,"p95":2.6},"callsPerFrame":365,"syncedFrameMs":{"p50":2.2,"p95":4.8}}
 # Chrome 154.0.8037.58 · ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+
+# After the review pass (sparks as falling streaks, 160-slot pool, 8 points each), branch only, PERF_AT=9000
+{"size":"1440x900","reduce":true,"calls":390,"tris":135412,"lights":7,"casters":1,"programs":17,"textures":23,"heroDist":7.48,"mon":[500,533,291,181],"pick":[true,true,true,true,true]}
+{"size":"1920x1080","reduce":true,"calls":390,"tris":135412,"lights":7,"casters":1,"programs":17,"textures":23,"heroDist":7.36,"mon":[686,643,363,226],"pick":[true,true,true,true,true]}
+{"size":"390x844","reduce":true,"calls":204,"tris":79160,"lights":7,"casters":1,"programs":13,"textures":15,"heroDist":8.8,"mon":[95,393,200,126],"pick":[true,true,true,true,true]}
+{"size":"1920x640","reduce":true,"calls":395,"tris":135872,"lights":7,"casters":1,"programs":17,"textures":23,"heroDist":7.36,"mon":[798,381,215,134],"pick":[true,true,true,true,true]}
+{"perf":"1440x900@1","buffer":"1440x900","intervalMs":{"p50":16.7,"p95":16.8,"max":16.8,"over25":0},"callbackMs":{"p50":2.7,"p95":3.4},"callsPerFrame":391,"syncedFrameMs":{"p50":1.9,"p95":4.3}}
+{"perf":"1440x900@2","buffer":"1800x1125","intervalMs":{"p50":16.7,"p95":16.7,"max":16.8,"over25":0},"callbackMs":{"p50":2.4,"p95":3.1},"callsPerFrame":391,"syncedFrameMs":{"p50":2.2,"p95":2.9}}
+# Chrome 154.0.8037.58 · ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)

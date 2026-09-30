@@ -1,0 +1,107 @@
+# The groups the sparks and completion changes touch, after them: node validate.cjs dist <group>
+## commands
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  commands: about prints its output, announced ("Printed: about me."), the prompt ready again  {"last":{"said":"about","out":"Printed: about me."},"status":"Printed: about me.","focus":"input"}
+PASS  commands: about shown whole, the prompt under it  {"fits":true,"whole":true,"fromTop":false,"prompt":true,"top":0,"max":0}
+PASS  commands: work prints its output, announced ("Printed: 11 projects."), the prompt ready again  {"last":{"said":"work","out":"Printed: 11 projects."},"status":"Printed: 11 projects.","focus":"input"}
+PASS  commands: work shown from its start  {"fits":false,"whole":false,"fromTop":true,"prompt":true,"top":509,"max":1534}
+PASS  commands: resume prints its output, announced ("Printed: the résumé, with the PDF to download."), the prompt ready again  {"last":{"said":"resume","out":"Printed: the résumé, with the PDF to download."},"status":"Printed: the résumé, with the PDF to download.","focus":"input"}
+PASS  commands: resume shown from its start  {"fits":false,"whole":false,"fromTop":true,"prompt":true,"top":2220,"max":3821}
+PASS  commands: contact prints its output, announced ("Printed: email, GitHub and LinkedIn."), the prompt ready again  {"last":{"said":"contact","out":"Printed: email, GitHub and LinkedIn."},"status":"Printed: email, GitHub and LinkedIn.","focus":"input"}
+PASS  commands: contact shown whole, the prompt under it  {"fits":true,"whole":true,"fromTop":false,"prompt":true,"top":4071,"max":4071}
+PASS  commands: about names Donald; work lists 11 projects, numbered, each with its command (work <id>, linking to /?computer=work/<id>); resume the PDF, then Experience, Education, Skills; contact email, GitHub, LinkedIn  {"about":"Donald Heddesheimer","work":["1. work traffic-ops-center /?computer=work/traffic-ops-center","2. work cucadence /?computer=work/cucadence","3. work fluxion /?computer=work/fluxion","4. work claude-status /?computer=work/claude-status","5. work nn-mnist /?computer=work/nn-mnist","6. work skyblock-bazaar /?computer=work/skyblock-bazaar","7. work bytefight /?computer=work/bytefight","8. work travelmate /?computer=work/travelmate","9. work smart-bin /?computer=work/smart-bin","10. work swerve-drive /?computer=work/swerve-drive","11. work useless-machine /?computer=work/useless-machine"],"resume":[["/resume.pdf","Donald-Heddesheimer-Resume.pdf"]],"sections":["Experience","Education","Skills"],"contact":["mailto:donaldheddes@gmail.com","https://github.com/donaldheddesheimer","https://www.linkedin.com/in/donaldheddesheimer/"]}
+PASS  commands: work cucadence prints the project in the terminal, announced, the prompt ready again; the address /?computer=work/cucadence, the title its own  {"last":{"said":"work cucadence","out":"Printed: cuCadence."},"status":"Printed: cuCadence.","focus":"input","at":"/?computer=work/cucadence","title":"cuCadence · Terminal · Donald Heddesheimer"}
+PASS  commands: work cucadence shown from its start, the prompt in view  {"fits":false,"whole":false,"fromTop":true,"prompt":true,"top":4756,"max":6406}
+PASS  commands: the project as text: name, status, source, tags, its write-up (headings, a code block), figures folded, related commands; no frame, nothing sideways  {"id":"cucadence","name":"cuCadence","kv":["what","my part","hard part","result","status","source","tags","Cost per GPU scope","Overhead vs. blocking timing","Throughput cost on llama.cpp","Reporting defects fixed"],"prose":6,"headings":["objective","how-it-works","staying-out-of-the-way","timelines","validation"],"ids":0,"code":1,"figs":2,"open":0,"related":["work nn-mnist","work fluxion","work claude-status"],"frames":0,"sideways":0}
+PASS  commands: "WORK  CuCadence" (case, spaces) prints it again, a new entry  ["work cucadence","WORK  CuCadence"]
+PASS  commands: work nope says there's no such project and to run work (a command), announced; no guess; the address /?computer  {"miss":{"text":"No project called nope. Run work to list them.","run":"work","guess":false},"status":"No project called nope. Run work to list them.","at":"/?computer","title":"Terminal · Donald Heddesheimer"}
+PASS  commands: work flux guesses work fluxion (a command to run)  {"shown":true,"runs":[["work fluxion","/?computer=work/fluxion"]]}
+PASS  commands: the guess clicked prints fluxion; focus in the prompt  {"last":{"said":"work fluxion","out":"Printed: Fluxion."},"focus":"input"}
+PASS  input: "  WoRk  " (mixed case, spaces) runs work; the address the terminal's again  {"last":{"said":"  WoRk  ","out":"Printed: 11 projects."},"at":"/?computer","title":"Terminal · Donald Heddesheimer"}
+PASS  input: an unknown command prints exactly the not-found line, with help to run  {"nf":"Command not found. Run help for available commands.","status":"Command not found. Run help for available commands."}
+PASS  input: an empty line, and one of spaces, just give a new prompt (no output, hidden from a screen reader)  [{"tag":"P","hidden":"true","out":false},{"tag":"P","hidden":"true","out":false}]
+PASS  input: markup typed is shown as text, never parsed or run  {"owned":null,"imgs":0,"echo":"donald@lab:~$<img src=x onerror=\"window.__owned=1\"><b>bold</b>"}
+PASS  input: a very long line stops at 200 characters, the terminal never scrolls sideways, the cursor stays in the field  {"len":200,"sideways":0,"cursorIn":true}
+PASS  input: run, the long line wraps in the history (no sideways scroll)  {"sideways":0}
+PASS  input: repeated and rapid commands each run once, in order  ["help","help","help","about","contact"]
+PASS  input: Up and Down recall earlier commands (repeats once), and Down again gives back the line being typed  ["contact","about","help","about","contact","draft"]
+PASS  input: the session keeps what was run (lab:terminal) and that the startup has played  {"boot":true,"n":20,"entries":20}
+PASS  input: no id repeats in the page, however many commands have run  []
+
+all passed
+## history
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  history: a project, Back to the terminal, Back to the room, Forward to the terminal, Forward to the project  ["/?computer=work/traffic-ops-center","/?computer","/","/?computer","/?computer=work/traffic-ops-center"]
+PASS  history: Back to the terminal: nothing printed again, where it was read, its title, focus on the project's command  {"entries":2,"top":92,"was":92,"title":"Terminal · Donald Heddesheimer","focus":"a:work traffic-ops-center"}
+PASS  history: Forward, and Forward again: the same two entries (nothing printed again), the project where it was, its title  {"fwd":2,"fwd2":2,"tops":[92,92,1803,1803],"title":"Traffic Operations Center · Terminal · Donald Heddesheimer"}
+PASS  history: an anchor edited into a project's address prints nothing again  {"entries":2,"at":"/?computer=work/traffic-ops-center#approach"}
+PASS  history: Escape on a project leaves the computer at once, for the opening, focus on the monitor  {"at":"/","focus":"monitor"}
+PASS  history: /?computer=about opens the terminal running about (address /?computer)  {"at":"/?computer","said":["about"]}
+PASS  history: /?computer=about, reloaded, doesn't run about again  ["about"]
+PASS  history: /#about opens the terminal running about (address /?computer)  {"at":"/?computer","said":["about"]}
+PASS  history: /#about, reloaded, doesn't run about again  ["about"]
+PASS  history: /computer/about/ opens the terminal running about (address /?computer)  {"at":"/?computer","said":["about"]}
+PASS  history: /computer/about/, reloaded, doesn't run about again  ["about"]
+PASS  history: /computer/#about opens the terminal running about (address /?computer)  {"at":"/?computer","said":["about"]}
+PASS  history: /computer/#about, reloaded, doesn't run about again  ["about"]
+PASS  history: /?computer=work opens the terminal running work (address /?computer)  {"at":"/?computer","said":["work"]}
+PASS  history: /?computer=work, reloaded, doesn't run work again  ["work"]
+PASS  history: /#work opens the terminal running work (address /?computer)  {"at":"/?computer","said":["work"]}
+PASS  history: /#work, reloaded, doesn't run work again  ["work"]
+PASS  history: /computer/work/ opens the terminal running work (address /?computer)  {"at":"/?computer","said":["work"]}
+PASS  history: /computer/work/, reloaded, doesn't run work again  ["work"]
+PASS  history: /computer/#work opens the terminal running work (address /?computer)  {"at":"/?computer","said":["work"]}
+PASS  history: /computer/#work, reloaded, doesn't run work again  ["work"]
+PASS  history: /?computer=resume opens the terminal running resume (address /?computer)  {"at":"/?computer","said":["resume"]}
+PASS  history: /?computer=resume, reloaded, doesn't run resume again  ["resume"]
+PASS  history: /#resume opens the terminal running resume (address /?computer)  {"at":"/?computer","said":["resume"]}
+PASS  history: /#resume, reloaded, doesn't run resume again  ["resume"]
+PASS  history: /computer/resume/ opens the terminal running resume (address /?computer)  {"at":"/?computer","said":["resume"]}
+PASS  history: /computer/resume/, reloaded, doesn't run resume again  ["resume"]
+PASS  history: /computer/#resume opens the terminal running resume (address /?computer)  {"at":"/?computer","said":["resume"]}
+PASS  history: /computer/#resume, reloaded, doesn't run resume again  ["resume"]
+PASS  history: /?computer=contact opens the terminal running contact (address /?computer)  {"at":"/?computer","said":["contact"]}
+PASS  history: /?computer=contact, reloaded, doesn't run contact again  ["contact"]
+PASS  history: /#contact opens the terminal running contact (address /?computer)  {"at":"/?computer","said":["contact"]}
+PASS  history: /#contact, reloaded, doesn't run contact again  ["contact"]
+PASS  history: /computer/contact/ opens the terminal running contact (address /?computer)  {"at":"/?computer","said":["contact"]}
+PASS  history: /computer/contact/, reloaded, doesn't run contact again  ["contact"]
+PASS  history: /computer/#contact opens the terminal running contact (address /?computer)  {"at":"/?computer","said":["contact"]}
+PASS  history: /computer/#contact, reloaded, doesn't run contact again  ["contact"]
+PASS  history: /computer/ opens the terminal (address /?computer)  {"at":"/?computer","said":[]}
+PASS  history: /?computer=work/traffic-ops-center opens the terminal running work traffic-ops-center (address /?computer=work/traffic-ops-center)  {"at":"/?computer=work/traffic-ops-center","said":["work traffic-ops-center"]}
+PASS  history: /?computer=work/traffic-ops-center, reloaded, doesn't run work traffic-ops-center again  ["work traffic-ops-center"]
+PASS  history: /computer/work/traffic-ops-center/ opens the terminal running work traffic-ops-center (address /?computer=work/traffic-ops-center)  {"at":"/?computer=work/traffic-ops-center","said":["work traffic-ops-center"]}
+PASS  history: /computer/work/traffic-ops-center/, reloaded, doesn't run work traffic-ops-center again  ["work traffic-ops-center"]
+PASS  history: /?computer=bogus is not the computer's: the room, the address cleaned  /
+PASS  history: /?computer=work/no-such-project is not the computer's: the room, the address cleaned  /
+PASS  history: /prototype/?computer=about opens the terminal running about (address /?computer)  {"at":"/?computer","said":["about"]}
+PASS  history: /prototype/?computer=about, reloaded, doesn't run about again  ["about"]
+PASS  history: /?sel=layer:gpu opens the terminal running work (address /?computer)  {"at":"/?computer","said":["work"]}
+PASS  history: /?sel=layer:gpu, reloaded, doesn't run work again  ["work"]
+PASS  history: /?sel=project:traffic-ops-center goes to its case study
+PASS  history: /computer/work/ (the old Work page) opens the terminal running work
+PASS  history: /computer/work/fluxion/#approach opens the lab printing fluxion, at its Approach (the heading in view)  {"at":"/?computer=work/fluxion#approach","printed":1,"heading":"Approach","top":328,"inView":true,"y":2048,"title":"Fluxion · Terminal · Donald Heddesheimer"}
+PASS  history: #contact set on the opening opens the terminal running contact  {"at":"/?computer","last":{"said":"contact","out":"Printed: email, GitHub and LinkedIn."}}
+
+all passed
+## keyboard
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  keyboard: Tab to the monitor's link (ringed), Enter goes in, focus in the prompt  {"first":"monitor","ring":true,"now":"input"}
+PASS  keyboard: Shift+Tab from the prompt reaches the newest command button, ringed  {"run":"contact","ring":true,"outline":"solid 2px"}
+PASS  keyboard: Enter on it runs contact once; focus back in the prompt  {"last":{"said":"contact","out":"Printed: email, GitHub and LinkedIn."},"focus":"input"}
+PASS  keyboard: the output's links take the focus, ringed  {"el":"BUTTON:copy donaldheddes@gmail.com","ring":true,"outline":"solid 2px"}
+PASS  keyboard: Tab down through work's links, none is left under the prompt  []
+PASS  keyboard: Tab from the prompt reaches no power button (there's none with a keyboard)  {"power":false,"inDialog":true,"el":"BUTTON:help"}
+PASS  keyboard: Escape leaves, focus on the monitor's link, ringed  {"focus":"monitor","ring":true}
+
+all passed
+## motion
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  motion on: help's lines come in one after another (the check below can see animations)  {"animations":4}
+PASS  reduced motion: in without the flight, the startup all at once, no output animation, a steady cursor  {"pcs":["read"],"boots":["pending","done"],"animations":0,"cursor":"none","scrolledAtOnce":true}
+PASS  reduced motion: a project printed at once (no animation), scrolled to at once  {"animations":0,"v":{"fits":false,"whole":false,"fromTop":true,"prompt":true,"top":1963,"max":2208},"at":"/?computer=work/fluxion"}
+PASS  Motion off (Settings): in without the flight, the startup all at once, no output animation, a steady cursor  {"pcs":["read"],"boots":["pending","done"],"animations":0,"cursor":"none","scrolledAtOnce":true}
+PASS  Motion off (Settings): a project printed at once (no animation), scrolled to at once  {"animations":0,"v":{"fits":false,"whole":false,"fromTop":true,"prompt":true,"top":1963,"max":2208},"at":"/?computer=work/fluxion"}
+
+all passed

@@ -10,7 +10,7 @@ const out = process.argv[2] || require('path').join(__dirname, '../screens');
 require('fs').mkdirSync(out, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const LAUNCH = { channel: 'chrome', args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'] };
-const ROBOT = { x: 380, y: 0, width: 300, height: 240 }; // the robot, at 1440x900
+const ROBOT = { x: 300, y: 0, width: 480, height: 420 }; // the robot and the sparks falling below it, at 1440x900
 const errs = [];
 (async () => {
   const b = await chromium.launch(LAUNCH);
