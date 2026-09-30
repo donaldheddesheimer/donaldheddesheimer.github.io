@@ -1,14 +1,14 @@
 // The robotics lab of the homepage's opening (/), where the computer on the desk holds the portfolio. It
-// began as a fork of the first homepage's robot stage; the rig and the routine's shape are the same. The room: a
-// concrete floor with the dance area taped out, a block wall with a high window, a workbench under a
-// pendant, an unfinished robot on a service stand, storage and a charging bay at the left, props (a task
-// chair pushed aside, a tool cart, a scope cart, an open case), a tripod work light as the key, and the
-// three dancers, given characters through proportion, their own timing and their own versions of the
-// routine's moves, where they stand and how they answer each other; the unfinished one on its stand runs a
-// calibration now and then. Two camera views: the opening, which the pointer may look around a little
-// (lookAround), and reading, square on to the monitor, whose screen the terminal covers in real HTML
-// (computer.ts); in the room the screen shows a screensaver (screensaver.ts). One flight joins them.
-// Simple geometry throughout.
+// began as a fork of the first homepage's robot stage; the rig and the routine's shape are the same. The
+// room: a concrete floor with the dance area taped out, a block wall with a broad window onto a city at blue
+// hour, a workbench under a pendant, an unfinished robot on a service stand, storage and a charging bay at
+// the left, props (a task chair pushed aside, a tool cart, a scope cart, an open case), a tripod work light
+// as the key, and the three dancers, given characters through proportion, their own timing and their own
+// versions of the routine's moves, where they stand and how they answer each other; the unfinished one on its
+// stand runs a calibration now and then. Two camera views: the opening, which the pointer may look around a
+// little (lookAround), and reading, square on to the monitor, whose screen the terminal covers in real HTML
+// (computer.ts); in the room the screen shows a screensaver (screensaver.ts). One flight joins them. Simple
+// geometry throughout.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -1700,7 +1700,7 @@ function drawingsTexture() {
   });
 }
 
-// The workshop clock: a plain white face, gone a quarter to midnight.
+// The workshop clock: a plain white face, gone half past seven (blue hour outside).
 function clockTexture() {
   return canvasTexture(128, 128, (g) => {
     g.fillStyle = '#e9e5dc';
@@ -1721,8 +1721,8 @@ function clockTexture() {
       g.fillRect(-width / 2, -len, width, len + 8);
       g.restore();
     };
-    hand(((11 + 47 / 60) / 12) * TAU, 30, 5, '#1b1b1c');
-    hand((47 / 60) * TAU, 46, 3.5, '#1b1b1c');
+    hand(((7 + 38 / 60) / 12) * TAU, 30, 5, '#1b1b1c');
+    hand((38 / 60) * TAU, 46, 3.5, '#1b1b1c');
     hand((22 / 60) * TAU, 50, 1.2, '#b3261e');
     g.fillStyle = '#1b1b1c';
     g.beginPath();
@@ -1793,61 +1793,97 @@ function tapeTexture() {
   return t;
 }
 
-// Night through the window: dark blue, lighter toward the moon above left.
-function nightTexture() {
-  return canvasTexture(128, 128, (g) => {
-    const grad = g.createRadialGradient(10, 4, 4, 10, 4, 150);
-    grad.addColorStop(0, '#5d7294');
-    grad.addColorStop(0.5, '#1f2a3d');
-    grad.addColorStop(1, '#0d121b');
-    g.fillStyle = grad;
-    g.fillRect(0, 0, 128, 128);
+// The city through the window at blue hour (1 px = 3 mm of glass): the sky peach at the horizon and
+// blue above, a few early stars, and three rows of buildings, the farthest pale with the haze and the
+// nearest dark, lit windows scattered through them (mostly warm, a few cool), with an elevated road
+// across in front of the towers for the traffic (buildRoom) and low roofs below it. Its own seed.
+const CITY = { w: 1024, h: 416, road: 0.79 }; // the road's deck, a fraction of the way down
+function cityTexture() {
+  const random = rng(1907);
+  const { w: W, h: H } = CITY;
+  return canvasTexture(W, H, (g) => {
+    const sky = g.createLinearGradient(0, 0, 0, H * 0.8);
+    sky.addColorStop(0, '#16224a');
+    sky.addColorStop(0.3, '#2b4580');
+    sky.addColorStop(0.55, '#6d78aa');
+    sky.addColorStop(0.74, '#d09496');
+    sky.addColorStop(0.9, '#f4ad7a');
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, H);
+    g.fillStyle = 'rgba(255,241,220,0.55)';
+    for (const [x, y] of [[120, 30], [388, 18], [610, 52], [842, 26], [948, 70]]) g.fillRect(x, y, 2, 2);
+    // Two thin clouds, lit from under.
+    g.fillStyle = 'rgba(245,184,160,0.16)';
+    for (const [x, y, w] of [[140, 196, 260], [620, 168, 200]]) {
+      g.beginPath();
+      g.ellipse(x + w / 2, y, w / 2, 5, 0, 0, TAU);
+      g.fill();
+    }
+    // A row of buildings standing on `base`, `lo` to `hi` tall, `wide` apart at most; windows `cell` px
+    // across, `lit` of them on.
+    const row = (base: number, lo: number, hi: number, wide: number, color: string, cell: number, lit: number, glow: string[]) => {
+      for (let x = -10; x < W + 10; ) {
+        const w = Math.round(wide * (0.45 + random() * 0.55));
+        const top = Math.round(base - lo - random() * (hi - lo));
+        g.fillStyle = color;
+        g.fillRect(x, top, w, H - top);
+        // Tops: a step back, a mast, or plain.
+        const kind = random();
+        if (kind < 0.25) g.fillRect(x + w * 0.25, top - cell * 3, w * 0.5, cell * 3);
+        else if (kind < 0.37) g.fillRect(x + w * 0.5 - 1, top - cell * 7, 2, cell * 7);
+        for (let wy = top + cell * 2; wy < base - cell; wy += cell * 2) {
+          for (let wx = x + cell; wx < x + w - cell * 1.5; wx += cell * 2) {
+            if (random() > lit) continue;
+            g.globalAlpha = 0.55 + random() * 0.45;
+            g.fillStyle = glow[random() < 0.12 ? 1 : 0];
+            g.fillRect(wx, wy, cell, cell);
+          }
+        }
+        g.globalAlpha = 1;
+        x += w + (random() < 0.3 ? Math.round(random() * wide * 0.4) : 0);
+      }
+    };
+    row(H * 0.84, 16, 80, 70, '#7c7ba4', 2, 0.05, ['#f6dcaa', '#dbe8ff']);
+    // Two towers that make the skyline, one with a spire.
+    g.fillStyle = '#343b69';
+    g.fillRect(262, H * 0.9 - 250, 44, 250);
+    g.fillRect(280, H * 0.9 - 300, 4, 50);
+    g.fillRect(704, H * 0.9 - 212, 60, 212);
+    g.fillRect(716, H * 0.9 - 228, 36, 16);
+    row(H * 0.9, 34, 130, 96, '#3a4170', 3, 0.1, ['#ffcf85', '#cfe0ff']);
+    // The road: its deck on piers, lamps along it.
+    const deck = Math.round(H * CITY.road);
+    g.fillStyle = '#1f2240';
+    g.fillRect(0, deck, W, 7);
+    for (let x = 40; x < W; x += 150) g.fillRect(x, deck, 8, H - deck);
+    g.fillStyle = '#4c4f78';
+    g.fillRect(0, deck, W, 1);
+    g.fillStyle = '#ffd59a';
+    for (let x = 12; x < W; x += 64) g.fillRect(x, deck - 5, 2, 2);
+    // Low roofs under it, near and dark.
+    row(H + 4, 18, 48, 120, '#191b30', 3, 0.14, ['#ffc978', '#cfe0ff']);
   });
 }
 
-// The haze the moonlight crosses: bright at the window, thinning toward the floor, soft at its sides.
-function beamTexture() {
-  return canvasTexture(
-    64,
-    64,
-    (g) => {
-      const along = g.createLinearGradient(0, 0, 0, 64);
-      along.addColorStop(0, 'rgba(255,255,255,0)');
-      along.addColorStop(0.35, 'rgba(255,255,255,1)');
-      along.addColorStop(0.75, 'rgba(255,255,255,0.4)');
-      along.addColorStop(1, 'rgba(255,255,255,0)');
-      g.fillStyle = along;
-      g.fillRect(0, 0, 64, 64);
-      g.globalCompositeOperation = 'destination-in';
-      const across = g.createLinearGradient(0, 0, 64, 0);
-      across.addColorStop(0, 'rgba(0,0,0,0)');
-      across.addColorStop(0.5, 'rgba(0,0,0,1)');
-      across.addColorStop(1, 'rgba(0,0,0,0)');
-      g.fillStyle = across;
-      g.fillRect(0, 0, 64, 64);
-    },
-    false,
-  );
-}
-
-// The window's light as it lands: six panes between the frame's bars (1 px = 1.25 cm of glass), their
-// edges a little soft, the whole fading off toward its ends. A mask, coloured by its material.
+// The window's light as it lands: three tall panes between the frame's bars (1 px = 1.25 cm of glass),
+// their edges soft (the sky's light, not the sun's), the whole fading off toward its ends. A mask,
+// colored by its material.
 function paneTexture() {
   return canvasTexture(
-    168,
-    92,
+    256,
+    104,
     (g) => {
-      g.filter = 'blur(2px)';
+      g.filter = 'blur(5px)';
       g.fillStyle = '#fff';
-      for (let c = 0; c < 3; c++) for (let r = 0; r < 2; r++) g.fillRect(2 + c * 56, 2 + r * 46, 52, 42);
+      for (let c = 0; c < 3; c++) g.fillRect(8 + c * 82, 8, 76, 88);
       g.filter = 'none';
       g.globalCompositeOperation = 'destination-in';
-      const fade = g.createLinearGradient(0, 0, 168, 0);
-      fade.addColorStop(0, 'rgba(0,0,0,0.55)');
-      fade.addColorStop(0.45, 'rgba(0,0,0,1)');
-      fade.addColorStop(1, 'rgba(0,0,0,0.7)');
+      const fade = g.createLinearGradient(0, 0, 256, 0);
+      fade.addColorStop(0, 'rgba(0,0,0,0.4)');
+      fade.addColorStop(0.5, 'rgba(0,0,0,1)');
+      fade.addColorStop(1, 'rgba(0,0,0,0.55)');
       g.fillStyle = fade;
-      g.fillRect(0, 0, 168, 92);
+      g.fillRect(0, 0, 256, 104);
     },
     false,
   );
@@ -1932,13 +1968,13 @@ function materials() {
 type Mats = ReturnType<typeof materials>;
 
 // --- The room ------------------------------------------------------------------------------------
-// Back wall at z = -3.1; the dance floor, taped out, in the middle; the window high over it, right of
-// centre; the workbench under a pendant at the right, the service stand in front of the bench's end. The
-// wall's left half, and the side wall it turns into, are the storage (buildStore), kept below the name.
+// Back wall at z = -3.1; the dance floor, taped out, in the middle; the window broad and high over it;
+// the workbench under a pendant at the right, the service stand in front of the bench's end. The wall's
+// left half, and the side wall it turns into, are the storage (buildStore), kept below the name.
 const WALL_Z = -3.1;
-// The moon, high to the left behind the wall: its light's way in through the window, down and across the
-// floor to the right of the monitor, among the dancers.
-const MOON = new THREE.Vector3(0.12, -0.66, 0.74).normalize();
+// The sky's light, from high to the left behind the wall: its way in through the window, down and across
+// the floor to the right of the monitor, among the dancers.
+const DUSK = new THREE.Vector3(0.12, -0.66, 0.74).normalize();
 export const STAND = { x: 1.75, z: -2.0, yaw: -0.15 };
 
 function buildRoom(random: () => number, mats: Mats) {
@@ -1989,47 +2025,67 @@ function buildRoom(random: () => number, mats: Mats) {
   add(boxGeo(16, 0.1, 0.03), mats.darkSteel, 0, 0.05, WALL_Z + 0.015);
   add(boxGeo(16, 0.04, 0.03), mats.darkSteel, 0, 1.2, WALL_Z + 0.015);
 
-  // The high window: a steel frame of six panes, night beyond.
-  const W = { x: 0.75, y: 2.95, w: 2.1, h: 1.15 };
-  const night = nightTexture();
-  textures.push(night);
-  const glass = add(new THREE.PlaneGeometry(W.w, W.h), new THREE.MeshBasicMaterial({ map: night, color: 0x8a96aa }), W.x, W.y, WALL_Z + 0.005);
+  // The window: broad and high, three tall panes in a heavy steel frame, the city beyond at blue hour
+  // (its own light, not the room's).
+  const W = { x: 0.1, y: 2.88, w: 3.2, h: 1.3 };
+  const city = cityTexture();
+  textures.push(city);
+  const glass = add(new THREE.PlaneGeometry(W.w, W.h), new THREE.MeshBasicMaterial({ map: city, color: 0xa6a6a6, toneMapped: false }), W.x, W.y, WALL_Z + 0.005);
   glass.userData.live = true;
-  for (const dx of [-1, -1 / 3, 1 / 3, 1]) add(boxGeo(0.05, W.h + 0.05, 0.06), mats.darkSteel, W.x + (dx * W.w) / 2, W.y, WALL_Z + 0.03);
-  for (const dy of [-1, 0, 1]) add(boxGeo(W.w + 0.05, 0.05, 0.06), mats.darkSteel, W.x, W.y + (dy * W.h) / 2, WALL_Z + 0.03);
-  add(boxGeo(W.w + 0.2, 0.05, 0.16), mats.steel, W.x, W.y - W.h / 2 - 0.05, WALL_Z + 0.08);
-  // Where the moonlight lands: the panes laid across the floor, skewed as it falls (a pale patch drawn
+  const bar = 0.1;
+  for (const dx of [-1, 1]) add(boxGeo(bar, W.h + bar, 0.08), mats.darkSteel, W.x + (dx * (W.w + bar)) / 2, W.y, WALL_Z + 0.04);
+  for (const dx of [-1 / 3, 1 / 3]) add(boxGeo(0.08, W.h, 0.07), mats.darkSteel, W.x + (dx * W.w) / 2, W.y, WALL_Z + 0.035);
+  for (const dy of [-1, 1]) add(boxGeo(W.w + bar * 2, bar, 0.08), mats.darkSteel, W.x, W.y + (dy * (W.h + bar)) / 2, WALL_Z + 0.04);
+  add(boxGeo(W.w + 0.36, 0.06, 0.2), mats.steel, W.x, W.y - W.h / 2 - bar - 0.03, WALL_Z + 0.1);
+  // The traffic on the city's road, far off: a car's lights now and then, headlights one way and
+  // taillights the other, each crossing in half a minute or so and gone a while between. Points just
+  // inside the glass, moved by the scene's clock (`traffic(t)`), so they keep still with motion off.
+  const [wl, wr, wb, wt] = [W.x - W.w / 2, W.x + W.w / 2, W.y - W.h / 2, W.y + W.h / 2];
+  const deckY = wt - CITY.road * W.h;
+  const cars = [
+    { lane: 0, v: 0.11, every: 7.5, at: 0.4 },
+    { lane: 0, v: 0.09, every: 9, at: 5.2 },
+    { lane: 0, v: 0.1, every: 11, at: 8.1 },
+    { lane: 1, v: 0.08, every: 8.5, at: 2.3 },
+    { lane: 1, v: 0.1, every: 10, at: 6.6 },
+  ];
+  const carPos = new Float32Array(cars.length * 3);
+  const carCol = new Float32Array(cars.length * 3);
+  const carGeo = new THREE.BufferGeometry();
+  carGeo.setAttribute('position', new THREE.BufferAttribute(carPos, 3));
+  carGeo.setAttribute('color', new THREE.BufferAttribute(carCol, 3));
+  const carLights = new THREE.Points(carGeo, new THREE.PointsMaterial({ size: 2.5, sizeAttenuation: false, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: false }));
+  carLights.frustumCulled = false;
+  const lamp = [new THREE.Color(0xfff0cc), new THREE.Color(0xff4436)];
+  function traffic(t: number) {
+    cars.forEach((c, i) => {
+      // Along the road from its own side, `every` crossings' worth of road round, so on for a stretch
+      // and off for longer.
+      const loop = W.w * (1 + c.every / 5);
+      const d = (((t + c.at * 10) * c.v) % loop) - 0.05;
+      const x = c.lane ? wr - d : wl + d;
+      const k = d < 0 || d > W.w ? 0 : Math.min(1, d / 0.3, (W.w - d) / 0.3) * 0.8;
+      carPos.set([x, deckY + 0.004 + c.lane * 0.006, WALL_Z + 0.008], i * 3);
+      carCol.set([lamp[c.lane].r * k, lamp[c.lane].g * k, lamp[c.lane].b * k], i * 3);
+    });
+    carGeo.attributes.position.needsUpdate = true;
+    carGeo.attributes.color.needsUpdate = true;
+  }
+  traffic(0);
+  // Where the sky's light lands: the panes laid across the floor, skewed as it falls (a pale patch drawn
   // over the floor, one quad), and a cool spot from behind the window along the same way, about as wide
   // as the window, for whatever stands in it.
-  const fall = (x: number, y: number) => new THREE.Vector3(x, y, WALL_Z).addScaledVector(MOON, (y - 0.005) / -MOON.y);
-  const [wl, wr, wb, wt] = [W.x - W.w / 2, W.x + W.w / 2, W.y - W.h / 2, W.y + W.h / 2];
+  const fall = (x: number, y: number) => new THREE.Vector3(x, y, WALL_Z).addScaledVector(DUSK, (y - 0.005) / -DUSK.y);
   const panes = paneTexture();
   textures.push(panes);
   const patchGeo = new THREE.BufferGeometry().setFromPoints([fall(wl, wb), fall(wr, wb), fall(wr, wt), fall(wl, wt)]);
   patchGeo.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1, 0, 1], 2));
   patchGeo.setIndex([0, 2, 1, 0, 3, 2]);
-  const patch = add(patchGeo, new THREE.MeshBasicMaterial({ map: panes, color: 0x2b3548, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }), 0, 0, 0);
+  const patch = add(patchGeo, new THREE.MeshBasicMaterial({ map: panes, color: 0x222b3e, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }), 0, 0, 0);
   patch.userData.live = true;
-  // The beam between, faint: sheets across it, each a line across the window drawn down to the floor
-  // (a sheet seen edge on would show as a streak, so none runs along the beam's sides).
-  const haze = beamTexture();
-  textures.push(haze);
-  const beamPos: number[] = [];
-  const beamUv: number[] = [];
-  for (const k of [0.12, 0.37, 0.63, 0.88]) {
-    const y = wb + k * W.h;
-    const quad = [new THREE.Vector3(wl, y, WALL_Z), new THREE.Vector3(wr, y, WALL_Z), fall(wr, y), fall(wl, y)];
-    for (const i of [0, 1, 2, 0, 2, 3]) beamPos.push(...quad[i].toArray());
-    beamUv.push(0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0);
-  }
-  const beamGeo = new THREE.BufferGeometry();
-  beamGeo.setAttribute('position', new THREE.Float32BufferAttribute(beamPos, 3));
-  beamGeo.setAttribute('uv', new THREE.Float32BufferAttribute(beamUv, 2));
-  const beam = add(beamGeo, new THREE.MeshBasicMaterial({ map: haze, color: 0x141a26, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }), 0, 0, 0);
-  beam.userData.live = true;
-  const moon = new THREE.SpotLight(0x9db3d9, 80, 16, 0.4, 0.7, 2);
-  moon.position.set(W.x, W.y, WALL_Z).addScaledVector(MOON, -3);
-  moon.target.position.copy(fall(W.x, W.y));
+  const dusk = new THREE.SpotLight(0xa4b0dc, 80, 16, 0.45, 0.8, 2);
+  dusk.position.set(W.x, W.y, WALL_Z).addScaledVector(DUSK, -3);
+  dusk.target.position.copy(fall(W.x, W.y));
 
   // Workbench: a butcher-block top on a steel frame, a shelf under it, pegboard over it.
   const B = { x: 2.55, z: WALL_Z + 0.4, w: 2.0, d: 0.66, y: 0.92 };
@@ -2088,8 +2144,8 @@ function buildRoom(random: () => number, mats: Mats) {
   pendant.target.position.set(STAND.x, 0.6, STAND.z - 0.1);
 
   bake(group);
-  group.add(pendant, pendant.target, moon, moon.target);
-  return { group, textures, pendant, walls: { low: low.material as THREE.MeshLambertMaterial, high: high.material as THREE.MeshLambertMaterial } };
+  group.add(pendant, pendant.target, dusk, dusk.target, carLights);
+  return { group, textures, pendant, traffic, walls: { low: low.material as THREE.MeshLambertMaterial, high: high.material as THREE.MeshLambertMaterial } };
 }
 
 // The service stand: a plate on casters, a mast, and an arm that holds the unfinished robot at the chest.
@@ -2738,7 +2794,7 @@ export function mountLab(
   const camera = new THREE.PerspectiveCamera(HERO_FOV, 1, 0.08, 60);
   const mats = materials();
 
-  // Seven lights: the work light (warm key, the one shadow), the moon through the window (the one cool
+  // Seven lights: the work light (warm key, the one shadow), the sky's light through the window (the one cool
   // light, down across the floor right of the monitor), the pendant (warm, on the bench and the
   // unfinished robot), the floor lamp (warm, over the storage and Graphite), the desk lamp, the screen's
   // glow, and a fill, lifted enough that the room reads as lived in after hours rather than shut up.
@@ -3107,6 +3163,7 @@ export function mountLab(
     for (const r of robots) r.update(beat, t, rest, s, game);
     proto.update(0, t, rest);
     store.animate(t, spin);
+    room.traffic(t);
     moveDust(t);
     dust.visible = mode !== 'read' || !!flight;
     let p = 1;
