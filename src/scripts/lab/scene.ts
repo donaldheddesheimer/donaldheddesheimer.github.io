@@ -973,16 +973,64 @@ function tapeTexture() {
   return t;
 }
 
-// Night through the window: dark blue, lighter toward the moon above right.
+// Night through the window: dark blue, lighter toward the moon above left.
 function nightTexture() {
   return canvasTexture(128, 128, (g) => {
-    const grad = g.createRadialGradient(118, 4, 4, 118, 4, 150);
+    const grad = g.createRadialGradient(10, 4, 4, 10, 4, 150);
     grad.addColorStop(0, '#5d7294');
     grad.addColorStop(0.5, '#1f2a3d');
     grad.addColorStop(1, '#0d121b');
     g.fillStyle = grad;
     g.fillRect(0, 0, 128, 128);
   });
+}
+
+// The haze the moonlight crosses: bright at the window, thinning toward the floor, soft at its sides.
+function beamTexture() {
+  return canvasTexture(
+    64,
+    64,
+    (g) => {
+      const along = g.createLinearGradient(0, 0, 0, 64);
+      along.addColorStop(0, 'rgba(255,255,255,0)');
+      along.addColorStop(0.35, 'rgba(255,255,255,1)');
+      along.addColorStop(0.75, 'rgba(255,255,255,0.4)');
+      along.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = along;
+      g.fillRect(0, 0, 64, 64);
+      g.globalCompositeOperation = 'destination-in';
+      const across = g.createLinearGradient(0, 0, 64, 0);
+      across.addColorStop(0, 'rgba(0,0,0,0)');
+      across.addColorStop(0.5, 'rgba(0,0,0,1)');
+      across.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = across;
+      g.fillRect(0, 0, 64, 64);
+    },
+    false,
+  );
+}
+
+// The window's light as it lands: six panes between the frame's bars (1 px = 1.25 cm of glass), their
+// edges a little soft, the whole fading off toward its ends. A mask, coloured by its material.
+function paneTexture() {
+  return canvasTexture(
+    168,
+    92,
+    (g) => {
+      g.filter = 'blur(2px)';
+      g.fillStyle = '#fff';
+      for (let c = 0; c < 3; c++) for (let r = 0; r < 2; r++) g.fillRect(2 + c * 56, 2 + r * 46, 52, 42);
+      g.filter = 'none';
+      g.globalCompositeOperation = 'destination-in';
+      const fade = g.createLinearGradient(0, 0, 168, 0);
+      fade.addColorStop(0, 'rgba(0,0,0,0.55)');
+      fade.addColorStop(0.45, 'rgba(0,0,0,1)');
+      fade.addColorStop(1, 'rgba(0,0,0,0.7)');
+      g.fillStyle = fade;
+      g.fillRect(0, 0, 168, 92);
+    },
+    false,
+  );
 }
 
 // The monitor's picture before the terminal is laid over it: the terminal as it waits to start, charcoal
@@ -1074,6 +1122,9 @@ type Mats = ReturnType<typeof materials>;
 // centre; the workbench under a pendant at the right, the service stand in front of the bench's end. The
 // wall's left half is left bare: the name is over it.
 const WALL_Z = -3.1;
+// The moon, high to the left behind the wall: its light's way in through the window, down and across the
+// floor to the right of the monitor, among the dancers.
+const MOON = new THREE.Vector3(0.12, -0.66, 0.74).normalize();
 export const STAND = { x: 1.75, z: -2.0, yaw: -0.15 };
 
 function buildRoom(random: () => number, mats: Mats) {
@@ -1133,6 +1184,38 @@ function buildRoom(random: () => number, mats: Mats) {
   for (const dx of [-1, -1 / 3, 1 / 3, 1]) add(boxGeo(0.05, W.h + 0.05, 0.06), mats.darkSteel, W.x + (dx * W.w) / 2, W.y, WALL_Z + 0.03);
   for (const dy of [-1, 0, 1]) add(boxGeo(W.w + 0.05, 0.05, 0.06), mats.darkSteel, W.x, W.y + (dy * W.h) / 2, WALL_Z + 0.03);
   add(boxGeo(W.w + 0.2, 0.05, 0.16), mats.steel, W.x, W.y - W.h / 2 - 0.05, WALL_Z + 0.08);
+  // Where the moonlight lands: the panes laid across the floor, skewed as it falls (a pale patch drawn
+  // over the floor, one quad), and a cool spot from behind the window along the same way, about as wide
+  // as the window, for whatever stands in it.
+  const fall = (x: number, y: number) => new THREE.Vector3(x, y, WALL_Z).addScaledVector(MOON, (y - 0.005) / -MOON.y);
+  const [wl, wr, wb, wt] = [W.x - W.w / 2, W.x + W.w / 2, W.y - W.h / 2, W.y + W.h / 2];
+  const panes = paneTexture();
+  textures.push(panes);
+  const patchGeo = new THREE.BufferGeometry().setFromPoints([fall(wl, wb), fall(wr, wb), fall(wr, wt), fall(wl, wt)]);
+  patchGeo.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1, 0, 1], 2));
+  patchGeo.setIndex([0, 2, 1, 0, 3, 2]);
+  const patch = add(patchGeo, new THREE.MeshBasicMaterial({ map: panes, color: 0x2b3548, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }), 0, 0, 0);
+  patch.userData.live = true;
+  // The beam between, faint: sheets across it, each a line across the window drawn down to the floor
+  // (a sheet seen edge on would show as a streak, so none runs along the beam's sides).
+  const haze = beamTexture();
+  textures.push(haze);
+  const beamPos: number[] = [];
+  const beamUv: number[] = [];
+  for (const k of [0.12, 0.37, 0.63, 0.88]) {
+    const y = wb + k * W.h;
+    const quad = [new THREE.Vector3(wl, y, WALL_Z), new THREE.Vector3(wr, y, WALL_Z), fall(wr, y), fall(wl, y)];
+    for (const i of [0, 1, 2, 0, 2, 3]) beamPos.push(...quad[i].toArray());
+    beamUv.push(0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0);
+  }
+  const beamGeo = new THREE.BufferGeometry();
+  beamGeo.setAttribute('position', new THREE.Float32BufferAttribute(beamPos, 3));
+  beamGeo.setAttribute('uv', new THREE.Float32BufferAttribute(beamUv, 2));
+  const beam = add(beamGeo, new THREE.MeshBasicMaterial({ map: haze, color: 0x141a26, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }), 0, 0, 0);
+  beam.userData.live = true;
+  const moon = new THREE.SpotLight(0x9db3d9, 80, 16, 0.4, 0.7, 2);
+  moon.position.set(W.x, W.y, WALL_Z).addScaledVector(MOON, -3);
+  moon.target.position.copy(fall(W.x, W.y));
 
   // Workbench: a butcher-block top on a steel frame, a shelf under it, pegboard over it.
   const B = { x: 2.55, z: WALL_Z + 0.4, w: 2.0, d: 0.66, y: 0.92 };
@@ -1153,16 +1236,18 @@ function buildRoom(random: () => number, mats: Mats) {
   add(new THREE.SphereGeometry(0.15, 20, 14), new THREE.MeshStandardMaterial({ color: 0x86837d, roughness: 0.9 }), B.x + 0.1, B.y + 0.15, B.z + 0.05);
   add(new THREE.TorusGeometry(0.1, 0.018, 8, 24), mats.rubber, B.x + 0.42, B.y + 0.018, B.z - 0.08).rotation.x = Math.PI / 2;
 
-  // The pendant over the bench, its cord up into the dark.
-  const P = new THREE.Vector3(B.x, 2.3, B.z + 0.05);
+  // The pendant hung low over the service stand, its cord up into the dark: its light a warm cone down
+  // onto the unfinished robot and the bench's end behind it, the wall above left dark.
+  const P = new THREE.Vector3(STAND.x + 0.3, 2.4, STAND.z + 0.3);
   add(new THREE.CylinderGeometry(0.006, 0.006, 3, 6), mats.rubber, P.x, P.y + 1.6, P.z);
   add(new THREE.ConeGeometry(0.2, 0.18, 24, 1, true), new THREE.MeshStandardMaterial({ color: 0x2f3a33, roughness: 0.5, metalness: 0.4, side: THREE.DoubleSide }), P.x, P.y, P.z);
   add(new THREE.SphereGeometry(0.05, 14, 10), mats.bulb, P.x, P.y - 0.08, P.z);
-  const pendant = new THREE.PointLight(0xffb573, 4.2, 5.5, 2);
-  pendant.position.set(P.x, P.y - 0.12, P.z);
+  const pendant = new THREE.SpotLight(0xff9c55, 30, 5.5, 0.5, 0.6, 2);
+  pendant.position.set(P.x, P.y - 0.1, P.z);
+  pendant.target.position.set(STAND.x, 0.6, STAND.z - 0.1);
 
   bake(group);
-  group.add(pendant);
+  group.add(pendant, pendant.target, moon, moon.target);
   return { group, textures, pendant };
 }
 
@@ -1398,9 +1483,9 @@ const PIXEL_RATIO = 1.25;
 const FLIGHT: Record<string, number> = { 'hero>read': 1900, 'read>hero': 1500 };
 // Looking around the opening (mouse or pen, in windows the lab opens in, with motion on): where the
 // pointer is turns the camera a little about the room's centre, and a drag turns it further, never past
-// LOOK (radians; `up` raises the camera). Let go, and it settles back to the composed view. Turning to
-// positive az swings the monitor toward the left edge, so that side stops sooner where the window needs
-// it to (reachAz in mountLab).
+// LOOK (radians; `up` raises the camera). Let go, and it settles back to the composed view. Turning
+// swings the monitor toward an edge of the window, so either way stops sooner where the window needs it
+// to (reachAz in mountLab).
 const PARALLAX = { az: 0.03, el: 0.015 };
 const LOOK = { az: 0.16, down: 0.05, up: 0.07 };
 const DRAG_PX = 6; // a press that moves further than this is a drag, not a click
@@ -1462,17 +1547,18 @@ export function mountLab(
   const mats = materials();
 
   // Six lights: the work light (warm key, the one shadow), the moon through the window (the one cool
-  // accent, a rim on the robots from behind), the pendant, the desk lamp, the screen's glow, and a low
-  // fill so nothing falls to pure black.
+  // light, down across the floor right of the monitor), the pendant (warm, on the bench and the
+  // unfinished robot), the desk lamp, the screen's glow, and a low fill so nothing falls to pure black.
+  // The key is kept to the floor and the dancers: the wall above them, and the room's corners, stay dark.
   const props = buildProps(mats);
   props.tripod.position.set(-4.6, 0, 3.0); // out of every view: its light, not its lamp, is in the picture
   props.tripod.lookAt(0.2, 0, -0.3);
   props.head.lookAt(new THREE.Vector3(0.2, 0.6, -0.4));
   scene.add(props.tripod);
   scene.updateMatrixWorld();
-  const key = new THREE.SpotLight(0xffc38a, 95, 0, 0.62, 0.55, 2);
+  const key = new THREE.SpotLight(0xffc38a, 95, 0, 0.4, 0.6, 2);
   props.head.getWorldPosition(key.position);
-  key.target.position.set(0.2, 0.5, -0.5);
+  key.target.position.set(0.9, 0.4, -0.3);
   key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024);
   key.shadow.camera.near = 1;
@@ -1480,10 +1566,7 @@ export function mountLab(
   key.shadow.bias = -0.0004;
   key.shadow.normalBias = 0.02;
   key.shadow.radius = 4;
-  const moon = new THREE.SpotLight(0x9db3d9, 70, 16, 0.42, 0.85, 2);
-  moon.position.set(1.4, 4.4, -4.8);
-  moon.target.position.set(0.1, 0, 0.2);
-  scene.add(key, key.target, moon, moon.target, new THREE.HemisphereLight(0x3a342d, 0x0c0b0a, 0.5));
+  scene.add(key, key.target, new THREE.HemisphereLight(0x2c2e33, 0x0c0b0a, 0.35));
 
   const room = buildRoom(random, mats);
   scene.add(room.group);
@@ -2013,11 +2096,13 @@ export function mountLab(
   const soft = (x: number, lo: number, hi: number) => (x >= 0 ? hi * Math.tanh(x / hi) : lo * Math.tanh(x / lo));
   const lookOK = () => intent && mode === 'hero' && !flight && !lost && !html.dataset.pc;
   const fine = (e: PointerEvent) => e.pointerType === 'mouse' || e.pointerType === 'pen';
-  // Turning to positive az swings the monitor toward the frame's left edge, so that way the look stops
-  // where the monitor's bezel would cross the fit's margin, with the drift where it is now: the limit
-  // moves with the drift, slowly, and the monitor never leaves the picture. The other way keeps LOOK.az.
+  // Turning to positive az swings the monitor toward the frame's left edge, and negative toward its right,
+  // so each way the look stops where the monitor's bezel would cross the fit's margin, with the drift
+  // where it is now: the limits move with the drift, slowly, and the monitor never leaves the picture (in
+  // a narrow window, too). Each is LOOK.az where there's room for it.
   const trial = newView();
   let lookAzMax = LOOK.az;
+  let lookAzMin = LOOK.az; // the negative way's, as a size
   function inFrame(az: number) {
     heroPose(trial, az, look.el);
     probe.position.copy(trial.pos);
@@ -2026,7 +2111,8 @@ export function mountLab(
     probe.matrixWorldInverse.copy(probe.matrixWorld).invert();
     return bezelCorners.every((c) => {
       pv.copy(c).applyMatrix4(probe.matrixWorldInverse);
-      return pv.z < -0.1 && trial.cx + (trial.f * pv.x) / -pv.z >= fw * 0.015;
+      const x = trial.cx + (trial.f * pv.x) / -pv.z;
+      return pv.z < -0.1 && x >= fw * 0.015 && x <= fw * 0.985;
     });
   }
   // The bezel in the opening as drawn now, with the drift and the look where they are (client px).
@@ -2056,13 +2142,13 @@ export function mountLab(
     }
     return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
   }
-  function reachAz() {
-    if (inFrame(LOOK.az)) return LOOK.az;
+  function reachAz(way: 1 | -1) {
+    if (inFrame(way * LOOK.az)) return LOOK.az;
     let lo = 0;
     let hi = LOOK.az;
     for (let i = 0; i < 12; i++) {
       const mid = (lo + hi) / 2;
-      if (inFrame(mid)) lo = mid;
+      if (inFrame(way * mid)) lo = mid;
       else hi = mid;
     }
     return Math.max(lo, 1e-3);
@@ -2073,9 +2159,12 @@ export function mountLab(
       drag.az *= k;
       drag.el *= k;
     }
-    if (lookOK()) lookAzMax = reachAz();
+    if (lookOK()) {
+      lookAzMax = reachAz(1);
+      lookAzMin = reachAz(-1);
+    }
     const k = 1 - Math.exp(-dt * 6);
-    look.az += (soft(par.az + drag.az, LOOK.az, lookAzMax) - look.az) * k;
+    look.az += (soft(par.az + drag.az, lookAzMin, lookAzMax) - look.az) * k;
     look.el += (soft(par.el + drag.el, LOOK.down, LOOK.up) - look.el) * k;
   }
   function unlook() {
@@ -2109,7 +2198,7 @@ export function mountLab(
       }
       if (press.moved) {
         // Grab the room: drag right and it turns right. Wound up no further than the limits.
-        drag.az = Math.max(-2 * LOOK.az, Math.min(2 * lookAzMax, press.az - (dx / fw) * 0.9));
+        drag.az = Math.max(-2 * lookAzMin, Math.min(2 * lookAzMax, press.az - (dx / fw) * 0.9));
         drag.el = Math.max(-2 * LOOK.down, Math.min(2 * LOOK.up, press.el + (dy / fh) * 0.5));
       }
     } else if (lookOK()) {
@@ -2241,6 +2330,7 @@ export function mountLab(
         ...(({ x, y, w, h }) => ({ monX: x, monY: y, monW: w, monH: h }))(monitorRect()),
         lookAz: look.az,
         lookAzMax,
+        lookAzMin,
         lookEl: look.el,
       };
     },
