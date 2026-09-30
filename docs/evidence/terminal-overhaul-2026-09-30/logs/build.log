@@ -1,0 +1,71 @@
+
+> donaldheddesheimer.github.io@0.1.0 build
+> astro build
+
+19:25:27 [content] Syncing content
+19:25:27 [content] Synced content
+19:25:27 [types] Generated 267ms
+19:25:27 [build] output: "static"
+19:25:27 [build] mode: "static"
+19:25:27 [build] directory: <repo>/dist/
+19:25:27 [build] Collecting build info...
+19:25:27 [build] ✓ Completed in 294ms.
+19:25:27 [build] Building static entrypoints...
+19:25:27 [vite] ✓ built in 565ms
+19:25:27 [WARN] [vite] [plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+19:25:27 [vite] ✓ built in 187ms
+19:25:27 [build] Rearranging server assets...
+
+ generating static routes 
+19:25:28   ├─ /404.html (+10ms) 
+19:25:28   ├─ /computer/about/index.html (+5ms) 
+19:25:28   ├─ /computer/contact/index.html (+4ms) 
+19:25:28   ├─ /computer/resume/index.html (+3ms) 
+19:25:28   ├─ /computer/work/bytefight/index.html (+3ms) 
+19:25:28   ├─ /computer/work/claude-status/index.html (+1ms) 
+19:25:28   ├─ /computer/work/cucadence/index.html (+1ms) 
+19:25:28   ├─ /computer/work/fluxion/index.html (+1ms) 
+19:25:28   ├─ /computer/work/nn-mnist/index.html (+1ms) 
+19:25:28   ├─ /computer/work/skyblock-bazaar/index.html (+1ms) 
+19:25:28   ├─ /computer/work/smart-bin/index.html (+1ms) 
+19:25:28   ├─ /computer/work/swerve-drive/index.html (+1ms) 
+19:25:28   ├─ /computer/work/traffic-ops-center/index.html (+1ms) 
+19:25:28   ├─ /computer/work/travelmate/index.html (+1ms) 
+19:25:28   ├─ /computer/work/useless-machine/index.html (+2ms) 
+19:25:28   ├─ /computer/work/index.html (+11ms) 
+19:25:28   ├─ /computer/index.html (+5ms) 
+19:25:28   ├─ /projects/useless-machine/index.html (+1ms) 
+19:25:28   ├─ /projects/swerve-drive/index.html (+4ms) 
+19:25:28   ├─ /projects/smart-bin/index.html (+2ms) 
+19:25:28   ├─ /projects/travelmate/index.html (+1ms) 
+19:25:28   ├─ /projects/bytefight/index.html (+2ms) 
+19:25:28   ├─ /projects/skyblock-bazaar/index.html (+1ms) 
+19:25:28   ├─ /projects/nn-mnist/index.html (+1ms) 
+19:25:28   ├─ /projects/claude-status/index.html (+1ms) 
+19:25:28   ├─ /projects/cucadence/index.html (+1ms) 
+19:25:28   ├─ /projects/fluxion/index.html (+1ms) 
+19:25:28   ├─ /projects/traffic-ops-center/index.html (+1ms) 
+19:25:28   ├─ /prototype/work/bytefight/index.html (+2ms) 
+19:25:28   ├─ /prototype/work/claude-status/index.html (+1ms) 
+19:25:28   ├─ /prototype/work/cucadence/index.html (+1ms) 
+19:25:28   ├─ /prototype/work/fluxion/index.html (+1ms) 
+19:25:28   ├─ /prototype/work/nn-mnist/index.html (+1ms) 
+19:25:28   ├─ /prototype/work/skyblock-bazaar/index.html (+1ms) 
+19:25:28   ├─ /prototype/work/smart-bin/index.html (+1ms) 
+19:25:28   ├─ /prototype/work/swerve-drive/index.html (+1ms) 
+19:25:28   ├─ /prototype/work/traffic-ops-center/index.html (+1ms) 
+19:25:28   ├─ /prototype/work/travelmate/index.html (+1ms) 
+19:25:28   ├─ /prototype/work/useless-machine/index.html (+1ms) 
+19:25:28   ├─ /prototype/index.html (+27ms) 
+19:25:28   ├─ /systems/screen/index.html (+11ms) 
+19:25:28   ├─ /systems/index.html (+3ms) 
+19:25:28   ├─ /index.html (+3ms) 
+19:25:28 ✓ Completed in 193ms.
+
+19:25:28 [build] ✓ Completed in 961ms.
+19:25:28 [build] 43 page(s) built in 1.28s
+19:25:28 [build] Complete!
