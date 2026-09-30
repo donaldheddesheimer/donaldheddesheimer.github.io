@@ -2,6 +2,10 @@
 code: PRJ-02
 title: Swerve Drive
 summary: FRC robot code that turns an Xbox controller into independent speed and angle commands for four swerve modules.
+brief:
+  does: 'FRC robot code that turns an Xbox controller into independent speed and angle commands for four swerve modules.'
+  hard: 'Field-centric control from a Pigeon 2 IMU across MK3, MK4 and MK4i modules, with a held button for robot-centric.'
+# TODO: brief: add what you owned in the rewrite (mine) and how it ran on the robot (shown).
 status: archived
 start: '2023'
 org: wra

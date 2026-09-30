@@ -2,6 +2,11 @@
 code: PRJ-09
 title: cuCadence
 summary: A header-only C++17/CUDA profiler that lives inside your binary and reports per-stage latency, tail spikes, and deadline misses in real-time GPU loops.
+brief:
+  does: 'A header-only C++17/CUDA profiler that runs inside the binary and reports per-stage latency, tail spikes and deadline misses in real-time GPU loops.'
+  mine: 'Built it after profiling a real-time GPU pipeline at Solopulse; tested it on llama.cpp''s CUDA backend, added CUDA Graph capture safeguards and fixed three reporting defects.'
+  hard: 'Measuring GPU stages without adding a sync: events resolve later at sync points the application already has, with thread-local event pools and statistics in bounded memory.'
+  shown: '3.4 μs per GPU scope, about 48% less than blocking CUDA-event timing, and no measurable throughput cost on llama.cpp when instrumented at the graph level.'
 status: active
 start: '2026-08'
 related: [solopulse]

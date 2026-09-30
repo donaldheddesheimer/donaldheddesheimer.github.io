@@ -81,9 +81,9 @@ const current = experience.find((e) => !e.end);
 {
   cmd === 'work' && (
     <div class="t-out" data-announce={`Printed: ${projects.length} projects.`}>
-      <p class="t-dim">Projects in GPU software, robotics and simulation, and a few from before. {projects.length} in all, featured first.</p>
-      <p class="t-hint">
-        To read one here, run its command, <span class="t-strong">work &lt;id&gt;</span>.
+      <p class="t-dim">
+        Projects in GPU software, robotics and simulation, and a few from before: {projects.length} in all, featured first. Run{' '}
+        <span class="t-strong">work &lt;id&gt;</span> to read one here.
       </p>
       <ol class="t-list t-work" role="list">
         {projects.map((p, i) => (
@@ -91,9 +91,11 @@ const current = experience.find((e) => !e.end);
             <span class="t-num" aria-hidden="true">
               {i + 1}.
             </span>
-            <h3 class="t-strong">{p.data.title}</h3>
-            <p class="t-dim">{workMeta(p.data)}</p>
-            <p class="t-prose">{p.data.summary}</p>
+            <div class="t-row">
+              <h3 class="t-strong">{p.data.title}</h3>
+              <span class="t-dim">{workMeta(p.data)}</span>
+            </div>
+            <p class="t-prose">{p.data.brief?.does ?? p.data.summary}</p>
             <p class="t-links">
               <TermCmd name={`work ${p.id}`} live={live} href={projectHref(p.id)} />
               {p.data.demo && (

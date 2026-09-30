@@ -2,6 +2,11 @@
 code: PRJ-07
 title: 'nn: MNIST three ways'
 summary: The same neural network in NumPy, a C++ CPU baseline, and CUDA, with a hand-tiled GEMM benchmarked against cuBLAS.
+brief:
+  does: 'The same multilayer perceptron written three times, in NumPy, C++ on the CPU and CUDA, each closer to the hardware.'
+  hard: 'The CUDA forward and backward passes, including a hand-tiled GEMM kernel benchmarked against cuBLAS.'
+  shown: 'About 97% accuracy on MNIST.'
+# TODO: brief: add mine; shown could carry the GEMM vs cuBLAS result once measured.
 status: active
 start: '2026-06'
 tags: [CUDA, C++, Python, Machine learning, Performance]

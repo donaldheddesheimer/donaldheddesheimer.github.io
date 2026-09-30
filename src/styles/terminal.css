@@ -131,7 +131,8 @@
 .t-list > li + li {
   margin-top: 1.4em;
 }
-/* A project: its number, then its title, when and where just under it, what it is and its commands. */
+/* A project: its number, then its title with when and where across from it (as the résumé's rows), what
+   it does and its commands. */
 .t-work > li {
   display: grid;
   grid-template-columns: 4ch minmax(0, 1fr);
@@ -144,8 +145,7 @@
   grid-column: 1;
   color: var(--t-dim);
 }
-.t-work > li > .t-num + h3,
-.t-work > li > h3 + .t-dim,
+.t-work > li > .t-num + .t-row,
 .t-project > h3 + .t-dim {
   margin-top: 0;
 }
@@ -295,6 +295,13 @@
 }
 .t-kv-wide > div {
   grid-template-columns: 24ch minmax(0, 1fr);
+}
+/* A project's opening (`work <id>`): a line of prose to each label, kept to a reading measure. */
+.t-brief {
+  gap: 0.5em;
+}
+.t-brief dd {
+  max-width: 76ch;
 }
 @container (width < 34rem) {
   .t-kv-wide > div {

@@ -2,6 +2,11 @@
 code: PRJ-08
 title: claude-status
 summary: A floating macOS desktop pet that shows what Claude Code is doing, including sessions running on a remote host over SSH.
+brief:
+  does: 'A macOS desktop pet that shows what Claude Code is doing, including sessions on a remote host over SSH.'
+  hard: 'Getting remote sessions'' events home safely: one SSH RemoteForward tunnel, a per-account filter on shared hosts, and a shared token where a real boundary is needed.'
+  shown: 'Several sessions fold into one mood, with a session waiting on you outranking one that''s working; it installs with one script and no dependencies.'
+# TODO: brief: add what you built (mine), if you want it said.
 status: active
 start: '2026-08'
 tags: [Developer tools, LLMs, Swift, macOS]
