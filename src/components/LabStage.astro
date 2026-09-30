@@ -19,7 +19,8 @@ import Terminal from './Terminal.astro';
 import { profile } from '../data/site';
 import { TERMINAL, pageHref } from '../scripts/lab/routes';
 
-const projects = (await getCollection('projects')).map((p) => p.id);
+// The projects' ids and names, for the computer's addresses (/?computer=work/<id>) and its title.
+const projects = Object.fromEntries((await getCollection('projects')).map((p) => [p.id, p.data.title]));
 ---
 
 <figure data-lab-root class="lab">
@@ -254,7 +255,7 @@ const projects = (await getCollection('projects')).map((p) => p.id);
 
   /* The lab, once entered: the whole window, see-through but for the computer's screen, over the scene,
      which fills the window under it. The screen (computer.ts sizes and places it) rides the drawn one in
-     flight and lies flat over it to read; the terminal fills it, and a project's details cover it. */
+     flight and lies flat over it to read; the terminal fills it. */
   .pc {
     --chin: env(safe-area-inset-bottom);
     position: fixed;
@@ -284,19 +285,6 @@ const projects = (await getCollection('projects')).map((p) => p.id);
     transform-origin: 0 0;
     opacity: 0;
     transition: opacity 0.3s var(--ease);
-  }
-  .pc-screen :global(.pc-detail) {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-    background: var(--bg);
-    opacity: 0;
-    transition: opacity 0.2s var(--ease);
-  }
-  .pc-screen :global(.pc-detail.is-loaded) {
-    opacity: 1;
   }
   /* The way out on a touch screen, with no Esc to hand: a power button on the bezel, under the screen at
      its right. A finger's target: 44px, reaching on down past a bezel too narrow for its box
@@ -351,13 +339,11 @@ const projects = (await getCollection('projects')).map((p) => p.id);
     transform: translateX(-50%);
   }
   :global(html[data-motion='off']) .pc-screen,
-  :global(html[data-motion='off']) .pc-screen :global(.pc-detail),
   :global(html[data-motion='off']) .pc-exit {
     transition: none;
   }
   @media (prefers-reduced-motion: reduce) {
     .pc-screen,
-    .pc-screen :global(.pc-detail),
     .pc-exit {
       transition: none;
     }

@@ -1,28 +1,52 @@
 ---
-// A project's details on the lab computer, over the terminal: the same CaseStudy as /projects/<id>/, its
-// links staying on the computer, and its bar the way back to the terminal (Screen.astro).
+// A project in the terminal's transcript: what `work <id>` prints on the lab computer (TermProject.astro),
+// on a page of its own, as /computer/ is the terminal's. With JavaScript, it opens the lab printing it
+// (/?computer=work/<id>, at the section its #anchor names); without, or after the lab's script failed
+// (?static, and until the lab next runs, in this session), it stands alone, its commands links to their
+// pages. Kept out of search results; the project's canonical page is its case study, /projects/<id>/.
 import { getCollection, type CollectionEntry } from 'astro:content';
-import Screen from '../../../layouts/Screen.astro';
-import CaseStudy from '../../../components/CaseStudy.astro';
+import Base from '../../../layouts/Base.astro';
+import TermProject from '../../../components/TermProject.astro';
 import { profile } from '../../../data/site';
-import { pageHref } from '../../../scripts/lab/routes';
+import { PS1 } from '../../../lib/terminal';
+import { canonicalHref, labHref } from '../../../scripts/lab/routes';
+import '../../../styles/terminal.css';
 
 export async function getStaticPaths() {
-  const projects = (await getCollection('projects')).sort((a, b) => a.data.code.localeCompare(b.data.code));
-  return projects.map((p, i) => ({
-    params: { slug: p.id },
-    props: { project: p, prev: projects[i - 1], next: projects[i + 1] },
-  }));
+  return (await getCollection('projects')).map((p) => ({ params: { slug: p.id }, props: { project: p } }));
 }
 
 interface Props {
   project: CollectionEntry<'projects'>;
-  prev?: CollectionEntry<'projects'>;
-  next?: CollectionEntry<'projects'>;
 }
 const { project } = Astro.props;
+const path = `work/${project.id}`;
+const lab = labHref(path);
 ---
 
-<Screen title={`${project.data.title} · ${profile.name}`} path={`work/${project.id}`}>
-  <CaseStudy {...Astro.props} projectHref={(id) => pageHref(`work/${id}`)} indexHref={false} />
-</Screen>
+<Base title={`${project.data.title} · Terminal · ${profile.name}`} description={project.data.summary} canonical={canonicalHref(path)} noindex>
+  <Fragment slot="head">
+    <script is:inline define:vars={{ lab }}>
+      (function () {
+        var stay = new URLSearchParams(location.search).has('static');
+        try {
+          stay = stay || sessionStorage.getItem('lab:static') === '1';
+        } catch (e) {}
+        if (!stay) location.replace(lab + location.hash);
+      })();
+    </script>
+  </Fragment>
+  <main id="main" class="t-static">
+    <h1 class="sr-only">{profile.name}: the portfolio's terminal</h1>
+    <div class="term-log">
+      <section class="term-entry" aria-labelledby="work-cmd">
+        <h2 class="term-echo" id="work-cmd"><span class="term-ps1" aria-hidden="true">{PS1}</span>work {project.id}</h2>
+        <TermProject project={project} live={false} />
+      </section>
+    </div>
+    <p class="t-static-prompt" aria-hidden="true">
+      <span class="term-ps1">{PS1}</span><span class="t-static-cursor"></span>
+    </p>
+    <p class="t-static-back"><a href="/">Back to the lab</a></p>
+  </main>
+</Base>

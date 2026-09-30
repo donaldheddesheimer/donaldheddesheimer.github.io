@@ -1,8 +1,9 @@
 ---
-// What one of the terminal's commands prints, as real HTML: `help`, the four it lists, and the answer
-// to anything else. From src/data/site.ts and the projects, nothing added. The lab's terminal holds each
-// in a <template> until it's run (Terminal.astro); the /computer/ transcript prints them all (`live`
-// false: commands are links to where they ran, and there's nothing to copy with).
+// What one of the terminal's commands prints, as real HTML: `help`, the four it lists, and the answers
+// to a project that isn't there and to anything else. From src/data/site.ts and the projects, nothing
+// added. (A project's own, `work <id>`, is TermProject.astro.) The lab's terminal holds each in a
+// <template> until it's run (Terminal.astro); the /computer/ transcript prints them all (`live` false:
+// commands are links to where they ran, and there's nothing to copy with).
 //
 // Plain text laid out as a terminal lays it out: a heading per part, key and value columns, "- " lists.
 // Under the entry's heading (the command, an h2), parts are h3 and entries h4.
@@ -10,19 +11,21 @@ import { getCollection } from 'astro:content';
 import TermCmd from './TermCmd.astro';
 import { contact, education, experience, offDuty, orgs, profile, skills, socials } from '../data/site';
 import { fmtMonth } from '../lib/format';
-import { workMeta } from '../lib/folio';
-import { HELP, NOT_FOUND } from '../lib/terminal';
+import { byWork, workMeta } from '../lib/folio';
+import { HELP, NOT_FOUND, NO_PROJECT } from '../lib/terminal';
+import { labHref } from '../scripts/lab/routes';
 
 interface Props {
-  cmd: 'help' | 'about' | 'work' | 'resume' | 'contact' | 'not-found';
+  cmd: 'help' | 'about' | 'work' | 'resume' | 'contact' | 'no-project' | 'not-found';
   live?: boolean;
 }
 const { cmd, live = true } = Astro.props;
 
 const org = (id: string) => orgs.find((o) => o.id === id)!;
 const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
-// Featured projects first, then the rest; newest first within each.
-const projects = (await getCollection('projects')).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.code.localeCompare(a.data.code));
+const projects = (await getCollection('projects')).sort(byWork);
+// A project's command: the lab running it, or, in the transcript, its page.
+const projectHref = (id: string) => (live ? labHref(`work/${id}`) : `/computer/work/${id}/`);
 const file = `${profile.name.replace(/\s+/g, '-')}-Resume.pdf`;
 const current = experience.find((e) => !e.end);
 ---
@@ -79,16 +82,20 @@ const current = experience.find((e) => !e.end);
   cmd === 'work' && (
     <div class="t-out" data-announce={`Printed: ${projects.length} projects.`}>
       <p class="t-dim">Projects in GPU software, robotics and simulation, and a few from before. {projects.length} in all, featured first.</p>
-      <ul class="t-list t-work">
-        {projects.map((p) => (
+      <p class="t-hint">
+        To read one here, run its command, <span class="t-strong">work &lt;id&gt;</span>.
+      </p>
+      <ol class="t-list t-work" role="list">
+        {projects.map((p, i) => (
           <li>
+            <span class="t-num" aria-hidden="true">
+              {i + 1}.
+            </span>
             <h3 class="t-strong">{p.data.title}</h3>
             <p class="t-dim">{workMeta(p.data)}</p>
             <p class="t-prose">{p.data.summary}</p>
             <p class="t-links">
-              <a href={`/projects/${p.id}/`} data-term-detail={live ? p.id : undefined} aria-label={`details: ${p.data.title}`}>
-                details
-              </a>
+              <TermCmd name={`work ${p.id}`} live={live} href={projectHref(p.id)} />
               {p.data.demo && (
                 <a href={p.data.demo} target="_blank" rel="noopener" aria-label={`demo: ${p.data.title} (opens in a new tab)`}>
                   demo<span aria-hidden="true">↗</span>
@@ -104,7 +111,7 @@ const current = experience.find((e) => !e.end);
             </p>
           </li>
         ))}
-      </ul>
+      </ol>
       <p class="t-hint">
         Run <TermCmd name="resume" live={live} /> for the full story, or <TermCmd name="contact" live={live} /> to get in touch.
       </p>
@@ -210,6 +217,23 @@ const current = experience.find((e) => !e.end);
           ))}
       </dl>
       <p class="t-dim">Based in {profile.location}.</p>
+    </div>
+  )
+}
+
+{
+  cmd === 'no-project' && (
+    <div class="t-out">
+      <p>
+        {NO_PROJECT[0]}
+        <span class="t-strong" data-term-arg />
+        {NO_PROJECT[1]}
+        <TermCmd name="work" live={live} />
+        {NO_PROJECT[2]}
+      </p>
+      <p data-term-guess hidden>
+        Did you mean <span data-term-guesses />?
+      </p>
     </div>
   )
 }

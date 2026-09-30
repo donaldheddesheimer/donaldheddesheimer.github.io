@@ -4,13 +4,13 @@
 // into the computer, which holds the whole portfolio as a terminal (about, work, resume, contact;
 // computer.ts, terminal.ts). There is nothing below the room.
 //
-// /?computer is the lab at the terminal, and /?computer=work/<id> a project's details over it (routes.ts):
-// a shared link or a reload opens it at once, without the camera's entrance, on the monitor or, in a
-// small window, across the window. The old pages' addresses (/?computer=about, and the older anchors
-// /#work, /#about, /#resume, /#contact) open the terminal the same way and run their command. /?sel=<id>
-// is an old systems-map link (LegacySel.astro). Without JavaScript, the monitor is a link to the
-// terminal's own page (/computer/), which stands alone; if the lab's script fails, that page is where
-// the lab goes instead.
+// /?computer is the lab at the terminal, and /?computer=work/<id> the terminal with a project printed
+// (routes.ts): a shared link or a reload opens it at once, without the camera's entrance, on the monitor
+// or, in a small window, across the window. The old pages' addresses (/?computer=about, and the older
+// anchors /#work, /#about, /#resume, /#contact) open the terminal the same way and run their command.
+// /?sel=<id> is an old systems-map link (LegacySel.astro). Without JavaScript, the monitor is a link to
+// the terminal's own page (/computer/), which stands alone; if the lab's script fails, that page is
+// where the lab goes instead.
 //
 // All of it is the page's main landmark, in reading order: the name (the page's heading), the room with
 // its one link (the monitor), then Settings. The room is fixed behind; the name and Settings stand over it.
@@ -49,7 +49,7 @@ const projects = (await getCollection('projects')).map((p) => p.id);
         else history.replaceState(history.state, '', location.pathname + location.hash);
       })();
       // If the lab's script never starts (it failed to load, or broke): the terminal's own page instead
-      // (until the lab next runs, in this session), or a project's.
+      // (until the lab next runs, in this session), or a project's case study.
       addEventListener('load', function () {
         setTimeout(function () {
           var h = document.documentElement;
@@ -59,7 +59,7 @@ const projects = (await getCollection('projects')).map((p) => p.id);
           } catch (e) {}
           var m = (new URLSearchParams(location.search).get('computer') || '').match(/^\/*work\/([\w-]+)\/*$/);
           var run = h.dataset.pcRun;
-          location.replace(m ? '/projects/' + m[1] + '/' : '/computer/?static' + (run ? '#' + run : ''));
+          location.replace(m ? '/projects/' + m[1] + '/' + location.hash : '/computer/?static' + (run ? '#' + run : ''));
         }, 0);
       });
     </script>

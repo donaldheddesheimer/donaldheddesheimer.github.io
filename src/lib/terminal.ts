@@ -1,6 +1,7 @@
 // The lab computer's terminal: the words it says, shared by the page (src/components/Terminal.astro,
 // TermOutput.astro, the /computer/ transcript) and its script (src/scripts/lab/terminal.ts). What each
-// command prints is TermOutput.astro, from src/data/site.ts and the projects.
+// command prints is TermOutput.astro (and a project's, TermProject.astro), from src/data/site.ts and the
+// projects.
 import type { Command } from '../scripts/lab/routes';
 
 /** The prompt: whose terminal, on which machine, and where. */
@@ -19,6 +20,10 @@ export const HELP: { cmd: Command; label: string }[] = [
   { cmd: 'resume', label: 'Experience, education, and résumé download' },
   { cmd: 'contact', label: 'Get in touch' },
 ];
+
+/** `work <id>`, for an id no project has: the id goes after the first part, and `work`, tappable, after
+ *  the second. */
+export const NO_PROJECT = ['No project called ', '. Run ', ' to list them.'] as const;
 
 /** Anything else. `help`, in the middle, is tappable. */
 export const NOT_FOUND = ['Command not found. Run ', ' for available commands.'] as const;

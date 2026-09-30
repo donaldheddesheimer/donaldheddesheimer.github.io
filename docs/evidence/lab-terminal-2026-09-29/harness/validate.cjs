@@ -49,8 +49,9 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
   const reading = (p) => p.waitForFunction(() => document.documentElement.dataset.pc === 'read', null, { timeout: 20000 });
   const booted = (p) => p.waitForFunction(() => document.querySelector('[data-term]')?.dataset.boot === 'done', null, { timeout: 5000 });
   const closed = (p) => p.waitForFunction(() => !document.documentElement.dataset.pc, null, { timeout: 15000 });
-  const frame = (p) => p.frames().find((f) => /\/computer\/work\/[\w-]+\/$/.test(new URL(f.url()).pathname));
-  const detailed = (p) => p.waitForFunction(() => { const f = document.querySelector('.pc-detail'); return !!f?.classList.contains('is-loaded') && f.contentDocument?.readyState === 'complete' && f.contentDocument.activeElement?.matches('main h1'); }, null, { timeout: 15000 });
+  // A project printed: the newest entry is `work <id>`'s, and the address is the project's.
+  const printed = (p, id) => p.waitForFunction((i) => [...document.querySelectorAll('[data-term] .term-entry')].at(-1)?.querySelector(':scope > .t-project')?.dataset.project === i && location.search === `?computer=work/${i}`, id, { timeout: 8000 });
+  const TERM_TITLE = 'Terminal · Donald Heddesheimer';
   const enter = async (p, touch = false) => {
     const r = await p.evaluate(() => (({ x, y, width, height }) => ({ x, y, w: width, h: height }))(document.querySelector('[data-lab-monitor]').getBoundingClientRect()));
     const [x, y] = [r.x + r.w / 2, r.y + r.h / 2];
@@ -75,7 +76,7 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
     const said = (echo) => [...echo.childNodes].slice(1).map((n) => n.textContent).join('');
     const all = [...t.querySelectorAll('.term-entry')];
     const a = document.activeElement;
-    const focus = !a || a === document.body ? 'body' : a === input ? 'input' : a === t ? 'terminal' : a.matches('.term-echo') ? `echo:${said(a).trim()}${a.closest('.term-entry') === all.at(-1) ? ' (newest)' : ''}` : a.matches('[data-lab-monitor]') ? 'monitor' : a.matches('[data-pc-exit]') ? 'power' : a === document.querySelector('[data-pc-dialog]') ? 'dialog' : a.tagName === 'IFRAME' ? 'frame' : `${a.tagName.toLowerCase()}:${(a.getAttribute('aria-label') || a.textContent).trim().replace(/\s+/g, ' ').slice(0, 48)}`;
+    const focus = !a || a === document.body ? 'body' : a === input ? 'input' : a === t ? 'terminal' : a.matches('.term-echo') ? `echo:${said(a).trim()}${a.closest('.term-entry') === all.at(-1) ? ' (newest)' : ''}` : a.matches('[data-lab-monitor]') ? 'monitor' : a.matches('[data-pc-exit]') ? 'power' : a === document.querySelector('[data-pc-dialog]') ? 'dialog' : `${a.tagName.toLowerCase()}:${(a.getAttribute('aria-label') || a.textContent).trim().replace(/\s+/g, ' ').slice(0, 48)}`;
     return {
       at: location.pathname + location.search + location.hash,
       pc: h.dataset.pc ?? null,
@@ -236,19 +237,64 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
       const [about, work, resume, contact] = outs;
       return {
         about: about.querySelector('.t-strong')?.textContent,
-        work: work.querySelectorAll('.t-work > li').length,
-        details: [...work.querySelectorAll('a[data-term-detail]')].map((a) => a.getAttribute('href')),
+        work: [...work.querySelectorAll('.t-work > li')].map((li) => { const a = li.querySelector('a.t-cmd'); return { num: li.querySelector('.t-num')?.textContent.trim(), run: a?.dataset.termRun, text: a?.textContent.trim(), href: a?.getAttribute('href') }; }),
         resume: [...resume.querySelectorAll('a[download]')].map((a) => [a.getAttribute('href'), a.getAttribute('download')]),
         sections: [...resume.querySelectorAll('.t-section')].map((h) => h.textContent),
         contact: [...contact.querySelectorAll('a')].map((a) => a.getAttribute('href')),
       };
     });
-    ok('commands: about names Donald; work lists 11 projects, each with details; resume the PDF, then Experience, Education, Skills; contact email, GitHub, LinkedIn', content.about === 'Donald Heddesheimer' && content.work === 11 && content.details.length === 11 && content.details.every((h) => /^\/projects\/[\w-]+\/$/.test(h)) && content.resume.length === 1 && content.resume[0][0] === '/resume.pdf' && content.sections.join(',') === 'Experience,Education,Skills' && content.contact.join(' ') === `mailto:${EMAIL} https://github.com/donaldheddesheimer https://www.linkedin.com/in/donaldheddesheimer/`, content);
+    const numbered = content.work.length === 11 && content.work.every((w, i) => w.num === `${i + 1}.` && /^work [\w-]+$/.test(w.run) && w.text === w.run && w.href === `/?computer=work/${w.run.slice(5)}`);
+    ok('commands: about names Donald; work lists 11 projects, numbered, each with its command (work <id>, linking to /?computer=work/<id>); resume the PDF, then Experience, Education, Skills; contact email, GitHub, LinkedIn', content.about === 'Donald Heddesheimer' && numbered && content.resume.length === 1 && content.resume[0][0] === '/resume.pdf' && content.sections.join(',') === 'Experience,Education,Skills' && content.contact.join(' ') === `mailto:${EMAIL} https://github.com/donaldheddesheimer https://www.linkedin.com/in/donaldheddesheimer/`, { ...content, work: content.work.map((w) => `${w.num} ${w.run} ${w.href}`) });
+
+    // A project, typed: its write-up printed in the terminal (no frame), the address and the title its own.
+    await type(p, 'work cucadence', 900);
+    let s = await snap(p);
+    let v = await shown(p);
+    const pj = await p.evaluate(() => {
+      const out = [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelector(':scope > .t-project');
+      const t = document.querySelector('[data-term]');
+      return {
+        id: out?.dataset.project,
+        name: out?.querySelector('h3')?.textContent.trim(),
+        kv: [...out.querySelectorAll('.t-kv dt')].map((d) => d.textContent.trim()),
+        prose: out.querySelectorAll('.t-md p').length,
+        headings: [...out.querySelectorAll('.t-md [data-anchor]')].map((h) => h.dataset.anchor),
+        ids: out.querySelectorAll('.t-md [id]').length,
+        code: out.querySelectorAll('pre.t-code').length,
+        figs: out.querySelectorAll('details.t-fig').length,
+        open: out.querySelectorAll('details.t-fig[open]').length,
+        related: [...out.querySelectorAll('.t-links a.t-cmd')].map((a) => a.dataset.termRun),
+        frames: document.querySelectorAll('iframe').length,
+        sideways: t.scrollWidth - t.clientWidth,
+      };
+    });
+    ok('commands: work cucadence prints the project in the terminal, announced, the prompt ready again; the address /?computer=work/cucadence, the title its own', last(s).said === 'work cucadence' && last(s).out === 'Printed: cuCadence.' && s.status === 'Printed: cuCadence.' && s.focus === 'input' && s.value === '' && s.at === '/?computer=work/cucadence' && s.title === `cuCadence · ${TERM_TITLE}`, { last: last(s), status: s.status, focus: s.focus, at: s.at, title: s.title });
+    ok(`commands: work cucadence shown ${v.fits ? 'whole' : 'from its start'}, the prompt in view`, (v.fits ? v.whole : v.fromTop) && v.prompt, v);
+    ok('commands: the project as text: name, status, source, tags, its write-up (headings, a code block), figures folded, related commands; no frame, nothing sideways', pj.id === 'cucadence' && pj.name === 'cuCadence' && ['status', 'source', 'tags'].every((k) => pj.kv.includes(k)) && pj.prose >= 3 && pj.headings.includes('how-it-works') && pj.ids === 0 && pj.code >= 1 && pj.figs >= 1 && pj.open === 0 && pj.related.length >= 1 && pj.related.every((r) => /^work [\w-]+$/.test(r)) && pj.frames === 0 && pj.sideways <= 0, pj);
+    await shot(p, 'cmd-work-cucadence-1440x900');
+    // Again (a repeat), mixed case and spaces: a second entry of its own.
+    await type(p, 'WORK  CuCadence', 900);
+    s = await snap(p);
+    ok('commands: "WORK  CuCadence" (case, spaces) prints it again, a new entry', said(s).slice(-2).join(',') === 'work cucadence,WORK  CuCadence' && last(s).out === 'Printed: cuCadence.' && s.at === '/?computer=work/cucadence', said(s).slice(-2));
+    // Unknown: says so, and how to list them; the address the terminal's again.
+    await type(p, 'work nope', 700);
+    s = await snap(p);
+    const miss = await p.evaluate(() => { const o = [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelector('.t-out'); return { text: o.querySelector('p').textContent.replace(/\s+/g, ' ').trim(), run: o.querySelector('[data-term-run]')?.dataset.termRun, guess: !o.querySelector('[data-term-guess]').hidden }; });
+    const NO = 'No project called nope. Run work to list them.';
+    ok('commands: work nope says there\'s no such project and to run work (a command), announced; no guess; the address /?computer', miss.text === NO && miss.run === 'work' && !miss.guess && s.status === NO && s.at === '/?computer' && s.title === TERM_TITLE, { miss, status: s.status, at: s.at, title: s.title });
+    await type(p, 'work flux', 700);
+    const guess = await p.evaluate(() => { const o = [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelector('.t-out'); const g = o.querySelector('[data-term-guess]'); return { shown: !g.hidden, runs: [...g.querySelectorAll('[data-term-run]')].map((a) => [a.dataset.termRun, a.getAttribute('href')]) }; });
+    ok('commands: work flux guesses work fluxion (a command to run)', guess.shown && guess.runs.length === 1 && guess.runs[0][0] === 'work fluxion' && guess.runs[0][1] === '/?computer=work/fluxion', guess);
+    await clickRun(p, 'work fluxion');
+    await printed(p, 'fluxion');
+    await sleep(500);
+    s = await snap(p);
+    ok('commands: the guess clicked prints fluxion; focus in the prompt', last(s).said === 'work fluxion' && last(s).out === 'Printed: Fluxion.' && s.focus === 'input', { last: last(s), focus: s.focus });
 
     // Unusual input.
     await type(p, '  WoRk  ');
-    let s = await snap(p);
-    ok('input: "  WoRk  " (mixed case, spaces) runs work', last(s).out === want.work, last(s));
+    s = await snap(p);
+    ok('input: "  WoRk  " (mixed case, spaces) runs work; the address the terminal\'s again', last(s).out === want.work && s.at === '/?computer' && s.title === TERM_TITLE, { last: last(s), at: s.at, title: s.title });
     await type(p, 'sudo rm -rf /');
     s = await snap(p);
     const nf = await p.evaluate(() => [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelector('.t-out').textContent.replace(/\s+/g, ' ').trim());
@@ -261,7 +307,7 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
     ok('input: an empty line, and one of spaces, just give a new prompt (no output, hidden from a screen reader)', s.entries.length === n0 + 2 && blank.every((x) => x.tag === 'P' && x.hidden === 'true' && !x.out), blank);
     await type(p, '<img src=x onerror="window.__owned=1"><b>bold</b>');
     s = await snap(p);
-    const inj = await p.evaluate(() => ({ owned: window.__owned ?? null, imgs: document.querySelectorAll('[data-term] .term-log img, [data-term] .term-log b').length, echo: [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelector('.term-echo').textContent }));
+    const inj = await p.evaluate(() => ({ owned: window.__owned ?? null, imgs: [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelectorAll('img, b').length + document.querySelectorAll('[data-term] .term-echo *:not(.term-ps1)').length, echo: [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelector('.term-echo').textContent }));
     ok('input: markup typed is shown as text, never parsed or run', inj.owned === null && inj.imgs === 0 && inj.echo.endsWith('<b>bold</b>') && last(s).out === NOT_FOUND, inj);
     await p.keyboard.type('x'.repeat(260));
     const long = await p.evaluate(() => { const t = document.querySelector('[data-term]'); const i = t.querySelector('[data-term-input]'); const c = t.querySelector('[data-term-cursor]').getBoundingClientRect(); const f = i.getBoundingClientRect(); return { len: i.value.length, sideways: t.scrollWidth - t.clientWidth, cursorIn: c.left >= f.left - 1 && c.right <= f.right + 1 }; });
@@ -358,8 +404,10 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
     await p.context().close();
   }
 
-  // 5. Links: a project's details in the frame (and back, by Escape and by its link), from one project to
-  //    the next; source and demo in a new tab; the résumé PDF; email, GitHub, LinkedIn; copy.
+  // 5. Links: a project's command in work's list, clicked, prints it here (with a modifier, the lab running
+  //    it opens in a new tab instead); a related project's, from inside it, and Back; a cover unfolded, a
+  //    code block scrolled within itself; source and demo in a new tab; the résumé PDF; email, GitHub,
+  //    LinkedIn; copy.
   if (run('links')) {
     // (The test origin isn't a secure context, so it has no clipboard: one is stubbed in, then refused.)
     const p = await fresh({ init: () => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (t) => void (window.__copied = t) } }) });
@@ -368,10 +416,11 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
     const links = await p.evaluate(() => {
       const out = [...document.querySelectorAll('[data-term] .term-entry')].at(-1);
       const all = [...out.querySelectorAll('.t-links a')];
-      return all.map((a) => ({ text: a.textContent.trim(), href: a.getAttribute('href'), target: a.target, rel: a.rel, detail: a.dataset.termDetail ?? null }));
+      return all.map((a) => ({ text: a.textContent.trim(), href: a.getAttribute('href'), target: a.target, rel: a.rel, run: a.dataset.termRun ?? null }));
     });
-    const ext = links.filter((l) => l.detail == null);
-    ok('links: each project\'s details link is its /projects/<id>/ page, run in the computer', links.filter((l) => l.detail).length === 11 && links.filter((l) => l.detail).every((l) => l.href === `/projects/${l.detail}/`), links.filter((l) => l.detail).length);
+    const cmds = links.filter((l) => l.run);
+    const ext = links.filter((l) => l.run == null);
+    ok('links: each project\'s command links to the lab running it (/?computer=work/<id>), in this tab', cmds.length === 11 && cmds.every((l) => l.href === `/?computer=${l.run.replace(' ', '/')}` && !l.target), cmds.length);
     ok('links: source and demo open in a new tab (noopener), to https addresses', ext.length > 0 && ext.every((l) => l.target === '_blank' && /noopener/.test(l.rel) && /^https:\/\//.test(l.href)), ext.map((l) => `${l.text} ${l.href}`));
     // A source link, clicked: a new tab; the computer stays as it was.
     const src = p.locator('[data-term] .term-entry:last-child .t-links a[target="_blank"]').first();
@@ -380,45 +429,84 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
     await tab.waitForLoadState();
     ok('links: a source link opens its address in a new tab, the computer stays open', /^https:\/\//.test(tab.url()) && (await p.evaluate(() => document.documentElement.dataset.pc)) === 'read', tab.url());
     await tab.close();
-    // Details: in the frame over the terminal, focus on its heading, the terminal inert under it.
-    const y0 = (await snap(p)).top;
-    const det = p.locator('[data-term] .term-entry:last-child a[data-term-detail]').nth(1);
-    const id = await det.getAttribute('data-term-detail');
-    await det.scrollIntoViewIfNeeded();
-    const y1 = (await snap(p)).top;
-    await det.click();
-    await detailed(p);
-    await sleep(300);
-    let d = await p.evaluate(() => ({ at: location.search, inert: document.querySelector('[data-term]').inert, title: document.title, h1: document.querySelector('.pc-detail').contentDocument.querySelector('main h1')?.textContent.trim(), back: document.querySelector('.pc-detail').contentDocument.querySelector('[data-leave]')?.textContent.trim().replace(/\s+/g, ' ') }));
-    ok('links: details open over the terminal in the frame (address ?computer=work/<id>), focus on its heading, the terminal inert', d.at === `?computer=work/${id}` && d.inert && d.title.startsWith(d.h1) && /Back to terminal/.test(d.back), d);
-    await shot(p, 'details-1440x900');
-    // Escape (in the frame): back to the terminal as it was, focus on the link that opened them, ringed.
-    await frame(p).locator('body').press('Escape');
-    await p.waitForFunction(() => location.search === '?computer' && !document.querySelector('.pc-detail'));
-    await sleep(300);
+    // A project's command with a modifier: the lab running it, in a new tab; nothing runs here.
+    const n0 = (await snap(p)).entries.length;
+    const cmd = p.locator('[data-term] .term-entry:last-child .t-work a.t-cmd').nth(1);
+    const id = (await cmd.getAttribute('data-term-run')).slice(5);
+    await cmd.scrollIntoViewIfNeeded();
+    const [nt] = await Promise.all([p.context().waitForEvent('page'), cmd.click({ modifiers: ['ControlOrMeta'] })]);
+    await nt.waitForLoadState();
     let s = await snap(p);
-    ok('links: Escape in the details goes back to the terminal (address ?computer), focus on the details link (ringed), the terminal where it was', s.focus.startsWith('a:details:') && s.ring && Math.abs(s.top - y1) <= 2 && s.title === 'Terminal · Donald Heddesheimer', { focus: s.focus, ring: s.ring, top: s.top, was: y1, before: y0 });
-    // Again, back by its link (a click): no ring.
-    await det.click();
-    await detailed(p);
-    await frame(p).click('[data-leave]');
-    await p.waitForFunction(() => location.search === '?computer' && !document.querySelector('.pc-detail'));
-    await sleep(300);
+    // (A tab the browser opens itself, for a modified click, isn't routed to dist/ by Playwright: its first
+    // load fails. What it asked for is in its history; loaded again, now routed, it prints the project.)
+    const asked = (await (await p.context().newCDPSession(nt)).send('Page.getNavigationHistory')).entries[0]?.url;
+    await nt.goto(asked);
+    const opened = await nt.waitForFunction((i) => document.documentElement.dataset.pc === 'read' && [...document.querySelectorAll('[data-term] .term-entry')].at(-1)?.querySelector(':scope > .t-project')?.dataset.project === i, id, { timeout: 15000 }).then(() => true, () => false);
+    ok('links: a project\'s command with a modifier opens /?computer=work/<id> in a new tab (the lab, printing it); nothing runs here', asked === `${base}/?computer=work/${id}` && opened && s.entries.length === n0 && s.at === '/?computer', { asked, opened, entries: s.entries.length, was: n0 });
+    await nt.close();
+    // Clicked: printed here, a new entry, shown from its start; the address and the title the project's;
+    // focus in the prompt (a mouse was used).
+    await cmd.click();
+    await printed(p, id);
+    await sleep(700);
     s = await snap(p);
-    ok('links: "Back to terminal" clicked goes back, focus on the details link without a ring', s.focus.startsWith('a:details:') && !s.ring, { focus: s.focus, ring: s.ring });
-    // From one project to the next, inside the frame; Back to the first; Back to the terminal.
-    await det.click();
-    await detailed(p);
-    const next = await frame(p).evaluate(() => document.querySelector('.cs-pager-link.is-next')?.getAttribute('href'));
-    await frame(p).click('.cs-pager-link.is-next');
-    await p.waitForFunction((n) => location.search === `?computer=work/${n}`, next.split('/').at(-2));
-    await detailed(p);
-    const second = where(p);
+    let v = await shown(p);
+    const name = await p.evaluate(() => [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelector('.t-project h3').textContent.trim());
+    const frames = await p.evaluate(() => document.querySelectorAll('iframe').length);
+    ok('links: a project\'s command clicked prints it in the terminal (a new entry, from its start), address /?computer=work/<id>, the title its own, focus in the prompt, no frame', s.entries.length === n0 + 1 && last(s).said === `work ${id}` && last(s).out === `Printed: ${name}.` && s.at === `/?computer=work/${id}` && s.title === `${name} · ${TERM_TITLE}` && s.focus === 'input' && (v.fits ? v.whole : v.fromTop) && v.prompt && frames === 0, { last: last(s), at: s.at, title: s.title, focus: s.focus, v, frames });
+    await shot(p, 'project-1440x900');
+    // A related project's command, from inside it: printed after it; Back to the first, nothing printed
+    // again, focus back on the command that was clicked (no ring: a mouse).
+    const rel = p.locator('[data-term] .term-entry:last-child .t-project > .t-links a.t-cmd').first();
+    const rid = (await rel.getAttribute('data-term-run')).slice(5);
+    await rel.scrollIntoViewIfNeeded();
+    await p.evaluate(() => document.addEventListener('click', () => (window.__y = Math.round(document.querySelector('[data-term]').scrollTop)), { capture: true, once: true }));
+    await rel.click();
+    const ry = await p.evaluate(() => window.__y);
+    await printed(p, rid);
+    await sleep(500);
+    s = await snap(p);
+    ok('links: a related project\'s command prints that one next (a new entry, its address)', last(s).said === `work ${rid}` && s.entries.length === n0 + 2 && s.at === `/?computer=work/${rid}`, { said: said(s).slice(-2), at: s.at });
     await p.goBack();
     await p.waitForFunction((i) => location.search === `?computer=work/${i}`, id);
-    await p.goBack();
-    await p.waitForFunction(() => location.search === '?computer' && !document.querySelector('.pc-detail'));
-    ok('links: the next project from inside the details (a new entry); Back, Back to the terminal', second === `/?computer=work/${next.split('/').at(-2)}` && where(p) === '/?computer', { next, second });
+    await sleep(500);
+    s = await snap(p);
+    ok('links: Back goes to the first project\'s address, nothing printed again, the terminal where it was, focus on the related command (no ring)', s.entries.length === n0 + 2 && Math.abs(s.top - ry) <= 2 && s.focus === `a:work ${rid}` && !s.ring && s.title === `${name} · ${TERM_TITLE}`, { entries: s.entries.length, top: s.top, was: ry, focus: s.focus, ring: s.ring, title: s.title });
+    // A cover, unfolded: the picture loads; a code block scrolls within itself, the terminal never sideways.
+    await p.focus('[data-term-input]');
+    await type(p, 'work cucadence', 900);
+    const fig = p.locator('[data-term] .term-entry:last-child details.t-fig').first();
+    await fig.locator('summary').scrollIntoViewIfNeeded();
+    await fig.locator('summary').click();
+    await p.waitForFunction(() => { const i = [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelector('details.t-fig[open] img'); return i?.complete && i.naturalWidth > 0; }, null, { timeout: 8000 }).catch(() => {});
+    const img = await p.evaluate(() => { const d = [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelector('details.t-fig'); const i = d.querySelector('img'); const t = document.querySelector('[data-term]'); return { open: d.open, loaded: !!i && i.complete && i.naturalWidth > 0, alt: i?.alt, w: Math.round(i?.getBoundingClientRect().width ?? 0), sideways: t.scrollWidth - t.clientWidth }; });
+    ok('links: a cover folded behind its line unfolds on a click, the picture loaded, described, in the terminal\'s width', img.open && img.loaded && img.alt && img.w > 0 && img.sideways <= 0, img);
+    const code = await p.evaluate(() => {
+      const pre = [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelector('pre.t-code');
+      const t = document.querySelector('[data-term]');
+      const wide = pre.scrollWidth > pre.clientWidth;
+      pre.scrollLeft = 80;
+      return { overflow: getComputedStyle(pre).overflowX, focusable: pre.tabIndex === 0, wide, moved: pre.scrollLeft, sideways: t.scrollWidth - t.clientWidth };
+    });
+    ok('links: a code block scrolls sideways within itself (focusable, for the keyboard), the terminal never does', code.overflow === 'auto' && code.focusable && (!code.wide || code.moved > 0) && code.sideways <= 0, code);
+    // An empty line (Enter, nothing typed) isn't a command: the address and the title stay the project's.
+    const was = await p.evaluate(() => ({ at: location.search, title: document.title }));
+    await p.focus('[data-term-input]');
+    await p.keyboard.press('Enter');
+    await sleep(300);
+    const now = await p.evaluate(() => ({ at: location.search, title: document.title }));
+    ok('links: Enter on an empty prompt while reading a project leaves its address and title be', was.at === '?computer=work/cucadence' && now.at === was.at && now.title === was.title, { was, now });
+    // A video folded away: its poster (and the cover's picture) not asked for until its figure is opened.
+    const fetched = [];
+    p.on('request', (r) => fetched.push(new URL(r.url()).pathname));
+    await type(p, 'work useless-machine', 900);
+    const early = fetched.filter((u) => u.startsWith('/projects/useless-machine'));
+    const vid = p.locator('[data-term] .term-entry:last-child details.t-fig:has(video)').first();
+    await vid.locator('summary').scrollIntoViewIfNeeded();
+    await vid.locator('summary').click();
+    await sleep(800);
+    const poster = await p.evaluate(() => [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelector('details.t-fig[open] video')?.getAttribute('poster'));
+    ok('links: a folded video\'s poster loads only once its figure is opened', !early.length && poster === '/projects/useless-machine.jpg' && fetched.includes(poster), { early, poster, fetched: fetched.filter((u) => u.startsWith('/projects/')) });
     // The résumé's PDF, and the contact links.
     await p.focus('[data-term-input]');
     await type(p, 'resume', 900);
@@ -488,6 +576,27 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
     await sleep(900);
     s = await snap(p);
     ok('leave: a reload opens the terminal at once, the history, the reading position and the finished startup kept', s.at === '/?computer' && s.boot === 'done' && said(s).join(',') === said(was).join(',') && Math.abs(s.top - was.top) <= 2, { said: said(s).length, top: s.top, was: was.top, boot: s.boot });
+    // A project's figure unfolded and read past, then a reload: unfolded again, the same line in view.
+    await p.focus('[data-term-input]');
+    await type(p, 'work cucadence', 900);
+    const fig = p.locator('[data-term] .term-entry:last-child details.t-fig').first();
+    await fig.locator('summary').scrollIntoViewIfNeeded();
+    await fig.locator('summary').click();
+    await p.waitForFunction(() => [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelector('details.t-fig[open] img')?.complete, null, { timeout: 8000 }).catch(() => {});
+    await p.evaluate(() => document.querySelector('[data-term]').scrollBy(0, 240));
+    await sleep(500);
+    const reading2 = () => p.evaluate(() => {
+      const t = document.querySelector('[data-term]');
+      const e = [...t.querySelectorAll('.term-entry')].at(-1);
+      const h = [...e.querySelectorAll('.t-section')].find((x) => x.getBoundingClientRect().top > t.getBoundingClientRect().top);
+      return { open: e.querySelectorAll('details.t-fig[open]').length, line: h?.textContent.trim(), at: Math.round(h?.getBoundingClientRect().top - t.getBoundingClientRect().top) };
+    });
+    const pre = await reading2();
+    await p.reload();
+    await reading(p);
+    await sleep(900);
+    const post = await reading2();
+    ok('leave: a reload with a figure unfolded unfolds it again, the same line where it was', pre.open === 1 && post.open === 1 && post.line === pre.line && Math.abs(post.at - pre.at) <= 2, { pre, post });
     // Escape during the flight in: it lands, then leaves.
     const q = await page();
     await q.goto(base + '/?probe');
@@ -529,26 +638,49 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
     await reading(p);
     await booted(p);
     await type(p, 'work', 900);
-    const det = p.locator('[data-term] .term-entry:last-child a[data-term-detail]').first();
-    const id = await det.getAttribute('data-term-detail');
-    await det.click();
-    await detailed(p);
-    const steps = [where(p)];
+    const cmd = p.locator('[data-term] .term-entry:last-child .t-work a.t-cmd').first();
+    const id = (await cmd.getAttribute('data-term-run')).slice(5);
+    await cmd.scrollIntoViewIfNeeded();
+    await p.evaluate(() => document.addEventListener('click', () => (window.__y = Math.round(document.querySelector('[data-term]').scrollTop)), { capture: true, once: true }));
+    await cmd.click();
+    await printed(p, id);
+    await sleep(600);
+    const y0 = await p.evaluate(() => window.__y);
+    const at = await snap(p);
+    const steps = [at.at];
     await p.goBack();
-    await p.waitForFunction(() => location.search === '?computer' && !document.querySelector('.pc-detail'));
-    steps.push(where(p));
+    await p.waitForFunction(() => location.search === '?computer');
+    await sleep(500);
+    const back = await snap(p);
+    steps.push(back.at);
     await p.goBack();
     await closed(p);
     steps.push(where(p));
     await p.goForward();
     await reading(p);
-    await sleep(300);
-    steps.push(where(p));
-    const kept = (await snap(p)).entries.length;
+    await sleep(600);
+    const fwd = await snap(p);
+    steps.push(fwd.at);
     await p.goForward();
-    await detailed(p);
-    steps.push(where(p));
-    ok('history: details, Back to the terminal, Back to the room, Forward to the terminal (as it was), Forward to the details', steps.join(' ') === `/?computer=work/${id} /?computer / /?computer /?computer=work/${id}` && kept === 1, { steps, kept });
+    await p.waitForFunction((i) => location.search === `?computer=work/${i}`, id);
+    await sleep(600);
+    const fwd2 = await snap(p);
+    steps.push(fwd2.at);
+    ok('history: a project, Back to the terminal, Back to the room, Forward to the terminal, Forward to the project', steps.join(' ') === `/?computer=work/${id} /?computer / /?computer /?computer=work/${id}`, steps);
+    ok('history: Back to the terminal: nothing printed again, where it was read, its title, focus on the project\'s command', back.entries.length === 2 && Math.abs(back.top - y0) <= 2 && back.title === TERM_TITLE && back.focus === `a:work ${id}`, { entries: back.entries.length, top: back.top, was: y0, title: back.title, focus: back.focus });
+    ok('history: Forward, and Forward again: the same two entries (nothing printed again), the project where it was, its title', fwd.entries.length === 2 && fwd2.entries.length === 2 && Math.abs(fwd.top - y0) <= 2 && Math.abs(fwd2.top - at.top) <= 2 && fwd2.title === at.title && at.title !== TERM_TITLE, { fwd: fwd.entries.length, fwd2: fwd2.entries.length, tops: [fwd.top, y0, fwd2.top, at.top], title: fwd2.title });
+    // An anchor edited into the address while reading (a fragment navigation: an entry of the browser's,
+    // without the lab's state): nothing printed again, and Escape below still leaves for the opening.
+    await p.evaluate(() => (location.hash = 'approach'));
+    await sleep(500);
+    const hashed = await snap(p);
+    ok('history: an anchor edited into a project\'s address prints nothing again', hashed.entries.length === 2 && where(p) === `/?computer=work/${id}#approach`, { entries: hashed.entries.length, at: where(p) });
+    // Escape on a project's address leaves the computer at once (not Back through the projects).
+    await p.keyboard.press('Escape');
+    await closed(p);
+    await sleep(300);
+    const out = await snap(p);
+    ok('history: Escape on a project leaves the computer at once, for the opening, focus on the monitor', out.at === '/' && out.focus === 'monitor' && out.pc === null, { at: out.at, focus: out.focus });
     await p.context().close();
 
     const legacy = async (path, cmd, what = '/?computer') => {
@@ -580,7 +712,8 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
       await legacy(`/computer/#${c}`, c);
     }
     await legacy('/computer/', null);
-    await legacy(`/?computer=work/${id}`, null, `/?computer=work/${id}`);
+    await legacy(`/?computer=work/${id}`, `work ${id}`, `/?computer=work/${id}`);
+    await legacy(`/computer/work/${id}/`, `work ${id}`, `/?computer=work/${id}`);
     await legacy('/?computer=bogus', null, '/');
     await legacy('/?computer=work/no-such-project', null, '/');
     await legacy('/prototype/?computer=about', 'about');
@@ -594,13 +727,20 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
       await q.waitForFunction(() => document.documentElement.dataset.pc === 'read' && location.pathname === '/', null, { timeout: 15000 });
       await sleep(500);
       ok('history: /computer/work/ (the old Work page) opens the terminal running work', last(await snap(q))?.said === 'work');
-      // A project's address with a section: the details open at that section.
+      // A project's address with a section: the lab prints it, at that section (its heading in view).
       await q.goto(base + '/computer/work/fluxion/#approach');
       await q.waitForURL('**/?computer=work/fluxion#approach', { timeout: 8000 }).catch(() => {});
-      await detailed(q);
+      await printed(q, 'fluxion');
       await sleep(600);
-      const sec = await q.evaluate(() => { const d = document.querySelector('.pc-detail').contentDocument; const h = d.getElementById('approach'); return { at: location.pathname + location.search + location.hash, frame: d.location.pathname + d.location.hash, top: h ? Math.round(h.getBoundingClientRect().top) : null, y: Math.round(d.defaultView.scrollY) }; });
-      ok('history: /computer/work/fluxion/#approach opens the lab at that project\'s Approach', sec.at === '/?computer=work/fluxion#approach' && sec.frame === '/computer/work/fluxion/#approach' && sec.y > 0 && sec.top != null && sec.top >= 0 && sec.top < 200, sec);
+      const sec = await q.evaluate(() => {
+        const t = document.querySelector('[data-term]');
+        const tr = t.getBoundingClientRect();
+        const fr = t.querySelector('[data-term-form]').getBoundingClientRect();
+        const h = [...t.querySelectorAll('.term-entry')].at(-1).querySelector('[data-anchor="approach"]');
+        const r = h?.getBoundingClientRect();
+        return { at: location.pathname + location.search + location.hash, printed: [...t.querySelectorAll('.term-echo')].filter((e) => e.textContent.endsWith('work fluxion')).length, heading: h?.textContent.trim(), top: r ? Math.round(r.top - tr.top) : null, inView: !!r && r.top >= tr.top - 1 && r.bottom <= fr.top + 1, y: Math.round(t.scrollTop), title: document.title };
+      });
+      ok('history: /computer/work/fluxion/#approach opens the lab printing fluxion, at its Approach (the heading in view)', sec.at === '/?computer=work/fluxion#approach' && sec.printed === 1 && sec.heading === 'Approach' && sec.inView && sec.y > 0 && sec.title === `Fluxion · ${TERM_TITLE}`, sec);
       // An old anchor followed on the opening.
       await q.goto(base + '/');
       await drawn(q);
@@ -645,6 +785,27 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
       await sleep(600);
       const s2 = await snap(p);
       ok(`phone ${tag}: a swipe scrolls the terminal, not the window`, s2.top > s.top && s2.winY === 0, { before: s.top, after: s2.top, winY: s2.winY });
+      // A project tapped in work's list: printed here, focus on its heading (no keyboard); its code block
+      // wider than the phone scrolls sideways under a finger, the terminal doesn't; Back to work's list.
+      const y0 = (await snap(p)).top;
+      await clickRun(p, 'work cucadence', 'tap');
+      await printed(p, 'cucadence');
+      await sleep(900);
+      s = await snap(p);
+      ok(`phone ${tag}: work cucadence tapped prints it, from its start, focus on its heading, address its own`, last(s).said === 'work cucadence' && s.focus === 'echo:work cucadence (newest)' && (await shown(p)).fromTop && s.at === '/?computer=work/cucadence' && s.winY === 0, { last: last(s), focus: s.focus, at: s.at });
+      const pre = p.locator('[data-term] .term-entry:last-child pre.t-code').first();
+      await pre.scrollIntoViewIfNeeded();
+      const pb = await pre.boundingBox();
+      await cdp.send('Input.synthesizeScrollGesture', { x: Math.round(pb.x + pb.width / 2), y: Math.round(pb.y + pb.height / 2), xDistance: -160, gestureSourceType: 'touch', speed: 800 });
+      await sleep(500);
+      const cx = await p.evaluate(() => { const pr = [...document.querySelectorAll('[data-term] .term-entry')].at(-1).querySelector('pre.t-code'); const t = document.querySelector('[data-term]'); return { wide: pr.scrollWidth > pr.clientWidth, left: Math.round(pr.scrollLeft), sideways: t.scrollWidth - t.clientWidth, tLeft: t.scrollLeft, winX: scrollX }; });
+      ok(`phone ${tag}: the project's code block, wider than the phone, scrolls sideways under a finger; the terminal and the window don't`, cx.wide && cx.left > 0 && cx.sideways <= 0 && cx.tLeft === 0 && cx.winX === 0, cx);
+      await shot(p, `phone-project-${tag}`);
+      await p.goBack();
+      await p.waitForFunction(() => location.search === '?computer');
+      await sleep(500);
+      s = await snap(p);
+      ok(`phone ${tag}: Back goes to work's list where it was read, nothing printed again`, said(s).join(',') === 'help,work,work cucadence' && Math.abs(s.top - y0) <= 2, { said: said(s), top: s.top, was: y0 });
       // The prompt, tapped: a keyboard comes up over the bottom of the window (stubbed here). The terminal
       // keeps above it, its prompt in view; the power button goes; typed commands run.
       const ib = await box(p, '[data-term-input]');
@@ -708,6 +869,13 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
       await sleep(1300);
       const cur = await p.evaluate(() => getComputedStyle(document.querySelector('[data-term-cursor]')).animationName);
       ok(`${how}: in without the flight, the startup all at once, no output animation, a steady cursor`, !sn.pc.includes('fly') && !sn.boot.includes('play') && n === 0 && cur === 'none' && v.fromTop, { pcs: sn.pc, boots: sn.boot, animations: n, cursor: cur, scrolledAtOnce: v.fromTop });
+      // A project: printed at once, no animation, scrolled to at once.
+      await p.keyboard.type('work fluxion');
+      await p.keyboard.press('Enter');
+      const pn = await anims(p);
+      await sleep(50);
+      const pv = await shown(p);
+      ok(`${how}: a project printed at once (no animation), scrolled to at once`, pn === 0 && pv.fromTop && where(p) === '/?computer=work/fluxion', { animations: pn, v: pv, at: where(p) });
       await p.context().close();
     }
   }
@@ -819,16 +987,16 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
         at: location.pathname + location.hash,
         h1: document.querySelector('h1')?.textContent,
         sections: [...document.querySelectorAll('main section.term-entry')].map((s) => `${s.id}:${s.querySelector('h2')?.textContent.replace('donald@lab:~$', '').trim()}`),
-        cmds: [...document.querySelectorAll('main a.t-cmd')].map((a) => a.getAttribute('href')).filter((x, i, a) => a.indexOf(x) === i).sort(),
+        cmds: [...document.querySelectorAll('main a.t-cmd')].map((a) => a.getAttribute('href')).filter((x, i, a) => x.startsWith('#') && a.indexOf(x) === i).sort(),
         buttons: document.querySelectorAll('main button').length,
-        details: document.querySelectorAll('main a[href^="/projects/"]').length,
+        projects: [...document.querySelectorAll('main .t-work a.t-cmd')].map((a) => [a.textContent.trim(), a.getAttribute('href')]),
         back: document.querySelector('.t-static-back a')?.getAttribute('href'),
         robots: document.querySelector('meta[name=robots]')?.content,
         canonical: document.querySelector('link[rel=canonical]')?.getAttribute('href'),
         sideways: document.scrollingElement.scrollWidth - innerWidth,
       }));
       ok(`no JS ${w}x${h}: the monitor links to /computer/, the transcript: help and the four commands, each a section with its heading`, href === '/computer/' && r.at === '/computer/' && r.sections.join(',') === 'help:help,about:about,work:work,resume:resume,contact:contact' && /terminal/.test(r.h1), r);
-      ok(`no JS ${w}x${h}: commands link to their place, no buttons, details to /projects/, a way back, out of search, no sideways scroll`, r.cmds.join(',') === '#about,#contact,#help,#resume,#work' && r.buttons === 0 && r.details === 11 && r.back === '/' && /noindex/.test(r.robots) && /\/computer\/$/.test(r.canonical) && r.sideways <= 0, r);
+      ok(`no JS ${w}x${h}: commands link to their place, projects' to their transcripts (/computer/work/<id>/), no buttons, a way back, out of search, no sideways scroll`, r.cmds.join(',') === '#about,#contact,#help,#resume,#work' && r.projects.length === 11 && r.projects.every(([t, h]) => h === `/computer/${t.replace(' ', '/')}/`) && r.buttons === 0 && r.back === '/' && /noindex/.test(r.robots) && /\/computer\/$/.test(r.canonical) && r.sideways <= 0, { ...r, projects: r.projects.length });
       await p.screenshot({ path: `${shots}/nojs-transcript-${w}x${h}.jpg`, type: 'jpeg', quality: 85 });
       await p.context().close();
     }
@@ -837,6 +1005,42 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
     await p.waitForURL('**/computer/#about', { timeout: 5000 }).catch(() => {});
     ok('no JS: /computer/about/ forwards to /computer/#about', where(p) === '/computer/#about', where(p));
     await p.context().close();
+    // A project's transcript, on its own: `work <id>` and what it prints, as a page (the write-up's headings
+    // keep their ids, for its anchors); its commands link to pages; the case study's page as it was.
+    for (const [w, h] of [[1440, 900], [390, 844]]) {
+      const q = await page({ w, h, js: false });
+      await q.goto(base + '/computer/work/cucadence/#how-it-works');
+      await sleep(300);
+      const r = await q.evaluate(() => {
+        const hd = document.getElementById('how-it-works')?.getBoundingClientRect();
+        const pre = document.querySelector('main pre.t-code');
+        return {
+          at: location.pathname + location.hash,
+          title: document.title,
+          echo: document.querySelector('main h2.term-echo')?.textContent.replace('donald@lab:~$', '').trim(),
+          name: document.querySelector('main .t-project h3')?.textContent.trim(),
+          atHeading: !!hd && hd.top >= -1 && hd.top < 120,
+          figs: document.querySelectorAll('main details.t-fig').length,
+          code: pre ? { overflow: getComputedStyle(pre).overflowX, wide: pre.scrollWidth > pre.clientWidth } : null,
+          related: [...document.querySelectorAll('main .t-project > .t-links a.t-cmd')].map((a) => [a.textContent.trim(), a.getAttribute('href')]),
+          list: document.querySelector('main .t-hint a.t-cmd')?.getAttribute('href'),
+          source: document.querySelector('main .t-kv a[target="_blank"]')?.getAttribute('href'),
+          buttons: document.querySelectorAll('main button').length,
+          frames: document.querySelectorAll('iframe').length,
+          back: document.querySelector('.t-static-back a')?.getAttribute('href'),
+          robots: document.querySelector('meta[name=robots]')?.content,
+          canonical: document.querySelector('link[rel=canonical]')?.getAttribute('href'),
+          sideways: document.scrollingElement.scrollWidth - innerWidth,
+        };
+      });
+      ok(`no JS ${w}x${h}: /computer/work/cucadence/ prints work cucadence as a page, at its anchor; related work and work link to pages; no buttons or frames; canonical its case study; no sideways scroll`, r.at === '/computer/work/cucadence/#how-it-works' && r.echo === 'work cucadence' && r.name === 'cuCadence' && /^cuCadence · Terminal/.test(r.title) && r.atHeading && r.figs >= 1 && r.code?.overflow === 'auto' && r.related.length >= 1 && r.related.every(([t, hr]) => hr === `/computer/${t.replace(' ', '/')}/`) && r.list === '/computer/#work' && /^https:\/\//.test(r.source) && r.buttons === 0 && r.frames === 0 && r.back === '/' && /noindex/.test(r.robots) && /\/projects\/cucadence\/$/.test(r.canonical) && r.sideways <= 0, r);
+      await q.screenshot({ path: `${shots}/nojs-project-${w}x${h}.jpg`, type: 'jpeg', quality: 85 });
+      await q.goto(base + '/projects/cucadence/');
+      await sleep(300);
+      const cs = await q.evaluate(() => ({ h1: document.querySelector('main h1')?.textContent.trim(), sideways: document.scrollingElement.scrollWidth - innerWidth }));
+      ok(`no JS ${w}x${h}: /projects/cucadence/, the case study, still stands on its own`, cs.h1 === 'cuCadence' && cs.sideways <= 0, cs);
+      await q.context().close();
+    }
   }
 
   // 12. A lab script that fails to load: the terminal's transcript instead (for the session), or the
@@ -858,10 +1062,14 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
     await Promise.all([p.waitForURL('**/computer/'), p.click('[data-lab-monitor]')]);
     await sleep(1500);
     ok('failed script: the monitor\'s link then stays on the transcript (no loop back to the lab)', where(p) === '/computer/', where(p));
-    const ids = await p.evaluate(() => [...document.querySelectorAll('main a[href^="/projects/"]')].map((a) => a.getAttribute('href').split('/')[2]));
-    await p.goto(base + `/?computer=work/${ids[0]}`);
-    await p.waitForURL(`**/projects/${ids[0]}/`, { timeout: 8000 }).catch(() => {});
-    ok('failed script: a project\'s address goes to its page', where(p) === `/projects/${ids[0]}/`, where(p));
+    const ids = await p.evaluate(() => [...document.querySelectorAll('main .t-work a.t-cmd')].map((a) => a.getAttribute('href').split('/')[3]));
+    // A project's command in the transcript: its transcript, which stays (no loop back to the lab).
+    await Promise.all([p.waitForURL(`**/computer/work/${ids[0]}/`), p.click(`main a[href="/computer/work/${ids[0]}/"]`)]);
+    await sleep(1500);
+    ok('failed script: a project\'s command in the transcript opens its own transcript, which stays', where(p) === `/computer/work/${ids[0]}/` && (await p.evaluate(() => document.querySelectorAll('main .t-project').length)) === 1, where(p));
+    await p.goto(base + `/?computer=work/${ids[0]}#objective`);
+    await p.waitForURL(`**/projects/${ids[0]}/#objective`, { timeout: 8000 }).catch(() => {});
+    ok('failed script: a project\'s address goes to its page (with its anchor)', where(p) === `/projects/${ids[0]}/#objective`, where(p));
     // The script loads again (the network's back): the lab runs, and the old addresses come to it again.
     await p.context().unrouteAll({ behavior: 'ignoreErrors' });
     await routeDist(p.context());

@@ -1,13 +1,13 @@
-// The lab computer's addresses. No three.js here: the homepage, the terminal, the case studies' pages
+// The lab computer's addresses. No three.js here: the homepage, the terminal, the site's pages
 // (src/layouts/Screen.astro) and the lab's controller (computer.ts) share it.
 //
-// A computer path names what the computer shows: 'terminal', or 'work/<project id>' (a project's
-// details, over the terminal). For each there are three addresses:
+// A computer path names what the computer shows: 'terminal', or 'work/<project id>' (the terminal, with
+// that project printed: `work <id>`). For each there are three addresses:
 // - the lab showing it, the one to share:          /?computer (the terminal), /?computer=work/<id>
-// - the page itself (a project's details load it
-//   on the monitor; both stand alone without
-//   JavaScript):                                    /computer/ (the terminal's transcript), /computer/work/<id>/
-// - its canonical page:                             /projects/<id>/ for a project, or the page itself
+// - the page itself, a transcript (standing alone
+//   without JavaScript, going to the lab with it):  /computer/, /computer/work/<id>/
+// - its canonical page:                             /projects/<id>/ for a project (its case study), or
+//                                                   the page itself
 // The terminal's commands were once pages of their own. Their old addresses (/?computer=about,
 // /#about, /computer/about/) open the terminal and run the command.
 export const COMMANDS = ['about', 'work', 'resume', 'contact'] as const;
@@ -17,8 +17,8 @@ export const TERMINAL = 'terminal';
 export const isCommand = (s: string): s is Command => (COMMANDS as readonly string[]).includes(s);
 
 /** What ?computer=<q> shows: 'terminal' (q empty), a command (an old page's address: the terminal,
- *  running it), a project's details ('work/<id>'), or null (not the computer's). `projects` are the
- *  project ids the site has. */
+ *  running it), a project ('work/<id>'), or null (not the computer's). `projects` are the project ids
+ *  the site has. */
 export function parse(q: string | null | undefined, projects: readonly string[]): string | null {
   if (q == null) return null;
   const p = q.replace(/^\/+|\/+$/g, '');

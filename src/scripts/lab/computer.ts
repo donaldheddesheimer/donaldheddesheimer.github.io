@@ -10,29 +10,30 @@
 // instead, over what's left of it when a keyboard is up: no flight, the terminal fading in (cutting in,
 // without motion). A window resized either way while reading moves between the two.
 //
-// A project's details (its case study, /computer/work/<id>/, src/layouts/Screen.astro) open in a frame
-// over the terminal, on the same screen, and go again (Escape, or their "Back to terminal") to the
-// terminal as it was, the focus on the link that opened them.
-//
 // The address names what the computer shows (routes.ts): /?computer (the terminal) or
-// /?computer=work/<id> (a project's details). Going in adds an entry, and so does each project opened;
-// Back and Forward move between them, and out of the lab. Escape (a project's details first), the
-// terminal's `exit` and, on a touch screen, the power button on the monitor's bezel go back to the entry
-// the lab was opened from, and put the focus back on the monitor (ringed, unless the button was
-// tapped). A reload or a shared link opens the computer at once, without the camera's entrance; so do
-// the old pages' addresses (/?computer=about, /#about…), which run their command. history.state is
-// { pc: path, back: entries since the opening (0: the lab was opened here), d: project entries since the
-// terminal's, y: a project's scroll when last left, k: the entry's own key }. The terminal keeps its own
-// (terminal.ts).
+// /?computer=work/<id> (a project, `work <id>`'s output in the terminal). Going in adds an entry, and so
+// does each project run from the prompt; running anything else there makes the entry the terminal's
+// again. Back and Forward move between them, each entry finding the terminal where it was left (a
+// project's output, where it was being read), and out of the lab: the terminal's history stays as it is,
+// nothing printed twice. A project's address, shared or reloaded, opens the computer on it, printing it
+// if the terminal hasn't (at the section its #anchor names). Escape, the terminal's `exit` and, on a
+// touch screen, the power button on the monitor's bezel go back to the entry the lab was opened from,
+// and put the focus back on the monitor (ringed, unless the button was tapped). A reload or a shared link
+// opens the computer at once, without the camera's entrance; so do the old pages' addresses
+// (/?computer=about, /#about…), which run their command. history.state is { pc: path, back: entries
+// since the opening (0: the lab was opened here), d: entries since the lab's first, n: the number of a
+// project's output (terminal.ts), y: the terminal's scroll when last left, k: the entry's own key }. The
+// terminal keeps its own (terminal.ts).
 import type { LabScene, Quad, Rect } from './scene';
 import { initTerminal, type Focus } from './terminal';
-import { TERMINAL, isCommand, labHref, pageHref, parse } from './routes';
+import { TERMINAL, isCommand, labHref, parse } from './routes';
 
 type State = 'closed' | 'moving' | 'read';
 interface Entry {
   pc?: string;
   back?: number;
   d?: number;
+  n?: number;
   y?: number;
   k?: string;
 }
@@ -80,10 +81,12 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   const exit = dialog.querySelector<HTMLButtonElement>('[data-pc-exit]');
   if (!screenEl || !termRoot) return;
   const screen: HTMLElement = screenEl;
-  let projects: string[] = [];
+  // The projects: their ids, and names.
+  let titles: Record<string, string> = {};
   try {
-    projects = JSON.parse(dialog.dataset.projects ?? '[]');
+    titles = JSON.parse(dialog.dataset.projects ?? '{}') ?? {};
   } catch {}
+  const projects = Object.keys(titles);
   let state: State = 'closed';
   let queued: (() => void) | null = null;
   let full = false;
@@ -96,14 +99,8 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   let scroll: [number, number] = [0, 0];
   let pending: string | null = null; // a command to run once the terminal is there (an old page's address)
   let used = ''; // what was last used here: 'key', or a pointer's type
-  // A project's details, over the terminal.
-  let frame: HTMLIFrameElement | null = null;
-  let shown: string | null = null; // the computer path in it
-  let shownKey: string | undefined; // and the key of the entry it was shown for
-  let loaded = false;
-  let restoreY: number | null = null;
-  let detailTitle = termTitle;
-  let ringBack = true; // a return to the terminal rings the focus it gives back (not after a click or a tap)
+  let shownKey: string | undefined; // the key of the entry the terminal was last shown for
+  let shown: Entry | null = null; // and that entry, as it was then
 
   const motionOK = () => !reduce.matches && html.dataset.motion !== 'off';
   const ready = () => !!getScene() && root.dataset.drawn != null && root.dataset.failed == null;
@@ -118,43 +115,94 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   addEventListener('pointerdown', (e) => (used = e.pointerType || 'mouse'), true);
 
   const term = initTerminal(termRoot, dialog, {
-    detail: (id) => openDetail(`work/${id}`),
+    project: opened,
+    ran,
     exit: () => leave(),
     motion: motionOK,
   });
 
-  // --- A project's scroll, kept in its entry for Back and Forward (and a reload) to return to -----------
+  // --- The terminal's scroll, kept in each entry for Back and Forward (and a reload) to return to -------
 
-  const frameY = () => {
-    try {
-      return Math.round(frame?.contentWindow?.scrollY ?? 0);
-    } catch {
-      return 0;
-    }
-  };
   const remember = () => {
-    if (state !== 'read' || !frame || !shown || current() !== shown) return;
+    if (state !== 'read' || !current() || entry().k !== shownKey) return;
     const e = entry();
-    const y = frameY();
+    const y = term.scroll();
     if (e.k) left.set(e.k, y);
     history.replaceState({ ...e, y }, '');
   };
-  // And as it scrolls, since Back and Forward leave an entry without asking: only while the frame still
-  // holds the page the address names (after Back, the old page may scroll once more before it goes).
+  // And as it scrolls, since Back and Forward leave an entry without asking.
   let keepTimer = 0;
-  const keep = () => {
-    clearTimeout(keepTimer);
-    keepTimer = window.setTimeout(() => {
-      try {
-        if (shown && frame?.contentWindow?.location.pathname === pageHref(shown)) remember();
-      } catch {}
-    }, 150);
-  };
+  termRoot.addEventListener(
+    'scroll',
+    () => {
+      clearTimeout(keepTimer);
+      keepTimer = window.setTimeout(remember, 150);
+    },
+    { passive: true },
+  );
   // Back or Forward can come before that (a scroll a moment old, or one still moving), and by the time
   // popstate says so the entry left can't be written: its scroll is kept here, by its key, instead.
   const left = new Map<string, number>();
   const newKey = () => Math.random().toString(36).slice(2, 10);
   const scrollOf = (e: Entry) => (e.k ? left.get(e.k) : undefined) ?? e.y ?? null;
+  // The project command each entry was left by (tapped or clicked), for the focus to come back to.
+  const openers = new Map<string, HTMLElement>();
+
+  const project = (path: string) => (path.startsWith('work/') ? path.slice(5) : null);
+  const titleOf = (path: string | null) => {
+    const id = path && project(path);
+    return id && titles[id] ? `${titles[id]} · ${termTitle}` : termTitle;
+  };
+
+  // The terminal as the address's entry has it: where it was left, or, for a project's, its output
+  // (printed now if the terminal no longer has it, or never did: a link or an address typed).
+  function show() {
+    const path = current();
+    if (!path) return;
+    let e = entry();
+    // An anchor edited into the address while reading: the browser's own new entry, one on from the one
+    // shown, showing the same (not printed again, and Escape still leaves).
+    if (history.state == null && state === 'read' && shown) {
+      e = { pc: path, back: shown.back ? shown.back + 1 : 0, d: (shown.d ?? 0) + 1, n: shown.pc === path ? shown.n : undefined, k: newKey() };
+      history.replaceState(e, '');
+    }
+    if (!e.k) history.replaceState((e = { ...e, k: newKey() }), '');
+    shownKey = e.k;
+    const id = project(path);
+    const y = scrollOf(e);
+    if (id && !(e.n && term.has(e.n, `work ${id}`))) {
+      const n = term.run(`work ${id}`, y == null ? location.hash : '');
+      history.replaceState((e = { ...e, n, y: undefined }), '');
+      if (e.k) left.delete(e.k);
+    } else if (y != null) term.scroll(y);
+    else if (id && e.n) term.show(e.n, location.hash);
+    shown = e;
+    if (state === 'read') document.title = titleOf(path);
+  }
+  // A project run from the prompt: a new entry for it, the one left keeping its place.
+  function opened(id: string, n: number, from: HTMLElement | null) {
+    if (state !== 'read' || !current()) return;
+    remember();
+    const e = entry();
+    // (Typed, it has none: the focus stays in the prompt, coming back.)
+    if (e.k && from) openers.set(e.k, from);
+    else if (e.k) openers.delete(e.k);
+    const path = `work/${id}`;
+    const k = newKey();
+    shown = { pc: path, back: e.back ? e.back + 1 : 0, d: (e.d ?? 0) + 1, n, k };
+    history.pushState(shown, '', labHref(path));
+    shownKey = k;
+    document.title = titleOf(path);
+  }
+  // Anything else run from the prompt, with a project's address: the terminal's (the project isn't what's
+  // being read now).
+  function ran() {
+    const e = entry();
+    if (state !== 'read' || !project(current() ?? '')) return;
+    shown = { ...e, pc: TERMINAL, n: undefined };
+    history.replaceState(shown, '', labHref(TERMINAL));
+    document.title = termTitle;
+  }
 
   // --- Where the screen is ----------------------------------------------------------------------------
 
@@ -277,14 +325,14 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     rect = layout();
     size();
     term.restore();
-    // (A shared project's address may name a section of it: the details open there.)
-    if (path !== TERMINAL) showDetail(path, scrollOf(entry()), scrollOf(entry()) == null ? location.hash : '');
+    show();
     if (fly) {
       html.dataset.pc = 'fade';
       await wait(FADE_MS);
       rect = layout();
       size();
       term.restore();
+      show();
       html.dataset.pc = 'fly';
       placed = true;
       await scene!.go('read', rect, riding('in'));
@@ -302,14 +350,8 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     // Laid out for the window as it is now (it may have been resized, or the room lost, in flight), with
     // the room behind a lab opened at once (loaded now, or when it arrives).
     relayout();
-    if (frame) {
-      term.enter('none');
-      if (loaded) focusFrame();
-      document.title = detailTitle;
-    } else {
-      term.enter(focusFor());
-      document.title = termTitle;
-    }
+    term.enter(focusFor());
+    document.title = titleOf(current());
     after();
   }
 
@@ -328,7 +370,8 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
       html.dataset.pc = 'return';
       await scene.go('hero', rect, riding('out'));
     }
-    dropDetail();
+    shownKey = undefined;
+    shown = null;
     placed = false;
     delete html.dataset.pc;
     scene?.home();
@@ -361,14 +404,14 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     history.replaceState({ ...entry(), pc: TERMINAL, d: 0 } satisfies Entry, '', labHref(TERMINAL));
   }
   function runPending() {
-    if (!pending || state !== 'read' || frame || current() !== TERMINAL) return;
+    if (!pending || state !== 'read' || current() !== TERMINAL) return;
     const cmd = pending;
     pending = null;
     term.run(cmd);
   }
 
-  // The lab follows the address: open on a computer path, the terminal or a project's details as it
-  // names, closed on any other.
+  // The lab follows the address: open on a computer path, the terminal or a project as it names,
+  // closed on any other.
   function sync(instant = false) {
     if (state === 'moving') {
       queued ??= () => sync(instant);
@@ -382,11 +425,18 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
       return;
     }
     if (state !== 'read') return;
-    if (path === TERMINAL) {
-      if (frame) hideDetail(ringBack);
-      runPending();
-    } else if (path !== shown) showDetail(path, scrollOf(entry()));
-    ringBack = true;
+    if (entry().k !== shownKey) {
+      const was = entry().k;
+      show();
+      // Back to where a project was opened from: the focus to its command, as a link followed and gone
+      // back from has it (if the focus is still in the terminal).
+      const from = was ? openers.get(was) : undefined;
+      const a = document.activeElement;
+      if (from?.isConnected && (!a || a === document.body || a === dialog || termRoot!.contains(a))) {
+        from.focus({ preventScroll: true, focusVisible: used === 'key' } as FocusOptions);
+      }
+    }
+    runPending();
   }
 
   // Go in from the opening: a new entry, on the terminal.
@@ -423,87 +473,6 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     close(instant);
   }
 
-  // --- A project's details ----------------------------------------------------------------------------
-
-  function focusFrame() {
-    if (!frame || state !== 'read') return;
-    frame.focus({ preventScroll: true });
-    // Its heading, for a screen reader to start there (the page is the same site's).
-    try {
-      const h = frame.contentDocument?.querySelector<HTMLElement>('main h1');
-      if (h) {
-        h.tabIndex = -1;
-        h.focus({ preventScroll: true });
-      } else frame.contentWindow?.focus();
-    } catch {
-      frame.contentWindow?.focus();
-    }
-  }
-  function showDetail(path: string, y: number | null, hash = '') {
-    shown = path;
-    shownKey = entry().k;
-    restoreY = y;
-    loaded = false;
-    if (frame?.contentWindow) frame.contentWindow.location.replace(pageHref(path) + hash);
-    else {
-      frame = document.createElement('iframe');
-      frame.className = 'pc-detail';
-      frame.title = 'Project details';
-      frame.addEventListener('load', () => {
-        if (!frame) return;
-        loaded = true;
-        frame.classList.add('is-loaded');
-        frame.contentWindow?.addEventListener('scroll', keep, { passive: true });
-        if (restoreY != null) {
-          frame.contentWindow?.scrollTo(0, restoreY);
-          restoreY = null;
-        }
-        focusFrame();
-      });
-      frame.src = pageHref(path) + hash;
-      screen.append(frame);
-    }
-    term.cover(true);
-    html.dataset.pcDetail = '';
-  }
-  function dropDetail() {
-    frame?.remove();
-    frame = null;
-    shown = null;
-    shownKey = undefined;
-    loaded = false;
-    term.cover(false);
-    delete html.dataset.pcDetail;
-  }
-  function hideDetail(visible: boolean) {
-    dropDetail();
-    term.focusReturn(visible, focusFor());
-    detailTitle = termTitle;
-    document.title = termTitle;
-  }
-  // A project's details, from the terminal or from another project's: a new entry.
-  function openDetail(path: string, hash = '') {
-    if (state !== 'read' || !path.startsWith('work/') || parse(path, projects) !== path) return;
-    remember();
-    const e = entry();
-    history.pushState({ pc: path, back: e.back ? e.back + 1 : 0, d: (e.d ?? 0) + 1, k: newKey() } satisfies Entry, '', labHref(path));
-    showDetail(path, null, hash);
-  }
-  // Back to the terminal: the history's Back, as far as the terminal's entry; or, for details opened
-  // here, the terminal's entry after them.
-  function backToTerminal(visible: boolean) {
-    if (state !== 'read' || !frame || going != null) return;
-    remember();
-    ringBack = visible;
-    const d = entry().d ?? 0;
-    if (d > 0) {
-      going = false;
-      return history.go(-d); // popstate shows it
-    }
-    history.pushState({ pc: TERMINAL, back: 0, d: 0, k: newKey() } satisfies Entry, '', labHref(TERMINAL));
-    sync();
-  }
-
   // --- Events -----------------------------------------------------------------------------------------
 
   const plain = (e: MouseEvent) => e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
@@ -533,11 +502,9 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     clicked = e.detail > 0;
     leave();
   });
-  // A close request, with the focus out of a project's frame: Escape closes the project's details, or
-  // leaves; the platform's Back (Android's), with no Escape behind it, goes back as Back does, or leaves a
-  // lab opened here. (With the focus in the frame, its page passes Escape up: pc:escape.) One the page
-  // may not refuse (the browser's limit on them, without a tap or a key since) shuts the dialog
-  // regardless: 'close' leaves then.
+  // A close request: Escape leaves; the platform's Back (Android's), with no Escape behind it, goes back
+  // as Back does, or leaves a lab opened here. One the page may not refuse (the browser's limit on them,
+  // without a tap or a key since) shuts the dialog regardless: 'close' leaves then.
   let escaped = false;
   addEventListener('keydown', (e) => (escaped = e.key === 'Escape' && !e.isComposing), true);
   addEventListener('keyup', () => (escaped = false), true);
@@ -553,8 +520,7 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     if (back) {
       going = false;
       history.back();
-    } else if (frame) backToTerminal(true);
-    else leave();
+    } else leave();
   });
   // Closed by the browser rather than by us (in flight, too): leave at once.
   dialog.addEventListener('close', () => {
@@ -563,10 +529,9 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
     else leave(true);
   });
   addEventListener('popstate', () => {
-    // The project left, while the frame still holds it.
-    try {
-      if (state === 'read' && shown && shownKey && frame?.contentWindow?.location.pathname === pageHref(shown)) left.set(shownKey, frameY());
-    } catch {}
+    // The entry left: where the terminal was (it hasn't moved yet).
+    clearTimeout(keepTimer);
+    if (state === 'read' && shownKey) left.set(shownKey, term.scroll());
     if (strip) {
       strip = false;
       history.replaceState(null, '', location.pathname);
@@ -622,24 +587,6 @@ export function initComputer(root: HTMLElement, dialog: HTMLDialogElement, getSc
   addEventListener('scroll', () => {
     if (html.dataset.pc && (scrollX !== scroll[0] || scrollY !== scroll[1])) scrollTo(scroll[0], scroll[1]);
   });
-  addEventListener('message', (e) => {
-    if (!frame || e.source !== frame.contentWindow || e.origin !== location.origin) return;
-    const msg = e.data as { type?: string; path?: string; hash?: string; title?: string; pointer?: boolean };
-    const visible = msg.pointer !== true;
-    if (msg.type === 'pc:go' && typeof msg.path === 'string') {
-      if (msg.path.startsWith('work/')) openDetail(msg.path, typeof msg.hash === 'string' ? msg.hash : '');
-      else {
-        if (isCommand(msg.path)) pending = msg.path;
-        backToTerminal(visible);
-      }
-    } else if (msg.type === 'pc:back') backToTerminal(visible);
-    else if (msg.type === 'pc:escape') backToTerminal(true);
-    else if (msg.type === 'pc:page' && typeof msg.title === 'string') {
-      detailTitle = msg.title;
-      if (state === 'read') document.title = detailTitle;
-    }
-  });
-
   // Running: the homepage's inline script leaves the failure guard be, and the addresses that stopped at
   // the transcript after a failure come to the lab again.
   html.dataset.pcLive = '';
