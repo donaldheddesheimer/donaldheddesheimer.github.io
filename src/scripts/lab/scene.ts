@@ -1,12 +1,13 @@
 // The robotics lab of the homepage's opening (/), where the computer on the desk holds the portfolio. It
 // began as a fork of the first homepage's robot stage; the rig and the routine's shape are the same. The room: a
 // concrete floor with the dance area taped out, a block wall with a high window, a workbench under a
-// pendant, an unfinished robot on a service stand, two props (a task chair pushed aside, a tool cart), a
-// tripod work light as the key, and the three dancers, given characters through proportion, their own
-// timing and their own versions of the routine's moves, where they stand and how they answer each other;
-// the unfinished one on its stand runs a calibration now and then. Two camera views: the opening, which the pointer may
-// look around a little (lookAround), and reading, square on to the monitor, whose screen the terminal
-// covers in real HTML (computer.ts). One flight joins them. Simple geometry throughout.
+// pendant, an unfinished robot on a service stand, storage and a charging bay at the left, props (a task
+// chair pushed aside, a tool cart, a scope cart, an open case), a tripod work light as the key, and the
+// three dancers, given characters through proportion, their own timing and their own versions of the
+// routine's moves, where they stand and how they answer each other; the unfinished one on its stand runs a
+// calibration now and then. Two camera views: the opening, which the pointer may look around a little
+// (lookAround), and reading, square on to the monitor, whose screen the terminal covers in real HTML
+// (computer.ts). One flight joins them. Simple geometry throughout.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -1230,6 +1231,154 @@ function readoutTexture() {
   });
 }
 
+// Two assembly drawings pinned up over the shelving, in one sheet: a blueprint of a head, exploded
+// (268 x 192 px), and a pencil sheet of an arm with its parts called out (240 x 180 px, at x 272).
+function drawingsTexture() {
+  return canvasTexture(512, 192, (g) => {
+    const line = (color: string, width: number, pts: [number, number][]) => {
+      g.strokeStyle = color;
+      g.lineWidth = width;
+      g.beginPath();
+      pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y)));
+      g.stroke();
+    };
+    // The blueprint: a head from the front and the side, its visor pulled forward, a title block.
+    g.fillStyle = '#23466e';
+    g.fillRect(0, 0, 268, 192);
+    const ink = 'rgba(226,236,248,0.85)';
+    g.strokeStyle = ink;
+    g.lineWidth = 1;
+    g.strokeRect(6, 6, 256, 180);
+    g.lineWidth = 2;
+    g.strokeRect(22, 34, 84, 64);
+    g.strokeRect(30, 52, 68, 22);
+    for (const x of [46, 82]) {
+      g.beginPath();
+      g.arc(x, 63, 6, 0, TAU);
+      g.stroke();
+    }
+    g.strokeRect(128, 34, 64, 64);
+    g.setLineDash([4, 3]);
+    line(ink, 1, [[64, 20], [64, 150]]);
+    line(ink, 1, [[196, 63], [240, 63]]);
+    g.setLineDash([]);
+    g.strokeRect(222, 50, 12, 26);
+    line(ink, 1, [[22, 112], [106, 112]]);
+    for (const x of [22, 106]) line(ink, 1, [[x, 106], [x, 118]]);
+    g.fillStyle = ink;
+    g.font = '10px ui-monospace, Menlo, monospace';
+    g.fillText('240', 54, 126);
+    g.strokeRect(150, 140, 110, 44);
+    line(ink, 1, [[150, 158], [260, 158]]);
+    g.font = 'bold 11px ui-monospace, Menlo, monospace';
+    g.fillText('HEAD ASSY', 158, 153);
+    g.font = '10px ui-monospace, Menlo, monospace';
+    g.fillText('REV C   1:2', 158, 174);
+    // The pencil sheet: an arm, shoulder to wrist, the parts numbered in balloons and listed.
+    g.fillStyle = '#d8d2c2';
+    g.fillRect(272, 0, 240, 180);
+    const pencil = '#3c3c40';
+    g.lineWidth = 2;
+    g.strokeStyle = pencil;
+    g.strokeRect(290, 30, 30, 30);
+    line(pencil, 2, [[320, 40], [400, 60]]);
+    line(pencil, 2, [[320, 52], [396, 72]]);
+    g.beginPath();
+    g.arc(408, 68, 14, 0, TAU);
+    g.stroke();
+    line(pencil, 2, [[418, 78], [460, 130]]);
+    line(pencil, 2, [[408, 82], [450, 136]]);
+    g.strokeRect(446, 130, 20, 22);
+    g.lineWidth = 1;
+    g.font = '10px ui-monospace, Menlo, monospace';
+    g.fillStyle = pencil;
+    for (const [i, [x, y, tx, ty]] of [[305, 45, 300, 100], [360, 56, 350, 110], [408, 68, 470, 40], [456, 141, 490, 110]].entries()) {
+      line(pencil, 1, [[x, y], [tx, ty]]);
+      g.beginPath();
+      g.arc(tx, ty, 8, 0, TAU);
+      g.stroke();
+      g.fillText(String(i + 1), tx - 3, ty + 4);
+    }
+    g.strokeRect(286, 128, 140, 44);
+    for (const y of [139, 150, 161]) line(pencil, 1, [[286, y], [426, y]]);
+    for (const [i, name] of ['BRKT', 'LINK', 'SERVO', 'GRIP'].entries()) g.fillText(`${i + 1} ${name}`, 292, 137 + i * 11);
+  });
+}
+
+// The workshop clock: a plain white face, gone a quarter to midnight.
+function clockTexture() {
+  return canvasTexture(128, 128, (g) => {
+    g.fillStyle = '#e9e5dc';
+    g.fillRect(0, 0, 128, 128);
+    g.translate(64, 64);
+    g.fillStyle = '#1b1b1c';
+    for (let i = 0; i < 60; i++) {
+      g.save();
+      g.rotate((i / 60) * TAU);
+      if (i % 5) g.fillRect(-0.6, -58, 1.2, 4);
+      else g.fillRect(-2, -58, 4, 11);
+      g.restore();
+    }
+    const hand = (a: number, len: number, width: number, color: string) => {
+      g.save();
+      g.rotate(a);
+      g.fillStyle = color;
+      g.fillRect(-width / 2, -len, width, len + 8);
+      g.restore();
+    };
+    hand(((11 + 47 / 60) / 12) * TAU, 30, 5, '#1b1b1c');
+    hand((47 / 60) * TAU, 46, 3.5, '#1b1b1c');
+    hand((22 / 60) * TAU, 50, 1.2, '#b3261e');
+    g.fillStyle = '#1b1b1c';
+    g.beginPath();
+    g.arc(0, 0, 3.5, 0, TAU);
+    g.fill();
+  });
+}
+
+// The oscilloscope's screen: a graticule, a sine on one channel and a clock on the other.
+function scopeTexture() {
+  return canvasTexture(128, 96, (g) => {
+    g.fillStyle = '#081410';
+    g.fillRect(0, 0, 128, 96);
+    g.strokeStyle = 'rgba(120,200,160,0.22)';
+    g.lineWidth = 1;
+    for (let x = 4; x < 128; x += 12) g.strokeRect(x, 0, 0, 96);
+    for (let y = 0; y < 96; y += 12) g.strokeRect(0, y, 128, 0);
+    g.lineWidth = 2;
+    g.strokeStyle = '#d9f26b';
+    g.beginPath();
+    for (let x = 0; x <= 128; x += 2) g.lineTo(x, 34 + Math.sin((x / 128) * TAU * 2) * 16);
+    g.stroke();
+    g.strokeStyle = '#5fd6e8';
+    g.beginPath();
+    for (let x = 0; x <= 128; x += 16) {
+      const y = (x / 16) % 2 ? 62 : 80;
+      g.lineTo(x, y);
+      g.lineTo(x + 16, y);
+    }
+    g.stroke();
+  });
+}
+
+// The charging dock's header: its name, stencilled, and a battery.
+function dockTexture() {
+  return canvasTexture(256, 48, (g) => {
+    g.fillStyle = '#16181a';
+    g.fillRect(0, 0, 256, 48);
+    g.fillStyle = '#e8b04a';
+    g.font = 'bold 26px "DIN Condensed", "Arial Narrow", sans-serif';
+    g.textBaseline = 'middle';
+    g.fillText('CHARGE  BAY 1', 18, 26);
+    g.strokeStyle = '#e8b04a';
+    g.lineWidth = 2.5;
+    g.strokeRect(196, 14, 38, 20);
+    g.fillRect(234, 20, 4, 8);
+    g.fillStyle = '#6fd08a';
+    for (let i = 0; i < 3; i++) g.fillRect(200 + i * 11, 18, 8, 12);
+  });
+}
+
 // Yellow and black floor tape.
 function tapeTexture() {
   const t = canvasTexture(64, 16, (g) => {
@@ -1396,7 +1545,7 @@ type Mats = ReturnType<typeof materials>;
 // --- The room ------------------------------------------------------------------------------------
 // Back wall at z = -3.1; the dance floor, taped out, in the middle; the window high over it, right of
 // centre; the workbench under a pendant at the right, the service stand in front of the bench's end. The
-// wall's left half is left bare: the name is over it.
+// wall's left half, and the side wall it turns into, are the storage (buildStore), kept below the name.
 const WALL_Z = -3.1;
 // The moon, high to the left behind the wall: its light's way in through the window, down and across the
 // floor to the right of the monitor, among the dancers.
@@ -1551,7 +1700,7 @@ function buildRoom(random: () => number, mats: Mats) {
 
   bake(group);
   group.add(pendant, pendant.target, moon, moon.target);
-  return { group, textures, pendant };
+  return { group, textures, pendant, walls: { low: low.material as THREE.MeshLambertMaterial, high: high.material as THREE.MeshLambertMaterial } };
 }
 
 // The service stand: a plate on casters, a mast, and an arm that holds the unfinished robot at the chest.
@@ -1641,6 +1790,272 @@ function buildProps(mats: Mats) {
   tadd(boxGeo(0.38, 0.02, 0.02), mats.darkSteel, 0, -0.16, 0, head);
 
   return { chair: bake(chair), cart: bake(cart), tripod, head };
+}
+
+// --- The left of the room: storage and experiments ------------------------------------------------
+// The wall turns a corner at the left, and along it the robots' side of the shop: steel shelving of
+// parts bins, cases and spare heads, a plant trailing off the top and a fan; assembly drawings pinned
+// over it, cable coils on hooks, the charging bay behind Graphite's spot with its cables down to a pad,
+// the clock; a scope cart out on the floor, and nearer, an open case and an extension cable. All of it
+// clear of the monitor and below the name.
+const SIDE_X = -7.0;
+const SHELF = { x0: -6.6, x1: -4.2, z: WALL_Z + 0.3, d: 0.5, levels: [0.12, 0.55, 0.98, 1.41, 1.84] };
+const DOCK = { x: -3.05, z: WALL_Z };
+const SCOPE_CART = { x: -3.3, z: -0.55, yaw: 0.55 };
+
+function buildStore(mats: Mats, room: { low: THREE.MeshLambertMaterial; high: THREE.MeshLambertMaterial }) {
+  const group = new THREE.Group();
+  const add = adder(group);
+  const textures: THREE.Texture[] = [];
+  const random = rng(4417); // its own, so the room's and the robots' seeded details stay as they were
+  const zinc = new THREE.MeshStandardMaterial({ color: 0x70757b, roughness: 0.5, metalness: 0.55 });
+  const card = new THREE.MeshStandardMaterial({ color: 0x8a6c4a, roughness: 0.9 });
+  const bins = [0x2f5f8f, 0xc9a23a, 0xa2432e].map((color) => new THREE.MeshStandardMaterial({ color, roughness: 0.55 }));
+  const green = new THREE.MeshStandardMaterial({ color: 0x3f6f3a, roughness: 0.75 });
+  const pcb = new THREE.MeshStandardMaterial({ color: 0x24573a, roughness: 0.6, metalness: 0.1 });
+  const cable = new THREE.MeshStandardMaterial({ color: 0xc0582c, roughness: 0.6 });
+  const beige = new THREE.MeshStandardMaterial({ color: 0x9d998e, roughness: 0.6, metalness: 0.1 });
+
+  // The side wall, at the corner: the same block and band as the back wall, 11 m of it.
+  for (const [mat, h, y] of [[room.low, 1.2, 0.6], [room.high, 3.8, 3.1]] as const) {
+    const m = mat.clone();
+    m.map = m.map!.clone();
+    m.map.repeat.x *= 11 / 16;
+    textures.push(m.map);
+    const wall = add(new THREE.PlaneGeometry(11, h), m, SIDE_X, y, WALL_Z + 5.5);
+    wall.rotation.y = Math.PI / 2;
+    wall.receiveShadow = true;
+    wall.userData.live = true;
+  }
+  add(boxGeo(0.03, 0.1, 11), mats.darkSteel, SIDE_X + 0.015, 0.05, WALL_Z + 5.5);
+  add(boxGeo(0.03, 0.04, 11), mats.darkSteel, SIDE_X + 0.015, 1.2, WALL_Z + 5.5);
+
+  // Shelving: two bays of galvanised steel, five shelves each.
+  const { x0, x1, z, d, levels } = SHELF;
+  const bay = (x1 - x0) / 2;
+  for (const x of [x0, x0 + bay, x1]) for (const dz of [-d / 2, d / 2]) add(boxGeo(0.035, 1.92, 0.035), zinc, x, 0.96, z + dz);
+  for (const y of levels) {
+    add(boxGeo(x1 - x0 + 0.04, 0.025, d), zinc, (x0 + x1) / 2, y, z);
+    add(boxGeo(x1 - x0 + 0.04, 0.045, 0.01), zinc, (x0 + x1) / 2, y - 0.01, z + d / 2);
+  }
+  const on = (level: number) => levels[level] + 0.0125;
+  const bx = (b: number, u: number) => x0 + b * bay + u * bay; // bay b, u across it
+  // Bottom: hard cases, one open a crack, and a crate of cable.
+  add(rbox(0.62, 0.3, 0.42, 0.03), mats.plastic, bx(0, 0.32), on(0) + 0.15, z + 0.02);
+  add(rbox(0.42, 0.22, 0.36, 0.025), beige, bx(0, 0.76), on(0) + 0.11, z + 0.04);
+  add(rbox(0.5, 0.26, 0.4, 0.03), mats.plastic, bx(1, 0.26), on(0) + 0.13, z + 0.02);
+  for (const [x, w] of [[bx(0, 0.32), 0.62], [bx(1, 0.26), 0.5]]) for (const s of [-1, 1]) add(boxGeo(0.05, 0.05, 0.02), mats.steel, x + s * w * 0.3, on(0) + 0.2, z + 0.24);
+  add(boxGeo(0.4, 0.24, 0.36), bins[0], bx(1, 0.74), on(0) + 0.12, z + 0.04);
+  for (let i = 0; i < 3; i++) add(new THREE.TorusGeometry(0.1, 0.018, 8, 20), i === 1 ? cable : mats.rubber, bx(1, 0.74) + (i - 1) * 0.1, on(0) + 0.27, z + 0.02).rotation.x = Math.PI / 2 - 0.3 + i * 0.2;
+  // Two shelves of parts bins, stacked two high, their mouths dark.
+  for (const level of [1, 2])
+    for (let b = 0; b < 2; b++)
+      for (let i = 0; i < 5; i++)
+        for (let r = 0; r < 2; r++) {
+          if (level === 2 && (b === 0 || r === 1)) continue; // the spare heads have the rest of it
+          const x = bx(b, 0.12 + i * 0.19);
+          const y = on(level) + 0.075 + r * 0.155;
+          const k = (i * 3 + b + r * 2 + level) % 7;
+          add(boxGeo(0.2, 0.15, 0.34), bins[k < 3 ? 0 : k < 5 ? 1 : 2], x, y, z + 0.06);
+          add(boxGeo(0.16, 0.06, 0.02), mats.rubber, x, y + 0.035, z + 0.232);
+        }
+  // Spare heads, waiting for bodies: a dome, a box (its visor on), a ball in primer. The box head is
+  // built apart, to wake now and then.
+  const graphite = new THREE.MeshStandardMaterial({ color: 0x464c54, roughness: 0.58, metalness: 0.06 });
+  const visor = new THREE.MeshStandardMaterial({ color: 0x07090b, roughness: 0.32, metalness: 0.25 });
+  add(rbox(0.34, 0.22, 0.28, 0.1), graphite, bx(0, 0.22), on(2) + 0.11, z + 0.02).rotation.y = 0.3;
+  add(rbox(0.31, 0.07, 0.04, 0.02), visor, bx(0, 0.22) + 0.04, on(2) + 0.12, z + 0.16).rotation.y = 0.3;
+  add(new THREE.SphereGeometry(0.15, 20, 14), new THREE.MeshStandardMaterial({ color: 0x86837d, roughness: 0.92 }), bx(0, 0.82), on(2) + 0.15, z - 0.02);
+  const spare = new THREE.Group();
+  spare.position.set(bx(0, 0.52), on(2), z + 0.04);
+  spare.rotation.y = 0.25;
+  group.add(spare);
+  const ivory = new THREE.MeshStandardMaterial({ color: 0xdcd5c6, roughness: 0.58, metalness: 0.06 });
+  add(rbox(0.28, 0.22, 0.23, 0.06), ivory, 0, 0.11, 0, spare);
+  add(rbox(0.22, 0.1, 0.04, 0.02), visor, 0, 0.115, 0.1, spare);
+  const eyes = new THREE.Group();
+  eyes.position.set(0, 0.115, 0.122);
+  spare.add(eyes);
+  const eyeMat = new THREE.MeshBasicMaterial({ color: 0x1a1612, toneMapped: false });
+  for (const s of [-1, 1]) add(boxGeo(0.04, 0.022, 0.006), eyeMat, s * 0.05, 0, 0, eyes);
+  bake(spare).traverse((o) => (o.userData.live = true));
+  // Upper shelves: cardboard boxes, a spool, stacked boards; the fan on the right bay, turned to the room.
+  add(boxGeo(0.46, 0.28, 0.38), card, bx(0, 0.28), on(3) + 0.14, z);
+  add(boxGeo(0.34, 0.2, 0.34), card, bx(0, 0.74), on(3) + 0.1, z + 0.02).rotation.y = 0.12;
+  add(new THREE.CylinderGeometry(0.1, 0.1, 0.07, 24), bins[2], bx(1, 0.2), on(3) + 0.1, z + 0.08).rotation.x = Math.PI / 2;
+  add(new THREE.CylinderGeometry(0.035, 0.035, 0.075, 16), mats.darkSteel, bx(1, 0.2), on(3) + 0.1, z + 0.08).rotation.x = Math.PI / 2;
+  for (let i = 0; i < 4; i++) add(boxGeo(0.22, 0.012, 0.16), pcb, bx(1, 0.46) + (random() - 0.5) * 0.02, on(3) + 0.006 + i * 0.014, z + 0.1).rotation.y = (random() - 0.5) * 0.3;
+  add(boxGeo(0.44, 0.24, 0.36), card, bx(0, 0.5), on(4) + 0.12, z);
+  add(boxGeo(0.3, 0.14, 0.3), card, bx(0, 0.5) + 0.04, on(4) + 0.31, z + 0.02).rotation.y = -0.15;
+  // The fan: a round base, a stem, the motor behind a guard, turned toward the room; the blades apart.
+  const fan = new THREE.Group();
+  fan.position.set(bx(1, 0.8), on(3), z + 0.06);
+  fan.rotation.y = 0.55;
+  group.add(fan);
+  add(new THREE.CylinderGeometry(0.08, 0.09, 0.025, 20), beige, 0, 0.0125, 0, fan);
+  add(new THREE.CylinderGeometry(0.012, 0.012, 0.16, 8), mats.steel, 0, 0.1, 0, fan);
+  add(new THREE.CylinderGeometry(0.045, 0.05, 0.09, 16), beige, 0, 0.23, -0.05, fan).rotation.x = Math.PI / 2;
+  for (const dz of [-0.005, 0.045]) add(new THREE.TorusGeometry(0.13, 0.005, 6, 32), mats.steel, 0, 0.23, dz, fan);
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * TAU;
+    add(new THREE.CylinderGeometry(0.003, 0.003, 0.13, 4), mats.steel, Math.cos(a) * 0.065, 0.23 + Math.sin(a) * 0.065, 0.045, fan).rotation.z = a + Math.PI / 2;
+  }
+  const rotor = new THREE.Group();
+  rotor.position.set(0, 0.23, 0.02);
+  fan.add(rotor);
+  const blade = new THREE.MeshStandardMaterial({ color: 0x5e7f86, roughness: 0.5, side: THREE.DoubleSide });
+  for (let i = 0; i < 3; i++) {
+    const m = add(new THREE.CircleGeometry(0.1, 12, -0.32, 0.64), blade, 0, 0, 0, rotor);
+    m.rotation.set(0, 0.35, (i / 3) * TAU);
+  }
+  add(new THREE.SphereGeometry(0.025, 12, 8), beige, 0, 0, 0.01, rotor);
+  bake(rotor).traverse((o) => (o.userData.live = true));
+  // A pothos on top, trailing down the front of the shelves.
+  const pot = new THREE.Vector3(bx(1, 0.3), on(4), z + 0.08);
+  add(new THREE.CylinderGeometry(0.1, 0.075, 0.16, 20), new THREE.MeshStandardMaterial({ color: 0x9a5a3e, roughness: 0.85 }), pot.x, pot.y + 0.08, pot.z);
+  add(new THREE.CylinderGeometry(0.092, 0.092, 0.01, 20), mats.rubber, pot.x, pot.y + 0.15, pot.z);
+  const leaf = new THREE.SphereGeometry(1, 8, 6);
+  const leafAt = (p: THREE.Vector3, s: number) => {
+    const m = add(leaf, green, p.x, p.y, p.z);
+    m.scale.set(0.05 * s, 0.012 * s, 0.038 * s);
+    m.rotation.set((random() - 0.5) * 1.2, random() * TAU, (random() - 0.5) * 1.2);
+  };
+  for (let i = 0; i < 16; i++) {
+    const a = random() * TAU;
+    const r = 0.04 + random() * 0.1;
+    leafAt(new THREE.Vector3(pot.x + Math.cos(a) * r, pot.y + 0.18 + random() * 0.12, pot.z + Math.sin(a) * r), 1 + random() * 0.4);
+  }
+  for (const [dx, drop] of [[-0.06, 0.95], [0.05, 0.6], [0.11, 1.25]]) {
+    const pts = [new THREE.Vector3(pot.x + dx, pot.y + 0.15, pot.z + 0.08), new THREE.Vector3(pot.x + dx * 1.5, pot.y + 0.05, z + d / 2 + 0.05)];
+    for (let k = 1; k <= 3; k++) pts.push(new THREE.Vector3(pot.x + dx * 1.5 + Math.sin(k * 1.7 + dx * 20) * 0.05, pot.y - (drop * k) / 3, z + d / 2 + 0.06 + k * 0.01));
+    const vine = new THREE.CatmullRomCurve3(pts);
+    add(new THREE.TubeGeometry(vine, 20, 0.004, 5), green, 0, 0, 0);
+    for (let k = 1; k < 9; k++) leafAt(vine.getPoint(k / 9).add(new THREE.Vector3(0, 0, 0.02)), 0.8 + random() * 0.3);
+  }
+
+  // Over the shelving, two assembly drawings on push pins.
+  const drawings = new THREE.MeshLambertMaterial({ map: drawingsTexture(), color: 0xc8c4bc });
+  textures.push(drawings.map!);
+  add(sheetGeo(0.7, 0.5, [512, 192], [0, 0, 268, 192]), drawings, -5.85, 2.42, WALL_Z + 0.01).rotation.z = -0.02;
+  add(sheetGeo(0.56, 0.42, [512, 192], [272, 0, 240, 180]), drawings, -5.0, 2.36, WALL_Z + 0.01).rotation.z = 0.035;
+  for (const [x, y] of [[-6.17, 2.64], [-5.53, 2.66], [-5.26, 2.57], [-4.73, 2.56]]) add(new THREE.SphereGeometry(0.012, 8, 6), bins[2], x, y, WALL_Z + 0.015);
+  // Cable coils on two hooks, between the shelving and the bay.
+  for (const [x, mat, s] of [[-3.95, cable, 1], [-3.72, mats.rubber, 0.8]] as const) {
+    add(new THREE.CylinderGeometry(0.01, 0.01, 0.1, 8), mats.steel, x, 1.78, WALL_Z + 0.05).rotation.x = Math.PI / 2;
+    for (let i = 0; i < 4; i++) {
+      const m = add(new THREE.TorusGeometry(0.14 * s, 0.012, 6, 28), mat, x + (i - 1.5) * 0.008, 1.66 - 0.14 * s + 0.12, WALL_Z + 0.07 + i * 0.012);
+      m.scale.y = 1.35;
+    }
+  }
+  // The clock, high between the bay and the window.
+  const clock = new THREE.MeshBasicMaterial({ map: clockTexture(), color: 0x6a6660 });
+  textures.push(clock.map!);
+  add(new THREE.CircleGeometry(0.17, 32), clock, -2.2, 2.3, WALL_Z + 0.03);
+  add(new THREE.TorusGeometry(0.175, 0.016, 8, 32), mats.darkSteel, -2.2, 2.3, WALL_Z + 0.03);
+
+  // The charging bay: a backboard with a header and a status column, a cradle at shoulder height for a
+  // robot to hang in, and its cables down in loops to the pad on the floor.
+  const D = DOCK;
+  add(boxGeo(0.9, 1.7, 0.05), mats.darkSteel, D.x, 1.2, D.z + 0.03);
+  const dockSign = new THREE.MeshBasicMaterial({ map: dockTexture(), color: 0x9a9a9a, toneMapped: false });
+  textures.push(dockSign.map!);
+  add(new THREE.PlaneGeometry(0.8, 0.15), dockSign, D.x, 1.97, D.z + 0.058);
+  for (const s of [-1, 1]) {
+    add(boxGeo(0.05, 0.05, 0.3), mats.steel, D.x + s * 0.28, 1.45, D.z + 0.2);
+    add(boxGeo(0.05, 0.12, 0.05), mats.steel, D.x + s * 0.28, 1.5, D.z + 0.33);
+  }
+  add(boxGeo(0.16, 0.5, 0.04), mats.plastic, D.x + 0.35, 1.05, D.z + 0.07);
+  const plugs: THREE.Vector3[] = [];
+  for (const [i, dx] of [-0.2, 0.0, 0.18].entries()) {
+    const a = new THREE.Vector3(D.x + dx, 1.62, D.z + 0.08);
+    add(boxGeo(0.06, 0.06, 0.05), mats.plastic, a.x, a.y, a.z);
+    const end = new THREE.Vector3(D.x + dx * 1.6 + 0.05, 0.03, D.z + 0.62 + i * 0.1);
+    plugs.push(end);
+    const hang = new THREE.CatmullRomCurve3([a, new THREE.Vector3(a.x + 0.02, 0.6 + i * 0.12, a.z + 0.06), new THREE.Vector3(a.x - 0.04, 0.12, a.z + 0.2 + i * 0.05), end]);
+    add(new THREE.TubeGeometry(hang, 28, 0.011, 6), mats.rubber, 0, 0, 0);
+    add(boxGeo(0.05, 0.03, 0.08), mats.plastic, end.x, end.y, end.z + 0.03);
+  }
+  // The pad: a plate edged in floor tape, a pale ring where the feet go.
+  add(boxGeo(1.0, 0.02, 0.8), mats.darkSteel, D.x, 0.01, D.z + 0.62);
+  add(new THREE.RingGeometry(0.26, 0.3, 40), new THREE.MeshBasicMaterial({ color: 0x3c6b73, toneMapped: false }), D.x, 0.022, D.z + 0.62).rotation.x = -Math.PI / 2;
+
+  // The scope cart: a two-tier trolley, an oscilloscope on top with a board under test, a soldering iron
+  // in its stand, tools; a battery and a box of leads below.
+  const cart = new THREE.Group();
+  cart.position.set(SCOPE_CART.x, 0, SCOPE_CART.z);
+  cart.rotation.y = SCOPE_CART.yaw;
+  group.add(cart);
+  const cadd = adder(cart);
+  for (const y of [0.3, 0.86]) {
+    cadd(boxGeo(0.84, 0.03, 0.52), zinc, 0, y, 0);
+    cadd(boxGeo(0.84, 0.06, 0.012), zinc, 0, y + 0.03, 0.26);
+  }
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    cadd(boxGeo(0.03, 0.86, 0.03), zinc, sx * 0.4, 0.46, sz * 0.24);
+    cadd(new THREE.CylinderGeometry(0.035, 0.035, 0.03, 12), mats.rubber, sx * 0.37, 0.035, sz * 0.21).rotation.x = Math.PI / 2;
+  }
+  strut(cadd, mats.steel, new THREE.Vector3(-0.44, 0.86, -0.2), new THREE.Vector3(-0.44, 1.02, -0.2), 0.012);
+  strut(cadd, mats.steel, new THREE.Vector3(-0.44, 1.02, -0.2), new THREE.Vector3(-0.44, 1.02, 0.2), 0.012);
+  strut(cadd, mats.steel, new THREE.Vector3(-0.44, 1.02, 0.2), new THREE.Vector3(-0.44, 0.86, 0.2), 0.012);
+  const scope = new THREE.Group();
+  scope.position.set(0.1, 0.875, -0.04);
+  scope.rotation.x = -0.12;
+  cart.add(scope);
+  cadd(rbox(0.44, 0.24, 0.3, 0.02), beige, 0, 0.12, 0, scope);
+  cadd(boxGeo(0.23, 0.16, 0.01), mats.plastic, -0.08, 0.13, 0.151, scope);
+  const trace = new THREE.MeshBasicMaterial({ map: scopeTexture(), color: 0x9a9a9a, toneMapped: false });
+  textures.push(trace.map!);
+  cadd(new THREE.PlaneGeometry(0.2, 0.14), trace, -0.08, 0.13, 0.157, scope);
+  for (let i = 0; i < 6; i++) cadd(new THREE.CylinderGeometry(0.012, 0.012, 0.02, 12), mats.plastic, 0.08 + (i % 2) * 0.06, 0.2 - Math.floor(i / 2) * 0.05, 0.155, scope).rotation.x = Math.PI / 2;
+  for (const [x, mat] of [[0.08, bins[1]], [0.14, bins[0]]] as const) cadd(new THREE.CylinderGeometry(0.01, 0.01, 0.02, 10), mat, x, 0.04, 0.155, scope).rotation.x = Math.PI / 2;
+  // A probe from the front, down to the board beside it.
+  const probeWire = new THREE.CatmullRomCurve3([new THREE.Vector3(0.18, 0.915, 0.12), new THREE.Vector3(0.24, 0.9, 0.2), new THREE.Vector3(0.3, 0.885, 0.16)]);
+  cadd(new THREE.TubeGeometry(probeWire, 12, 0.004, 5), bins[1], 0, 0, 0);
+  cadd(boxGeo(0.14, 0.012, 0.1), pcb, 0.3, 0.884, 0.12).rotation.y = 0.3;
+  for (let i = 0; i < 4; i++) cadd(boxGeo(0.025, 0.006, 0.018), mats.plastic, 0.27 + (i % 2) * 0.05, 0.893, 0.1 + Math.floor(i / 2) * 0.04).rotation.y = 0.3;
+  cadd(boxGeo(0.12, 0.012, 0.09), pcb, -0.28, 0.884, 0.14).rotation.y = -0.4;
+  cadd(boxGeo(0.12, 0.012, 0.09), pcb, -0.27, 0.897, 0.12).rotation.y = -0.2;
+  // The iron in its coil, on a small base; a screwdriver and cutters.
+  cadd(boxGeo(0.1, 0.02, 0.08), mats.darkSteel, -0.3, 0.885, -0.12);
+  const coil = cadd(new THREE.CylinderGeometry(0.02, 0.028, 0.1, 10, 1, true), mats.steel, -0.3, 0.94, -0.12);
+  coil.rotation.z = 0.8;
+  strut(cadd, bins[0], new THREE.Vector3(-0.33, 0.92, -0.12), new THREE.Vector3(-0.2, 1.02, -0.12), 0.012);
+  strut(cadd, mats.toolRed, new THREE.Vector3(-0.08, 0.884, 0.2), new THREE.Vector3(0.06, 0.884, 0.23), 0.009);
+  strut(cadd, mats.steel, new THREE.Vector3(0.06, 0.884, 0.23), new THREE.Vector3(0.12, 0.884, 0.24), 0.003);
+  cadd(rbox(0.26, 0.09, 0.16, 0.015), mats.plastic, -0.15, 0.36, 0.02);
+  cadd(boxGeo(0.3, 0.12, 0.22), card, 0.2, 0.375, 0);
+  for (let i = 0; i < 3; i++) cadd(new THREE.TorusGeometry(0.06, 0.008, 6, 18), [bins[2], mats.rubber, bins[1]][i], 0.16 + i * 0.03, 0.45, 0.02).rotation.x = Math.PI / 2 - 0.4;
+
+  // Nearer, on the floor: a case left open, its foam cut for a forearm and a hand, and an orange
+  // extension cable in loose coils, its lead off toward the bay.
+  const box = new THREE.Group();
+  box.position.set(-2.55, 0, 1.55);
+  box.rotation.y = 0.35;
+  group.add(box);
+  const badd = adder(box);
+  const foam = new THREE.MeshStandardMaterial({ color: 0x2a2b2e, roughness: 1 });
+  badd(rbox(0.62, 0.12, 0.42, 0.02), mats.plastic, 0, 0.06, 0);
+  badd(boxGeo(0.57, 0.01, 0.37), foam, 0, 0.115, 0);
+  badd(new THREE.CapsuleGeometry(0.04, 0.26, 4, 12), ivory, -0.05, 0.12, 0.02).rotation.z = Math.PI / 2;
+  badd(rbox(0.1, 0.05, 0.08, 0.015), mats.darkSteel, 0.2, 0.125, -0.06);
+  const lid = new THREE.Group();
+  lid.position.set(0, 0.12, -0.21);
+  lid.rotation.x = -2.45;
+  box.add(lid);
+  badd(rbox(0.62, 0.06, 0.42, 0.02), mats.plastic, 0, 0.03, 0.21, lid);
+  badd(boxGeo(0.56, 0.012, 0.36), foam, 0, -0.004, 0.21, lid);
+  for (const s of [-1, 1]) badd(boxGeo(0.05, 0.04, 0.02), zinc, s * 0.18, 0.06, 0.22);
+  for (let i = 0; i < 5; i++) {
+    const m = add(new THREE.TorusGeometry(0.22 - i * 0.012, 0.014, 6, 36), cable, -2.0 + i * 0.012, 0.014 + i * 0.022, 2.35 + i * 0.01);
+    m.rotation.set(Math.PI / 2 + (random() - 0.5) * 0.2, 0, random() * TAU);
+    m.scale.set(1, 1.15, 1);
+  }
+  const lead = new THREE.CatmullRomCurve3([new THREE.Vector3(-2.2, 0.03, 2.3), new THREE.Vector3(-2.6, 0.012, 1.95), new THREE.Vector3(-3.2, 0.012, 1.2), new THREE.Vector3(-3.4, 0.012, 0.4)]);
+  add(new THREE.TubeGeometry(lead, 40, 0.012, 6), cable, 0, 0, 0);
+  add(rbox(0.12, 0.05, 0.06, 0.01), bins[1], -3.42, 0.025, 0.36);
+
+  bake(group);
+  return { group, textures, fan: rotor, spare, eyes: eyeMat };
 }
 
 // --- Workstation ---------------------------------------------------------------------------------
@@ -1887,6 +2302,8 @@ export function mountLab(
 
   const room = buildRoom(random, mats);
   scene.add(room.group);
+  const store = buildStore(mats, room.walls);
+  scene.add(store.group);
   const blobTex = radialTexture([
     [0, 'rgba(255,255,255,1)'],
     [0.45, 'rgba(255,255,255,0.55)'],
@@ -2561,7 +2978,7 @@ export function mountLab(
     }
     return hit;
   }
-  const textures = new Set<THREE.Texture>([blobTex, dotTex, screenMap, ...room.textures]);
+  const textures = new Set<THREE.Texture>([blobTex, dotTex, screenMap, ...room.textures, ...store.textures]);
 
   return {
     go(to, rect, onFrame, instant = false) {
