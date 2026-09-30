@@ -2595,6 +2595,67 @@ const SEAM = new THREE.Vector3().lerpVectors(CRACK.lo, CRACK.hi, 0.66);
  *  work, and its size. */
 const RIGGER = { x: -2.3, y: 2.9, z: WALL_Z + 0.32, yaw: -0.25, hang: 4.6, scale: 1.15 };
 const RIG = { upper: 0.2, fore: 0.19, torch: 0.13, r: 0.024 };
+/** The two spots it welds: the break, then (on a second look) the one it missed, just above it. */
+const WELDS = [new THREE.Vector3().lerpVectors(CRACK.lo, CRACK.hi, 0.73), new THREE.Vector3().lerpVectors(CRACK.lo, CRACK.hi, 0.73).add(new THREE.Vector3(0.016, 0.018, 0.012))];
+
+// The repair, on the scene's clock: a loop `every` s long, the first from `start` (once the caught
+// moment is over; before it, and in the loop's second half, it hangs at ease). In each: settle in,
+// a nod to drop the hood and a weld; stop, pull back, flip the hood up and lean in to look; a double
+// take at the spot it missed, a short second weld; a satisfied nod, and the torch down for a rest,
+// a look round the room. Each channel is keyed ([seconds into the loop, value]), eased between keys.
+const REPAIR = { start: CAUGHT.end + 0.8, every: 24, idle: 20 };
+type Keys = readonly (readonly [number, number])[];
+const RK = {
+  /** The torch: 0 down at its side, 1 up at the work. */
+  work: [[0.2, 0], [1.0, 1], [11.2, 1], [12.4, 0]],
+  /** Its tip's distance from the spot (m): 1.5 cm is welding. */
+  gap: [[1.1, 0.08], [1.45, 0.08], [1.65, 0.015], [4.0, 0.015], [4.25, 0.11], [6.6, 0.11], [7.0, 0.07], [8.05, 0.07], [8.25, 0.015], [9.2, 0.015], [9.45, 0.1]],
+  /** Which spot, the break (0) or the missed one (1). */
+  aim: [[6.55, 0], [6.85, 1], [11.2, 1], [12.4, 0]],
+  /** The hood: 0 up, 1 down over the eyes. */
+  hood: [[1.05, 0], [1.3, 1], [4.55, 1], [4.85, 0], [7.55, 0], [7.8, 1], [9.6, 1], [9.9, 0]],
+  /** The head's nod (rad, down): a dip to drop the hood, a toss to throw it up, the satisfied nods. */
+  nod: [[0.7, 0], [0.95, -0.1], [1.15, 0.28], [1.45, 0], [4.4, 0], [4.55, -0.22], [4.95, 0], [7.4, 0], [7.55, -0.06], [7.72, 0.24], [8.0, 0], [9.55, 0], [9.7, -0.2], [10.0, 0], [10.5, 0], [10.65, 0.14], [10.8, 0], [10.95, 0.14], [11.15, 0]],
+  /** The head's tilt (rad) as it looks the work over, and the double take. */
+  tilt: [[5.0, 0], [5.5, 0.3], [6.45, 0.3], [6.6, -0.08], [6.9, 0.05], [7.3, 0]],
+  /** Leaning in to look (m). */
+  lean: [[4.9, 0], [5.6, 0.04], [6.5, 0.04], [6.75, 0.015], [10.2, 0.015], [10.5, 0.04], [11.2, 0]],
+  /** Where it looks: 0 the work, 1 down at the room. */
+  look: [[12.8, 0], [13.5, 1], [16.8, 1], [17.6, 0]],
+  /** Each spot's heat, 0 to 1: up as it's welded, cooling after. */
+  heat0: [[1.65, 0], [2.6, 1], [4.0, 1], [5.2, 0.4], [7.0, 0.12], [9.0, 0]],
+  heat1: [[8.25, 0], [8.7, 1], [9.2, 1], [10.4, 0.4], [12.2, 0.1], [14, 0]],
+} satisfies Record<string, Keys>;
+/** The small swings as it stops and pulls back, and at the double take (seconds into the loop). */
+const JOLTS = [4.0, 6.6, 9.2];
+
+/** Eased through `keys` at `u`, held beyond the first and last. */
+function keyed(keys: Keys, u: number) {
+  if (u <= keys[0][0]) return keys[0][1];
+  for (let i = 1; i < keys.length; i++) if (u <= keys[i][0]) return lerp(keys[i - 1][1], keys[i][1], smooth(keys[i - 1][0], keys[i][0], u));
+  return keys[keys.length - 1][1];
+}
+/** Seconds into the repair loop at `t`. */
+const repairAt = (t: number) => (t < REPAIR.start ? REPAIR.idle : (t - REPAIR.start) % REPAIR.every);
+/** How bright the arc is at `t`: on while the tip is at the spot. */
+const arcAt = (t: number) => {
+  const u = repairAt(t);
+  return keyed(RK.work, u) * (1 - smooth(0.015, 0.03, keyed(RK.gap, u)));
+};
+/** 0 to 1, the same every time for the same `a`, `b` and `c`. */
+function hash3(a: number, b: number, c: number) {
+  let h = Math.imul(a | 0, 0x27d4eb2d) ^ Math.imul(b | 0, 0x165667b1) ^ Math.imul(c | 0, 0x9e3779b1);
+  h = Math.imul(h ^ (h >>> 15), 0x85ebca6b);
+  h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+// Sparks: a small pool, each slot firing again every `every` s while the arc is on (or skipping a
+// turn, at random, so they come in spits), and flying for under half a second, down and a little out:
+// they're gone well above anything below. Worked out afresh from the clock each frame, no state.
+const SPARK = { n: 36, every: 0.5, life: [0.22, 0.46], fall: 5.5 };
+
+const COLD = new THREE.Color(0x2c2420);
+const EMBER = [new THREE.Color(0xb3300c), new THREE.Color(0xffd79a)];
 
 /** Two bones from `a` (lengths `u`, then `f`) toward `t`, the elbow bent toward `pole`: the elbow into
  *  `e` and the wrist (at `t`, or as near as it reaches) into `w`. */
@@ -2636,9 +2697,26 @@ function buildRigger(mats: Mats) {
   bake(fixed);
   const soot = new THREE.MeshBasicMaterial({ map: radialTexture([[0, 'rgba(8,5,3,0.9)'], [0.35, 'rgba(8,5,3,0.5)'], [1, 'rgba(8,5,3,0)']], 64), transparent: true, depthWrite: false });
   add(new THREE.PlaneGeometry(0.32, 0.26), soot, SEAM.x, SEAM.y, WALL_Z + 0.004);
-  // The bead laid along the seam, and later the hot spot where the torch is working: live.
-  const hot = new THREE.MeshBasicMaterial({ color: 0x2c2420, toneMapped: false });
-  const bead = add(new THREE.SphereGeometry(0.013, 10, 8), hot, SEAM.x, SEAM.y, SEAM.z);
+  // A bead of weld at each spot, cold metal until the torch heats it: live.
+  const beads = WELDS.map((p) => add(new THREE.SphereGeometry(0.012, 10, 8), new THREE.MeshBasicMaterial({ color: COLD, toneMapped: false }), p.x, p.y, p.z));
+  // The arc's glow at the torch's tip (small, and warm, not a flash), and the sparks.
+  const arcMat = new THREE.SpriteMaterial({ map: radialTexture([[0, 'rgba(255,244,222,1)'], [0.18, 'rgba(255,196,120,0.55)'], [1, 'rgba(255,140,60,0)']], 64), color: 0xffffff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0, toneMapped: false });
+  const arc = new THREE.Sprite(arcMat);
+  arc.scale.setScalar(0.17);
+  arc.visible = false;
+  group.add(arc);
+  const sparkPos = new Float32Array(SPARK.n * 3);
+  const sparkCol = new Float32Array(SPARK.n * 3);
+  const sparkGeo = new THREE.BufferGeometry();
+  sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3).setUsage(THREE.DynamicDrawUsage));
+  sparkGeo.setAttribute('color', new THREE.BufferAttribute(sparkCol, 3).setUsage(THREE.DynamicDrawUsage));
+  const sparks = new THREE.Points(
+    sparkGeo,
+    new THREE.PointsMaterial({ size: 0.075, map: radialTexture([[0, 'rgba(255,255,255,1)'], [0.35, 'rgba(255,255,255,0.8)'], [1, 'rgba(255,255,255,0)']], 32), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }),
+  );
+  sparks.frustumCulled = false;
+  sparks.visible = false;
+  group.add(sparks);
 
   // The robot, about 0.8 m of it, posed in its torso's frame: a shell (torso, pack, harness, legs,
   // baked), a head with a visor on a hinge, two arms and the hands.
@@ -2752,7 +2830,32 @@ function buildRigger(mats: Mats) {
   const w = new THREE.Vector3();
   const goal = new THREE.Vector3();
   const pole = new THREE.Vector3();
+  const aim = new THREE.Vector3();
   const railAt = new THREE.Vector3(RIGGER.x + 0.18, RAIL.y - 0.04, RAIL.z + 0.03);
+  const home = new THREE.Vector3(RIGGER.x, RIGGER.y, RIGGER.z);
+  const yaw = new THREE.Quaternion().setFromAxisAngle(UP, RIGGER.yaw);
+  // Leaning in is toward the work, and a jolt swings it back out into the room.
+  const toWork = new THREE.Vector3(SEAM.x - home.x, 0, SEAM.z - home.z).normalize();
+  const out = new THREE.Vector3(-toWork.x, 0, -toWork.z).add(Z_AXIS).normalize();
+  // Where the torch hangs at rest (the body's frame), pointing down, and its way in to the work.
+  const lowered = new THREE.Vector3(-0.2, -0.06, 0.14);
+  const hangDir = new THREE.Vector3(-0.15, -1, 0.35).normalize();
+  const approach = new THREE.Vector3(0.5, -0.45, 0.35).normalize();
+  const room = new THREE.Vector3(-0.6, 1.3, 0.4);
+  const q = new THREE.Quaternion();
+  const col = new THREE.Color();
+  // The cables' anchors, overhead: a little closer together than the rings, fixed, so it swings.
+  body.position.copy(home);
+  body.quaternion.copy(yaw);
+  body.updateMatrixWorld(true);
+  const anchors = rings.map((r) => {
+    body.localToWorld(v1.copy(r));
+    return new THREE.Vector3(lerp(v1.x, home.x, 0.3), RIGGER.hang, lerp(v1.z, home.z, 0.3));
+  });
+  const hangLen = RIGGER.hang - home.y;
+  const P = { work: 1, gap: 0.1, aim: 0, hood: 0, nod: 0, tilt: 0, lean: 0, look: 0, heat0: 0, heat1: 0 };
+  const HELD = { ...P };
+  type Ps = typeof P;
 
   /** An arm from its shoulder to `goal` (the body's frame), the elbow toward `pole`; the wrist in `w`. */
   function arm(i: number) {
@@ -2761,39 +2864,111 @@ function buildRigger(mats: Mats) {
     span(arms[i][1], e, w);
   }
 
-  function pose() {
-    // Hanging square under its anchors, turned to the work.
-    body.position.set(RIGGER.x, RIGGER.y, RIGGER.z);
-    body.rotation.set(0, RIGGER.yaw, 0);
+  /** A weld's color at `k` (0 to 1): cold metal, dull red, orange, near white. */
+  function heatColor(k: number, into: THREE.Color) {
+    if (k < 0.5) return into.copy(COLD).lerp(EMBER[0], k * 2);
+    return into.copy(EMBER[0]).lerp(EMBER[1], (k - 0.5) * 2);
+  }
+
+  /** The sparks at `t`, `k` of their brightness (0 hides them). */
+  function spit(t: number, k: number) {
+    let any = false;
+    const src = tip.getWorldPosition(v3);
+    for (let i = 0; i < SPARK.n; i++) {
+      const phase = (i / SPARK.n) * SPARK.every;
+      const c = Math.floor((t - phase) / SPARK.every);
+      const born = c * SPARK.every + phase;
+      const age = t - born;
+      const life = lerp(SPARK.life[0], SPARK.life[1], hash3(c, i, 4));
+      const on = k > 0 && age < life && hash3(c, i, 0) < 0.7 && arcAt(born) > 0.6;
+      if (!on) {
+        sparkCol.fill(0, i * 3, i * 3 + 3);
+        continue;
+      }
+      any = true;
+      // Out of the spot, mostly down and away from the wall, a few kicked up first; slowed as they go.
+      const vx = (hash3(c, i, 1) - 0.4) * 0.9;
+      const vy = -0.1 + hash3(c, i, 2) * 0.5;
+      const vz = 0.15 + hash3(c, i, 3) * 0.45;
+      const d = age * (1 - 0.35 * age);
+      sparkPos[i * 3] = src.x + vx * d;
+      sparkPos[i * 3 + 1] = src.y + vy * d - 0.5 * SPARK.fall * age * age;
+      sparkPos[i * 3 + 2] = src.z + vz * d;
+      const f = age / life;
+      col.copy(EMBER[1]).lerp(EMBER[0], f).multiplyScalar(1.6 * k * (1 - f) ** 0.8);
+      col.toArray(sparkCol, i * 3);
+    }
+    sparks.visible = any;
+    sparkGeo.attributes.position.needsUpdate = true;
+    sparkGeo.attributes.color.needsUpdate = true;
+  }
+
+  function pose(p: Ps, t: number, sway: number) {
+    // Hanging from its anchors: a slow, small swing, wider at ease than at the work, and the jolts.
+    const u = repairAt(t);
+    const amp = lerp(0.005, 0.016, 1 - p.work) * sway;
+    let jolt = 0;
+    for (const j of JOLTS) {
+      const x = u - j;
+      if (x > 0 && x < 2) jolt += Math.exp(-3.5 * x) * Math.sin(10 * x) * 0.012;
+    }
+    body.position.copy(home).addScaledVector(toWork, p.lean);
+    body.position.x += amp * (Math.sin(0.83 * t) + 0.45 * Math.sin(1.57 * t + 1.3));
+    body.position.z += amp * 0.5 * Math.sin(0.61 * t + 0.4);
+    body.position.addScaledVector(out, jolt * sway);
+    // Square to the cables, however it swings.
+    v1.set(home.x - body.position.x, hangLen, home.z - body.position.z).normalize();
+    body.quaternion.setFromUnitVectors(UP, v1).multiply(yaw);
     body.updateMatrixWorld(true);
-    // Its head to the seam (a little toward the room, so its face shows); the visor up, to look.
-    head.lookAt(v1.copy(SEAM).add(v2.set(0.05, -0.05, 0.6)));
-    visor.rotation.x = -0.75;
+    // The head: to the work (a little toward the room, so its face shows) or down at the room; then the
+    // nod and the tilt. The hood on its pivots.
+    aim.lerpVectors(WELDS[0], WELDS[1], p.aim);
+    v1.copy(aim).add(v2.set(0.05, -0.05, 0.6)).lerp(room, p.look);
+    head.lookAt(v1);
+    head.rotateX(p.nod);
+    head.rotateZ(p.tilt);
+    visor.rotation.x = lerp(-0.75, 0, p.hood);
     // The grip on the rail (its right hand, the far one), the elbow out and down.
     body.worldToLocal(goal.copy(railAt));
     pole.set(1, -0.5, 0.4);
     arm(1);
     grip.position.copy(w);
     grip.quaternion.setFromUnitVectors(UP, v1.subVectors(w, e).normalize());
-    // The torch (its left hand), held off the seam a moment, pointing at it.
-    body.worldToLocal(v1.copy(SEAM));
-    v2.set(0.5, -0.45, 0.35).normalize();
-    goal.copy(v1).addScaledVector(v2, (RIG.torch + 0.12) / RIGGER.scale);
+    // The torch (its left hand): its tip `gap` off the spot, pointing at it, or down at its side.
+    body.worldToLocal(v1.copy(aim));
+    goal.copy(v1).addScaledVector(approach, RIG.torch + p.gap / RIGGER.scale).lerp(lowered, 1 - p.work);
     pole.set(-0.6, -1, 0.3);
     arm(0);
     torch.position.copy(w);
-    torch.quaternion.setFromUnitVectors(UP, v2.subVectors(v1, w).normalize());
+    v2.subVectors(v1, w).normalize().lerp(hangDir, 1 - p.work).normalize();
+    torch.quaternion.setFromUnitVectors(UP, v2);
     // The cables, from the rings up.
     body.updateMatrixWorld(true);
     rings.forEach((r, i) => {
       body.localToWorld(v1.copy(r));
-      v2.set(lerp(v1.x, RIGGER.x, 0.3), RIGGER.hang, lerp(v1.z, RIGGER.z, 0.3));
-      span(cables[i], v1, v2);
-      cables[i].scale.y = v1.distanceTo(v2);
+      span(cables[i], v1, anchors[i]);
+      cables[i].scale.y = v1.distanceTo(anchors[i]);
     });
+    beads.forEach((b, i) => heatColor(i ? p.heat1 : p.heat0, (b.material as THREE.MeshBasicMaterial).color));
   }
-  pose();
-  return { group, body, bead, tip };
+
+  /** The rig at `t`: the repair with motion on, easing to the held pose as the room rests (`rest`
+   *  0 to 1); with motion off, only the held pose, with no swing, no sparks, no glow. */
+  function update(t: number, motion: boolean, rest: number) {
+    const k = motion ? 1 - rest : 0;
+    const u = repairAt(t);
+    for (const key of Object.keys(P) as (keyof Ps)[]) P[key] = lerp(HELD[key], keyed(RK[key], u), k);
+    pose(P, t, k);
+    const a = motion ? arcAt(t) * k : 0;
+    arc.visible = a > 0.01;
+    if (arc.visible) {
+      arc.position.copy(tip.getWorldPosition(v1));
+      arcMat.opacity = a * (0.7 + 0.2 * Math.sin(t * 53) * Math.sin(t * 31 + 1));
+    }
+    spit(t, motion ? k : 0);
+  }
+  update(0, false, 1);
+  return { group, update };
 }
 
 // --- Workstation ---------------------------------------------------------------------------------
@@ -3435,6 +3610,7 @@ export function mountLab(
     for (const r of robots) r.update(beat, t, rest, s, game);
     proto.update(0, t, rest);
     store.animate(t, spin);
+    rigger.update(t, intent, rest);
     room.traffic(t);
     moveDust(t);
     dust.visible = mode !== 'read' || !!flight;
