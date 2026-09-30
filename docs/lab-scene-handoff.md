@@ -1,8 +1,221 @@
 # Robotics lab implementation handoff
 
-## Current checkpoint: a terminal inside the lab computer, 2026-09-29 (Claude)
+## Current checkpoint: project details in the terminal, and a workshop with character, 2026-09-30 (Claude)
 
-**Status: validated, pushed to the `lab-terminal` branch, and up for review as a pull request to `main`.** Not merged and not deployed (`deploy.yml` deploys only on a push to `main`).
+**Status: five local commits on `terminal-workshop-polish`, from `main` at `f6a7150`.** Not pushed, no pull request, not merged, not deployed. Publishing waits on the owner's go-ahead.
+
+- **Commits, in order** (each builds on its own, and each can be reviewed and reverted alone):
+  1. `7745081` Render project details within the portfolio terminal.
+  2. `b886565` Shape the workshop lighting and opening composition.
+  3. `49d47b2` Differentiate the workshop robots and their dance behavior.
+  4. `7835167` Add specific workshop details around the robots.
+  5. The one that adds this section: Refresh workshop fallbacks and document the terminal experience.
+- **This supersedes the project details frame** in the section below. There, `work <id>` covered the terminal with an iframe of the case study, with "Back to terminal" and an Escape that closed it first. That frame is gone. Where the sections below describe it, this one wins.
+- **What to judge:** `docs/evidence/terminal-workshop-2026-09-30/`:
+  - `screens/`;
+  - `video/terminal-1280x800.webm`: the terminal, 23.6 s;
+  - `video/robots-1280x800.webm`: one loop of the dance, then the held moment, 20.2 s;
+  - `logs/`.
+
+### What changed
+
+1. **A project prints into the terminal** (commit 1).
+   - **Where it's made:**
+     - `src/components/TermProject.astro`: one project in the terminal's type;
+     - `src/components/TermProse.astro`: the write-up's layout;
+     - `src/lib/writeup.ts`: what turns the case study's HTML into it.
+   - **The source is the case study's own Markdown**, as `/projects/<id>/` renders it, so the content is unchanged. The same markup serves the lab and the no-JavaScript page `/computer/work/<id>/`.
+   - **What it prints:**
+     - the name, when and where, and what it is;
+     - status, source (and demo), team and tags, and the figures, in the terminal's key and value columns;
+     - the write-up: plain section lines, prose, lists and links;
+     - related work, to run next.
+   - **Figures are folded** under a line that says what they show, and open when it's clicked. A video's poster loads only once its figure is opened.
+   - **Code blocks** scroll sideways within themselves. The page never does.
+   - In the lab, each project waits in a `<template>` until it's run (`Terminal.astro`).
+2. **Command syntax.** Commands are trimmed and matched in any case, and never run as code, HTML or a shell command.
+
+   | Command | Prints |
+   |---|---|
+   | `help` | The four commands below, each a button. |
+   | `about` | About me, from `src/data/site.ts`. |
+   | `work` | A numbered list of the 11 projects. Tapping an entry runs `work <id>` for it. |
+   | `work <id>` | That project (1 above). An id no project has prints `No project called <id>. Run work to list them.`, with `work` a button. |
+   | `resume` | The résumé PDF, then Experience, Education and Skills. |
+   | `contact` | Email, GitHub and LinkedIn. |
+   | `exit` | Leaves. A hidden alias, not listed by `help`. |
+   | anything else | `Command not found. Run help for available commands.` |
+
+   An empty line gives a new prompt, and doesn't change the address. Up and Down recall earlier commands.
+3. **Addresses** (`src/scripts/lab/routes.ts`, the pre-paint routing in `src/pages/index.astro`). The table below still holds, except for these rows:
+
+   | Address | Now |
+   |---|---|
+   | `/?computer=work/<id>` | The terminal, with that project printed (`work <id>`). An anchor (`#approach`) lands on its section. |
+   | `/computer/work/<id>/` | With JavaScript, it goes to `/?computer=work/<id>` with its anchor. Without JavaScript, or after the lab's script failed, the project stands alone on the page, in the terminal's type, with its commands as links to their pages. `noindex`, with its canonical at `/projects/<id>/`. |
+   | a failed script at `/?computer=work/<id>` | The case study, `/projects/<id>/`, with the anchor. |
+
+4. **History.**
+   - Going in adds one entry, and printing a project adds one more.
+   - Back and Forward reprint an entry's project rather than printing it again: the transcript keeps one copy, and the reading place comes back.
+   - An anchor edited into the address while reading stays on the same entry, and prints nothing again.
+   - Escape, `exit` and the power button leave straight for the entry the lab was opened from. There's no frame to close first. The focus goes back to the monitor's link, or stays in the prompt if the command was typed.
+   - **Kept for the session:**
+     - the transcript;
+     - the reading place, kept even when the oldest outputs are trimmed;
+     - which figures were open.
+
+     They survive leaving, coming back and a reload.
+5. **Lighting and the opening** (commit 2, `src/scripts/lab/scene.ts`).
+   - **The moon** comes in high from the left through the window:
+     - a cool spot along one direction;
+     - the six panes laid across the floor, right of the monitor, as one additive quad;
+     - a faint beam of four haze sheets between.
+   - **The pendant** is a warm spot hung low over the service stand. The unfinished robot and the bench's end are the warm pool at the back.
+   - **The work light's cone** is tighter and aimed at the dancers' floor.
+   - **The fill** is darker and cooler, so the wall above the robots and the room's corners stay dark.
+   - **Looking around** is now limited both ways by the monitor's bezel against the window's margin. Before, only turning left was limited, so in a narrow mouse window turning right pushed the monitor partly out of the picture.
+6. **The robots** (commit 3). The dancers keep the shared rig and the routine's four sections. Each now has its own sense of time and its own version of a section, not only a phase offset.
+   - **Graphite:**
+     - moves for three beats of each bar and all but stops on the fourth, holding a shape;
+     - stands lower;
+     - its gestures are broad and whole-armed.
+   - **Ivory:**
+     - lands every move on a half beat, and tuts: one forearm set at a time, right on the beat and left on the next;
+     - its head follows the arm that moved;
+     - never has both forearms across the body at one height.
+   - **Terracotta:**
+     - kicks on every off-beat in the warm-up;
+     - in the canon, overdoes its hop-spin: a wobble with its arms out, a foot out to catch it, a hop back, a shake of the head, then the pose it meant.
+
+     Graphite turns to watch it, and Ivory tilts its head.
+   - **The unfinished robot** on the stand runs a stepped calibration every 12 s: head, elbow, wrist, a nod. Reading quiets it with the others.
+   - **The held moment** is now beat 11.5 (it was 21.2), where each dancer is in a clear pose of its own. Reduced motion and Motion off show it.
+   - The text clearance samples the dancers' reach twice as often (128 samples a loop), and the probe's `stats()` reports the beat.
+7. **Workshop details** (commit 4), all procedural: canvas textures and primitives, with no new files, fonts or dependencies.
+   - **By the bench:**
+     - a wiring sketch for the arm on the stand, taped to the wall at the pegboard's end, askew, gone over in red where it was wrong;
+     - marker labels on the parts drawers, one written over and one blank;
+     - a bench supply with a dim readout, its leads clipped to the spare head. The rubber ring moved to make room.
+     - on the pegboard, a missing wrench's outline and hand grime.
+   - **On the cart:** a tag on the spare forearm, on a string.
+   - **On the desk, under the lamp:** the useless machine, one of the projects in the content (`src/content/projects/useless-machine.md`): a small wooden box with its switch on the lid.
+   - **No floating labels.** All text is on the objects themselves. The sketch is a generic servo test rig, not a diagram of a real project.
+   - **No new randomness is drawn**, so the robots' seeded details are unchanged.
+8. **Fallbacks** (commit 5), retaken from the scene as it is now:
+   - `public/lab/opening-wide.webp`: 33 KB;
+   - `public/lab/opening-tall.webp`: 11 KB;
+   - `public/og.jpg`: 66 KB.
+
+   The monitor's bezel moved in the wide still, so `LabStage.astro`'s `--still-*` fractions were updated to match:
+   - **wide:** from 0.3392 / 0.5889 / 0.5396 / 0.7884 to 0.347 / 0.5919 / 0.5493 / 0.7936;
+   - **tall:** from 0.253 / 0.4627 / 0.747 / 0.6173 to 0.2511 / 0.462 / 0.7489 / 0.618.
+
+   To retake them, follow "Retaking the stills" further down, with the lab-terminal pass's `harness/stills.cjs` and `harness/og.cjs`.
+9. **Harness.**
+   - **`validate.cjs` in `lab-terminal-2026-09-29`:**
+     - commit 1 replaced its iframe checks with checks of the printed write-up, folded figures, posters, anchors, reloads and history;
+     - commit 5 fixes a flaky history check. "Forward, and Forward again" compared scroll positions after a fixed 600 ms, while a smooth scroll could still be running. It missed by 8–9 px in about one run in three. It now waits until the terminal's `scrollTop` has held for 250 ms, and passed 4 of 4 runs alone and in the full run.
+   - **This pass's own harness** (`terminal-workshop-2026-09-30/harness/`):
+     - `rec.cjs`: the lab-terminal pass's recording, with a project added;
+     - `robots-rec.cjs`: the dance loop and the held moment.
+
+     Both use the lab-terminal pass's `serve.cjs`.
+
+### Validation
+
+- **Machine:** Apple M5 Pro, Darwin 25.5.0.
+- **Browser:** headless Chrome 154.0.8037.58 (installed Chrome, through Playwright). WebGL is ANGLE Metal on the Mac's GPU. No SwiftShader run in this pass.
+- **Site:** `dist/` from `npm run build`, read straight from disk (`serve.cjs`).
+- **Build:** 43 pages, with only the older three.js chunk-size warning (`logs/build.log`).
+- **Type check:** `tsc --noEmit -p .` is clean (`logs/tsc.log` is empty).
+- **`git diff --check`:** clean.
+- **Every commit** was built and type-checked on its own before the next.
+
+**The terminal's checks.** `validate.cjs` in `lab-terminal-2026-09-29`, run on the final build, is 227 checks, all passing (`logs/validate.log`). It covers:
+- the startup, commands and taps;
+- scrolling and links, including every project printed, folded figures, posters and anchors;
+- leaving and coming back with the history kept, and addresses and history;
+- the phone, including a simulated keyboard;
+- reduced motion and Motion off, and the keyboard;
+- no WebGL, with the link over the new stills to the pixel at five sizes;
+- no JavaScript and a failed script;
+- the fit at 13 sizes, including 200% and 150% text.
+
+**The scene.** These were measured with scratch scripts (not committed) on the GPU, after each of commits 2–4. Only the robots and props changed after commit 2; the figures below are from the final scene.
+- **The opening's fit** is the same after commits 3 and 4 as after commit 2: the camera's distance is 7.48 at 1440×900, 7.36 at 1920×1080 and 1920×640, and 8.8 at 390×844.
+- **The monitor's pick** (the pointer on its centre and four inset corners) hits at all five points at all four sizes.
+- **Looking around**, as far as it goes in six directions at 1440×900, 390×844 and 1920×640, keeps the monitor in view every time. The pick hits all five points in 16 of 18 cases. At the up-left limit, at 1440×900 and 1920×640, the inset bottom-right point misses. The monitor is skewed there, so that inset corner of its bounding box falls just outside the bezel. The miss is the same before commit 4 (measured on commit 3).
+- **Frame cost at 1440×900,** held (reduced motion), on the M5 Pro with ANGLE Metal. Callback time is CPU time in the page's animation frame, not GPU time.
+
+  | | Commit 3 | Commit 4 |
+  |---|---|---|
+  | Draw calls a frame | 313 | 321 |
+  | Callback p50/p95, 1× | 2.1 / 2.5 ms | 1.5 / 2.1 ms |
+  | Callback p50/p95, 2× (buffer 1800×1125) | 1.6 / 2.3 ms | 1.5 / 2.3 ms |
+  | Frame interval p50/p95 | 16.7 / 16.8 ms | 16.7 / 16.8 ms, none over 25 ms |
+
+  The callback times differ between runs by more than the props add, so read them as unchanged.
+- **The dance** was checked on contact sheets at chosen beats, with a fake clock. The recording shows the loop, then the held moment once reduced motion is switched on.
+
+**Screens** (GPU, the page's own fonts, JPEG), in `docs/evidence/terminal-workshop-2026-09-30/screens/`:
+- **Opening:**
+  - `opening-{1440x900,1280x800,1920x1080}` and `phone-opening-390x844`;
+  - `focus-monitor-1440x900`;
+  - `robots-held-1280x800`: the recording's last frame, the held moment.
+- **The terminal, at 1440×900:**
+  - `terminal-startup`, `terminal-help`, `terminal-work`, `terminal-contact`;
+  - `terminal-project`: `work traffic-ops-center`, printed.
+- **Tablet:** `tablet-terminal-1180x820`.
+- **Phone:** `phone-terminal`, `phone-terminal-work` and `phone-terminal-project`, all 390×844.
+
+**Recordings** (VP9, 1280×800, from Chrome's screencast replayed into MediaRecorder, with no ffmpeg):
+- **`video/terminal-1280x800.webm`** (23.6 s, 2.0 MB). A real mouse and keyboard:
+  - find the monitor and click it, fly in, and watch the startup;
+  - type `help`, then `work`;
+  - click the first project's command in the list, and scroll through its details;
+  - press Esc and fly out;
+  - click the monitor again: the transcript and the reading place are back, and the startup doesn't replay.
+- **`video/robots-1280x800.webm`** (20.2 s, 1.0 MB): one whole loop of the dance, untouched (32 beats at 112 bpm), then reduced motion switched on, and the room holds.
+
+### Known limitations
+
+1. **Coverage:**
+   - headless Chrome 154 on one Mac;
+   - no Safari, Firefox, Playwright WebKit, real phone or tablet, or screen-reader pass;
+   - a phone's keyboard is simulated.
+2. **The props are small at most sizes.** The drawer labels, the tag and the readout are a few pixels tall at 1440×900. They read as labels, not as words. The sketch and the useless machine read at every desktop size. On a phone, only the useless machine is in the picture.
+3. **The sketch sits between Ivory's head and the unfinished robot** at 1440×900. Its paper is toned down to keep it from drawing the eye, but it's still the palest thing on that part of the wall.
+4. **Frame cost wasn't measured while dancing** in this pass, and not on any GPU but the M5 Pro.
+5. **The look-around pick miss** at the up-left limit (Validation, above) comes from the harness's inset corner on a skewed monitor. It isn't a new gap in the monitor's hit area, but nothing measures the bezel's exact outline there.
+6. **Carried over from the section below:**
+   - the monitor's texture shows only the empty prompt;
+   - the right-click on the drawn monitor;
+   - the three.js chunk-size warning;
+   - stills that go stale if the opening changes without a retake.
+
+### Commands (from the repository root)
+
+```sh
+npm run build                          # 43 pages
+git diff --check
+tsc --noEmit -p .                      # clean
+
+# PW=<path to a playwright or playwright-core module>; the site from dist/, no server.
+T=docs/evidence/lab-terminal-2026-09-29          # the terminal's harness
+E=docs/evidence/terminal-workshop-2026-09-30     # this pass's evidence
+PW=<playwright> node $T/harness/validate.cjs dist > $E/logs/validate.log   # or: … dist history
+PW=<playwright> node $T/harness/shots.cjs $E/screens
+PW=<playwright> node $E/harness/rec.cjs                                     # → $E/video/terminal-1280x800.webm
+LAST=$E/screens/robots-held-1280x800.jpg PW=<playwright> node $E/harness/robots-rec.cjs
+PW=<playwright> node $T/harness/frames.cjs $E/video/terminal-1280x800.webm <scratch>/sheet.png
+PW=<playwright> node $T/harness/stills.cjs <scratch>                        # then "Retaking the stills", below
+PW=<playwright> node $T/harness/og.cjs <scratch>/og.png                     # then down to public/og.jpg
+```
+
+## Earlier checkpoint: a terminal inside the lab computer, 2026-09-29 (Claude)
+
+**Status: merged into `main` as `f6a7150` (pull request #5).** The checkpoint above replaces its project details frame; see there.
 
 - **Branch:** `lab-terminal`, from `main` at `b49f29c` (the merge of the full-screen lab below).
 - **Commits:**

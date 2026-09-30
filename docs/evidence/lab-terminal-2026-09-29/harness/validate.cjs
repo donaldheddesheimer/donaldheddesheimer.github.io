@@ -51,6 +51,22 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
   const closed = (p) => p.waitForFunction(() => !document.documentElement.dataset.pc, null, { timeout: 15000 });
   // A project printed: the newest entry is `work <id>`'s, and the address is the project's.
   const printed = (p, id) => p.waitForFunction((i) => [...document.querySelectorAll('[data-term] .term-entry')].at(-1)?.querySelector(':scope > .t-project')?.dataset.project === i && location.search === `?computer=work/${i}`, id, { timeout: 8000 });
+  // The terminal's scroll at rest: the same scrollTop for 250 ms running (a smooth scroll can outlast a
+  // fixed wait).
+  const settled = (p) =>
+    p.evaluate(
+      () =>
+        new Promise((done) => {
+          const el = document.querySelector('[data-term]');
+          let [last, since] = [el.scrollTop, performance.now()];
+          const tick = (now) => {
+            if (el.scrollTop !== last) [last, since] = [el.scrollTop, now];
+            if (now - since >= 250) done();
+            else requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }),
+    );
   const TERM_TITLE = 'Terminal · Donald Heddesheimer';
   const enter = async (p, touch = false) => {
     const r = await p.evaluate(() => (({ x, y, width, height }) => ({ x, y, w: width, h: height }))(document.querySelector('[data-lab-monitor]').getBoundingClientRect()));
@@ -645,6 +661,7 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
     await cmd.click();
     await printed(p, id);
     await sleep(600);
+    await settled(p);
     const y0 = await p.evaluate(() => window.__y);
     const at = await snap(p);
     const steps = [at.at];
@@ -659,11 +676,13 @@ const NOT_FOUND = 'Command not found. Run help for available commands.';
     await p.goForward();
     await reading(p);
     await sleep(600);
+    await settled(p);
     const fwd = await snap(p);
     steps.push(fwd.at);
     await p.goForward();
     await p.waitForFunction((i) => location.search === `?computer=work/${i}`, id);
     await sleep(600);
+    await settled(p);
     const fwd2 = await snap(p);
     steps.push(fwd2.at);
     ok('history: a project, Back to the terminal, Back to the room, Forward to the terminal, Forward to the project', steps.join(' ') === `/?computer=work/${id} /?computer / /?computer /?computer=work/${id}`, steps);
