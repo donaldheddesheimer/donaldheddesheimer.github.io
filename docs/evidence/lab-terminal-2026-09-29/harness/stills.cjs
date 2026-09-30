@@ -18,7 +18,8 @@ const { BASE, routeDist } = require('./serve.cjs');
     await p.evaluate(() => document.fonts.ready);
     await p.waitForTimeout(1500);
     const s = await p.evaluate(() => window.__lab.stats());
-    await p.addStyleTag({ content: '.home-id, .home-settings { opacity: 0 !important }' });
+    // The room bare: the mood (LabStage.astro) goes over the still as it does over the scene.
+    await p.addStyleTag({ content: '.home-id, .home-settings, .mood, .grain { opacity: 0 !important } [data-lab-stage] canvas { filter: none !important }' });
     await p.waitForTimeout(300);
     await p.screenshot({ path: `${out}/${name}.png`, clip: { x: 0, y: 0, width: w, height: h } });
     const f = (v) => +v.toFixed(4);
