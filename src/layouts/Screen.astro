@@ -1,80 +1,42 @@
 ---
-// A project's case study, and the site's few other pages, under one slim bar. The content is the site's
-// own (CaseStudy.astro).
-//
-// On the lab computer (/computer/work/<id>/, `path` set), the page is a project's details, opened from the
-// terminal's `work` and laid over it in a frame (src/scripts/lab/computer.ts). Its bar is only the way
-// back: "Back to terminal" (and Escape) ask the lab for the terminal again (pc:back, pc:escape). The lab
-// owns the address (/?computer=work/<id>) and the history, and this page never navigates itself: a
-// plain click on a link to another page the computer has asks the lab to go there (pc:go); a modified
-// click opens that page's own address in a new tab. Links the computer has no page for open in a new
-// tab, so the lab stays; downloads and mail links do what they do. Opened on their own with JavaScript,
-// these pages go to the lab showing them; without it they stand alone. They are kept out of search
-// results; a case study's canonical page is /projects/<id>/.
-//
-// The site's pages of their own (a case study's /projects/<id>/, the 404) stay where they are: their bar
-// has the name (to the lab, /) and the terminal's commands (its page's anchors, /computer/#work, which
+// A project's case study (CaseStudy.astro), and the site's few other pages (the 404), under one slim
+// bar: the name (to the lab, /) and the terminal's commands (its page's anchors, /computer/#work, which
 // open the lab running them).
 import Base from './Base.astro';
 import Mark from '../components/Mark.astro';
-import Icon from '../components/Icon.astro';
 import { profile } from '../data/site';
-import { COMMANDS, TERMINAL, canonicalHref, labHref, pageHref } from '../scripts/lab/routes';
+import { COMMANDS, pageHref } from '../scripts/lab/routes';
 
 interface Props {
   title: string;
-  /** The computer path (routes.ts) of one of the computer's own pages: a project's, 'work/<id>'. */
-  path?: string;
-  /** A page of its own: which of the terminal's commands it belongs to, if any. */
+  /** Which of the terminal's commands the page belongs to, if any. */
   section?: string;
   description?: string;
-  /** A page of its own: its canonical address, or false for none (the 404). */
+  /** Its canonical address, or false for none (the 404). */
   canonical?: string | false;
   noindex?: boolean;
 }
-const { title, path, description } = Astro.props;
-const framed = path != null;
-const section = framed ? path.split('/')[0] : Astro.props.section;
-const canonical = framed ? canonicalHref(path) : Astro.props.canonical;
-const lab = framed ? labHref(path) : null;
+const { title, section, description, canonical, noindex } = Astro.props;
 const labels: Record<string, string> = { about: 'About', work: 'Work', resume: 'Résumé', contact: 'Contact' };
 const nav = (['work', ...COMMANDS.filter((c) => c !== 'work')] as string[]).map((id) => [id, labels[id]] as const);
 ---
 
-<Base title={title} description={description} canonical={canonical} noindex={framed || Astro.props.noindex} screen>
-  <Fragment slot="head">
-    <base target="_top" />
-    <script is:inline define:vars={{ lab }}>
-      if (lab && window.top === window.self) location.replace(lab + location.hash);
-    </script>
-  </Fragment>
-  <div class="scr" data-path={path}>
+<Base title={title} description={description} canonical={canonical} noindex={noindex} screen>
+  <div class="scr">
     <header class="scr-bar">
-      {
-        framed ? (
-          <>
-            <a href={pageHref(section ?? TERMINAL)} class="scr-back" data-leave aria-keyshortcuts="Escape">
-              <Icon name="arrow-left" class="size-3.5 shrink-0" />
-              Back to terminal
+      <a href="/" class="scr-home" aria-label={`${profile.name}, the lab`}>
+        <Mark class="size-5 shrink-0" />
+        <span class="scr-name">{profile.name}</span>
+      </a>
+      <nav class="scr-nav" aria-label="Portfolio">
+        {
+          nav.map(([id, label]) => (
+            <a href={pageHref(id)} aria-current={section === id ? 'true' : undefined}>
+              {label}
             </a>
-            <kbd class="scr-esc" aria-hidden="true">Esc</kbd>
-          </>
-        ) : (
-          <>
-            <a href="/" class="scr-home" aria-label={`${profile.name}, the lab`}>
-              <Mark class="size-5 shrink-0" />
-              <span class="scr-name">{profile.name}</span>
-            </a>
-            <nav class="scr-nav" aria-label="Portfolio">
-              {nav.map(([id, label]) => (
-                <a href={pageHref(id)} aria-current={section === id ? 'true' : undefined}>
-                  {label}
-                </a>
-              ))}
-            </nav>
-          </>
-        )
-      }
+          ))
+        }
+      </nav>
     </header>
     <main id="main" class="scr-main">
       <slot />
@@ -83,14 +45,7 @@ const nav = (['work', ...COMMANDS.filter((c) => c !== 'work')] as string[]).map(
 </Base>
 
 <script>
-  import { pathOf } from '../scripts/lab/routes';
-
   const html = document.documentElement;
-  const here = document.querySelector<HTMLElement>('.scr')?.dataset.path;
-  // On the lab's monitor: the frame of the homepage's computer, and nowhere else.
-  const framed = !!here && window.parent !== window;
-  const post = (msg: object) => parent.postMessage(msg, location.origin);
-
   const smooth = () => html.dataset.motion !== 'off' && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   function scrollToHash(hash: string) {
     const el = hash.length > 1 ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
@@ -99,41 +54,12 @@ const nav = (['work', ...COMMANDS.filter((c) => c !== 'work')] as string[]).map(
     else scrollTo({ top: 0, behavior: smooth() ? 'smooth' : 'auto' });
   }
 
-  if (framed) {
-    document.addEventListener('click', (e) => {
-      if (e.defaultPrevented || e.button !== 0) return;
-      const a = (e.target as Element).closest<HTMLAnchorElement>('a[href]');
-      if (!a || a.hasAttribute('download') || a.target === '_blank') return;
-      const u = new URL(a.href);
-      if (u.protocol !== 'https:' && u.protocol !== 'http:') return; // mail links
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // the link's own address, in a new tab or window
-      e.preventDefault();
-      const to = a.hasAttribute('data-leave') ? null : pathOf(u, location.origin);
-      // (A click with no count is the keyboard's: the lab rings the focus it gives back only then.)
-      if (a.hasAttribute('data-leave')) post({ type: 'pc:back', pointer: e.detail > 0 });
-      else if (!to) window.open(u.href, '_blank', 'noopener');
-      else if (to === here) scrollToHash(u.hash);
-      else post({ type: 'pc:go', path: to, hash: u.hash });
-    });
-
-    // Tell the lab which page this is, and pass Escape up to it unless something here is using it.
-    post({ type: 'pc:page', path: here, title: document.title });
-    addEventListener(
-      'keydown',
-      (e) => {
-        if (e.key !== 'Escape' || e.defaultPrevented || document.querySelector('dialog[open]')) return;
-        post({ type: 'pc:escape' });
-      },
-      true,
-    );
-  }
   if (location.hash) requestAnimationFrame(() => scrollToHash(location.hash));
 </script>
 
 <style>
-  /* The bar: on the computer, the way back to the terminal (and Escape, for a keyboard); on a page of its
-     own, the name and the terminal's commands. On a page standing alone, the window's safe area (a
-     phone's notch and home bar) is kept clear. */
+  /* The bar: the name and the terminal's commands, the window's safe area (a phone's notch and home
+     bar) kept clear. */
   .scr-bar {
     position: sticky;
     top: 0;
@@ -162,8 +88,7 @@ const nav = (['work', ...COMMANDS.filter((c) => c !== 'work')] as string[]).map(
     gap: 0.125rem;
     margin-left: auto;
   }
-  .scr-nav a,
-  .scr-back {
+  .scr-nav a {
     display: inline-flex;
     align-items: center;
     min-height: 2rem;
@@ -174,8 +99,7 @@ const nav = (['work', ...COMMANDS.filter((c) => c !== 'work')] as string[]).map(
   .scr-nav a {
     color: var(--muted);
   }
-  .scr-nav a:hover,
-  .scr-back:hover {
+  .scr-nav a:hover {
     color: var(--text);
     background: var(--hover-bg);
   }
@@ -184,28 +108,9 @@ const nav = (['work', ...COMMANDS.filter((c) => c !== 'work')] as string[]).map(
     box-shadow: inset 0 -2px 0 var(--text);
     border-radius: 0;
   }
-  .scr-back {
-    gap: 0.375rem;
-    margin-left: -0.625rem;
-    color: var(--muted);
-  }
-  .scr-esc {
-    margin-left: auto;
-    padding: 0.125rem 0.375rem;
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    color: var(--dim);
-    font: 500 var(--text-xs) / 1.2 var(--font-mono);
-  }
-  @media not ((hover: hover) and (pointer: fine)) {
-    .scr-esc {
-      display: none;
-    }
-  }
   @media (pointer: coarse) {
     .scr-home,
-    .scr-nav a,
-    .scr-back {
+    .scr-nav a {
       min-height: var(--h-touch);
     }
   }

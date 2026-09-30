@@ -50,10 +50,11 @@
   position: relative;
   padding: var(--t-pad-y) var(--t-pad-x) 0;
 }
-/* A link or button the focus reaches scrolls clear of the prompt and its fade, not under them.
-   (A margin on these, not padding on .term: the prompt's own input, being scrolled to as it's typed
-   in, would otherwise pull the transcript away from where it's being read.) */
-.term-log :is(a, button) {
+/* Whatever the focus reaches (a link, a button, a figure's line, a code block, a video) scrolls clear of
+   the prompt and its fade, not under them. (A margin on these, not padding on .term: the prompt's own
+   input, being scrolled to as it's typed in, would otherwise pull the transcript away from where it's
+   being read.) */
+.term-log :is(a, button, summary, pre, video) {
   scroll-margin-bottom: calc(var(--t-prompt, 4.5em) + 1.25em);
 }
 .term-log,
@@ -97,8 +98,7 @@
 .t-out .t-section {
   margin-top: 1.6em;
 }
-.t-out h3,
-.t-out h4 {
+.t-out :is(h3, h4, h5, h6) {
   font: inherit;
 }
 .t-strong {
@@ -131,12 +131,139 @@
 .t-list > li + li {
   margin-top: 1.4em;
 }
-/* A project: its title, when and where just under it, then what it is and its links. */
-.t-work > li > h3 + .t-dim {
+/* A project: its number, then its title, when and where just under it, what it is and its commands. */
+.t-work > li {
+  display: grid;
+  grid-template-columns: 4ch minmax(0, 1fr);
+}
+.t-work > li > * {
+  grid-column: 2;
+}
+.t-work > li > .t-num {
+  grid-row: 1;
+  grid-column: 1;
+  color: var(--t-dim);
+}
+.t-work > li > .t-num + h3,
+.t-work > li > h3 + .t-dim,
+.t-project > h3 + .t-dim {
   margin-top: 0;
 }
 .t-work > li > * + :is(.t-prose, .t-links) {
   margin-top: 0.3em;
+}
+
+/* A project's write-up (`work <id>`): its Markdown, in the terminal's type. Sections under their labels,
+   "- " lists, code in a well of its own that scrolls sideways rather than wrap, tables likewise. */
+.t-out > * + :is(.t-md, .t-fig) {
+  margin-top: var(--t-gap);
+}
+.t-md > * + * {
+  margin-top: 0.75em;
+}
+.t-md > :first-child {
+  margin-top: 0;
+}
+.t-md :is(p, li, .t-fig > summary) {
+  max-width: 76ch;
+}
+.t-md strong {
+  font-weight: 600;
+}
+.t-md :is(ul, ol) {
+  padding-left: 2ch;
+}
+.t-md ul {
+  list-style-type: '- ';
+}
+.t-md ol {
+  padding-left: 3ch;
+  list-style-type: decimal;
+}
+.t-md li + li {
+  margin-top: 0.35em;
+}
+.t-md li::marker {
+  color: var(--t-dim);
+}
+.t-md :not(pre) > code {
+  padding: 0.05em 0.3em;
+  border-radius: 2px;
+  background: rgb(235 229 218 / 0.08);
+}
+.t-code,
+.t-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #4a443d transparent;
+}
+.t-code {
+  padding: 0.75em 1.5ch;
+  border: 1px solid var(--t-rule);
+  border-radius: 2px;
+  background: #1e1b18;
+  line-height: 1.5;
+  white-space: pre;
+  overflow-wrap: normal;
+  tab-size: 2;
+}
+.t-md table {
+  border-collapse: collapse;
+  line-height: 1.5;
+}
+.t-md :is(th, td) {
+  padding: 0.3em 3ch 0.3em 0;
+  border-bottom: 1px solid var(--t-rule);
+  text-align: left;
+  vertical-align: top;
+}
+.t-md th {
+  color: var(--t-dim);
+  font-weight: 400;
+}
+
+/* A figure, folded away behind the line that says what it shows: opened, its picture or video (or a
+   trace, scrolling sideways). */
+.t-fig > summary {
+  display: block;
+  width: fit-content;
+  cursor: pointer;
+}
+.t-fig > summary::-webkit-details-marker {
+  display: none;
+}
+.t-fig > summary::before {
+  content: '+ ';
+  content: '+ ' / '';
+  color: var(--t-accent);
+}
+.t-fig[open] > summary::before {
+  content: '- ';
+  content: '- ' / '';
+}
+.t-fig > summary:hover > .t-dim {
+  color: var(--t-accent);
+}
+.t-fig-body {
+  margin-top: 0.6em;
+  padding-left: 2ch;
+}
+.t-fig-body :is(img, video) {
+  display: block;
+  max-width: min(100%, 72ch);
+  height: auto;
+  border: 1px solid var(--t-rule);
+}
+.t-fig-body .fig-scroll {
+  border-color: var(--t-rule);
+  border-radius: 2px;
+  background: #1e1b18;
+}
+.t-fig-body .fig-scroll img {
+  max-width: none;
+  border: 0;
 }
 .t-row {
   display: flex;
@@ -190,7 +317,8 @@
 /* Links read as text, underlined; what can be run is the accent. Both give a finger more room than the
    letters without moving one (the links, on a touch screen, above and below). */
 .term a,
-.t-static a {
+.t-static a,
+.t-fig > summary {
   color: var(--t-fg);
   text-decoration: underline;
   text-decoration-color: rgb(235 229 218 / 0.4);

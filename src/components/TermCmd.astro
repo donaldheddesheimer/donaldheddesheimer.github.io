@@ -1,18 +1,26 @@
 ---
 // A command named in the terminal's output: on the lab's computer, a button that runs it
-// (src/scripts/lab/terminal.ts); in the /computer/ transcript, a link to where it ran.
+// (src/scripts/lab/terminal.ts); in the /computer/ transcript, a link to where it ran. A command with an
+// address of its own (a project's, `work <id>`) is a link on both: to the lab running it, which runs it
+// here on a plain click (and opens it in a new tab on a modified one); or to its page, in the transcript.
 interface Props {
   name: string;
-  /** The live terminal's (a button), or the transcript's (a link). */
+  /** The live terminal's (a button, or a link to `href`), or the transcript's (a link). */
   live?: boolean;
+  /** The command's own address: `live`, the lab running it; else, its page. */
+  href?: string;
 }
-const { name, live = true } = Astro.props;
+const { name, live = true, href } = Astro.props;
 ---
 
 {
-  live ? (
+  live && href ? (
+    <a class="t-cmd" href={href} data-term-run={name}>
+      {name}
+    </a>
+  ) : live ? (
     <button type="button" class="t-cmd" data-term-run={name}>{name}</button>
   ) : (
-    <a class="t-cmd" href={`#${name}`}>{name}</a>
+    <a class="t-cmd" href={href ?? `#${name}`}>{name}</a>
   )
 }

@@ -1,0 +1,123 @@
+---
+// What `work <id>` prints: one project, in the terminal's own type. Its name, when and where, and what it
+// is; its status, source (and demo), team and tags, and its figures, in the terminal's key and value
+// columns; its cover, folded away behind a line saying what it shows; its write-up, the Markdown its case
+// study (/projects/<id>/) renders, laid out as the terminal lays out text (TermProse.astro); and related
+// work, to run next. The lab's terminal holds each in a <template> until it's run (Terminal.astro);
+// /computer/work/<id>/ prints one on a page of its own (`live` false: commands are links to their pages,
+// and the write-up's headings keep their ids, for that page's anchors).
+//
+// Under the entry's heading (the command, an h2), the project's name is an h3 and its sections h4.
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import TermCmd from './TermCmd.astro';
+import TermProse from './TermProse.astro';
+import { mediaKindLabel, statusLabel } from '../lib/format';
+import { related, workMeta } from '../lib/folio';
+import { labHref } from '../scripts/lab/routes';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  live?: boolean;
+}
+const { project, live = true } = Astro.props;
+const d = project.data;
+const { Content } = await render(project);
+const more = related(project, await getCollection('projects'));
+// A project's command: the lab running it, or its page.
+const href = (id: string) => (live ? labHref(`work/${id}`) : `/computer/work/${id}/`);
+const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
+const posters = Object.fromEntries(d.evidence.flatMap((m) => (m.poster ? [[m.src, m.poster]] : [])));
+---
+
+<div class="t-out t-project" data-announce={`Printed: ${d.title}.`} data-project={live ? project.id : undefined}>
+  <h3 class="t-strong">{d.title}</h3>
+  <p class="t-dim">{workMeta(d)}</p>
+  <p class="t-prose">{d.summary}</p>
+  <dl class="t-kv">
+    <div>
+      <dt>status</dt>
+      <dd>{statusLabel[d.status].toLowerCase()}</dd>
+    </div>
+    <div>
+      <dt>source</dt>
+      <dd>
+        {
+          d.repo ? (
+            <a href={d.repo} target="_blank" rel="noopener">
+              {host(d.repo)}
+              <span aria-hidden="true">↗</span>
+              <span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          ) : (
+            <span class="t-dim">{(d.repoNote ?? 'Private repository').toLowerCase()}</span>
+          )
+        }
+      </dd>
+    </div>
+    {
+      d.demo && (
+        <div>
+          <dt>demo</dt>
+          <dd>
+            <a href={d.demo} target="_blank" rel="noopener">
+              {host(d.demo)}
+              <span aria-hidden="true">↗</span>
+              <span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          </dd>
+        </div>
+      )
+    }
+    {
+      d.team && (
+        <div>
+          <dt>team</dt>
+          <dd>{d.team}</dd>
+        </div>
+      )
+    }
+    <div>
+      <dt>tags</dt>
+      <dd>{d.tags.join(', ')}</dd>
+    </div>
+  </dl>
+  {
+    d.stats.length > 0 && (
+      <dl class="t-kv t-kv-wide">
+        {d.stats.map((s) => (
+          <div>
+            <dt>{s.label}</dt>
+            <dd class="t-strong">{s.value}</dd>
+          </div>
+        ))}
+      </dl>
+    )
+  }
+  {
+    d.cover && (
+      <details class="t-fig">
+        <summary>
+          <span class="t-dim">cover{coverKind && ` · ${mediaKindLabel[coverKind].toLowerCase()}`}</span> {d.coverAlt}
+        </summary>
+        <figure class="t-fig-body">
+          <img src={d.cover} alt={d.coverAlt ?? ''} loading="lazy" decoding="async" />
+        </figure>
+      </details>
+    )
+  }
+  <TermProse ids={!live} posters={posters}><Content /></TermProse>
+  {
+    more.length > 0 && (
+      <p class="t-links">
+        <span class="t-dim">related</span>
+        {more.map((p) => (
+          <TermCmd name={`work ${p.id}`} live={live} href={href(p.id)} />
+        ))}
+      </p>
+    )
+  }
+  <p class="t-hint">
+    Run <TermCmd name="work" live={live} href={live ? undefined : '/computer/#work'} /> to list every project.
+  </p>
+</div>

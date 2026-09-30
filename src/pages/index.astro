@@ -4,13 +4,13 @@
 // into the computer, which holds the whole portfolio as a terminal (about, work, resume, contact;
 // computer.ts, terminal.ts). There is nothing below the room.
 //
-// /?computer is the lab at the terminal, and /?computer=work/<id> a project's details over it (routes.ts):
-// a shared link or a reload opens it at once, without the camera's entrance, on the monitor or, in a
-// small window, across the window. The old pages' addresses (/?computer=about, and the older anchors
-// /#work, /#about, /#resume, /#contact) open the terminal the same way and run their command. /?sel=<id>
-// is an old systems-map link (LegacySel.astro). Without JavaScript, the monitor is a link to the
-// terminal's own page (/computer/), which stands alone; if the lab's script fails, that page is where
-// the lab goes instead.
+// /?computer is the lab at the terminal, and /?computer=work/<id> the terminal with a project printed
+// (routes.ts): a shared link or a reload opens it at once, without the camera's entrance, on the monitor
+// or, in a small window, across the window. The old pages' addresses (/?computer=about, and the older
+// anchors /#work, /#about, /#resume, /#contact) open the terminal the same way and run their command.
+// /?sel=<id> is an old systems-map link (LegacySel.astro). Without JavaScript, the monitor is a link to
+// the terminal's own page (/computer/), which stands alone; if the lab's script fails, that page is
+// where the lab goes instead.
 //
 // All of it is the page's main landmark, in reading order: the name (the page's heading), the room with
 // its one link (the monitor), then Settings. The room is fixed behind; the name and Settings stand over it.
@@ -49,7 +49,7 @@ const projects = (await getCollection('projects')).map((p) => p.id);
         else history.replaceState(history.state, '', location.pathname + location.hash);
       })();
       // If the lab's script never starts (it failed to load, or broke): the terminal's own page instead
-      // (until the lab next runs, in this session), or a project's.
+      // (until the lab next runs, in this session), or a project's case study.
       addEventListener('load', function () {
         setTimeout(function () {
           var h = document.documentElement;
@@ -59,7 +59,7 @@ const projects = (await getCollection('projects')).map((p) => p.id);
           } catch (e) {}
           var m = (new URLSearchParams(location.search).get('computer') || '').match(/^\/*work\/([\w-]+)\/*$/);
           var run = h.dataset.pcRun;
-          location.replace(m ? '/projects/' + m[1] + '/' : '/computer/?static' + (run ? '#' + run : ''));
+          location.replace(m ? '/projects/' + m[1] + '/' + location.hash : '/computer/?static' + (run ? '#' + run : ''));
         }, 0);
       });
     </script>
@@ -69,11 +69,34 @@ const projects = (await getCollection('projects')).map((p) => p.id);
     <header class="home-id" data-lab-avoid>
       <h1 class="home-name">{profile.name}</h1>
       <p class="home-title">{profile.title}</p>
+      <div class="view-hint" data-view-hint>
+        <p>The lab is best experienced in a wider, horizontal view.</p>
+        <button type="button" aria-label="Dismiss viewing suggestion" data-view-hint-dismiss hidden>×</button>
+      </div>
     </header>
     <LabStage />
     <Settings class="home-settings" />
   </main>
 </Base>
+
+<script>
+  const hint = document.querySelector<HTMLElement>('[data-view-hint]');
+  const dismiss = hint?.querySelector<HTMLButtonElement>('[data-view-hint-dismiss]');
+  if (hint && dismiss) {
+    try {
+      hint.hidden = sessionStorage.getItem('lab:view-hint-dismissed') === '1';
+    } catch {}
+    dismiss.hidden = false;
+    dismiss.addEventListener('click', () => {
+      // Keep keyboard focus somewhere useful when its button disappears.
+      if (document.activeElement === dismiss) document.querySelector<HTMLElement>('[data-lab-monitor]')?.focus({ preventScroll: true });
+      hint.hidden = true;
+      try {
+        sessionStorage.setItem('lab:view-hint-dismissed', '1');
+      } catch {}
+    });
+  }
+</script>
 
 <style>
   /* The whole window, and no more at ordinary sizes. Enlarged text or a very short window lets the page
@@ -128,6 +151,40 @@ const projects = (await getCollection('projects')).map((p) => p.id);
     font-size: var(--text-sm);
     line-height: 1.4;
     color: var(--muted);
+  }
+
+  .view-hint {
+    display: none;
+    align-items: flex-start;
+    gap: 0.375rem;
+    margin-top: 0.75rem;
+    max-width: 22rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+  @media (width < 64rem), (height < 36rem), (pointer: coarse) {
+    .view-hint:not([hidden]) {
+      display: flex;
+    }
+  }
+  .view-hint button {
+    flex: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-top: -0.25rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .view-hint button:hover {
+    color: var(--text);
+  }
+  .view-hint button:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
   }
 
   .home :global(.home-settings) {

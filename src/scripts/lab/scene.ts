@@ -1,9 +1,10 @@
 // The robotics lab of the homepage's opening (/), where the computer on the desk holds the portfolio. It
-// began as a fork of the first homepage's robot stage; the rig and the routine are the same. The room: a
+// began as a fork of the first homepage's robot stage; the rig and the routine's shape are the same. The room: a
 // concrete floor with the dance area taped out, a block wall with a high window, a workbench under a
 // pendant, an unfinished robot on a service stand, two props (a task chair pushed aside, a tool cart), a
-// tripod work light as the key, and the three dancers, given characters through proportion, timing,
-// where they stand and how they answer each other. Two camera views: the opening, which the pointer may
+// tripod work light as the key, and the three dancers, given characters through proportion, their own
+// timing and their own versions of the routine's moves, where they stand and how they answer each other;
+// the unfinished one on its stand runs a calibration now and then. Two camera views: the opening, which the pointer may
 // look around a little (lookAround), and reading, square on to the monitor, whose screen the terminal
 // covers in real HTML (computer.ts). One flight joins them. Simple geometry throughout.
 import * as THREE from 'three';
@@ -15,8 +16,9 @@ const TAU = Math.PI * 2;
 const BPM = 112;
 const BEATS = 32;
 const RAMP = 0.35; // beats of crossfade either side of a section boundary
-// Reduced motion (or Motion off) holds this moment: each robot in character, arms clear of the opening's text.
-const STILL_BEAT = 21.2;
+// Reduced motion (or Motion off) holds this moment: each robot in character (Graphite's arms open wide,
+// Ivory mid-tut, Terracotta with an arm thrown up), arms clear of the opening's text.
+const STILL_BEAT = 11.5;
 const STILL_T = (STILL_BEAT * 60) / BPM; // the same moment, in seconds
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
@@ -26,6 +28,12 @@ const smooth = (a: number, b: number, x: number) => {
 };
 const win = (x: number, a: number, b: number, c: number, d: number) => smooth(a, b, x) * (1 - smooth(c, d, x));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+// 0 to 1 as x goes 0 to 1, in n quick ticks.
+const steps = (x: number, n: number) => {
+  const s = clamp01(x) * n;
+  const i = Math.min(n - 1, Math.floor(s));
+  return (i + smooth(0, 0.25, s - i)) / n;
+};
 // Seeded, so every visit (and every screenshot) gets the same dust, blinks and concrete.
 function rng(seed: number) {
   return () => {
@@ -113,9 +121,13 @@ interface Persona {
   hop: number;
   /** Looks around between moves: 0 to 1. */
   curious: number;
-  /** Keeps its arms close, 0 to 1: raised straight up rather than out, and swung past the shoulder in
-   *  front, elbows bent. */
+  /** Keeps its arms close, 0 to 1: raised straight up rather than out to the side. */
   close: number;
+  /** Its own sense of time (the routine's beat in, its own out, a loop still a loop): holding at the end
+   *  of each bar, or snapping to each half beat. */
+  feel?: (beat: number) => number;
+  /** Its own version of a section of the routine. */
+  own?: Partial<Record<SectionName, Section>>;
 }
 
 function groove(o: Pose, g: number, p: Persona, k = 1) {
@@ -246,16 +258,116 @@ const travel: Section = (o, u, g, p) => {
   o.rW += open * 0.4;
 };
 
-const SECTIONS: readonly [start: number, end: number, fn: Section][] = [
-  [0, 8, warmUp],
-  [8, 16, gestures],
-  [16, 24, canon],
-  [24, 32, travel],
+// --- Each dancer's own ---------------------------------------------------------------------------
+// Graphite's timing: each bar's move in three beats, then it all but stops for the fourth, and its
+// gestures are broad, whole-arm and slow, with a held shape at the end of each bar.
+const barHold = (beat: number) => {
+  const bar = Math.floor(beat / 4) * 4;
+  return lerp(beat, bar + 4 * smooth(0, 3, beat - bar), 0.85);
+};
+const GATHER: Arm = [1.1, 0.45, 0, 1.45, 0];
+const OPEN: Arm = [0.55, 1.25, 0, 0.3, 0];
+const PUSH: Arm = [1.35, 0.3, 0, 0.2, -0.45];
+const PRESS: Arm = [0.45, 0.55, 0, 0.5, 0.9];
+const BROAD: readonly Key[] = [[-1, ARM.pump, 1], [0, GATHER, 1.1], [1.5, OPEN, 1.4], [4, PUSH, 1.1], [6, PRESS, 1.1]];
+const broad: Section = (o, u, g, p) => {
+  groove(o, g, p, 0.6);
+  armKeys(o, 'r', BROAD, u, 1);
+  // The left a little behind the right: the weight of it.
+  armKeys(o, 'l', BROAD, u - 0.3, 1);
+  const open = win(u, 1.5, 3, 3.9, 4.6);
+  const push = win(u, 4, 5, 5.9, 6.6);
+  const press = win(u, 6, 7, 7.7, 8.3);
+  o.cPitch += push * 0.14 + press * 0.1 - open * 0.06;
+  o.pPitch += push * 0.05;
+  o.hPitch += press * 0.16 - open * 0.1;
+  o.py += press * 0.05 + push * 0.02;
+  o.pz += push * 0.04;
+};
+
+// Ivory's timing: every move lands on a half beat, fast, and holds. Its gestures are small and exact: a
+// tut, one forearm set at a time (right on the beat, left on the one after), the head following each.
+// No two forearms ever lie across the body at one height.
+const halfSnap = (beat: number) => {
+  const half = Math.floor(beat * 2) / 2;
+  return lerp(beat, half + 0.5 * smooth(0, 0.2, beat - half), 0.9);
+};
+const TUT_UP: Arm = [1.45, 0.45, 0, 1.57, 0];
+const TUT_ACROSS: Arm = [1.5, 0.12, -1.45, 1.57, 0];
+const TUT_LOW: Arm = [0.05, 0.25, -1.45, 1.57, 0];
+const TUT_OUT: Arm = [0.05, 0.25, 1.45, 1.57, 0];
+const TUT_TRAY: Arm = [0.05, 0.18, 0, 1.57, 0];
+const TUT: Record<Side, readonly Key[]> = {
+  r: [[-1, ARM.pump, 1], [0, TUT_UP, 0.25], [2, TUT_ACROSS, 0.25], [4, TUT_OUT, 0.25], [6, TUT_LOW, 0.25]],
+  l: [[-1, ARM.pump, 1], [1, TUT_TRAY, 0.25], [3, TUT_LOW, 0.25], [5, TUT_UP, 0.25], [7, TUT_ACROSS, 0.25]],
+};
+const tut: Section = (o, u, g, p) => {
+  groove(o, g, p, 0.5);
+  armKeys(o, 'r', TUT.r, u, 1);
+  armKeys(o, 'l', TUT.l, u, 1);
+  // To the arm that moved: the robot's right is its -x, and a turn to its right is negative.
+  const n = Math.floor(u);
+  const side = n % 2 ? 1 : -1;
+  const to = lerp(-side, side, smooth(0, 0.15, u - n));
+  const on = win(u, -0.2, 0.2, 7.8, 8.2);
+  o.hYaw += to * 0.26 * on;
+  o.hPitch += 0.1 * on;
+  o.cYaw += to * 0.05 * on;
+};
+
+// Terracotta's warm-up: a kick on every off-beat, a flick of the head and one elbow (the other each
+// time), and it lets go at once.
+const accent = (x: number) => (x < 0.05 ? x / 0.05 : Math.exp(-(x - 0.05) * 10));
+const kick: Section = (o, u, g, p) => {
+  warmUp(o, u, g, p);
+  const x = (((g + 0.5) % 1) + 1) % 1;
+  const a = accent(x) * win(u, -0.2, 0.3, 7.7, 8.2);
+  const side = Math.floor(g + 0.5) % 2 ? 1 : -1;
+  o.hPitch += a * 0.16;
+  o.cRoll += side * a * 0.07;
+  o.lE += (side > 0 ? a : 0) * 0.6;
+  o.rE += (side < 0 ? a : 0) * 0.6;
+};
+
+// Terracotta's canon, overdone: a hop and a spin a good way past round, a wobble, arms out, a foot out
+// to catch it, a hop back to the front, a shake of the head, and the pose it meant to end on.
+const BALANCE: Arm = [0.1, 1.45, 0, 0.35, 0];
+const overdo: Section = (o, u, g, p) => {
+  canon(o, u, g, p);
+  const a = smooth(3.6, 4.2, u) * (TAU + 0.8) - smooth(5.0, 5.5, u) * 0.8;
+  o.turn += Math.atan2(Math.sin(a), Math.cos(a));
+  const lift = Math.sin(Math.PI * clamp01((u - 3.55) / 0.7)) * 0.11 + Math.sin(Math.PI * clamp01((u - 4.95) / 0.6)) * 0.07;
+  o.lfy += lift;
+  o.rfy += lift;
+  o.py -= lift;
+  const since = u - 4.2;
+  const wob = since > 0 ? Math.exp(-since * 2.4) * Math.sin(TAU * 1.6 * since) * (1 - smooth(4.9, 5.2, u)) : 0;
+  const reel = win(u, 4.1, 4.3, 5.0, 5.4);
+  o.pRoll += wob * 0.12;
+  o.cRoll -= wob * 0.1;
+  for (const s of ['l', 'r'] as const) blendArm(o, s, BALANCE, reel);
+  o.lA += wob * 0.35;
+  o.rA -= wob * 0.35;
+  o.rfx -= 0.22 * reel;
+  o.px -= 0.1 * reel;
+  const shake = win(u, 5.45, 5.6, 6.0, 6.15) * Math.sin(TAU * 3 * (u - 5.45));
+  o.hYaw += shake * 0.3;
+};
+
+type SectionName = 'warmUp' | 'gestures' | 'canon' | 'travel';
+const ROUTINE: Record<SectionName, Section> = { warmUp, gestures, canon, travel };
+const SECTIONS: readonly [start: number, end: number, name: SectionName][] = [
+  [0, 8, 'warmUp'],
+  [8, 16, 'gestures'],
+  [16, 24, 'canon'],
+  [24, 32, 'travel'],
 ];
 
 function choreograph(out: Pose, tmp: Pose, beat: number, p: Persona) {
   clear(out);
-  for (const [start, end, fn] of SECTIONS)
+  if (p.feel) beat = p.feel(beat);
+  for (const [start, end, name] of SECTIONS) {
+    const fn = p.own?.[name] ?? ROUTINE[name];
     for (const k of [-BEATS, 0, BEATS]) {
       const x = beat + k;
       const w = win(x, start - RAMP, start + RAMP, end - RAMP, end + RAMP);
@@ -264,6 +376,7 @@ function choreograph(out: Pose, tmp: Pose, beat: number, p: Persona) {
       fn(tmp, x - start, x, p);
       for (const c of CH) out[c] += tmp[c] * w;
     }
+  }
 }
 
 // Where a curious robot looks between moves (head yaw, roll), a new place every 2.6 s, turning there
@@ -310,14 +423,17 @@ interface Build {
 
 const STILL: Persona = { lag: 0, canon: 0, sway: 0, bounce: 0, arm: 0, twist: 0, tilt: 0, look: 0, dir: 1, groove: 1, dip: 1, pace: 1, low: 0, hop: 1, curious: 0, close: 0 };
 
-// Graphite: heavy, grounded, deliberate. The broadest build, thick limbs and a wide low stance; it
-// sways at half time, bounces every other beat and arrives late on every arm move, and keeps its arms
-// close. It dances just behind the monitor, left of it.
-// Ivory: precise, curious, attentive. Tall, slim and long-necked; snaps to each arm key and looks
-// around (and tilts its head) between moves. It stands back by the service stand, and leaves the step
-// now and then to inspect the unfinished robot on it.
-// Terracotta: small, energetic, playful. Bounces twice a beat, hops its steps and throws its arms wide.
-// It has the front of the floor, right of the monitor, and starts the exchanges (react()).
+// Graphite: heavy, grounded, deliberate. The broadest build, thick limbs and a wide, low, bent-kneed
+// stance; it sways at half time, bounces every other beat, moves for three beats of each bar and pauses
+// on the fourth (barHold), and its gestures are broad and whole-armed, leaning into them (broad). It
+// dances just behind the monitor, left of it.
+// Ivory: precise, curious, attentive. Tall, slim and long-necked; every move lands on a half beat
+// (halfSnap), its gestures are a small, exact tut (tut), and it looks around (and tilts its head)
+// between moves. It stands back by the service stand, and leaves the step now and then to inspect the
+// unfinished robot on it.
+// Terracotta: small, energetic, playful. Bounces twice a beat, kicks every off-beat (kick), hops its
+// steps and throws its arms wide, and overdoes its spin, and recovers (overdo). It has the front of
+// the floor, right of the monitor, and starts the exchanges (react()).
 // The three stand as a loose triangle round the monitor, not a line: Graphite and Terracotta either side
 // of it and a little behind, turned partly toward each other, Ivory further back.
 const BUILDS: Build[] = [
@@ -344,7 +460,7 @@ const BUILDS: Build[] = [
     head: 'dome',
     headSize: [0.4, 0.26, 0.33],
     pads: true,
-    persona: { lag: 0.12, canon: 0, sway: 0.05, bounce: 0.05, arm: 0.7, twist: 1.2, tilt: 0.3, look: 0.12, dir: 1, groove: 0.5, dip: 0.5, pace: 1.9, low: 0.06, hop: 0.5, curious: 0, close: 1 },
+    persona: { lag: 0.12, canon: 0, sway: 0.05, bounce: 0.05, arm: 0.7, twist: 1.2, tilt: 0.3, look: 0.12, dir: 1, groove: 0.5, dip: 0.5, pace: 1.9, low: 0.09, hop: 0.5, curious: 0, close: 1, feel: barHold, own: { gestures: broad } },
   },
   {
     name: 'ivory',
@@ -369,7 +485,7 @@ const BUILDS: Build[] = [
     head: 'box',
     headSize: [0.34, 0.27, 0.28],
     antenna: true,
-    persona: { lag: 0, canon: 1, sway: 0.05, bounce: 0.05, arm: 0.95, twist: 0.8, tilt: 0.9, look: 0, dir: -1, groove: 1, dip: 1, pace: 0.5, low: 0, hop: 1, curious: 1, close: 0 },
+    persona: { lag: 0, canon: 1, sway: 0.035, bounce: 0.04, arm: 0.6, twist: 0.8, tilt: 0.9, look: 0, dir: -1, groove: 1, dip: 1, pace: 0.5, low: 0, hop: 1, curious: 1, close: 0, feel: halfSnap, own: { gestures: tut } },
   },
   {
     name: 'terracotta',
@@ -393,7 +509,7 @@ const BUILDS: Build[] = [
     neck: 0.05,
     head: 'ball',
     headSize: [0.37, 0.37, 0.37],
-    persona: { lag: -0.05, canon: 2, sway: 0.085, bounce: 0.05, arm: 1.45, twist: 0.9, tilt: 1.6, look: -0.12, dir: 1, groove: 1, dip: 2, pace: 0.8, low: 0.02, hop: 2.4, curious: 0.3, close: 0 },
+    persona: { lag: -0.05, canon: 2, sway: 0.085, bounce: 0.05, arm: 1.45, twist: 0.9, tilt: 1.6, look: -0.12, dir: 1, groove: 1, dip: 2, pace: 0.8, low: 0.02, hop: 2.4, curious: 0.3, close: 0, own: { warmUp: kick, canon: overdo } },
   },
 ];
 
@@ -430,6 +546,8 @@ const PROTO: Build = {
 //   to 9.4).
 // - Between the gestures and the canon, Terracotta hops round to Ivory, behind it (13.8 to 14.8), shimmies
 //   at it and hops back (15.9 to 16.9); Ivory glances over.
+// - Terracotta overdoes its spin in the canon (19.6 to 22.2): Graphite turns, slowly, to watch it (20.2 to
+//   22.6), and Ivory tilts its head at it (20.3 to 21.9).
 // - Late in the travel, Ivory leaves the step to inspect the unfinished robot on its stand (25.6 to 31.8):
 //   it turns to it, leans in, head tilted, one hand raised to its chin.
 const spot = (name: string) => BUILDS.find((b) => b.name === name)!.at;
@@ -478,7 +596,7 @@ function react(o: Pose, b: Build, beat: number) {
     const [there, up] = hops(beat, 13.8, 14.8);
     const [back, down] = hops(beat, 15.9, 16.9);
     const round = there * (1 - back);
-    o.turn = bearing(at, iv[0], iv[1]) * 0.85 * round;
+    o.turn += bearing(at, iv[0], iv[1]) * 0.85 * round;
     face(o, at, iv[0], iv[1], round, 0.35);
     const lift = (up + down) * 0.12;
     o.lfy += lift;
@@ -494,9 +612,13 @@ function react(o: Pose, b: Build, beat: number) {
     const nod = win(beat, 6.5, 7, 7.5, 8.2);
     o.hPitch += nod * 0.34;
     o.cPitch += nod * 0.07;
+    face(o, at, t[0], t[1], win(beat, 20.2, 21.2, 22, 22.6), 0.3);
   } else if (b.name === 'ivory') {
     const t = spot('terracotta');
     face(o, at, t[0], t[1], win(beat, 14.5, 14.9, 16, 16.5), 0.2);
+    const tilt = win(beat, 20.3, 20.6, 21.5, 21.9);
+    face(o, at, t[0], t[1], tilt, 0.1);
+    o.hRoll += tilt * 0.2;
     const look = win(beat, 25.6, 26.6, 30.8, 31.8);
     if (look > 0) {
       // Out of the step: feet back under it, the travel's drift gone, arms easing down.
@@ -743,13 +865,21 @@ class Robot {
     const p = b.persona;
     const o = this.pose;
     if (b.schematic) {
-      // On the stand: arms held out a little for fitting, the head scanning slowly.
+      // On the stand: arms held out a little for fitting, and a calibration run through, joint by joint,
+      // in steps, every 12 s: the head across in four and back, the right elbow in two and back, a flick
+      // of the left wrist, a nod, then a rest (the moment held with motion off is in the rest). Reading
+      // quiets it with the others.
       clear(o);
       o.lA = o.rA = 0.34;
       o.lE = o.rE = 0.4;
       o.lF = o.rF = 0.1;
-      o.hYaw = Math.sin(time * 0.32) * 0.45;
-      o.hPitch = -0.06 + Math.sin(time * 0.21) * 0.04;
+      o.hPitch = -0.06;
+      const c = (((time - STILL_T + 10) % 12) + 12) % 12;
+      const k = 1 - smooth(0, 1, rest);
+      o.hYaw += 0.5 * steps(c / 2, 4) * (1 - smooth(2.6, 3.1, c)) * k;
+      o.rE += 0.55 * steps(c - 4, 2) * (1 - smooth(5.8, 6.3, c)) * k;
+      o.lW += Math.sin(TAU * 2 * (c - 7)) * 0.35 * win(c, 7, 7.1, 7.9, 8) * k;
+      o.hPitch += 0.16 * win(c, 9, 9.15, 9.6, 10) * k;
     } else {
       choreograph(o, this.tmp, (((beat - p.lag) % BEATS) + BEATS) % BEATS, p);
       if (p.curious) {
@@ -763,12 +893,9 @@ class Robot {
         for (const s of ['l', 'r'] as const) {
           const A = ch(s, 'A');
           o[A] += (Math.PI - 0.12 - o[A]) * 0.7 * p.close * smooth(1.6, 2.4, o[A]);
-          const level = Math.max(0, Math.sin(o[A])) ** 2;
-          o[ch(s, 'E')] = Math.max(o[ch(s, 'E')], 1.4 * p.close * level);
-          o[ch(s, 'F')] = Math.max(o[ch(s, 'F')], 0.9 * p.close * level);
         }
+      if (rest > 0) for (const c of CH) o[c] *= 1 - smooth(0, 1, rest);
     }
-    if (rest > 0) for (const c of CH) o[c] *= 1 - smooth(0, 1, rest);
     // The whole robot turns about its spot (the unfinished one is held by its stand).
     if (!b.schematic) this.root.rotation.y = b.at[2] + o.turn;
     const L = this.L;
@@ -951,6 +1078,155 @@ function pegboardTexture() {
       g.ellipse(400, 100, 44 - i * 4, 52 - i * 4, 0, 0, TAU);
       g.stroke();
     }
+    // The fourth wrench is out: its outline, in marker, where it hangs.
+    g.strokeStyle = '#17120d';
+    g.lineWidth = 1.5;
+    g.beginPath();
+    g.arc(106, 30, 10, 0, TAU);
+    g.moveTo(102.5, 39);
+    g.lineTo(102.5, 98);
+    g.lineTo(109.5, 98);
+    g.lineTo(109.5, 39);
+    g.stroke();
+    // Hands' grime around the hooks most used.
+    for (const [x, y, r] of [[62, 60, 40], [140, 50, 30], [280, 60, 34]] as const) {
+      const grad = g.createRadialGradient(x, y, 0, x, y, r);
+      grad.addColorStop(0, 'rgba(20,14,8,0.22)');
+      grad.addColorStop(1, 'rgba(20,14,8,0)');
+      g.fillStyle = grad;
+      g.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+  });
+}
+
+// A wiring sketch on squared paper, taped up by the bench: a supply, a switch, a driver board and three
+// servos for the arm on the stand, in pencil, gone over in red where it was wrong. Folded once.
+function sketchTexture() {
+  return canvasTexture(320, 400, (g) => {
+    g.fillStyle = '#dcd6c6';
+    g.fillRect(0, 0, 320, 400);
+    g.strokeStyle = 'rgba(70,120,110,0.2)';
+    g.lineWidth = 1;
+    for (let x = 8; x < 320; x += 16) g.strokeRect(x, -1, 0, 402);
+    for (let y = 8; y < 400; y += 16) g.strokeRect(-1, y, 322, 0);
+    const pen = (color: string, width: number, path: [number, number][][]) => {
+      g.strokeStyle = color;
+      g.lineWidth = width;
+      g.lineCap = g.lineJoin = 'round';
+      for (const line of path) {
+        g.beginPath();
+        line.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y)));
+        g.stroke();
+      }
+    };
+    const write = (color: string, size: number, text: string, x: number, y: number) => {
+      g.fillStyle = color;
+      g.font = `italic ${size}px "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive`;
+      g.fillText(text, x, y);
+    };
+    const lead = '#3a3a3c';
+    const red = '#b3261e';
+    write(lead, 22, 'arm test  r2', 24, 38);
+    pen(lead, 1.5, [[[22, 44], [150, 46]]]);
+    // Supply, switch, driver.
+    pen(lead, 2.2, [
+      [[40, 96], [64, 96]], [[46, 108], [58, 108]], [[52, 96], [52, 80], [96, 80]], [[52, 108], [52, 340]],
+      [[96, 80], [124, 66]], [[128, 80], [180, 80]],
+    ]);
+    g.strokeStyle = lead;
+    g.strokeRect(180, 62, 104, 62);
+    write(lead, 20, 'DRV', 208, 100);
+    write(lead, 17, '5V', 18, 132);
+    // Three servos off the driver, their grounds back along the bottom.
+    for (const [i, x] of [70, 160, 250].entries()) {
+      pen(lead, 2.2, [[[196 + i * 36, 124], [196 + i * 36, 180], [x, 220], [x, 242]], [[x, 286], [x, 340]]]);
+      g.beginPath();
+      g.arc(x, 264, 22, 0, TAU);
+      g.stroke();
+      write(lead, 20, 'M', x - 9, 271);
+      write(lead, 14, ['E1', 'E2', 'W'][i], x + 26, 250);
+    }
+    pen(lead, 2.2, [[[52, 340], [250, 340]], [[40, 352], [64, 352]], [[46, 360], [58, 360]], [[50, 368], [54, 368]], [[52, 340], [52, 352]]]);
+    // In red: the supply was wrong, the wrist wants its own feed, and one servo runs backwards.
+    pen(red, 2.4, [[[14, 116], [42, 138]], [[112, 150], [134, 152]], [[250, 190], [292, 190], [292, 242], [262, 250]]]);
+    write(red, 20, '6V!', 16, 162);
+    write(red, 15, 'own feed', 214, 176);
+    g.strokeStyle = red;
+    g.beginPath();
+    g.ellipse(160, 264, 34, 30, 0.2, 0, TAU);
+    g.stroke();
+    write(red, 15, 'rev?', 110, 312);
+    // The fold, and a thumb's smudge.
+    g.fillStyle = 'rgba(0,0,0,0.1)';
+    g.fillRect(0, 199, 320, 1);
+    g.fillStyle = 'rgba(255,255,255,0.3)';
+    g.fillRect(0, 200, 320, 1);
+    const smudge = g.createRadialGradient(270, 360, 0, 270, 360, 40);
+    smudge.addColorStop(0, 'rgba(40,36,30,0.18)');
+    smudge.addColorStop(1, 'rgba(40,36,30,0)');
+    g.fillStyle = smudge;
+    g.fillRect(220, 310, 100, 90);
+  });
+}
+
+// Masking-tape labels in marker for the parts drawers, the first eleven (one written over), in one
+// sheet: each 64 x 20 px, four to a row.
+const LABELS = ['M3', 'M4', 'NUTS', 'SERVO', 'BRG', 'SPRG', 'HDR', 'JST', 'FUSE', 'LED', 'M2.5'];
+function labelTexture() {
+  return canvasTexture(256, 64, (g) => {
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    LABELS.forEach((text, i) => {
+      const [x, y] = [(i % 4) * 64, Math.floor(i / 4) * 20];
+      g.fillStyle = i % 3 ? '#e4dccb' : '#d9cfb8';
+      g.fillRect(x + 1, y + 1, 62, 18);
+      g.fillStyle = '#1c1a18';
+      g.font = 'bold 13px "Marker Felt", "Arial Narrow", sans-serif';
+      g.fillText(text, x + 32, y + 11);
+      if (text === 'M2.5') {
+        g.fillRect(x + 6, y + 5, 20, 1.5);
+        g.font = 'bold 9px "Marker Felt", "Arial Narrow", sans-serif';
+        g.fillText('M2', x + 14, y + 6);
+      }
+    });
+  });
+}
+
+// A manila tag, for a part sent back.
+function tagTexture() {
+  return canvasTexture(64, 64, (g) => {
+    g.fillStyle = '#c9a66b';
+    g.fillRect(0, 0, 64, 64);
+    g.fillStyle = '#6b5436';
+    g.beginPath();
+    g.arc(32, 8, 4, 0, TAU);
+    g.fill();
+    g.fillStyle = '#1c1a18';
+    g.font = 'bold 10px "Marker Felt", "Arial Narrow", sans-serif';
+    g.fillText('L FOREARM', 5, 28);
+    g.font = '9px "Bradley Hand", "Comic Sans MS", cursive';
+    g.fillText('boss cracked', 5, 42);
+    g.fillText('reprint', 5, 54);
+  });
+}
+
+// A plane showing part of a canvas texture: the rect x, y, w, h (in its pixels) of a W x H sheet.
+function sheetGeo(w: number, h: number, [W, H]: [number, number], [x, y, pw, ph]: [number, number, number, number]) {
+  const geo = new THREE.PlaneGeometry(w, h);
+  const uv = geo.attributes.uv as THREE.BufferAttribute;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, (x + uv.getX(i) * pw) / W, 1 - (y + (1 - uv.getY(i)) * ph) / H);
+  return geo;
+}
+
+// The bench supply's readout: four red digits, dim.
+function readoutTexture() {
+  return canvasTexture(128, 48, (g) => {
+    g.fillStyle = '#140707';
+    g.fillRect(0, 0, 128, 48);
+    g.fillStyle = '#ff4a2e';
+    g.font = 'bold 34px ui-monospace, Menlo, monospace';
+    g.textBaseline = 'middle';
+    g.fillText('6.00', 14, 26);
   });
 }
 
@@ -973,16 +1249,64 @@ function tapeTexture() {
   return t;
 }
 
-// Night through the window: dark blue, lighter toward the moon above right.
+// Night through the window: dark blue, lighter toward the moon above left.
 function nightTexture() {
   return canvasTexture(128, 128, (g) => {
-    const grad = g.createRadialGradient(118, 4, 4, 118, 4, 150);
+    const grad = g.createRadialGradient(10, 4, 4, 10, 4, 150);
     grad.addColorStop(0, '#5d7294');
     grad.addColorStop(0.5, '#1f2a3d');
     grad.addColorStop(1, '#0d121b');
     g.fillStyle = grad;
     g.fillRect(0, 0, 128, 128);
   });
+}
+
+// The haze the moonlight crosses: bright at the window, thinning toward the floor, soft at its sides.
+function beamTexture() {
+  return canvasTexture(
+    64,
+    64,
+    (g) => {
+      const along = g.createLinearGradient(0, 0, 0, 64);
+      along.addColorStop(0, 'rgba(255,255,255,0)');
+      along.addColorStop(0.35, 'rgba(255,255,255,1)');
+      along.addColorStop(0.75, 'rgba(255,255,255,0.4)');
+      along.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = along;
+      g.fillRect(0, 0, 64, 64);
+      g.globalCompositeOperation = 'destination-in';
+      const across = g.createLinearGradient(0, 0, 64, 0);
+      across.addColorStop(0, 'rgba(0,0,0,0)');
+      across.addColorStop(0.5, 'rgba(0,0,0,1)');
+      across.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = across;
+      g.fillRect(0, 0, 64, 64);
+    },
+    false,
+  );
+}
+
+// The window's light as it lands: six panes between the frame's bars (1 px = 1.25 cm of glass), their
+// edges a little soft, the whole fading off toward its ends. A mask, coloured by its material.
+function paneTexture() {
+  return canvasTexture(
+    168,
+    92,
+    (g) => {
+      g.filter = 'blur(2px)';
+      g.fillStyle = '#fff';
+      for (let c = 0; c < 3; c++) for (let r = 0; r < 2; r++) g.fillRect(2 + c * 56, 2 + r * 46, 52, 42);
+      g.filter = 'none';
+      g.globalCompositeOperation = 'destination-in';
+      const fade = g.createLinearGradient(0, 0, 168, 0);
+      fade.addColorStop(0, 'rgba(0,0,0,0.55)');
+      fade.addColorStop(0.45, 'rgba(0,0,0,1)');
+      fade.addColorStop(1, 'rgba(0,0,0,0.7)');
+      g.fillStyle = fade;
+      g.fillRect(0, 0, 168, 92);
+    },
+    false,
+  );
 }
 
 // The monitor's picture before the terminal is laid over it: the terminal as it waits to start, charcoal
@@ -1074,6 +1398,9 @@ type Mats = ReturnType<typeof materials>;
 // centre; the workbench under a pendant at the right, the service stand in front of the bench's end. The
 // wall's left half is left bare: the name is over it.
 const WALL_Z = -3.1;
+// The moon, high to the left behind the wall: its light's way in through the window, down and across the
+// floor to the right of the monitor, among the dancers.
+const MOON = new THREE.Vector3(0.12, -0.66, 0.74).normalize();
 export const STAND = { x: 1.75, z: -2.0, yaw: -0.15 };
 
 function buildRoom(random: () => number, mats: Mats) {
@@ -1133,6 +1460,38 @@ function buildRoom(random: () => number, mats: Mats) {
   for (const dx of [-1, -1 / 3, 1 / 3, 1]) add(boxGeo(0.05, W.h + 0.05, 0.06), mats.darkSteel, W.x + (dx * W.w) / 2, W.y, WALL_Z + 0.03);
   for (const dy of [-1, 0, 1]) add(boxGeo(W.w + 0.05, 0.05, 0.06), mats.darkSteel, W.x, W.y + (dy * W.h) / 2, WALL_Z + 0.03);
   add(boxGeo(W.w + 0.2, 0.05, 0.16), mats.steel, W.x, W.y - W.h / 2 - 0.05, WALL_Z + 0.08);
+  // Where the moonlight lands: the panes laid across the floor, skewed as it falls (a pale patch drawn
+  // over the floor, one quad), and a cool spot from behind the window along the same way, about as wide
+  // as the window, for whatever stands in it.
+  const fall = (x: number, y: number) => new THREE.Vector3(x, y, WALL_Z).addScaledVector(MOON, (y - 0.005) / -MOON.y);
+  const [wl, wr, wb, wt] = [W.x - W.w / 2, W.x + W.w / 2, W.y - W.h / 2, W.y + W.h / 2];
+  const panes = paneTexture();
+  textures.push(panes);
+  const patchGeo = new THREE.BufferGeometry().setFromPoints([fall(wl, wb), fall(wr, wb), fall(wr, wt), fall(wl, wt)]);
+  patchGeo.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1, 0, 1], 2));
+  patchGeo.setIndex([0, 2, 1, 0, 3, 2]);
+  const patch = add(patchGeo, new THREE.MeshBasicMaterial({ map: panes, color: 0x2b3548, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }), 0, 0, 0);
+  patch.userData.live = true;
+  // The beam between, faint: sheets across it, each a line across the window drawn down to the floor
+  // (a sheet seen edge on would show as a streak, so none runs along the beam's sides).
+  const haze = beamTexture();
+  textures.push(haze);
+  const beamPos: number[] = [];
+  const beamUv: number[] = [];
+  for (const k of [0.12, 0.37, 0.63, 0.88]) {
+    const y = wb + k * W.h;
+    const quad = [new THREE.Vector3(wl, y, WALL_Z), new THREE.Vector3(wr, y, WALL_Z), fall(wr, y), fall(wl, y)];
+    for (const i of [0, 1, 2, 0, 2, 3]) beamPos.push(...quad[i].toArray());
+    beamUv.push(0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0);
+  }
+  const beamGeo = new THREE.BufferGeometry();
+  beamGeo.setAttribute('position', new THREE.Float32BufferAttribute(beamPos, 3));
+  beamGeo.setAttribute('uv', new THREE.Float32BufferAttribute(beamUv, 2));
+  const beam = add(beamGeo, new THREE.MeshBasicMaterial({ map: haze, color: 0x141a26, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }), 0, 0, 0);
+  beam.userData.live = true;
+  const moon = new THREE.SpotLight(0x9db3d9, 80, 16, 0.4, 0.7, 2);
+  moon.position.set(W.x, W.y, WALL_Z).addScaledVector(MOON, -3);
+  moon.target.position.copy(fall(W.x, W.y));
 
   // Workbench: a butcher-block top on a steel frame, a shelf under it, pegboard over it.
   const B = { x: 2.55, z: WALL_Z + 0.4, w: 2.0, d: 0.66, y: 0.92 };
@@ -1149,20 +1508,49 @@ function buildRoom(random: () => number, mats: Mats) {
   add(boxGeo(0.12, 0.1, 0.2), mats.steel, B.x + 0.7, B.y + 0.05, B.z + 0.18);
   add(boxGeo(0.2, 0.08, 0.06), mats.steel, B.x + 0.7, B.y + 0.14, B.z + 0.2);
   add(boxGeo(0.46, 0.34, 0.26), mats.darkSteel, B.x - 0.62, B.y + 0.17, B.z - 0.12);
-  for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) add(boxGeo(0.12, 0.055, 0.01), mats.steel, B.x - 0.77 + c * 0.15, B.y + 0.06 + r * 0.075, B.z + 0.012);
+  // The drawers, labelled in marker on tape, top row first; the last one never was.
+  const labels = new THREE.MeshLambertMaterial({ map: labelTexture() });
+  for (let r = 0; r < 4; r++)
+    for (let c = 0; c < 3; c++) {
+      const [x, y] = [B.x - 0.77 + c * 0.15, B.y + 0.06 + r * 0.075];
+      add(boxGeo(0.12, 0.055, 0.01), mats.steel, x, y, B.z + 0.012);
+      const i = (3 - r) * 3 + c;
+      if (i < LABELS.length) add(sheetGeo(0.07, 0.022, [256, 64], [(i % 4) * 64, Math.floor(i / 4) * 20, 64, 20]), labels, x + ((i * 5) % 3 - 1) * 0.006, y + 0.008, B.z + 0.0175).rotation.z = ((i * 7) % 5 - 2) * 0.018;
+    }
   add(new THREE.SphereGeometry(0.15, 20, 14), new THREE.MeshStandardMaterial({ color: 0x86837d, roughness: 0.9 }), B.x + 0.1, B.y + 0.15, B.z + 0.05);
-  add(new THREE.TorusGeometry(0.1, 0.018, 8, 24), mats.rubber, B.x + 0.42, B.y + 0.018, B.z - 0.08).rotation.x = Math.PI / 2;
+  add(new THREE.TorusGeometry(0.1, 0.018, 8, 24), mats.rubber, B.x - 0.25, B.y + 0.018, B.z + 0.17).rotation.x = Math.PI / 2;
+  // A bench supply behind the head, its leads across the bench and clipped on under the head's ear: the
+  // head under test before it goes on.
+  add(rbox(0.24, 0.12, 0.22, 0.008), mats.darkSteel, B.x + 0.45, B.y + 0.06, B.z - 0.16);
+  add(new THREE.PlaneGeometry(0.075, 0.028), new THREE.MeshBasicMaterial({ map: readoutTexture(), color: 0x8c8c8c, toneMapped: false }), B.x + 0.38, B.y + 0.08, B.z - 0.049);
+  for (const dx of [0.47, 0.53]) add(new THREE.CylinderGeometry(0.011, 0.011, 0.016, 12), mats.steel, B.x + dx, B.y + 0.08, B.z - 0.042).rotation.x = Math.PI / 2;
+  // Each lead from its post (dx along the bench) through `way`, across the bench to its clip.
+  const lead = (mat: THREE.Material, dx: number, way: [number, number, number][]) => {
+    const pts = [[dx, 0.03, -0.03], ...way].map(([x, y, z]) => new THREE.Vector3(B.x + x, B.y + y, B.z + z));
+    add(new THREE.CylinderGeometry(0.007, 0.007, 0.02, 10), mat, pts[0].x, pts[0].y, pts[0].z).rotation.x = Math.PI / 2;
+    add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.004, 6), mat, 0, 0, 0);
+    const [before, end] = pts.slice(-2);
+    strut(add, mat, end.clone().lerp(before, 0.4), end, 0.006);
+  };
+  lead(mats.toolRed, 0.47, [[0.46, 0.012, 0.03], [0.38, 0.006, 0.1], [0.3, 0.03, 0.1], [0.244, 0.121, 0.079]]);
+  lead(mats.rubber, 0.53, [[0.53, 0.01, 0.06], [0.42, 0.006, 0.16], [0.3, 0.02, 0.17], [0.2125, 0.0975, 0.134]]);
+  // A wiring sketch taped to the wall at the pegboard's end, a little askew; the tape at its foot let go.
+  add(new THREE.PlaneGeometry(0.225, 0.28), new THREE.MeshLambertMaterial({ map: sketchTexture(), color: 0xc2beb4 }), 1.44, 1.74, WALL_Z + 0.012).rotation.z = 0.045;
+  const tapeMat = new THREE.MeshLambertMaterial({ color: 0xc8b88e });
+  for (const [x, y, a] of [[1.335, 1.875, 0.6], [1.555, 1.88, -0.5], [1.34, 1.605, -0.55]]) add(new THREE.PlaneGeometry(0.05, 0.018), tapeMat, x, y, WALL_Z + 0.014).rotation.z = a;
 
-  // The pendant over the bench, its cord up into the dark.
-  const P = new THREE.Vector3(B.x, 2.3, B.z + 0.05);
+  // The pendant hung low over the service stand, its cord up into the dark: its light a warm cone down
+  // onto the unfinished robot and the bench's end behind it, the wall above left dark.
+  const P = new THREE.Vector3(STAND.x + 0.3, 2.4, STAND.z + 0.3);
   add(new THREE.CylinderGeometry(0.006, 0.006, 3, 6), mats.rubber, P.x, P.y + 1.6, P.z);
   add(new THREE.ConeGeometry(0.2, 0.18, 24, 1, true), new THREE.MeshStandardMaterial({ color: 0x2f3a33, roughness: 0.5, metalness: 0.4, side: THREE.DoubleSide }), P.x, P.y, P.z);
   add(new THREE.SphereGeometry(0.05, 14, 10), mats.bulb, P.x, P.y - 0.08, P.z);
-  const pendant = new THREE.PointLight(0xffb573, 4.2, 5.5, 2);
-  pendant.position.set(P.x, P.y - 0.12, P.z);
+  const pendant = new THREE.SpotLight(0xff9c55, 30, 5.5, 0.5, 0.6, 2);
+  pendant.position.set(P.x, P.y - 0.1, P.z);
+  pendant.target.position.set(STAND.x, 0.6, STAND.z - 0.1);
 
   bake(group);
-  group.add(pendant);
+  group.add(pendant, pendant.target, moon, moon.target);
   return { group, textures, pendant };
 }
 
@@ -1230,6 +1618,10 @@ function buildProps(mats: Mats) {
   cadd(new THREE.TorusGeometry(0.1, 0.02, 8, 24), mats.rubber, 0.05, 0.53, 0).rotation.x = Math.PI / 2;
   const arm = cadd(new THREE.CapsuleGeometry(0.035, 0.24, 4, 12), new THREE.MeshStandardMaterial({ color: 0xdcd5c6, roughness: 0.58 }), -0.15, 0.55, 0.02);
   arm.rotation.z = Math.PI / 2;
+  // Its tag, on a string over the shelf's lip.
+  cadd(new THREE.PlaneGeometry(0.05, 0.05), new THREE.MeshLambertMaterial({ map: tagTexture() }), -0.24, 0.51, 0.2395).rotation.z = 0.14;
+  const string = new THREE.CatmullRomCurve3([new THREE.Vector3(-0.3, 0.55, 0.03), new THREE.Vector3(-0.27, 0.565, 0.24), new THREE.Vector3(-0.243, 0.53, 0.2405)]);
+  cadd(new THREE.TubeGeometry(string, 12, 0.0012, 4), mats.fabric, 0, 0, 0);
 
   // The work light on its tripod, left of the floor: the room's key.
   const tripod = new THREE.Group();
@@ -1298,6 +1690,16 @@ function buildWorkstation(mats: Mats, screenMap: THREE.Texture) {
   // A mug and a notebook, right of the keyboard.
   add(new THREE.CylinderGeometry(0.04, 0.036, 0.1, 16), new THREE.MeshStandardMaterial({ color: 0xc9c2b4, roughness: 0.4 }), 0.52, 0.79, -0.06);
   add(boxGeo(0.21, 0.014, 0.28), new THREE.MeshStandardMaterial({ color: 0x3d4a3f, roughness: 0.85 }), 0.46, 0.747, 0.16).rotation.y = -0.2;
+  // Under the lamp, the useless machine (src/content/projects/useless-machine.md): a small hinged box,
+  // its switch on the lid, turned a little toward the chair.
+  const machine = new THREE.Group();
+  machine.position.set(-0.45, 0.74, -0.02);
+  machine.rotation.y = 0.5;
+  group.add(machine);
+  add(rbox(0.15, 0.075, 0.1, 0.004), mats.wood, 0, 0.0375, 0, machine);
+  add(boxGeo(0.152, 0.003, 0.102), mats.darkWood, 0, 0.058, 0, machine);
+  add(boxGeo(0.022, 0.004, 0.014), mats.steel, 0.03, 0.077, 0, machine);
+  add(new THREE.CylinderGeometry(0.0022, 0.003, 0.024, 8), mats.steel, 0.034, 0.088, 0, machine).rotation.z = -0.4;
 
   // Desk lamp at the left end, set back.
   const base = new THREE.Vector3(-0.58, 0.762, -0.2);
@@ -1398,9 +1800,9 @@ const PIXEL_RATIO = 1.25;
 const FLIGHT: Record<string, number> = { 'hero>read': 1900, 'read>hero': 1500 };
 // Looking around the opening (mouse or pen, in windows the lab opens in, with motion on): where the
 // pointer is turns the camera a little about the room's centre, and a drag turns it further, never past
-// LOOK (radians; `up` raises the camera). Let go, and it settles back to the composed view. Turning to
-// positive az swings the monitor toward the left edge, so that side stops sooner where the window needs
-// it to (reachAz in mountLab).
+// LOOK (radians; `up` raises the camera). Let go, and it settles back to the composed view. Turning
+// swings the monitor toward an edge of the window, so either way stops sooner where the window needs it
+// to (reachAz in mountLab).
 const PARALLAX = { az: 0.03, el: 0.015 };
 const LOOK = { az: 0.16, down: 0.05, up: 0.07 };
 const DRAG_PX = 6; // a press that moves further than this is a drag, not a click
@@ -1462,17 +1864,18 @@ export function mountLab(
   const mats = materials();
 
   // Six lights: the work light (warm key, the one shadow), the moon through the window (the one cool
-  // accent, a rim on the robots from behind), the pendant, the desk lamp, the screen's glow, and a low
-  // fill so nothing falls to pure black.
+  // light, down across the floor right of the monitor), the pendant (warm, on the bench and the
+  // unfinished robot), the desk lamp, the screen's glow, and a low fill so nothing falls to pure black.
+  // The key is kept to the floor and the dancers: the wall above them, and the room's corners, stay dark.
   const props = buildProps(mats);
   props.tripod.position.set(-4.6, 0, 3.0); // out of every view: its light, not its lamp, is in the picture
   props.tripod.lookAt(0.2, 0, -0.3);
   props.head.lookAt(new THREE.Vector3(0.2, 0.6, -0.4));
   scene.add(props.tripod);
   scene.updateMatrixWorld();
-  const key = new THREE.SpotLight(0xffc38a, 95, 0, 0.62, 0.55, 2);
+  const key = new THREE.SpotLight(0xffc38a, 95, 0, 0.4, 0.6, 2);
   props.head.getWorldPosition(key.position);
-  key.target.position.set(0.2, 0.5, -0.5);
+  key.target.position.set(0.9, 0.4, -0.3);
   key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024);
   key.shadow.camera.near = 1;
@@ -1480,10 +1883,7 @@ export function mountLab(
   key.shadow.bias = -0.0004;
   key.shadow.normalBias = 0.02;
   key.shadow.radius = 4;
-  const moon = new THREE.SpotLight(0x9db3d9, 70, 16, 0.42, 0.85, 2);
-  moon.position.set(1.4, 4.4, -4.8);
-  moon.target.position.set(0.1, 0, 0.2);
-  scene.add(key, key.target, moon, moon.target, new THREE.HemisphereLight(0x3a342d, 0x0c0b0a, 0.5));
+  scene.add(key, key.target, new THREE.HemisphereLight(0x2c2e33, 0x0c0b0a, 0.35));
 
   const room = buildRoom(random, mats);
   scene.add(room.group);
@@ -1539,8 +1939,8 @@ export function mountLab(
   // (reachPoints) the dancers' elbows and hands wherever the routine takes them, sampled over one loop.
   const clearPoints = [...robots.map((r) => new THREE.Vector3(r.root.position.x - 0.6, 2.05, r.root.position.z)), desk.group.localToWorld(new THREE.Vector3(-0.4, 1.4, -0.15))];
   const reachPoints: THREE.Vector3[] = [];
-  for (let i = 0; i < 64; i++) {
-    const beat = (i / 64) * BEATS;
+  for (let i = 0; i < 128; i++) {
+    const beat = (i / 128) * BEATS;
     for (const r of robots) {
       r.update(beat, (beat * 60) / BPM);
       reachPoints.push(...r.reach());
@@ -1783,7 +2183,7 @@ export function mountLab(
   function render(now = performance.now()) {
     const beat = ((t * BPM) / 60) % BEATS;
     for (const r of robots) r.update(beat, t, rest);
-    proto.update(0, t);
+    proto.update(0, t, rest);
     moveDust(t);
     dust.visible = mode !== 'read' || !!flight;
     let p = 1;
@@ -2013,11 +2413,13 @@ export function mountLab(
   const soft = (x: number, lo: number, hi: number) => (x >= 0 ? hi * Math.tanh(x / hi) : lo * Math.tanh(x / lo));
   const lookOK = () => intent && mode === 'hero' && !flight && !lost && !html.dataset.pc;
   const fine = (e: PointerEvent) => e.pointerType === 'mouse' || e.pointerType === 'pen';
-  // Turning to positive az swings the monitor toward the frame's left edge, so that way the look stops
-  // where the monitor's bezel would cross the fit's margin, with the drift where it is now: the limit
-  // moves with the drift, slowly, and the monitor never leaves the picture. The other way keeps LOOK.az.
+  // Turning to positive az swings the monitor toward the frame's left edge, and negative toward its right,
+  // so each way the look stops where the monitor's bezel would cross the fit's margin, with the drift
+  // where it is now: the limits move with the drift, slowly, and the monitor never leaves the picture (in
+  // a narrow window, too). Each is LOOK.az where there's room for it.
   const trial = newView();
   let lookAzMax = LOOK.az;
+  let lookAzMin = LOOK.az; // the negative way's, as a size
   function inFrame(az: number) {
     heroPose(trial, az, look.el);
     probe.position.copy(trial.pos);
@@ -2026,7 +2428,8 @@ export function mountLab(
     probe.matrixWorldInverse.copy(probe.matrixWorld).invert();
     return bezelCorners.every((c) => {
       pv.copy(c).applyMatrix4(probe.matrixWorldInverse);
-      return pv.z < -0.1 && trial.cx + (trial.f * pv.x) / -pv.z >= fw * 0.015;
+      const x = trial.cx + (trial.f * pv.x) / -pv.z;
+      return pv.z < -0.1 && x >= fw * 0.015 && x <= fw * 0.985;
     });
   }
   // The bezel in the opening as drawn now, with the drift and the look where they are (client px).
@@ -2056,13 +2459,13 @@ export function mountLab(
     }
     return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
   }
-  function reachAz() {
-    if (inFrame(LOOK.az)) return LOOK.az;
+  function reachAz(way: 1 | -1) {
+    if (inFrame(way * LOOK.az)) return LOOK.az;
     let lo = 0;
     let hi = LOOK.az;
     for (let i = 0; i < 12; i++) {
       const mid = (lo + hi) / 2;
-      if (inFrame(mid)) lo = mid;
+      if (inFrame(way * mid)) lo = mid;
       else hi = mid;
     }
     return Math.max(lo, 1e-3);
@@ -2073,9 +2476,12 @@ export function mountLab(
       drag.az *= k;
       drag.el *= k;
     }
-    if (lookOK()) lookAzMax = reachAz();
+    if (lookOK()) {
+      lookAzMax = reachAz(1);
+      lookAzMin = reachAz(-1);
+    }
     const k = 1 - Math.exp(-dt * 6);
-    look.az += (soft(par.az + drag.az, LOOK.az, lookAzMax) - look.az) * k;
+    look.az += (soft(par.az + drag.az, lookAzMin, lookAzMax) - look.az) * k;
     look.el += (soft(par.el + drag.el, LOOK.down, LOOK.up) - look.el) * k;
   }
   function unlook() {
@@ -2109,7 +2515,7 @@ export function mountLab(
       }
       if (press.moved) {
         // Grab the room: drag right and it turns right. Wound up no further than the limits.
-        drag.az = Math.max(-2 * LOOK.az, Math.min(2 * lookAzMax, press.az - (dx / fw) * 0.9));
+        drag.az = Math.max(-2 * lookAzMin, Math.min(2 * lookAzMax, press.az - (dx / fw) * 0.9));
         drag.el = Math.max(-2 * LOOK.down, Math.min(2 * LOOK.up, press.el + (dy / fh) * 0.5));
       }
     } else if (lookOK()) {
@@ -2235,12 +2641,14 @@ export function mountLab(
         bufferH: canvas.height,
         pixelRatio: renderer.getPixelRatio(),
         frames,
+        beat: ((t * BPM) / 60) % BEATS,
         hint: hintK,
         heroDist,
         heroFramed,
         ...(({ x, y, w, h }) => ({ monX: x, monY: y, monW: w, monH: h }))(monitorRect()),
         lookAz: look.az,
         lookAzMax,
+        lookAzMin,
         lookEl: look.el,
       };
     },

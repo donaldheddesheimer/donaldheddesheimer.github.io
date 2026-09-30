@@ -1,17 +1,21 @@
 ---
 // The lab computer's terminal (src/scripts/lab/terminal.ts), inside the lab's dialog (LabStage.astro):
 // the startup's two lines, the history of what was run, and the prompt. What each command prints waits
-// in a <template> below it, rendered here from the site's data (TermOutput.astro), until it's run.
+// in a <template> below it, rendered here from the site's data (TermOutput.astro; each project's,
+// `work <id>`, TermProject.astro), until it's run. (A template's pictures load only once it's printed.)
 //
 // The history is real text for reading, selecting and copying, and headed for moving through it: each
 // command run is an h2 (the prompt beside it is decoration). New output is announced once, briefly, in
 // the status line; the history itself isn't live.
+import { getCollection } from 'astro:content';
 import TermCmd from './TermCmd.astro';
 import TermOutput from './TermOutput.astro';
+import TermProject from './TermProject.astro';
 import { BOOT, PS1 } from '../lib/terminal';
 import '../styles/terminal.css';
 
-const outputs = ['help', 'about', 'work', 'resume', 'contact', 'not-found'] as const;
+const outputs = ['help', 'about', 'work', 'resume', 'contact', 'no-project', 'not-found'] as const;
+const projects = await getCollection('projects');
 ---
 
 <div class="term" data-term data-boot="pending" tabindex="-1">
@@ -53,6 +57,13 @@ const outputs = ['help', 'about', 'work', 'resume', 'contact', 'not-found'] as c
   outputs.map((cmd) => (
     <template data-term-out={cmd}>
       <TermOutput cmd={cmd} />
+    </template>
+  ))
+}
+{
+  projects.map((p) => (
+    <template data-term-out={`work/${p.id}`} data-title={p.data.title}>
+      <TermProject project={p} />
     </template>
   ))
 }

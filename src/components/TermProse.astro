@@ -1,0 +1,16 @@
+---
+// A project's write-up in the terminal (TermProject.astro): its Markdown, rendered by the site's own
+// processor as its case study's is (the slot), then laid out as the terminal lays out text
+// (src/lib/writeup.ts).
+import { writeUp } from '../lib/writeup';
+
+interface Props {
+  /** Headings keep their ids (a page of its own), or not (the lab's terminal: data-anchor instead). */
+  ids?: boolean;
+  /** Stills for the write-up's videos, by src. */
+  posters?: Record<string, string>;
+}
+const html = await Astro.slots.render('default');
+---
+
+<div class="t-md"><Fragment set:html={writeUp(html, Astro.props)} /></div>
