@@ -92,6 +92,13 @@
 .term-echo .term-ps1 {
   margin-right: 1ch;
 }
+/* On the prompt, a line of its own; broken only where even that can't hold it (a phone, its text
+   enlarged: ~/contact at 200% is wider than the screen). */
+.term-prompt .term-ps1 {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 
 /* A view's opening: where it is (as the prompt says it), then its title. */
 .t-crumb {
@@ -546,7 +553,8 @@
 }
 @media (pointer: coarse) {
   .term a,
-  .t-static a {
+  .t-static a,
+  .t-more > summary {
     padding-block: 0.35em;
   }
   .t-links {

@@ -165,6 +165,7 @@ export function initTerminal(
   const place = (view: string) => ((saved.views ??= {})[view] ??= {});
 
   let pointer = 'mouse'; // the last pointer used on the terminal
+  let clicked = -1e9; // when a command last ran from a click (its double click's second press follows)
   let bootTimer = 0;
 
   // --- The views ---------------------------------------------------------------------------------
@@ -440,6 +441,12 @@ export function initTerminal(
     pointer = e.pointerType || 'mouse';
     endBoot();
   });
+  // A double click's second press lands on the view its first showed, wherever that put text: it selects
+  // nothing there and doesn't take the focus (the click, below, gives it back to the prompt).
+  const second = (e: MouseEvent) => e.detail > 1 && e.timeStamp - clicked < 800;
+  root.addEventListener('mousedown', (e) => {
+    if (second(e)) e.preventDefault();
+  });
   root.addEventListener('keydown', (e) => {
     endBoot();
     // A letter typed with the focus elsewhere in the terminal (on a link, say) goes to the prompt.
@@ -450,6 +457,10 @@ export function initTerminal(
   const plain = (e: MouseEvent) => e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
   root.addEventListener('click', (e) => {
     const t = e.target as Element;
+    if (second(e)) {
+      e.preventDefault();
+      return void input.focus({ preventScroll: true });
+    }
     const cmd = t.closest<HTMLElement>('[data-term-run]');
     if (cmd) {
       // A command with an address (a project's) is a link: a modified click opens that in a new tab.
@@ -461,6 +472,7 @@ export function initTerminal(
       // goes back to the prompt).
       if (e.detail > 1) return void (pointer === 'mouse' && input.focus({ preventScroll: true }));
       const by = e.detail === 0 || pointer === 'mouse' ? 'click' : 'tap';
+      if (e.detail === 1 && pointer === 'mouse') clicked = e.timeStamp;
       return run(cmd.dataset.termRun!, by, cmd);
     }
     const copy = t.closest<HTMLButtonElement>('[data-term-copy]');
