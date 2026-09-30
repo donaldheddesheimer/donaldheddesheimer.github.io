@@ -2579,6 +2579,223 @@ const LED = {
   eye: new THREE.Color(0x8fe3ff),
 };
 
+// --- The rigger ----------------------------------------------------------------------------------
+// High on the wall left of the window, above the clock, a small maintenance robot mends the cable rail:
+// slung in a harness from two cables (up into the dark, out of every view), one hand on the rail, the
+// other with a welding torch at a bracket whose brace has cracked. Squat and hi-vis yellow, a welder's
+// visor that flips up, a gas bottle on its back, sitting in its harness with its boots dangling: nothing
+// like the dancers or the robot on its stand. Its arms are solved to their targets each frame (two
+// bones, the elbow out to one side), so its hands stay on the work however it hangs.
+const RAIL = { y: 3.3, z: WALL_Z + 0.16, x0: -3.6, x1: -1.62, brackets: [-3.35, -2.72, -2.02] };
+/** The cracked bracket, and the brace's run from low on its wall plate up to under the rail's arm. */
+const CRACK = { x: -2.72, lo: new THREE.Vector3(-2.72, RAIL.y - 0.2, WALL_Z + 0.012), hi: new THREE.Vector3(-2.72, RAIL.y - 0.045, RAIL.z - 0.02) };
+/** Where the brace has parted, the seam to weld: most of the way up it. */
+const SEAM = new THREE.Vector3().lerpVectors(CRACK.lo, CRACK.hi, 0.66);
+/** The rigger's torso, where it hangs (the cables' anchors are `hang` up, overhead), turned to the
+ *  work, and its size. */
+const RIGGER = { x: -2.3, y: 2.9, z: WALL_Z + 0.32, yaw: -0.25, hang: 4.6, scale: 1.15 };
+const RIG = { upper: 0.2, fore: 0.19, torch: 0.13, r: 0.024 };
+
+/** Two bones from `a` (lengths `u`, then `f`) toward `t`, the elbow bent toward `pole`: the elbow into
+ *  `e` and the wrist (at `t`, or as near as it reaches) into `w`. */
+function reach(a: THREE.Vector3, t: THREE.Vector3, u: number, f: number, pole: THREE.Vector3, e: THREE.Vector3, w: THREE.Vector3) {
+  const d = Math.max(Math.abs(u - f) + 0.01, Math.min(a.distanceTo(t), (u + f) * 0.999));
+  dir.subVectors(t, a).normalize();
+  const x = (u * u - f * f + d * d) / (2 * d);
+  const h = Math.sqrt(Math.max(0, u * u - x * x));
+  v4.copy(pole).addScaledVector(dir, -pole.dot(dir)).normalize();
+  e.copy(a).addScaledVector(dir, x).addScaledVector(v4, h);
+  w.copy(a).addScaledVector(dir, d);
+}
+
+function buildRigger(mats: Mats) {
+  const group = new THREE.Group();
+  const add = adder(group);
+
+  // The rail: a steel channel on standoff brackets, each a plate on the wall, an arm out and a brace
+  // under it. The cracked one's brace has parted most of the way up, its lower half knocked askew, and
+  // the wall round it is sooted.
+  const R = RAIL;
+  const fixed = new THREE.Group();
+  group.add(fixed);
+  const fadd = adder(fixed);
+  fadd(boxGeo(R.x1 - R.x0, 0.055, 0.05), mats.steel, (R.x0 + R.x1) / 2, R.y, R.z);
+  fadd(boxGeo(R.x1 - R.x0, 0.014, 0.056), mats.darkSteel, (R.x0 + R.x1) / 2, R.y - 0.032, R.z);
+  for (const bx of R.brackets) {
+    fadd(boxGeo(0.08, 0.24, 0.014), mats.darkSteel, bx, R.y - 0.07, WALL_Z + 0.007);
+    fadd(boxGeo(0.035, 0.024, R.z - WALL_Z), mats.darkSteel, bx, R.y - 0.036, (WALL_Z + R.z) / 2);
+    const lo = CRACK.lo.clone().setX(bx);
+    const hi = CRACK.hi.clone().setX(bx);
+    if (bx !== CRACK.x) {
+      strut(fadd, mats.darkSteel, lo, hi, 0.01);
+      continue;
+    }
+    strut(fadd, mats.darkSteel, v1.lerpVectors(lo, hi, 0.74), hi, 0.012);
+    strut(fadd, mats.steel, lo, v2.copy(lo).addScaledVector(v3.set(-0.4, -0.8, 0.45).normalize(), lo.distanceTo(hi) * 0.6), 0.012);
+  }
+  bake(fixed);
+  const soot = new THREE.MeshBasicMaterial({ map: radialTexture([[0, 'rgba(8,5,3,0.9)'], [0.35, 'rgba(8,5,3,0.5)'], [1, 'rgba(8,5,3,0)']], 64), transparent: true, depthWrite: false });
+  add(new THREE.PlaneGeometry(0.32, 0.26), soot, SEAM.x, SEAM.y, WALL_Z + 0.004);
+  // The bead laid along the seam, and later the hot spot where the torch is working: live.
+  const hot = new THREE.MeshBasicMaterial({ color: 0x2c2420, toneMapped: false });
+  const bead = add(new THREE.SphereGeometry(0.013, 10, 8), hot, SEAM.x, SEAM.y, SEAM.z);
+
+  // The robot, about 0.8 m of it, posed in its torso's frame: a shell (torso, pack, harness, legs,
+  // baked), a head with a visor on a hinge, two arms and the hands.
+  const paint = new THREE.MeshStandardMaterial({ color: 0xe0a91f, roughness: 0.5, metalness: 0.08 });
+  const trim = new THREE.MeshStandardMaterial({ color: 0x2a2b2d, roughness: 0.7, metalness: 0.2 });
+  const webbing = new THREE.MeshStandardMaterial({ color: 0x2f64b8, roughness: 0.8 });
+  const bottle = new THREE.MeshStandardMaterial({ color: 0x3d5a3c, roughness: 0.45, metalness: 0.3 });
+  const glass = new THREE.MeshStandardMaterial({ color: 0x0b140f, roughness: 0.2, metalness: 0.4 });
+  const eyeMat = new THREE.MeshBasicMaterial({ color: 0xbff7de, toneMapped: false });
+  const cableMat = new THREE.MeshStandardMaterial({ color: 0x151617, roughness: 0.6, metalness: 0.4 });
+
+  const body = new THREE.Group();
+  body.scale.setScalar(RIGGER.scale);
+  group.add(body);
+  const shell = new THREE.Group();
+  body.add(shell);
+  const sadd = adder(shell);
+  const T = { w: 0.27, h: 0.25, d: 0.2 };
+  sadd(rbox(T.w, T.h, T.d, 0.05), paint, 0, 0, 0);
+  sadd(rbox(T.w * 0.7, 0.06, T.d * 1.04, 0.02), trim, 0, -T.h / 2 + 0.01, 0);
+  sadd(rbox(T.w * 0.36, T.h * 0.3, 0.02, 0.008), trim, 0, 0.0, T.d / 2);
+  // On its back: a pack, and the welder's gas in a bottle strapped to it.
+  sadd(rbox(T.w * 0.8, T.h * 0.8, 0.08, 0.02), trim, 0, 0, -T.d / 2 - 0.035);
+  sadd(new THREE.CylinderGeometry(0.045, 0.045, 0.26, 14), bottle, T.w * 0.2, 0.03, -T.d / 2 - 0.1);
+  sadd(new THREE.CylinderGeometry(0.018, 0.024, 0.04, 10), mats.steel, T.w * 0.2, 0.18, -T.d / 2 - 0.1);
+  // The harness: a belt, two straps from it up the chest and over the shoulders, a strap across the
+  // chest, a D-ring on each shoulder where a cable clips on, and loops round the thighs.
+  const Wb = 0.04;
+  sadd(rbox(T.w + 0.02, Wb, T.d + 0.02, 0.02), webbing, 0, -T.h / 2 + 0.05, 0);
+  sadd(boxGeo(T.w * 0.62, Wb * 0.8, 0.012), webbing, 0, T.h * 0.2, T.d / 2 + 0.008);
+  const rings: THREE.Vector3[] = [];
+  for (const s of [-1, 1]) {
+    const sx = s * T.w * 0.3;
+    sadd(boxGeo(Wb, T.h * 0.95, 0.012), webbing, sx, 0.0, T.d / 2 + 0.006);
+    sadd(boxGeo(Wb, 0.012, T.d + 0.1), webbing, sx, T.h / 2 + 0.006, -0.02);
+    const ring = new THREE.Vector3(s * 0.12, T.h / 2 + 0.035, -0.02);
+    sadd(new THREE.TorusGeometry(0.022, 0.005, 6, 14), mats.steel, ring.x, ring.y, ring.z).rotation.y = Math.PI / 2;
+    rings.push(ring);
+  }
+  // Shoulders; and the legs, sitting in the harness: thighs out in front, shins hanging, the boots.
+  const shoulders = [-1, 1].map((s) => new THREE.Vector3(s * (T.w / 2 + 0.02), T.h / 2 - 0.05, 0));
+  for (const sh of shoulders) sadd(new THREE.SphereGeometry(0.045, 14, 10), trim, sh.x, sh.y, sh.z);
+  const bone = (a: THREE.Vector3, b: THREE.Vector3, r: number, mat: THREE.Material, into: Adder) =>
+    span(into(new THREE.CapsuleGeometry(r, a.distanceTo(b), 4, 10), mat, 0, 0, 0), a, b);
+  [-1, 1].forEach((s, i) => {
+    const hip = new THREE.Vector3(s * 0.075, -T.h / 2 - 0.01, 0.01);
+    const knee = new THREE.Vector3(s * 0.085, -T.h / 2 - 0.05 - i * 0.02, 0.15);
+    const ankle = new THREE.Vector3(s * 0.09, -T.h / 2 - 0.2 + i * 0.01, 0.14 + i * 0.03);
+    sadd(new THREE.SphereGeometry(0.038, 12, 10), trim, hip.x, hip.y, hip.z);
+    bone(hip, knee, 0.027, paint, sadd);
+    sadd(new THREE.SphereGeometry(0.032, 12, 10), trim, knee.x, knee.y, knee.z);
+    bone(knee, ankle, 0.024, paint, sadd);
+    sadd(rbox(0.07, 0.05, 0.1, 0.02), trim, ankle.x, ankle.y - 0.03, ankle.z + 0.025);
+    sadd(new THREE.TorusGeometry(0.034, 0.009, 6, 14), webbing, s * 0.08, -T.h / 2 - 0.03, 0.07);
+  });
+  bake(shell);
+
+  // The head, low on the shoulders: a rounded block with two lit eyes, and a welder's hood pivoting at
+  // its temples, down over the eyes to weld and up over the brow to look.
+  const H = { w: 0.19, h: 0.15, d: 0.17 };
+  const head = new THREE.Group();
+  head.position.set(0, T.h / 2 + 0.03, 0.01);
+  body.add(head);
+  const skull = new THREE.Group();
+  head.add(skull);
+  const hadd = adder(skull);
+  hadd(new THREE.CylinderGeometry(0.035, 0.04, 0.04, 10), trim, 0, 0, 0);
+  hadd(rbox(H.w, H.h, H.d, 0.045), paint, 0, H.h / 2 + 0.02, 0);
+  hadd(rbox(H.w * 0.8, H.h * 0.5, 0.02, 0.012), trim, 0, H.h * 0.55, H.d / 2 - 0.004);
+  for (const s of [-1, 1]) {
+    hadd(new THREE.CylinderGeometry(0.013, 0.013, 0.035, 12), eyeMat, s * H.w * 0.2, H.h * 0.58, H.d / 2 + 0.008).rotation.x = Math.PI / 2;
+    hadd(new THREE.CylinderGeometry(0.02, 0.02, 0.02, 12), trim, s * (H.w / 2 + 0.008), H.h * 0.58 + 0.02, 0).rotation.z = Math.PI / 2;
+  }
+  bake(skull);
+  const visor = new THREE.Group();
+  visor.position.set(0, H.h * 0.58 + 0.02, 0);
+  head.add(visor);
+  const vadd = adder(visor);
+  const vz = H.d / 2 + 0.022;
+  vadd(rbox(H.w * 1.02, H.h * 0.72, 0.016, 0.012), trim, 0, 0, vz);
+  vadd(rbox(H.w * 0.8, H.h * 0.46, 0.012, 0.008), glass, 0, 0, vz + 0.008);
+  for (const s of [-1, 1]) vadd(boxGeo(0.012, 0.024, vz), trim, s * (H.w / 2 + 0.014), 0, vz / 2);
+  bake(visor);
+
+  // The arms, each a pair of fixed-length bones laid between the joints wherever they fall; the hands,
+  // a clamp for the rail and the torch (a grip, a handle, a nozzle, its tip).
+  const badd = adder(body);
+  const arms = shoulders.map(() => [RIG.upper, RIG.fore].map((len, j) => badd(new THREE.CapsuleGeometry(RIG.r * (1 - j * 0.1), len, 4, 10), paint, 0, 0, 0)));
+  const grip = new THREE.Group();
+  body.add(grip);
+  adder(grip)(rbox(0.05, 0.065, 0.05, 0.014), trim, 0, 0.025, 0);
+  const torch = new THREE.Group();
+  body.add(torch);
+  const tadd = adder(torch);
+  tadd(rbox(0.048, 0.05, 0.048, 0.014), trim, 0, 0, 0);
+  tadd(new THREE.CylinderGeometry(0.014, 0.014, 0.085, 10), mats.toolRed, 0, 0.055, 0);
+  tadd(new THREE.CylinderGeometry(0.007, 0.012, 0.05, 10), mats.steel, 0, 0.115, 0);
+  bake(torch);
+  const tip = new THREE.Object3D();
+  tip.position.y = RIG.torch;
+  torch.add(tip);
+
+  // The cables, from the D-rings up to anchors overhead, a little closer together than the rings.
+  const cables = rings.map(() => add(new THREE.CylinderGeometry(0.006, 0.006, 1, 6), cableMat, 0, 0, 0));
+
+  group.traverse((o) => {
+    if (o instanceof THREE.Mesh) o.receiveShadow = true;
+  });
+
+  const e = new THREE.Vector3();
+  const w = new THREE.Vector3();
+  const goal = new THREE.Vector3();
+  const pole = new THREE.Vector3();
+  const railAt = new THREE.Vector3(RIGGER.x + 0.18, RAIL.y - 0.04, RAIL.z + 0.03);
+
+  /** An arm from its shoulder to `goal` (the body's frame), the elbow toward `pole`; the wrist in `w`. */
+  function arm(i: number) {
+    reach(shoulders[i], goal, RIG.upper, RIG.fore, pole, e, w);
+    span(arms[i][0], shoulders[i], e);
+    span(arms[i][1], e, w);
+  }
+
+  function pose() {
+    // Hanging square under its anchors, turned to the work.
+    body.position.set(RIGGER.x, RIGGER.y, RIGGER.z);
+    body.rotation.set(0, RIGGER.yaw, 0);
+    body.updateMatrixWorld(true);
+    // Its head to the seam (a little toward the room, so its face shows); the visor up, to look.
+    head.lookAt(v1.copy(SEAM).add(v2.set(0.05, -0.05, 0.6)));
+    visor.rotation.x = -0.75;
+    // The grip on the rail (its right hand, the far one), the elbow out and down.
+    body.worldToLocal(goal.copy(railAt));
+    pole.set(1, -0.5, 0.4);
+    arm(1);
+    grip.position.copy(w);
+    grip.quaternion.setFromUnitVectors(UP, v1.subVectors(w, e).normalize());
+    // The torch (its left hand), held off the seam a moment, pointing at it.
+    body.worldToLocal(v1.copy(SEAM));
+    v2.set(0.5, -0.45, 0.35).normalize();
+    goal.copy(v1).addScaledVector(v2, (RIG.torch + 0.12) / RIGGER.scale);
+    pole.set(-0.6, -1, 0.3);
+    arm(0);
+    torch.position.copy(w);
+    torch.quaternion.setFromUnitVectors(UP, v2.subVectors(v1, w).normalize());
+    // The cables, from the rings up.
+    body.updateMatrixWorld(true);
+    rings.forEach((r, i) => {
+      body.localToWorld(v1.copy(r));
+      v2.set(lerp(v1.x, RIGGER.x, 0.3), RIGGER.hang, lerp(v1.z, RIGGER.z, 0.3));
+      span(cables[i], v1, v2);
+      cables[i].scale.y = v1.distanceTo(v2);
+    });
+  }
+  pose();
+  return { group, body, bead, tip };
+}
+
 // --- Workstation ---------------------------------------------------------------------------------
 // The desk at the front, a little left of centre and turned toward the room: whoever sits there looks
 // past the monitor to the dancers. Life size (the robots stand 1.4 to 1.8 m). The monitor is the way
@@ -2868,6 +3085,8 @@ export function mountLab(
   for (const r of robots) scene.add(r.root);
   const proto = new Robot(PROTO, blobTex, random);
   scene.add(buildStand(mats, proto));
+  const rigger = buildRigger(mats);
+  scene.add(rigger.group);
 
   // The chair pushed aside past the desk's left end, out of the way of the monitor, turned half away.
   const [cx, cz] = [CHAIR.x, CHAIR.z];
@@ -3074,7 +3293,9 @@ export function mountLab(
     // the width (the more, the taller the window): the camera comes as close as that takes, the room
     // round it crops, and the picture slides to put the monitor in the middle, a little low.
     const share = Math.min(0.52, 0.12 + (1.3 - fw / fh) * 0.48);
-    if (share > 0 && bezelAt(framed).w < share * fw) {
+    // (The rigger, high on the wall, would hang behind the name in that crop: it stays out of it.)
+    rigger.group.visible = !(share > 0 && bezelAt(framed).w < share * fw);
+    if (!rigger.group.visible) {
       let lo = 1;
       let hi = framed;
       for (let i = 0; i < 24; i++) {
