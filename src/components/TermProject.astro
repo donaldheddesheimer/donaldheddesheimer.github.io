@@ -60,7 +60,7 @@ const parts = [
   <p class="t-links t-actions">
     {
       d.repo ? (
-        <a href={d.repo} target="_blank" rel="noopener">
+        <a class="t-action" href={d.repo} target="_blank" rel="noopener">
           source<span class="t-dim"> · {host(d.repo)}</span>
           <span aria-hidden="true">↗</span>
           <span class="sr-only"> (opens in a new tab)</span>
@@ -71,7 +71,7 @@ const parts = [
     }
     {
       d.demo && (
-        <a href={d.demo} target="_blank" rel="noopener">
+        <a class="t-action" href={d.demo} target="_blank" rel="noopener">
           demo<span class="t-dim"> · {host(d.demo)}</span>
           <span aria-hidden="true">↗</span>
           <span class="sr-only"> (opens in a new tab)</span>

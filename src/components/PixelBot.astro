@@ -1,0 +1,28 @@
+---
+// A small pixel robot beside the name in the terminal's `about` (TermOutput.astro): decoration, in the
+// terminal's own colours, drawn from the grid below (a letter to a pixel, a rect to each run of one
+// colour in a row) so it stays crisp at any size. Its eyes and antenna are the accent.
+const GRID = [
+  '.......ee.......',
+  '.......oo.......',
+  '..oooooooooooo..',
+  '..offffffffffo..',
+  '.oofeeffffeefoo.',
+  '.oofeeffffeefoo.',
+  '..offffffffffo..',
+  '..offfwwwwfffo..',
+  '..oooooooooooo..',
+  '......oooo......',
+  '...oooooooooo...',
+  '.o.offffffffo.o.',
+  '.o.ofeffwwffo.o.',
+  '.o.offffffffo.o.',
+  '...oooooooooo...',
+];
+const FILL: Record<string, string> = { o: 'var(--t-dim)', f: '#34302b', e: 'var(--t-accent)', w: 'var(--t-fg)' };
+const runs = GRID.flatMap((row, y) => [...row.matchAll(/([^.])\1*/g)].map((m) => ({ x: m.index!, y, w: m[0].length, c: FILL[m[1]] })));
+---
+
+<svg class="t-bot" viewBox={`0 0 ${GRID[0].length} ${GRID.length}`} shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+  {runs.map((r) => <rect x={r.x} y={r.y} width={r.w} height="1" style={`fill:${r.c}`} />)}
+</svg>

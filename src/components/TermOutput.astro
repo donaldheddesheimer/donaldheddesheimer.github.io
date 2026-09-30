@@ -6,10 +6,13 @@
 // commands are links to where they ran, and there's nothing to copy with).
 //
 // Plain text laid out as a terminal lays it out: a heading per part, key and value columns, "- " lists.
-// Each view opens with where it is and its title, an h2 (TermHead.astro); parts are h3 and entries h4.
+// Each view opens with where it is and its title, an h2 (TermHead.astro; `about`'s is my name, beside a
+// small pixel robot, PixelBot.astro); parts are h3 and entries h4. Detail a visitor may not want (what I
+// did in each role, my coursework) is folded under a line that opens it.
 // The answers to a mistake aren't views: the lab's terminal says them over its prompt (terminal.ts).
 import { getCollection } from 'astro:content';
 import TermCmd from './TermCmd.astro';
+import PixelBot from './PixelBot.astro';
 import TermHead from './TermHead.astro';
 import WorkRow from './WorkRow.astro';
 import { contact, education, experience, offDuty, orgs, profile, skills, socials } from '../data/site';
@@ -51,14 +54,16 @@ const current = experience.find((e) => !e.end);
 
 {
   cmd === 'about' && (
-    <div class="t-out" data-announce="About me.">
-      <TermHead view="about" title="About" />
-      <p>
-        <strong class="t-strong">{profile.name}</strong> <span class="t-dim">· {profile.headline}</span>
-      </p>
-      <p class="t-dim">
-        {profile.school} · {profile.location}
-      </p>
+    <div class="t-out t-about" data-announce="About me.">
+      <div class="t-intro">
+        <PixelBot />
+        <TermHead view="about" title={profile.name}>
+          <p class="t-role">{profile.headline}</p>
+          <p class="t-sub">
+            {profile.school} · {profile.location}
+          </p>
+        </TermHead>
+      </div>
       {profile.about.map((para) => (
         <p class="t-prose">{para}</p>
       ))}
@@ -76,8 +81,10 @@ const current = experience.find((e) => !e.end);
           <dd>{offDuty.map((h) => h.name).join(', ')}</dd>
         </div>
       </dl>
-      <p class="t-hint">
-        Run <TermCmd name="work" live={live} /> to see what I've built, or <TermCmd name="contact" live={live} /> to say hello.
+      <p class="t-links t-next">
+        <TermCmd name="work" live={live} />
+        <TermCmd name="resume" live={live} />
+        <TermCmd name="contact" live={live} />
       </p>
     </div>
   )
@@ -116,17 +123,17 @@ const current = experience.find((e) => !e.end);
 
 {
   cmd === 'resume' && (
-    <div class="t-out" data-announce="Résumé, with the PDF to download.">
+    <div class="t-out t-resume" data-announce="Résumé, with the PDF to download.">
       <TermHead view="resume" title="Résumé" />
-      <p class="t-links">
-        <a href={profile.resume} download={file}>
+      <p class="t-links t-actions">
+        <a class="t-action" href={profile.resume} download={file}>
           <span aria-hidden="true">↓ </span>Download the PDF
         </a>
         <span class="t-dim">{file}</span>
       </p>
 
       <h3 class="t-section">Experience</h3>
-      <ul class="t-list">
+      <ul class="t-list t-cv">
         {experience.map((e) => (
           <li>
             <div class="t-row">
@@ -141,26 +148,38 @@ const current = experience.find((e) => !e.end);
               {e.unit && `${e.unit} · `}
               {e.location}
             </p>
-            <ul class="t-points">
-              {e.points.map((pt) => (
-                <li>{pt}</li>
-              ))}
-            </ul>
+            <details class="t-sec">
+              <summary>
+                <span class="t-dim">what I did</span>
+              </summary>
+              <ul class="t-points t-sec-body">
+                {e.points.map((pt) => (
+                  <li>{pt}</li>
+                ))}
+              </ul>
+            </details>
           </li>
         ))}
       </ul>
 
       <h3 class="t-section">Education</h3>
-      <div class="t-row">
-        <h4 class="t-strong">{education.school}</h4>
-        <span class="t-dim">
-          {fmtMonth(education.start)} – {fmtMonth(education.end)} (expected)
-        </span>
+      <div class="t-cv">
+        <div class="t-row">
+          <h4 class="t-strong">{education.school}</h4>
+          <span class="t-dim">
+            {fmtMonth(education.start)} – {fmtMonth(education.end)} (expected)
+          </span>
+        </div>
+        <p>
+          {education.degree} · {education.program} · {education.thread} · GPA {education.gpa}
+        </p>
+        <details class="t-sec">
+          <summary>
+            <span class="t-dim">coursework</span>
+          </summary>
+          <p class="t-prose t-sec-body">{education.coursework.join(', ')}</p>
+        </details>
       </div>
-      <p>
-        {education.degree} · {education.program} · {education.thread} · GPA {education.gpa}
-      </p>
-      <p class="t-dim">Coursework: {education.coursework.join(', ')}</p>
 
       <h3 class="t-section">Skills</h3>
       <dl class="t-kv t-kv-wide">
@@ -181,11 +200,12 @@ const current = experience.find((e) => !e.end);
 {
   cmd === 'contact' && (
     <div class="t-out" data-announce="Contact: email, GitHub and LinkedIn.">
-      <TermHead view="contact" title="Contact" />
-      <p class="t-prose">
-        {contact.title} {contact.note}
-      </p>
-      <dl class="t-kv">
+      <TermHead view="contact" title="Contact">
+        <p class="t-sub">
+          {contact.title} {contact.note}
+        </p>
+      </TermHead>
+      <dl class="t-kv t-contact">
         <div>
           <dt>email</dt>
           <dd>

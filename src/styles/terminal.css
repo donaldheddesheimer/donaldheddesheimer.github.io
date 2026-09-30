@@ -6,10 +6,11 @@
 .term,
 .t-static {
   --t-bg: #171513;
-  --t-fg: #ebe5da;
+  --t-fg: #eee5d5;
   --t-dim: #a69d90;
   --t-accent: #e2a95c;
   --t-rule: #2e2a26;
+  --t-line: #554c42;
   --t-fs: clamp(0.8125rem, 1.4cqi, 1.0625rem);
   --t-pad-y: max(1rem, 2.6cqi);
   --t-pad-x: max(1rem, 3cqi);
@@ -99,13 +100,15 @@
 }
 .t-title {
   font-weight: 600;
-  font-size: 1.25em;
-  line-height: 1.35;
+  font-size: 1.5em;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 .t-head > * + * {
   margin-top: 0.3em;
 }
 .t-sub {
+  max-width: 70ch;
   color: var(--t-dim);
 }
 
@@ -116,7 +119,7 @@
 .term-views > .t-out {
   margin-top: 0;
 }
-.t-out > .t-head + * {
+.t-out > :is(.t-head, .t-intro) + * {
   margin-top: var(--t-gap);
 }
 .t-out > * + *,
@@ -142,11 +145,13 @@
   color: var(--t-dim);
 }
 .t-prose {
-  max-width: 76ch;
+  max-width: 70ch;
 }
 .t-section {
+  color: var(--t-dim);
+  font-size: 0.875em;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .t-help,
@@ -156,8 +161,14 @@
 }
 .t-help li {
   display: grid;
-  grid-template-columns: 9ch minmax(0, 1fr);
+  grid-template-columns: 10ch minmax(0, 1fr);
   align-items: baseline;
+}
+.t-help .t-cmd {
+  justify-self: start;
+}
+.t-help li + li {
+  margin-top: 0.2em;
 }
 .t-list > li + li {
   margin-top: 1.4em;
@@ -272,7 +283,7 @@
   margin-top: 0;
 }
 .t-md :is(p, li, .t-fig > summary) {
-  max-width: 76ch;
+  max-width: 70ch;
 }
 .t-md strong {
   font-weight: 600;
@@ -356,6 +367,36 @@
   margin-top: 0.6em;
 }
 
+/* `about`: the name beside a small pixel robot, what I do under it, then a few lines about me and where
+   to go next. `resume`: the PDF first, then each role's line, what I did folded under it. */
+.t-intro {
+  display: flex;
+  align-items: center;
+  gap: 1em 3ch;
+}
+.t-bot {
+  flex: none;
+  width: 5.5em;
+  height: auto;
+}
+.t-role {
+  color: var(--t-fg);
+}
+.t-next {
+  gap: 0.25em 3ch;
+}
+.t-cv .t-sec {
+  margin-top: 0.35em;
+}
+.t-cv.t-list > li + li {
+  margin-top: 1.1em;
+}
+@container (width < 30rem) {
+  .t-bot {
+    width: 3.5em;
+  }
+}
+
 /* A section of a project's write-up (or its numbers), folded away behind its heading: opened, the
    section, set in under it. */
 .t-sec > summary {
@@ -378,10 +419,12 @@
 .t-out .t-sec > summary > .t-section {
   display: inline;
   margin: 0;
+  color: var(--t-fg);
+  font-size: inherit;
   letter-spacing: 0;
   text-transform: none;
 }
-.t-sec > summary:hover > .t-section {
+.t-sec > summary:hover > :is(.t-section, .t-dim) {
   color: var(--t-accent);
 }
 .t-sec-body {
@@ -518,6 +561,12 @@
   margin-left: 0.15em;
   text-decoration: none;
 }
+/* An action (the résumé's PDF, a project's source and demo): the accent, like a command. */
+.term a.t-action,
+.t-static a.t-action {
+  color: var(--t-accent);
+  text-decoration-color: rgb(226 169 92 / 0.45);
+}
 /* A project's name in `work`'s index: its text, quiet until it's pointed at or focused. */
 .term a.t-open,
 .t-static a.t-open {
@@ -566,10 +615,11 @@
   outline: none;
 }
 
-/* The prompt: after the history, and held at the screen's foot when the history runs past it, with
-   the text above fading under it. Its field is a real input, see-through, with the block cursor drawn
-   over it where the caret is (terminal.ts): solid and blinking while it has the keyboard, an outline
-   while it hasn't. A line longer than the field scrolls inside it, with room at its end for the cursor. */
+/* The prompt: after the view, and held at the screen's foot when the view runs past it, under a dashed
+   line, the text above fading out just short of the line. Its field is a real input, see-through, with
+   the block cursor drawn over it where the caret is (terminal.ts): solid and blinking while it has the
+   keyboard, an outline while it hasn't. A line longer than the field scrolls inside it, with room at
+   its end for the cursor. */
 .term-prompt {
   position: sticky;
   bottom: 0;
@@ -579,7 +629,9 @@
   align-items: center;
   gap: 0 1ch;
   margin-top: var(--t-gap);
+  padding-top: 0.6em;
   padding-bottom: var(--t-pad-y);
+  border-top: 1px dashed var(--t-line);
   background: var(--t-bg);
 }
 .term-prompt::before {
@@ -587,7 +639,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 100%;
+  bottom: calc(100% + 1px);
   height: 1.25em;
   background: linear-gradient(to top, var(--t-bg), rgb(23 21 19 / 0));
   pointer-events: none;
