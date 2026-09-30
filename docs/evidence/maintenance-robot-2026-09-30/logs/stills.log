@@ -1,0 +1,4 @@
+# node stills.cjs <scratch>/c5 (lab-terminal harness), then node og.cjs <scratch>/c5/og.png
+opening-wide {"gl":"ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)","aspect":1.6,"ml":0.347,"mt":0.5919,"mr":0.5493,"mb":0.7936}
+opening-tall {"gl":"ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)","aspect":0.5,"ml":0.2511,"mt":0.462,"mr":0.7489,"mb":0.618}
+opening-tall.webp: byte-identical to the previous still (the robot is hidden in the tall crop)

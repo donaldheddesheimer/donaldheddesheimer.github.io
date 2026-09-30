@@ -1,0 +1,33 @@
+PASS  wo + Tab fills "work "  {"v":"work ","focus":"input","list":null,"status":"","n":0}
+PASS  work s + Tab lists three ids  {"v":"work s","focus":"input","list":"skyblock-bazaar  smart-bin  swerve-drive","status":"3 matches: skyblock-bazaar, smart-bin, swerve-drive.","n":0}
+PASS  second Tab moves focus on, list gone  {"v":"work s","focus":"BODY:Donald HeddesheimerSoftware en","list":null,"status":"3 matches: skyblock-bazaar, smart-bin, swerve-drive.","n":0}
+PASS  work sw + Tab fills swerve-drive, nothing run  {"v":"work swerve-drive","focus":"input","list":null,"status":"","n":0}
+PASS  complete id + Tab moves on  {"v":"work swerve-drive","focus":"BUTTON:help","list":null,"status":"","n":0}
+PASS  work t + Tab extends to tra  {"v":"work tra","focus":"input","list":null,"status":"","n":0}
+PASS  work tr + Tab lists  {"v":"work tra","focus":"input","list":"traffic-ops-center  travelmate","status":"","n":0}
+PASS  typing hides list  {"v":"work traa","focus":"input","list":null,"status":"","n":0}
+PASS  upper case WO + Tab  {"v":"work ","focus":"input","list":null,"status":"","n":0}
+PASS  no match + Tab moves focus  {"v":"abc","focus":"BODY:Donald HeddesheimerSoftware en","list":null,"status":"","n":0}
+PASS  empty + Tab moves focus  {"v":"","focus":"BUTTON:help","list":null,"status":"","n":0}
+PASS  two words + Tab moves focus  {"v":"help me","focus":"BODY:Donald HeddesheimerSoftware en","list":null,"status":"","n":0}
+PASS  spaces + Tab moves focus  {"v":"   ","focus":"BUTTON:help","list":null,"status":"","n":0}
+PASS  caret not at end: Tab moves on  {"v":"abo","focus":"BODY:Donald HeddesheimerSoftware en","list":null,"status":"","n":0}
+PASS  selection: Tab moves on  {"v":"abo","focus":"BUTTON:help","list":null,"status":"","n":0}
+PASS  Shift+Tab not taken  {"v":"abo","focus":"BUTTON:help","list":null,"status":"","n":0}
+PASS  Ctrl/Alt+Tab, composing: not taken  [false,false,false,"abo"]
+PASS  abo + Tab -> about, not run  {"v":"about","focus":"input","list":null,"status":"about","n":0}
+PASS  Enter runs about once  {"v":"","focus":"input","list":null,"status":"Printed: about me.","n":1}
+PASS  he -> help  {"v":"help","focus":"input","list":null,"status":"","n":1}
+PASS  exit not completed  {"v":"ex","focus":"BODY:Donald HeddesheimerSoftware en","list":null,"status":"","n":1}
+PASS  Up recalls about  {"v":"about","focus":"input","list":null,"status":"","n":1}
+PASS  Down back to empty  {"v":"","focus":"input","list":null,"status":"","n":1}
+PASS  work lists linked projects  ["/?computer=work/traffic-ops-center","https://github.com/donaldheddesheimer/traffic-sim","/?computer=work/cucadence","https://github.com/donald-heddesheimer/cadence"]
+PASS  Cmd+click opens a new tab, nothing run  {"url":"chrome-error://chromewebdata/","n":2}
+  popup at chrome-error://chromewebdata/
+PASS  project opened, has source/demo links  {"at":"?computer=work/traffic-ops-center","links":[["github.com/donaldheddesheimer/traffic-sim↗ (opens in a new tab)","_blank","noopener"],["Eclipse SUMO↗ (opens in a new tab)","_blank","noopener"]]}
+PASS  resume has a PDF  [["↓ Download the PDF","/resume.pdf",true]]
+PASS  resume PDF serves  [200,"application/pdf",146254]
+PASS  contact: email, GitHub, LinkedIn  [["donaldheddes@gmail.com","mailto:donaldheddes@gmail.com"],["copy","donaldheddes@gmail.com"],["github.com/donaldheddesheimer↗","https://github.com/donaldheddesheimer"],["linkedin.com/in/donaldheddesheimer↗","https://www.linkedin.com/in/donaldheddesheimer/"]]
+PASS  copy puts the email on the clipboard  donaldheddes@gmail.com
+PASS  shared /?computer=work/fluxion opens it  {"at":"?computer=work/fluxion","proj":"fluxion"}
+all pass
