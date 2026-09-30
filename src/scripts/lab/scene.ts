@@ -4120,7 +4120,7 @@ export function mountLab(
       for (const [type, fn] of idleEvents) removeEventListener(type, fn, true);
       document.removeEventListener('visibilitychange', sync);
       scene.traverse((o) => {
-        if (!(o instanceof THREE.Mesh || o instanceof THREE.Points || o instanceof THREE.Line)) return;
+        if (!(o instanceof THREE.Mesh || o instanceof THREE.Points || o instanceof THREE.Line || o instanceof THREE.Sprite)) return;
         o.geometry.dispose();
         for (const m of [o.material].flat()) {
           for (const v of Object.values(m)) if (v instanceof THREE.Texture) textures.add(v);
