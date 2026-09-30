@@ -1,14 +1,16 @@
 ---
-// What `work <id>` prints: one project, in the terminal's own type. Its name, when and where, and its
-// opening (the brief: what it does, my part, the hard problem, what it showed; or, without one, its
-// summary); its status, source (and demo), team and tags, and its figures, in the terminal's key and value
-// columns; its cover, folded away behind a line saying what it shows; its write-up, the Markdown its case
-// study (/projects/<id>/) renders, laid out as the terminal lays out text (TermProse.astro); and related
-// work, to run next. The lab's terminal holds each in a <template> until it's run (Terminal.astro);
-// /computer/work/<id>/ prints one on a page of its own (`live` false: commands are links to their pages,
-// and the write-up's headings keep their ids, for that page's anchors).
+// What `work <id>` prints: one project, in the terminal's own type. It opens on the brief, each fact once:
+// the name, what it does, what it's built with and when (and with whom), its one standout result, then my
+// part and the hard part, where the brief has them (without one, the summary). Then where to find it (source, and
+// demo), and the detail folded away to unfold in place: the cover, the write-up's sections, the Markdown
+// its case study (/projects/<id>/) renders, laid out as the terminal lays out text (TermProse.astro), and
+// its figures. Last, related work and the way back to `work`. Nothing here is written for the terminal
+// alone: a line the brief doesn't have is left out, not guessed at. The lab's terminal holds each in a
+// <template> until it's run (Terminal.astro); /computer/work/<id>/ prints one on a page of its own (`live`
+// false: commands are links to their pages, and the write-up's headings keep their ids, for that page's
+// anchors).
 //
-// The project's name is the view's heading, an h2 (TermHead.astro), and its sections h3.
+// The project's name is the view's heading, an h2 (TermHead.astro), and its parts h3.
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import TermCmd from './TermCmd.astro';
 import TermHead from './TermHead.astro';
@@ -30,100 +32,85 @@ const href = (id: string) => (live ? labHref(`work/${id}`) : `/computer/work/${i
 const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const coverKind = d.evidence.find((m) => m.src === d.cover)?.kind;
 const posters = Object.fromEntries(d.evidence.flatMap((m) => (m.poster ? [[m.src, m.poster]] : [])));
-// The brief's lines, in order, those it has.
-const brief = d.brief && ([['what', d.brief.does], ['my part', d.brief.mine], ['hard part', d.brief.hard], ['result', d.brief.shown]].filter(([, v]) => v) as [string, string][]);
+const meta = [d.stack, workMeta(d), d.team, statusLabel[d.status].toLowerCase()].filter(Boolean).join(' · ');
+// The brief's prose, under its labels, those it has. Its result is the short one `work`'s index shows,
+// where there is one (the rest of the brief's is in the write-up or its numbers, so it isn't said twice);
+// without one, the brief's, as prose.
+const parts = [
+  ['My part', d.brief?.mine],
+  ['The hard part', d.brief?.hard],
+  ['The result', d.result ? undefined : d.brief?.shown],
+].filter(([, v]) => v) as [string, string][];
 ---
 
 <div class="t-out t-project" data-announce={`${d.title}.`} data-project={live ? project.id : undefined}>
-  <TermHead view={`work/${project.id}`} title={d.title} />
-  <p class="t-dim">{workMeta(d)}</p>
+  <TermHead view={`work/${project.id}`} title={d.title}>
+    <p class="t-purpose">{d.brief?.does ?? d.summary}</p>
+    <p class="t-sub">{meta}</p>
+  </TermHead>
+  {d.result && <p class="t-outcome">{d.result}</p>}
   {
-    brief ? (
-      <dl class="t-kv t-brief">
-        {brief.map(([k, v]) => (
-          <div>
-            <dt>{k}</dt>
-            <dd>{v}</dd>
-          </div>
-        ))}
-      </dl>
-    ) : (
-      <p class="t-prose">{d.summary}</p>
-    )
+    parts.map(([label, text]) => (
+      <section class="t-part">
+        <h3 class="t-label">{label}</h3>
+        <p class="t-prose">{text}</p>
+      </section>
+    ))
   }
-  <dl class="t-kv">
-    <div>
-      <dt>status</dt>
-      <dd>{statusLabel[d.status].toLowerCase()}</dd>
-    </div>
-    <div>
-      <dt>source</dt>
-      <dd>
-        {
-          d.repo ? (
-            <a href={d.repo} target="_blank" rel="noopener">
-              {host(d.repo)}
-              <span aria-hidden="true">↗</span>
-              <span class="sr-only"> (opens in a new tab)</span>
-            </a>
-          ) : (
-            <span class="t-dim">{(d.repoNote ?? 'Private repository').toLowerCase()}</span>
-          )
-        }
-      </dd>
-    </div>
+  <p class="t-links t-actions">
+    {
+      d.repo ? (
+        <a href={d.repo} target="_blank" rel="noopener">
+          source<span class="t-dim"> · {host(d.repo)}</span>
+          <span aria-hidden="true">↗</span>
+          <span class="sr-only"> (opens in a new tab)</span>
+        </a>
+      ) : (
+        <span class="t-dim">{d.repoNote ?? 'Private repository'}</span>
+      )
+    }
     {
       d.demo && (
-        <div>
-          <dt>demo</dt>
-          <dd>
-            <a href={d.demo} target="_blank" rel="noopener">
-              {host(d.demo)}
-              <span aria-hidden="true">↗</span>
-              <span class="sr-only"> (opens in a new tab)</span>
-            </a>
-          </dd>
-        </div>
+        <a href={d.demo} target="_blank" rel="noopener">
+          demo<span class="t-dim"> · {host(d.demo)}</span>
+          <span aria-hidden="true">↗</span>
+          <span class="sr-only"> (opens in a new tab)</span>
+        </a>
       )
     }
+  </p>
+  <div class="t-detail">
     {
-      d.team && (
-        <div>
-          <dt>team</dt>
-          <dd>{d.team}</dd>
-        </div>
+      d.cover && (
+        <details class="t-fig">
+          <summary>
+            <span class="t-dim">cover{coverKind && ` · ${mediaKindLabel[coverKind].toLowerCase()}`}</span> {d.coverAlt}
+          </summary>
+          <figure class="t-fig-body">
+            <img src={d.cover} alt={d.coverAlt ?? ''} loading="lazy" decoding="async" />
+          </figure>
+        </details>
       )
     }
-    <div>
-      <dt>tags</dt>
-      <dd>{d.tags.join(', ')}</dd>
-    </div>
-  </dl>
-  {
-    d.stats.length > 0 && (
-      <dl class="t-kv t-kv-wide">
-        {d.stats.map((s) => (
-          <div>
-            <dt>{s.label}</dt>
-            <dd class="t-strong">{s.value}</dd>
-          </div>
-        ))}
-      </dl>
-    )
-  }
-  {
-    d.cover && (
-      <details class="t-fig">
-        <summary>
-          <span class="t-dim">cover{coverKind && ` · ${mediaKindLabel[coverKind].toLowerCase()}`}</span> {d.coverAlt}
-        </summary>
-        <figure class="t-fig-body">
-          <img src={d.cover} alt={d.coverAlt ?? ''} loading="lazy" decoding="async" />
-        </figure>
-      </details>
-    )
-  }
-  <TermProse ids={!live} posters={posters}><Content /></TermProse>
+    <TermProse ids={!live} posters={posters}><Content /></TermProse>
+    {
+      d.stats.length > 0 && (
+        <details class="t-sec">
+          <summary>
+            <h3 class="t-section">In numbers</h3>
+          </summary>
+          <dl class="t-kv t-kv-wide t-sec-body">
+            {d.stats.map((s) => (
+              <div>
+                <dt>{s.label}</dt>
+                <dd class="t-strong">{s.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </details>
+      )
+    }
+  </div>
   {
     more.length > 0 && (
       <p class="t-links">
@@ -135,6 +122,6 @@ const brief = d.brief && ([['what', d.brief.does], ['my part', d.brief.mine], ['
     )
   }
   <p class="t-hint">
-    Run <TermCmd name="work" live={live} href={live ? undefined : '/computer/#work'} /> to list every project.
+    Back to <TermCmd name="work" live={live} href={live ? undefined : '/computer/#work'} /> for every project.
   </p>
 </div>

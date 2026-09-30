@@ -331,6 +331,70 @@
   font-weight: 400;
 }
 
+/* A project's opening (`work <id>`): what it does, a step up from the prose; what it's built with and
+   when, quieter; what it showed, in the accent; then my part and the hard part, each under its label, and
+   where to find it. Its detail follows, folded (below). */
+.t-purpose {
+  max-width: 68ch;
+  font-size: 1.0625em;
+}
+.t-outcome {
+  max-width: 76ch;
+  color: var(--t-accent);
+}
+.t-out > * + :is(.t-part, .t-actions, .t-detail),
+.t-out > .t-detail + * {
+  margin-top: var(--t-gap);
+}
+.t-part > .t-label {
+  font-weight: 600;
+}
+.t-part > * + * {
+  margin-top: 0.2em;
+}
+.t-detail > * + * {
+  margin-top: 0.6em;
+}
+
+/* A section of a project's write-up (or its numbers), folded away behind its heading: opened, the
+   section, set in under it. */
+.t-sec > summary {
+  display: block;
+  width: fit-content;
+  cursor: pointer;
+}
+.t-sec > summary::-webkit-details-marker {
+  display: none;
+}
+.t-sec > summary::before {
+  content: '+ ';
+  content: '+ ' / '';
+  color: var(--t-accent);
+}
+.t-sec[open] > summary::before {
+  content: '- ';
+  content: '- ' / '';
+}
+.t-out .t-sec > summary > .t-section {
+  display: inline;
+  margin: 0;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.t-sec > summary:hover > .t-section {
+  color: var(--t-accent);
+}
+.t-sec-body {
+  margin-top: 0.75em;
+  padding-left: 2ch;
+}
+.t-sec-body > * + * {
+  margin-top: 0.75em;
+}
+.t-sec[open] + * {
+  margin-top: var(--t-gap);
+}
+
 /* A figure, folded away behind the line that says what it shows: opened, its picture or video (or a
    trace, scrolling sideways). */
 .t-fig > summary {
@@ -402,13 +466,6 @@
 }
 .t-kv-wide > div {
   grid-template-columns: 24ch minmax(0, 1fr);
-}
-/* A project's opening (`work <id>`): a line of prose to each label, kept to a reading measure. */
-.t-brief {
-  gap: 0.5em;
-}
-.t-brief dd {
-  max-width: 76ch;
 }
 @container (width < 34rem) {
   .t-kv-wide > div {

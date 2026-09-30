@@ -174,9 +174,10 @@ export function initTerminal(
   let cur = START;
   const disclosures = (el: Element) => [...el.querySelectorAll<HTMLDetailsElement>('details')];
 
-  // A figure unfolded: its video's poster now (not before).
+  // A figure unfolded: its video's poster now (not before, nor as the section it's in unfolds).
   const unfold = (d: HTMLDetailsElement) => {
     for (const v of d.querySelectorAll<HTMLVideoElement>('video[data-poster]')) {
+      if (v.closest('details') !== d) continue;
       v.poster = v.dataset.poster!;
       v.removeAttribute('data-poster');
     }
