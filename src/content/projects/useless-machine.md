@@ -7,6 +7,8 @@ brief:
   mine: 'My first project ever.'
   hard: 'One switch that both starts and stops the arm: a DPDT toggle reverses the servo, and an SPDT lever switch cuts the power once the arm is home.'
   shown: 'It works; the video is below.'
+line: 'A box that switches itself off'
+stack: 'Circuits / woodworking'
 status: shipped
 start: '2023'
 tags: [Hardware, Circuits, Woodworking]

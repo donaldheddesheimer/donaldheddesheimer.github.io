@@ -7,6 +7,9 @@ brief:
   hard: 'The CUDA forward and backward passes, including a hand-tiled GEMM kernel benchmarked against cuBLAS.'
   shown: 'About 97% accuracy on MNIST.'
 # TODO: brief: add mine; shown could carry the GEMM vs cuBLAS result once measured.
+line: 'One neural network, written three ways'
+stack: 'NumPy / C++ / CUDA'
+result: '~97% on MNIST'
 status: active
 start: '2026-06'
 tags: [CUDA, C++, Python, Machine learning, Performance]

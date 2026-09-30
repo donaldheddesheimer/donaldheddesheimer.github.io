@@ -7,6 +7,8 @@ brief:
   mine: 'The Bayesian trapdoor inference and death handling, a refactor of the minimax and move selection, fixes to move application, and a web match viewer.'
   hard: 'Trapdoors known only through noisy sensor readings, and a fixed time budget for the whole match.'
 # TODO: brief: add shown (the tournament placement) with the TODO above.
+line: 'A game agent that hunts hidden trapdoors'
+stack: 'Python'
 status: shipped
 start: '2025-11'
 org: gt

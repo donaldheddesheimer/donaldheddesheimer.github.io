@@ -20,6 +20,11 @@ const projects = defineCollection({
         shown: z.string().optional(),
       })
       .optional(),
+    // Its row in `work`'s index: what it is in a few words, what it's built with, and at most one
+    // result the write-up supports (none rather than a goal or a guess).
+    line: z.string().optional(),
+    stack: z.string().optional(),
+    result: z.string().optional(),
     status: z.enum(['active', 'shipped', 'archived']),
     start: z.string().regex(/^\d{4}(-\d{2})?$/), // "2026-08" or just "2023"
     // Where it happened: an org id from src/data/site.ts (orgs), or leave out for personal projects.

@@ -7,6 +7,8 @@ brief:
   hard: 'The goal: cache-friendly data layouts and tight update loops that keep thousands of agents on screen at once.'
   shown: 'So far, a controllable player in a small arena, building on Linux, macOS and Windows.'
 # TODO: brief: add mine, if you want it said.
+line: 'A top-down simulation game, for learning performance'
+stack: 'C++ / raylib'
 status: active
 start: '2026-09'
 tags: [C++, Performance, Simulation, raylib, Game dev]

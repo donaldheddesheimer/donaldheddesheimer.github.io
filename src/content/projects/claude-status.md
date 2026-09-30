@@ -7,6 +7,8 @@ brief:
   hard: 'Getting remote sessions'' events home safely: one SSH RemoteForward tunnel, a per-account filter on shared hosts, and a shared token where a real boundary is needed.'
   shown: 'Several sessions fold into one mood, with a session waiting on you outranking one that''s working; it installs with one script and no dependencies.'
 # TODO: brief: add what you built (mine), if you want it said.
+line: 'A desktop pet that shows what Claude Code is doing'
+stack: 'Swift / macOS'
 status: active
 start: '2026-08'
 tags: [Developer tools, LLMs, Swift, macOS]

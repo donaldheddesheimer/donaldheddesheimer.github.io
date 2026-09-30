@@ -7,6 +7,8 @@ brief:
   hard: 'Most six-hour windows are flat, so the classes are heavily imbalanced, across 3.57 million snapshots merged with event and mayor-perk flags.'
   shown: 'Tuning raised the XGBoost classifier''s test accuracy from 55.5% to 60.6% on about 698K held-out rows.'
 # TODO: brief: add mine with the TODO below.
+line: 'Forecasting an in-game market''s prices'
+stack: 'Python / XGBoost'
 status: shipped
 start: '2026-01'
 team: Team of two

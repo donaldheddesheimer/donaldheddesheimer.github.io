@@ -105,6 +105,9 @@
 .t-head > * + * {
   margin-top: 0.3em;
 }
+.t-sub {
+  color: var(--t-dim);
+}
 
 /* Output: lines of text, a half line between blocks, a blank line before each part. */
 .t-out {
@@ -159,26 +162,102 @@
 .t-list > li + li {
   margin-top: 1.4em;
 }
-/* A project: its number, then its title with when and where across from it (as the résumé's rows), what
-   it does and its commands. */
+/* `work`'s index: a row to a project, between hairlines. Its number; its name, which opens it; and
+   across from the name (under it, where the screen is narrow), what it is, over a quieter line of what
+   it's built with and its one result. The featured first; the rest behind a line that shows them. */
+.t-work {
+  max-width: 88ch;
+  padding: 0;
+  list-style: none;
+}
+.t-out > .t-work,
+.t-more > .t-work {
+  margin-top: var(--t-gap);
+}
 .t-work > li {
   display: grid;
-  grid-template-columns: 4ch minmax(0, 1fr);
+  grid-template-columns: 5ch minmax(0, 26ch) minmax(0, 1fr);
+  column-gap: 2ch;
+  align-items: baseline;
+  padding: 0.85em 0;
+  border-top: 1px solid var(--t-rule);
 }
-.t-work > li > * {
-  grid-column: 2;
+.t-work > li:last-child {
+  border-bottom: 1px solid var(--t-rule);
 }
-.t-work > li > .t-num {
-  grid-row: 1;
-  grid-column: 1;
+.t-work .t-num {
+  grid-row: 1 / span 2;
   color: var(--t-dim);
+  white-space: nowrap;
 }
-.t-work > li > .t-num + .t-row,
-.t-project > h3 + .t-dim {
-  margin-top: 0;
+/* (The row being pointed at, or its name focused: a marker by its number, as a shell's menu has it.) */
+.t-work .t-num::before {
+  content: '> ';
+  content: '> ' / '';
+  visibility: hidden;
+  color: var(--t-accent);
 }
-.t-work > li > * + :is(.t-prose, .t-links) {
-  margin-top: 0.3em;
+.t-work > li:has(.t-open:is(:hover, :focus-visible)) .t-num {
+  color: var(--t-accent);
+}
+.t-work > li:has(.t-open:is(:hover, :focus-visible)) .t-num::before {
+  visibility: visible;
+}
+.t-work-name {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  font-weight: 600;
+}
+.t-work-line,
+.t-work-meta {
+  grid-column: 3;
+}
+.t-work-meta {
+  margin-top: 0.15em;
+  color: var(--t-dim);
+  font-size: 0.9375em;
+}
+.t-result {
+  color: var(--t-fg);
+}
+@container (width < 46rem) {
+  .t-work > li {
+    grid-template-columns: 5ch minmax(0, 1fr);
+  }
+  .t-work-name,
+  .t-work-line,
+  .t-work-meta {
+    grid-row: auto;
+    grid-column: 2;
+  }
+  .t-work .t-num {
+    grid-row: 1;
+  }
+  .t-work-line {
+    margin-top: 0.2em;
+  }
+}
+.t-more > summary {
+  display: block;
+  width: fit-content;
+  margin-top: 1em;
+  color: var(--t-dim);
+  text-decoration: underline;
+  text-decoration-color: rgb(166 157 144 / 0.45);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  cursor: pointer;
+}
+.t-more > summary::-webkit-details-marker {
+  display: none;
+}
+.t-more > summary:hover {
+  color: var(--t-accent);
+  text-decoration-color: var(--t-accent);
+}
+.t-more:not([open]) .t-more-hide,
+.t-more[open] .t-more-show {
+  display: none;
 }
 
 /* A project's write-up (`work <id>`): its Markdown, in the terminal's type. Sections under their labels,
@@ -381,6 +460,16 @@
 .t-static a [aria-hidden] {
   margin-left: 0.15em;
   text-decoration: none;
+}
+/* A project's name in `work`'s index: its text, quiet until it's pointed at or focused. */
+.term a.t-open,
+.t-static a.t-open {
+  text-decoration-color: transparent;
+}
+.term a.t-open:is(:hover, :focus-visible),
+.t-static a.t-open:is(:hover, :focus-visible) {
+  color: var(--t-accent);
+  text-decoration-color: var(--t-accent);
 }
 .t-cmd {
   display: inline-block;

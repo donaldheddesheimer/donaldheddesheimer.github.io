@@ -6,6 +6,8 @@ brief:
   does: 'A Django trip planner with itineraries, live forecasts, generated packing lists and an AI travel assistant.'
   shown: 'Deployed on Render, with a live demo.'
 # TODO: brief: add mine, and the hard part, if there was one worth naming.
+line: 'A trip planner with an AI travel assistant'
+stack: 'Python / Django'
 status: shipped
 start: '2025-03'
 tags: [Python, LLMs, Django, Web]

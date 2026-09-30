@@ -11,11 +11,11 @@
 import { getCollection } from 'astro:content';
 import TermCmd from './TermCmd.astro';
 import TermHead from './TermHead.astro';
+import WorkRow from './WorkRow.astro';
 import { contact, education, experience, offDuty, orgs, profile, skills, socials } from '../data/site';
 import { fmtMonth } from '../lib/format';
-import { byWork, workMeta } from '../lib/folio';
+import { byWork } from '../lib/folio';
 import { HELP, NOT_FOUND, NO_PROJECT } from '../lib/terminal';
-import { labHref } from '../scripts/lab/routes';
 
 interface Props {
   cmd: 'help' | 'about' | 'work' | 'resume' | 'contact' | 'no-project' | 'not-found';
@@ -26,8 +26,9 @@ const { cmd, live = true } = Astro.props;
 const org = (id: string) => orgs.find((o) => o.id === id)!;
 const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const projects = (await getCollection('projects')).sort(byWork);
-// A project's command: the lab running it, or, in the transcript, its page.
-const projectHref = (id: string) => (live ? labHref(`work/${id}`) : `/computer/work/${id}/`);
+// `work` shows the featured first; the rest wait behind a line that shows them.
+const featured = projects.filter((p) => p.data.featured);
+const rest = projects.filter((p) => !p.data.featured);
 const file = `${profile.name.replace(/\s+/g, '-')}-Resume.pdf`;
 const current = experience.find((e) => !e.end);
 ---
@@ -84,43 +85,30 @@ const current = experience.find((e) => !e.end);
 
 {
   cmd === 'work' && (
-    <div class="t-out" data-announce={`Work: ${projects.length} projects.`}>
-      <TermHead view="work" title="Work" />
-      <p class="t-dim">
-        Projects in GPU software, robotics and simulation, and a few from before: {projects.length} in all, featured first. Run{' '}
-        <span class="t-strong">work &lt;id&gt;</span> to read one here.
-      </p>
-      <ol class="t-list t-work" role="list">
-        {projects.map((p, i) => (
-          <li>
-            <span class="t-num" aria-hidden="true">
-              {i + 1}.
-            </span>
-            <div class="t-row">
-              <h3 class="t-strong">{p.data.title}</h3>
-              <span class="t-dim">{workMeta(p.data)}</span>
-            </div>
-            <p class="t-prose">{p.data.brief?.does ?? p.data.summary}</p>
-            <p class="t-links">
-              <TermCmd name={`work ${p.id}`} live={live} href={projectHref(p.id)} />
-              {p.data.demo && (
-                <a href={p.data.demo} target="_blank" rel="noopener" aria-label={`demo: ${p.data.title} (opens in a new tab)`}>
-                  demo<span aria-hidden="true">↗</span>
-                </a>
-              )}
-              {p.data.repo ? (
-                <a href={p.data.repo} target="_blank" rel="noopener" aria-label={`source: ${p.data.title} (opens in a new tab)`}>
-                  source<span aria-hidden="true">↗</span>
-                </a>
-              ) : (
-                <span class="t-dim">{(p.data.repoNote ?? 'Private repository').toLowerCase()}</span>
-              )}
-            </p>
-          </li>
+    <div class="t-out" data-announce={`Selected work: ${featured.length} featured of ${projects.length} projects.`}>
+      <TermHead view="work" title="Selected work">
+        <p class="t-sub">GPU software, simulation and tools, and a few from before.</p>
+      </TermHead>
+      <ol class="t-work" role="list">
+        {featured.map((p, i) => (
+          <WorkRow project={p} n={i + 1} live={live} />
         ))}
       </ol>
+      {rest.length > 0 && (
+        <details class="t-more">
+          <summary>
+            <span class="t-more-show">Show all {projects.length} projects</span>
+            <span class="t-more-hide">Show featured only</span>
+          </summary>
+          <ol class="t-work" role="list">
+            {rest.map((p, i) => (
+              <WorkRow project={p} n={featured.length + i + 1} live={live} />
+            ))}
+          </ol>
+        </details>
+      )}
       <p class="t-hint">
-        Run <TermCmd name="resume" live={live} /> for the full story, or <TermCmd name="contact" live={live} /> to get in touch.
+        Or run <span class="t-strong">work &lt;id&gt;</span>; Tab completes the id.
       </p>
     </div>
   )

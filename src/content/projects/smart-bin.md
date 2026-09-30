@@ -7,6 +7,9 @@ brief:
   hard: 'General trash, the hardest class (F1 0.89): "trash" is everything that isn''t something else.'
   shown: '94.8% validation accuracy and an F1 of 0.943, with a ResNet50 and a custom classification head.'
 # TODO: brief: add what you did (mine): the model, the data collection, or both.
+line: 'Sorting photos of waste into six classes'
+stack: 'Python / TensorFlow'
+result: '94.8% validation accuracy'
 status: shipped
 start: '2023'
 org: wra
