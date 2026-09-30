@@ -7,11 +7,13 @@
 // routine's moves, where they stand and how they answer each other; the unfinished one on its stand runs a
 // calibration now and then. Two camera views: the opening, which the pointer may look around a little
 // (lookAround), and reading, square on to the monitor, whose screen the terminal covers in real HTML
-// (computer.ts). One flight joins them. Simple geometry throughout.
+// (computer.ts); in the room the screen shows a screensaver (screensaver.ts). One flight joins them.
+// Simple geometry throughout.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { SAVER_FPS, screensaver } from './screensaver';
 
 const TAU = Math.PI * 2;
 const BPM = 112;
@@ -1851,23 +1853,17 @@ function paneTexture() {
   );
 }
 
-// The monitor's picture before the terminal is laid over it: the terminal as it waits to start, charcoal
-// with its cursor at the first line (src/components/Terminal.astro, src/styles/terminal.css), laid out as
-// it is at a 1209 px screen (reading, in a 1440 x 900 window). The terminal itself fades in over it in
-// flight.
-function terminalTexture() {
-  const W = 1280;
-  const H = 800;
-  const S = W / 1209; // texture px per CSS px
-  // terminal.css at a 1209 px screen: type 1.4cqi, padding 3cqi across and 2.6cqi down; the block cursor
-  // 1ch x 1.3em, its top 0.16em into the first line (measured in the page).
-  const em = 1209 * 0.014;
-  return canvasTexture(W, H, (g) => {
-    g.fillStyle = '#171513';
-    g.fillRect(0, 0, W, H);
-    g.fillStyle = '#ebe5da';
-    g.fillRect(Math.round(1209 * 0.03 * S), Math.round((1209 * 0.026 + 0.16 * em) * S), Math.round(0.6 * em * S), Math.round(1.3 * em * S));
-  });
+// The monitor's picture: the screensaver (screensaver.ts), crisp pixels. As the camera arrives it gives
+// way, a pixel at a time, to the terminal's charcoal, and the terminal itself fades in over it
+// (computer.ts); the way back, the other way round.
+function saverTexture() {
+  const saver = screensaver();
+  const texture = new THREE.CanvasTexture(saver.canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.NearestFilter;
+  texture.generateMipmaps = false;
+  return { texture, draw: saver.draw };
 }
 
 // Bakes a group's meshes into one per material: the room and props are still, so they cost a draw
@@ -2789,7 +2785,8 @@ export function mountLab(
   props.cart.rotation.y = -0.5;
   scene.add(props.chair, props.cart);
 
-  const screenMap = terminalTexture();
+  const saver = saverTexture();
+  const screenMap = saver.texture;
   const desk = buildWorkstation(mats, screenMap);
   scene.add(desk.group);
   scene.updateMatrixWorld(true);
@@ -3085,6 +3082,24 @@ export function mountLab(
     });
   }
 
+  // The screensaver's last step and dissolve drawn: it redraws only when either moves on, and not at all
+  // while reading (the terminal covers it).
+  let saverStep = 0;
+  let saverGone = 0;
+  function drawSaver(p: number) {
+    // `mode` is where the flight is going: in, the screensaver gives way from a fifth of the way to a
+    // little past halfway (under 0.7 s, before the terminal is up); out, it comes back once the terminal
+    // has gone.
+    const gone = flight ? (mode === 'read' ? smooth(0.2, 0.55, p) : 1 - smooth(0.15, 0.6, p)) : mode === 'read' ? 1 : 0;
+    if (gone >= 1 && saverGone >= 1) return;
+    const step = intent ? Math.floor(t * SAVER_FPS) : 0;
+    if (step === saverStep && gone === saverGone) return;
+    saverStep = step;
+    saverGone = gone;
+    saver.draw(step, gone);
+    screenMap.needsUpdate = true;
+  }
+
   function render(now = performance.now()) {
     const beat = ((t * BPM) / 60) % BEATS;
     const s = intro && t < CAUGHT.end ? t : -1;
@@ -3105,6 +3120,7 @@ export function mountLab(
       cur.cx = lerp(flight.from.cx, next.cx, e);
       cur.cy = lerp(flight.from.cy, next.cy, e);
     } else VIEWS[mode](cur);
+    drawSaver(p);
     place(cur);
     renderer.render(scene, camera);
     frames++;
