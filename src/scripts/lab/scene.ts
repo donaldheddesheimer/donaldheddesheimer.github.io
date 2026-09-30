@@ -1078,6 +1078,155 @@ function pegboardTexture() {
       g.ellipse(400, 100, 44 - i * 4, 52 - i * 4, 0, 0, TAU);
       g.stroke();
     }
+    // The fourth wrench is out: its outline, in marker, where it hangs.
+    g.strokeStyle = '#17120d';
+    g.lineWidth = 1.5;
+    g.beginPath();
+    g.arc(106, 30, 10, 0, TAU);
+    g.moveTo(102.5, 39);
+    g.lineTo(102.5, 98);
+    g.lineTo(109.5, 98);
+    g.lineTo(109.5, 39);
+    g.stroke();
+    // Hands' grime around the hooks most used.
+    for (const [x, y, r] of [[62, 60, 40], [140, 50, 30], [280, 60, 34]] as const) {
+      const grad = g.createRadialGradient(x, y, 0, x, y, r);
+      grad.addColorStop(0, 'rgba(20,14,8,0.22)');
+      grad.addColorStop(1, 'rgba(20,14,8,0)');
+      g.fillStyle = grad;
+      g.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+  });
+}
+
+// A wiring sketch on squared paper, taped up by the bench: a supply, a switch, a driver board and three
+// servos for the arm on the stand, in pencil, gone over in red where it was wrong. Folded once.
+function sketchTexture() {
+  return canvasTexture(320, 400, (g) => {
+    g.fillStyle = '#dcd6c6';
+    g.fillRect(0, 0, 320, 400);
+    g.strokeStyle = 'rgba(70,120,110,0.2)';
+    g.lineWidth = 1;
+    for (let x = 8; x < 320; x += 16) g.strokeRect(x, -1, 0, 402);
+    for (let y = 8; y < 400; y += 16) g.strokeRect(-1, y, 322, 0);
+    const pen = (color: string, width: number, path: [number, number][][]) => {
+      g.strokeStyle = color;
+      g.lineWidth = width;
+      g.lineCap = g.lineJoin = 'round';
+      for (const line of path) {
+        g.beginPath();
+        line.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y)));
+        g.stroke();
+      }
+    };
+    const write = (color: string, size: number, text: string, x: number, y: number) => {
+      g.fillStyle = color;
+      g.font = `italic ${size}px "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive`;
+      g.fillText(text, x, y);
+    };
+    const lead = '#3a3a3c';
+    const red = '#b3261e';
+    write(lead, 22, 'arm test  r2', 24, 38);
+    pen(lead, 1.5, [[[22, 44], [150, 46]]]);
+    // Supply, switch, driver.
+    pen(lead, 2.2, [
+      [[40, 96], [64, 96]], [[46, 108], [58, 108]], [[52, 96], [52, 80], [96, 80]], [[52, 108], [52, 340]],
+      [[96, 80], [124, 66]], [[128, 80], [180, 80]],
+    ]);
+    g.strokeStyle = lead;
+    g.strokeRect(180, 62, 104, 62);
+    write(lead, 20, 'DRV', 208, 100);
+    write(lead, 17, '5V', 18, 132);
+    // Three servos off the driver, their grounds back along the bottom.
+    for (const [i, x] of [70, 160, 250].entries()) {
+      pen(lead, 2.2, [[[196 + i * 36, 124], [196 + i * 36, 180], [x, 220], [x, 242]], [[x, 286], [x, 340]]]);
+      g.beginPath();
+      g.arc(x, 264, 22, 0, TAU);
+      g.stroke();
+      write(lead, 20, 'M', x - 9, 271);
+      write(lead, 14, ['E1', 'E2', 'W'][i], x + 26, 250);
+    }
+    pen(lead, 2.2, [[[52, 340], [250, 340]], [[40, 352], [64, 352]], [[46, 360], [58, 360]], [[50, 368], [54, 368]], [[52, 340], [52, 352]]]);
+    // In red: the supply was wrong, the wrist wants its own feed, and one servo runs backwards.
+    pen(red, 2.4, [[[14, 116], [42, 138]], [[112, 150], [134, 152]], [[250, 190], [292, 190], [292, 242], [262, 250]]]);
+    write(red, 20, '6V!', 16, 162);
+    write(red, 15, 'own feed', 214, 176);
+    g.strokeStyle = red;
+    g.beginPath();
+    g.ellipse(160, 264, 34, 30, 0.2, 0, TAU);
+    g.stroke();
+    write(red, 15, 'rev?', 110, 312);
+    // The fold, and a thumb's smudge.
+    g.fillStyle = 'rgba(0,0,0,0.1)';
+    g.fillRect(0, 199, 320, 1);
+    g.fillStyle = 'rgba(255,255,255,0.3)';
+    g.fillRect(0, 200, 320, 1);
+    const smudge = g.createRadialGradient(270, 360, 0, 270, 360, 40);
+    smudge.addColorStop(0, 'rgba(40,36,30,0.18)');
+    smudge.addColorStop(1, 'rgba(40,36,30,0)');
+    g.fillStyle = smudge;
+    g.fillRect(220, 310, 100, 90);
+  });
+}
+
+// Masking-tape labels in marker for the parts drawers, the first eleven (one written over), in one
+// sheet: each 64 x 20 px, four to a row.
+const LABELS = ['M3', 'M4', 'NUTS', 'SERVO', 'BRG', 'SPRG', 'HDR', 'JST', 'FUSE', 'LED', 'M2.5'];
+function labelTexture() {
+  return canvasTexture(256, 64, (g) => {
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    LABELS.forEach((text, i) => {
+      const [x, y] = [(i % 4) * 64, Math.floor(i / 4) * 20];
+      g.fillStyle = i % 3 ? '#e4dccb' : '#d9cfb8';
+      g.fillRect(x + 1, y + 1, 62, 18);
+      g.fillStyle = '#1c1a18';
+      g.font = 'bold 13px "Marker Felt", "Arial Narrow", sans-serif';
+      g.fillText(text, x + 32, y + 11);
+      if (text === 'M2.5') {
+        g.fillRect(x + 6, y + 5, 20, 1.5);
+        g.font = 'bold 9px "Marker Felt", "Arial Narrow", sans-serif';
+        g.fillText('M2', x + 14, y + 6);
+      }
+    });
+  });
+}
+
+// A manila tag, for a part sent back.
+function tagTexture() {
+  return canvasTexture(64, 64, (g) => {
+    g.fillStyle = '#c9a66b';
+    g.fillRect(0, 0, 64, 64);
+    g.fillStyle = '#6b5436';
+    g.beginPath();
+    g.arc(32, 8, 4, 0, TAU);
+    g.fill();
+    g.fillStyle = '#1c1a18';
+    g.font = 'bold 10px "Marker Felt", "Arial Narrow", sans-serif';
+    g.fillText('L FOREARM', 5, 28);
+    g.font = '9px "Bradley Hand", "Comic Sans MS", cursive';
+    g.fillText('boss cracked', 5, 42);
+    g.fillText('reprint', 5, 54);
+  });
+}
+
+// A plane showing part of a canvas texture: the rect x, y, w, h (in its pixels) of a W x H sheet.
+function sheetGeo(w: number, h: number, [W, H]: [number, number], [x, y, pw, ph]: [number, number, number, number]) {
+  const geo = new THREE.PlaneGeometry(w, h);
+  const uv = geo.attributes.uv as THREE.BufferAttribute;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, (x + uv.getX(i) * pw) / W, 1 - (y + (1 - uv.getY(i)) * ph) / H);
+  return geo;
+}
+
+// The bench supply's readout: four red digits, dim.
+function readoutTexture() {
+  return canvasTexture(128, 48, (g) => {
+    g.fillStyle = '#140707';
+    g.fillRect(0, 0, 128, 48);
+    g.fillStyle = '#ff4a2e';
+    g.font = 'bold 34px ui-monospace, Menlo, monospace';
+    g.textBaseline = 'middle';
+    g.fillText('6.00', 14, 26);
   });
 }
 
@@ -1359,9 +1508,36 @@ function buildRoom(random: () => number, mats: Mats) {
   add(boxGeo(0.12, 0.1, 0.2), mats.steel, B.x + 0.7, B.y + 0.05, B.z + 0.18);
   add(boxGeo(0.2, 0.08, 0.06), mats.steel, B.x + 0.7, B.y + 0.14, B.z + 0.2);
   add(boxGeo(0.46, 0.34, 0.26), mats.darkSteel, B.x - 0.62, B.y + 0.17, B.z - 0.12);
-  for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) add(boxGeo(0.12, 0.055, 0.01), mats.steel, B.x - 0.77 + c * 0.15, B.y + 0.06 + r * 0.075, B.z + 0.012);
+  // The drawers, labelled in marker on tape, top row first; the last one never was.
+  const labels = new THREE.MeshLambertMaterial({ map: labelTexture() });
+  for (let r = 0; r < 4; r++)
+    for (let c = 0; c < 3; c++) {
+      const [x, y] = [B.x - 0.77 + c * 0.15, B.y + 0.06 + r * 0.075];
+      add(boxGeo(0.12, 0.055, 0.01), mats.steel, x, y, B.z + 0.012);
+      const i = (3 - r) * 3 + c;
+      if (i < LABELS.length) add(sheetGeo(0.07, 0.022, [256, 64], [(i % 4) * 64, Math.floor(i / 4) * 20, 64, 20]), labels, x + ((i * 5) % 3 - 1) * 0.006, y + 0.008, B.z + 0.0175).rotation.z = ((i * 7) % 5 - 2) * 0.018;
+    }
   add(new THREE.SphereGeometry(0.15, 20, 14), new THREE.MeshStandardMaterial({ color: 0x86837d, roughness: 0.9 }), B.x + 0.1, B.y + 0.15, B.z + 0.05);
-  add(new THREE.TorusGeometry(0.1, 0.018, 8, 24), mats.rubber, B.x + 0.42, B.y + 0.018, B.z - 0.08).rotation.x = Math.PI / 2;
+  add(new THREE.TorusGeometry(0.1, 0.018, 8, 24), mats.rubber, B.x - 0.25, B.y + 0.018, B.z + 0.17).rotation.x = Math.PI / 2;
+  // A bench supply behind the head, its leads across the bench and clipped on under the head's ear: the
+  // head under test before it goes on.
+  add(rbox(0.24, 0.12, 0.22, 0.008), mats.darkSteel, B.x + 0.45, B.y + 0.06, B.z - 0.16);
+  add(new THREE.PlaneGeometry(0.075, 0.028), new THREE.MeshBasicMaterial({ map: readoutTexture(), color: 0x8c8c8c, toneMapped: false }), B.x + 0.38, B.y + 0.08, B.z - 0.049);
+  for (const dx of [0.47, 0.53]) add(new THREE.CylinderGeometry(0.011, 0.011, 0.016, 12), mats.steel, B.x + dx, B.y + 0.08, B.z - 0.042).rotation.x = Math.PI / 2;
+  // Each lead from its post (dx along the bench) through `way`, across the bench to its clip.
+  const lead = (mat: THREE.Material, dx: number, way: [number, number, number][]) => {
+    const pts = [[dx, 0.03, -0.03], ...way].map(([x, y, z]) => new THREE.Vector3(B.x + x, B.y + y, B.z + z));
+    add(new THREE.CylinderGeometry(0.007, 0.007, 0.02, 10), mat, pts[0].x, pts[0].y, pts[0].z).rotation.x = Math.PI / 2;
+    add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.004, 6), mat, 0, 0, 0);
+    const [before, end] = pts.slice(-2);
+    strut(add, mat, end.clone().lerp(before, 0.4), end, 0.006);
+  };
+  lead(mats.toolRed, 0.47, [[0.46, 0.012, 0.03], [0.38, 0.006, 0.1], [0.3, 0.03, 0.1], [0.244, 0.121, 0.079]]);
+  lead(mats.rubber, 0.53, [[0.53, 0.01, 0.06], [0.42, 0.006, 0.16], [0.3, 0.02, 0.17], [0.2125, 0.0975, 0.134]]);
+  // A wiring sketch taped to the wall at the pegboard's end, a little askew; the tape at its foot let go.
+  add(new THREE.PlaneGeometry(0.225, 0.28), new THREE.MeshLambertMaterial({ map: sketchTexture(), color: 0xc2beb4 }), 1.44, 1.74, WALL_Z + 0.012).rotation.z = 0.045;
+  const tapeMat = new THREE.MeshLambertMaterial({ color: 0xc8b88e });
+  for (const [x, y, a] of [[1.335, 1.875, 0.6], [1.555, 1.88, -0.5], [1.34, 1.605, -0.55]]) add(new THREE.PlaneGeometry(0.05, 0.018), tapeMat, x, y, WALL_Z + 0.014).rotation.z = a;
 
   // The pendant hung low over the service stand, its cord up into the dark: its light a warm cone down
   // onto the unfinished robot and the bench's end behind it, the wall above left dark.
@@ -1442,6 +1618,10 @@ function buildProps(mats: Mats) {
   cadd(new THREE.TorusGeometry(0.1, 0.02, 8, 24), mats.rubber, 0.05, 0.53, 0).rotation.x = Math.PI / 2;
   const arm = cadd(new THREE.CapsuleGeometry(0.035, 0.24, 4, 12), new THREE.MeshStandardMaterial({ color: 0xdcd5c6, roughness: 0.58 }), -0.15, 0.55, 0.02);
   arm.rotation.z = Math.PI / 2;
+  // Its tag, on a string over the shelf's lip.
+  cadd(new THREE.PlaneGeometry(0.05, 0.05), new THREE.MeshLambertMaterial({ map: tagTexture() }), -0.24, 0.51, 0.2395).rotation.z = 0.14;
+  const string = new THREE.CatmullRomCurve3([new THREE.Vector3(-0.3, 0.55, 0.03), new THREE.Vector3(-0.27, 0.565, 0.24), new THREE.Vector3(-0.243, 0.53, 0.2405)]);
+  cadd(new THREE.TubeGeometry(string, 12, 0.0012, 4), mats.fabric, 0, 0, 0);
 
   // The work light on its tripod, left of the floor: the room's key.
   const tripod = new THREE.Group();
@@ -1510,6 +1690,16 @@ function buildWorkstation(mats: Mats, screenMap: THREE.Texture) {
   // A mug and a notebook, right of the keyboard.
   add(new THREE.CylinderGeometry(0.04, 0.036, 0.1, 16), new THREE.MeshStandardMaterial({ color: 0xc9c2b4, roughness: 0.4 }), 0.52, 0.79, -0.06);
   add(boxGeo(0.21, 0.014, 0.28), new THREE.MeshStandardMaterial({ color: 0x3d4a3f, roughness: 0.85 }), 0.46, 0.747, 0.16).rotation.y = -0.2;
+  // Under the lamp, the useless machine (src/content/projects/useless-machine.md): a small hinged box,
+  // its switch on the lid, turned a little toward the chair.
+  const machine = new THREE.Group();
+  machine.position.set(-0.45, 0.74, -0.02);
+  machine.rotation.y = 0.5;
+  group.add(machine);
+  add(rbox(0.15, 0.075, 0.1, 0.004), mats.wood, 0, 0.0375, 0, machine);
+  add(boxGeo(0.152, 0.003, 0.102), mats.darkWood, 0, 0.058, 0, machine);
+  add(boxGeo(0.022, 0.004, 0.014), mats.steel, 0.03, 0.077, 0, machine);
+  add(new THREE.CylinderGeometry(0.0022, 0.003, 0.024, 8), mats.steel, 0.034, 0.088, 0, machine).rotation.z = -0.4;
 
   // Desk lamp at the left end, set back.
   const base = new THREE.Vector3(-0.58, 0.762, -0.2);
