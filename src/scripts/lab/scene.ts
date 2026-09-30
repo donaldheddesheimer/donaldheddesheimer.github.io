@@ -2592,6 +2592,12 @@ const SCREEN_Z = -0.1475;
 // brightening under the pointer are what mark it out.
 const SCREEN_LIT = 1.08;
 const GLOW = 0.5;
+// In the room the screen shows the screensaver, and glows its night blue: on the keys and the desk, and
+// in a soft ring round the screen, on the bezel and the air past it (HALO metres out). As the screensaver
+// gives way to the terminal, the light turns the page's warm white and the ring goes.
+const SAVER_GLOW = { light: 0x8a95ff, lit: 1.7, halo: 0x1c2270 };
+const PAGE_GLOW = 0xf2e7d6;
+const HALO = 0.24;
 /** Where the chair stands, in the desk's frame (metres; x to the desk's right), and its turn. */
 const CHAIR = { x: -1.0, z: 0.25, yaw: 1.9 };
 
@@ -2661,17 +2667,41 @@ function buildWorkstation(mats: Mats, screenMap: THREE.Texture) {
   lift.position.set(0, SCREEN.y, SCREEN_Z + 0.0015);
   lift.visible = false;
   monitor.add(lift);
+  // The ring of glow: a blur round the screen's edge, clear over the screen itself, added over whatever
+  // is behind. In the desk's group, not the monitor's, so the pointer doesn't pick it.
+  const halo = new THREE.Mesh(
+    new THREE.PlaneGeometry(SCREEN.w + HALO * 2, SCREEN.h + HALO * 2),
+    new THREE.MeshBasicMaterial({ map: haloTexture(), color: SAVER_GLOW.halo, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }),
+  );
+  halo.position.set(0, SCREEN.y, SCREEN_Z + 0.001);
+  group.add(halo);
 
   const lamp = new THREE.SpotLight(0xffc68c, 3.2, 2.6, 0.95, 0.7, 2);
   lamp.position.set(head.x, head.y - 0.09, head.z);
   lamp.target.position.set(-0.1, 0.74, 0.12);
   group.add(lamp, lamp.target);
   // The screen's light on the keys and the desk's front edge: warm neutral, like the page on it.
-  const glow = new THREE.PointLight(0xf2e7d6, GLOW, 1.6, 2);
+  const glow = new THREE.PointLight(SAVER_GLOW.light, GLOW * SAVER_GLOW.lit, 1.6, 2);
   glow.position.set(0, SCREEN.y - 0.06, SCREEN_Z + 0.28);
   group.add(glow);
 
-  return { group, monitor, screen, screenMat, glow, lift };
+  return { group, monitor, screen, screenMat, glow, lift, halo };
+}
+
+// The screen's glow: white fading out from the screen's edge over HALO (1 px = 2.5 mm), clear inside it.
+function haloTexture() {
+  const px = 400;
+  const w = Math.round((SCREEN.w + HALO * 2) * px);
+  const h = Math.round((SCREEN.h + HALO * 2) * px);
+  const [sw, sh] = [SCREEN.w * px, SCREEN.h * px];
+  return canvasTexture(w, h, (g) => {
+    g.shadowColor = '#fff';
+    g.shadowBlur = HALO * px * 0.9;
+    g.fillStyle = '#fff';
+    g.fillRect((w - sw) / 2, (h - sh) / 2, sw, sh);
+    g.shadowBlur = 0;
+    g.clearRect((w - sw) / 2, (h - sh) / 2, sw, sh);
+  });
 }
 
 export type Quad = [x: number, y: number][];
@@ -3148,6 +3178,18 @@ export function mountLab(
   // while reading (the terminal covers it).
   let saverStep = 0;
   let saverGone = 0;
+  // The screen's light and its ring, for the screensaver as far as it's drawn, and brighter by `glowK`
+  // (light(): the pointer over the monitor, the idle hint).
+  let glowK = 0;
+  const saverLight = new THREE.Color(SAVER_GLOW.light);
+  const pageLight = new THREE.Color(PAGE_GLOW);
+  function glowNow() {
+    const k = 1 + 1.2 * glowK;
+    desk.glow.intensity = GLOW * lerp(SAVER_GLOW.lit, 1, saverGone) * k;
+    desk.glow.color.lerpColors(saverLight, pageLight, saverGone);
+    desk.halo.material.color.setHex(SAVER_GLOW.halo).multiplyScalar((1 - saverGone) * (1 + 0.6 * glowK));
+    desk.halo.visible = saverGone < 1;
+  }
   function drawSaver(p: number) {
     // `mode` is where the flight is going: in, the screensaver gives way from a fifth of the way to a
     // little past halfway (under 0.7 s, before the terminal is up); out, it comes back once the terminal
@@ -3157,7 +3199,10 @@ export function mountLab(
     const step = intent ? Math.floor(t * SAVER_FPS) : 0;
     if (step === saverStep && gone === saverGone) return;
     saverStep = step;
-    saverGone = gone;
+    if (gone !== saverGone) {
+      saverGone = gone;
+      glowNow();
+    }
     saver.draw(step, gone);
     screenMap.needsUpdate = true;
   }
@@ -3332,7 +3377,8 @@ export function mountLab(
     desk.screenMat.color.setScalar(SCREEN_LIT * (1 + 0.14 * k));
     desk.lift.material.opacity = 0.05 * k;
     desk.lift.visible = k > 0.002;
-    desk.glow.intensity = GLOW * (1 + 1.2 * k);
+    glowK = k;
+    glowNow();
   }
   light();
 
