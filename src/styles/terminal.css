@@ -1,15 +1,17 @@
 /* The lab computer's terminal (src/components/Terminal.astro) and its transcript, /computer/ (the same
-   outputs, standing alone). Charcoal, warm off-white type in the site's mono, and one accent, amber,
-   for the prompt and for what can be run. Sizes follow the screen: the terminal is the container
-   (the lab's .pc-screen), so a larger monitor reads larger; on a touch screen the type never drops
-   under 16px (the prompt's field would zoom the page on focus). */
+   views, standing alone, one after another). Charcoal, warm off-white type in the site's mono, and one
+   accent, amber, for the prompt and for what can be run; a view's title alone is in a pixel face. Sizes
+   follow the screen: the terminal is the container (the lab's .pc-screen), so a larger monitor reads
+   larger; on a touch screen the type never drops under 16px (the prompt's field would zoom the page on
+   focus). */
 .term,
 .t-static {
   --t-bg: #171513;
-  --t-fg: #ebe5da;
+  --t-fg: #eee5d5;
   --t-dim: #a69d90;
   --t-accent: #e2a95c;
   --t-rule: #2e2a26;
+  --t-line: #554c42;
   --t-fs: clamp(0.8125rem, 1.4cqi, 1.0625rem);
   --t-pad-y: max(1rem, 2.6cqi);
   --t-pad-x: max(1rem, 3cqi);
@@ -35,7 +37,8 @@
   color: var(--t-fg);
 }
 
-/* The live terminal: the screen's whole area, scrolling inside itself and never the page. */
+/* The live terminal: the screen's whole area, scrolling inside itself and never the page. One view
+   over the prompt, which keeps to the screen's foot however short the view. */
 .term {
   position: absolute;
   inset: 0;
@@ -48,21 +51,28 @@
 }
 .term-inner {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
   padding: var(--t-pad-y) var(--t-pad-x) 0;
+}
+.term-views {
+  flex: 1 0 auto;
 }
 /* Whatever the focus reaches (a link, a button, a figure's line, a code block, a video) scrolls clear of
    the prompt and its fade, not under them. (A margin on these, not padding on .term: the prompt's own
-   input, being scrolled to as it's typed in, would otherwise pull the transcript away from where it's
+   input, being scrolled to as it's typed in, would otherwise pull the view away from where it's
    being read.) */
-.term-log :is(a, button, summary, pre, video) {
+.term-views :is(a, button, summary, pre, video) {
   scroll-margin-bottom: calc(var(--t-prompt, 4.5em) + 1.25em);
 }
+.term-views,
 .term-log,
 .term-prompt {
   max-width: 92ch;
 }
 
-/* The history: the startup's lines, then each command as typed (its heading), and what it printed. */
+/* The transcript (/computer/): the startup's lines, then each command as typed, and what it shows. */
 .term-entry {
   margin-top: var(--t-gap);
 }
@@ -83,10 +93,56 @@
 .term-echo .term-ps1 {
   margin-right: 1ch;
 }
+/* On the prompt, a line of its own; broken only where even that can't hold it (a phone, its text
+   enlarged: ~/contact at 200% is wider than the screen). */
+.term-prompt .term-ps1 {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* A view's opening: where it is (as the prompt says it), then its title. */
+.t-crumb {
+  color: var(--t-dim);
+  font-size: 0.8125em;
+}
+.t-title {
+  font-family: var(--font-pixel);
+  font-weight: 600;
+  font-size: 2.125em;
+  line-height: 1.12;
+}
+.t-head > * + * {
+  margin-top: 0.3em;
+}
+.t-head > .t-title {
+  margin-top: 0.2em;
+}
+.t-head > .t-title + * {
+  margin-top: 0.55em;
+}
+.t-sub {
+  max-width: 70ch;
+  color: var(--t-dim);
+  font-size: 0.9375em;
+}
+
+/* What's read: a looser line, at most 70 columns. */
+:is(.t-prose, .t-purpose, .t-points),
+.t-md :is(p, li, blockquote) {
+  max-width: 70ch;
+  line-height: 1.65;
+}
 
 /* Output: lines of text, a half line between blocks, a blank line before each part. */
 .t-out {
   margin-top: 0.35em;
+}
+.term-views > .t-out {
+  margin-top: 0;
+}
+.t-out > :is(.t-head, .t-intro) + * {
+  margin-top: var(--t-gap);
 }
 .t-out > * + *,
 .t-list > li > * + * {
@@ -98,7 +154,8 @@
 .t-out .t-section {
   margin-top: 1.6em;
 }
-.t-out :is(h3, h4, h5, h6) {
+/* Headings in a view are set by their class; this reset (zero specificity) sits under any class rule. */
+:where(.t-out) :is(h3, h4, h5, h6) {
   font: inherit;
 }
 .t-strong {
@@ -110,10 +167,9 @@
 .t-kv dt {
   color: var(--t-dim);
 }
-.t-prose {
-  max-width: 76ch;
-}
 .t-section {
+  color: var(--t-dim);
+  font-size: 0.875em;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -125,32 +181,117 @@
 }
 .t-help li {
   display: grid;
-  grid-template-columns: 9ch minmax(0, 1fr);
+  grid-template-columns: 10ch minmax(0, 1fr);
   align-items: baseline;
+}
+.t-help .t-cmd {
+  justify-self: start;
+}
+.t-help li + li {
+  margin-top: 0.2em;
 }
 .t-list > li + li {
   margin-top: 1.4em;
 }
-/* A project: its number, then its title with when and where across from it (as the résumé's rows), what
-   it does and its commands. */
+/* `work`'s index: a row to a project, between hairlines. Its number; its name, which opens it; and
+   across from the name (under it, where the screen is narrow), what it is, over a quieter line of what
+   it's built with and its one result. The featured first; the rest behind a line that shows them. */
+.t-work {
+  max-width: 88ch;
+  padding: 0;
+  list-style: none;
+}
+.t-out > .t-work,
+.t-more > .t-work {
+  margin-top: var(--t-gap);
+}
 .t-work > li {
   display: grid;
-  grid-template-columns: 4ch minmax(0, 1fr);
+  grid-template-columns: 5ch minmax(0, 26ch) minmax(0, 1fr);
+  column-gap: 2ch;
+  align-items: baseline;
+  padding: 1em 0;
+  border-top: 1px solid var(--t-rule);
 }
-.t-work > li > * {
-  grid-column: 2;
+.t-work > li:last-child {
+  border-bottom: 1px solid var(--t-rule);
 }
-.t-work > li > .t-num {
-  grid-row: 1;
-  grid-column: 1;
+.t-work .t-num {
+  grid-row: 1 / span 2;
   color: var(--t-dim);
+  font-size: 0.875em;
+  white-space: nowrap;
 }
-.t-work > li > .t-num + .t-row,
-.t-project > h3 + .t-dim {
-  margin-top: 0;
+/* (The row being pointed at, or its name focused: a marker by its number, as a shell's menu has it.) */
+.t-work .t-num::before {
+  content: '> ';
+  content: '> ' / '';
+  visibility: hidden;
+  color: var(--t-accent);
 }
-.t-work > li > * + :is(.t-prose, .t-links) {
-  margin-top: 0.3em;
+.t-work > li:has(.t-open:is(:hover, :focus-visible)) .t-num {
+  color: var(--t-accent);
+}
+.t-work > li:has(.t-open:is(:hover, :focus-visible)) .t-num::before {
+  visibility: visible;
+}
+.t-work-name {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  font-size: 1.1875em;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.t-work-line,
+.t-work-meta {
+  grid-column: 3;
+}
+.t-work-meta {
+  margin-top: 0.25em;
+  color: var(--t-dim);
+  font-size: 0.875em;
+}
+.t-result {
+  color: var(--t-fg);
+}
+@container (width < 46rem) {
+  .t-work > li {
+    grid-template-columns: 5ch minmax(0, 1fr);
+  }
+  .t-work-name,
+  .t-work-line,
+  .t-work-meta {
+    grid-row: auto;
+    grid-column: 2;
+  }
+  .t-work .t-num {
+    grid-row: 1;
+  }
+  .t-work-line {
+    margin-top: 0.2em;
+  }
+}
+.t-more > summary {
+  display: block;
+  width: fit-content;
+  margin-top: 1em;
+  color: var(--t-dim);
+  text-decoration: underline;
+  text-decoration-color: rgb(166 157 144 / 0.45);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  cursor: pointer;
+}
+.t-more > summary::-webkit-details-marker {
+  display: none;
+}
+.t-more > summary:hover {
+  color: var(--t-accent);
+  text-decoration-color: var(--t-accent);
+}
+.t-more:not([open]) .t-more-hide,
+.t-more[open] .t-more-show {
+  display: none;
 }
 
 /* A project's write-up (`work <id>`): its Markdown, in the terminal's type. Sections under their labels,
@@ -164,8 +305,8 @@
 .t-md > :first-child {
   margin-top: 0;
 }
-.t-md :is(p, li, .t-fig > summary) {
-  max-width: 76ch;
+.t-md .t-fig > summary {
+  max-width: 70ch;
 }
 .t-md strong {
   font-weight: 600;
@@ -224,6 +365,174 @@
   font-weight: 400;
 }
 
+/* A project's opening (`work <id>`): what it does, a step up from the prose; what it's built with and
+   when, quieter; what it showed, in the accent; then my part and the hard part, each under its label, and
+   where to find it. Its detail follows, folded (below). */
+.t-purpose {
+  max-width: 64ch;
+  font-size: 1.125em;
+}
+.t-project > .t-head .t-sub {
+  font-size: 0.875em;
+}
+.t-outcome {
+  max-width: 76ch;
+  color: var(--t-accent);
+}
+.t-out > * + :is(.t-part, .t-actions, .t-detail),
+.t-out > .t-detail + * {
+  margin-top: var(--t-gap);
+}
+.t-part > .t-label {
+  font-weight: 600;
+}
+.t-part > * + * {
+  margin-top: 0.2em;
+}
+.t-detail > * + * {
+  margin-top: 0.6em;
+}
+
+/* `about`: the name beside a small pixel robot, what I do under it, then a few lines about me and where
+   to go next. `resume`: the PDF first, then each role's line, what I did folded under it. */
+.t-intro {
+  display: flex;
+  align-items: center;
+  gap: 1em 3ch;
+}
+.t-bot {
+  flex: none;
+  width: 8em;
+  height: auto;
+}
+/* Alive, in the lab's terminal (PixelBot.astro): a blink every few seconds, the antenna light pulsing,
+   both in whole steps, as pixels would. Its eyes drop a pixel to the prompt while something's typed
+   there; a command that ran gets a nod (the head bobbing a pixel, twice), a mistake a squint
+   (terminal.ts). Reduced motion, or Motion off: still, eyes open (the animations go, below, and the
+   script leaves the moods be). The transcript's robot is still. */
+.t-bot-shut,
+.t-bot-squint {
+  opacity: 0;
+}
+.term .t-bot-eyes {
+  animation: t-bot-open 5.2s step-end infinite;
+}
+.term .t-bot-shut {
+  animation: t-bot-shut 5.2s step-end infinite;
+}
+.term .t-bot-light {
+  animation: t-bot-pulse 2.6s steps(1, end) infinite;
+}
+.term[data-bot-look] :is(.t-bot-eyes, .t-bot-shut, .t-bot-squint) {
+  transform: translateY(1px);
+}
+.term[data-bot='squint'] :is(.t-bot-eyes, .t-bot-shut) {
+  visibility: hidden;
+}
+.term[data-bot='squint'] .t-bot-squint {
+  opacity: 1;
+}
+.term[data-bot='nod'] .t-bot-head {
+  animation: t-bot-nod 480ms steps(1, end);
+}
+@keyframes t-bot-open {
+  95% {
+    opacity: 0;
+  }
+  98% {
+    opacity: 1;
+  }
+}
+@keyframes t-bot-shut {
+  95% {
+    opacity: 1;
+  }
+  98% {
+    opacity: 0;
+  }
+}
+@keyframes t-bot-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+@keyframes t-bot-nod {
+  0%,
+  50% {
+    transform: translateY(1px);
+  }
+  25%,
+  75% {
+    transform: none;
+  }
+}
+/* The startup's welcome (TermHello.astro): `about`'s opening, between the startup's two lines. */
+.term-hello {
+  margin-block: var(--t-gap);
+}
+.t-role {
+  color: var(--t-fg);
+  font-size: 1.125em;
+}
+.t-next {
+  gap: 0.25em 3ch;
+}
+.t-cv .t-sec {
+  margin-top: 0.35em;
+}
+.t-cv.t-list > li + li {
+  margin-top: 1.1em;
+}
+@container (width < 30rem) {
+  .t-bot {
+    width: 5em;
+  }
+}
+
+/* A section of a project's write-up (or its numbers), folded away behind its heading: opened, the
+   section, set in under it. */
+.t-sec > summary {
+  display: block;
+  width: fit-content;
+  cursor: pointer;
+}
+.t-sec > summary::-webkit-details-marker {
+  display: none;
+}
+.t-sec > summary::before {
+  content: '+ ';
+  content: '+ ' / '';
+  color: var(--t-accent);
+}
+.t-sec[open] > summary::before {
+  content: '- ';
+  content: '- ' / '';
+}
+.t-out .t-sec > summary > .t-section {
+  display: inline;
+  margin: 0;
+  color: var(--t-fg);
+  font-size: 1.125em;
+  letter-spacing: 0;
+  text-transform: none;
+}
+:is(.t-md, .t-detail) > .t-sec + .t-sec {
+  margin-top: 0.8em;
+}
+.t-sec > summary:hover > :is(.t-section, .t-dim) {
+  color: var(--t-accent);
+}
+.t-sec-body {
+  margin-top: 0.75em;
+  padding-left: 2ch;
+}
+.t-sec-body > * + * {
+  margin-top: 0.75em;
+}
+.t-sec[open] + * {
+  margin-top: var(--t-gap);
+}
+
 /* A figure, folded away behind the line that says what it shows: opened, its picture or video (or a
    trace, scrolling sideways). */
 .t-fig > summary {
@@ -274,7 +583,6 @@
   max-width: 80ch;
 }
 .t-points {
-  max-width: 80ch;
   padding-left: 2ch;
   list-style-type: '- ';
 }
@@ -295,13 +603,6 @@
 }
 .t-kv-wide > div {
   grid-template-columns: 24ch minmax(0, 1fr);
-}
-/* A project's opening (`work <id>`): a line of prose to each label, kept to a reading measure. */
-.t-brief {
-  gap: 0.5em;
-}
-.t-brief dd {
-  max-width: 76ch;
 }
 @container (width < 34rem) {
   .t-kv-wide > div {
@@ -339,7 +640,8 @@
 }
 @media (pointer: coarse) {
   .term a,
-  .t-static a {
+  .t-static a,
+  .t-more > summary {
     padding-block: 0.35em;
   }
   .t-links {
@@ -353,6 +655,22 @@
 .t-static a [aria-hidden] {
   margin-left: 0.15em;
   text-decoration: none;
+}
+/* An action (the résumé's PDF, a project's source and demo): the accent, like a command. */
+.term a.t-action,
+.t-static a.t-action {
+  color: var(--t-accent);
+  text-decoration-color: rgb(226 169 92 / 0.45);
+}
+/* A project's name in `work`'s index: its text, quiet until it's pointed at or focused. */
+.term a.t-open,
+.t-static a.t-open {
+  text-decoration-color: transparent;
+}
+.term a.t-open:is(:hover, :focus-visible),
+.t-static a.t-open:is(:hover, :focus-visible) {
+  color: var(--t-accent);
+  text-decoration-color: var(--t-accent);
 }
 .t-cmd {
   display: inline-block;
@@ -392,10 +710,11 @@
   outline: none;
 }
 
-/* The prompt: after the history, and held at the screen's foot when the history runs past it, with
-   the text above fading under it. Its field is a real input, see-through, with the block cursor drawn
-   over it where the caret is (terminal.ts): solid and blinking while it has the keyboard, an outline
-   while it hasn't. A line longer than the field scrolls inside it, with room at its end for the cursor. */
+/* The prompt: after the view, and held at the screen's foot when the view runs past it, under a dashed
+   line, the text above fading out just short of the line. Its field is a real input, see-through, with
+   the block cursor drawn over it where the caret is (terminal.ts): solid and blinking while it has the
+   keyboard, an outline while it hasn't. A line longer than the field scrolls inside it, with room at
+   its end for the cursor. */
 .term-prompt {
   position: sticky;
   bottom: 0;
@@ -405,7 +724,9 @@
   align-items: center;
   gap: 0 1ch;
   margin-top: var(--t-gap);
+  padding-top: 0.6em;
   padding-bottom: var(--t-pad-y);
+  border-top: 1px dashed var(--t-line);
   background: var(--t-bg);
 }
 .term-prompt::before {
@@ -413,10 +734,29 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 100%;
+  bottom: calc(100% + 1px);
   height: 1.25em;
   background: linear-gradient(to top, var(--t-bg), rgb(23 21 19 / 0));
   pointer-events: none;
+}
+/* A mistake (a command there isn't), or a shell's habit answered: a line over the prompt, until the next
+   command (terminal.ts). */
+/* (The whole line its own, however short what's said: the prompt's name never rides up beside it.) */
+.term-note {
+  flex: 1 0 100%;
+  margin: 0 0 0.35em;
+}
+.term-note > * {
+  max-width: 76ch;
+}
+.term-note[hidden] {
+  display: none;
+}
+.term-note > * + * {
+  margin-top: 0.2em;
+}
+.term-said {
+  white-space: pre-wrap;
 }
 /* What Tab found, several of them: a line over the prompt, dim, until the next key (terminal.ts). */
 .term-matches {
@@ -488,9 +828,50 @@
   visibility: hidden;
   white-space: pre;
 }
+/* The status line, under the prompt, as a terminal multiplexer's: the robots, and the time in Atlanta
+   (terminal.ts), dim, on a band of its own. Decoration: hidden from screen readers. */
+.term-bar {
+  flex: 1 0 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 2ch;
+  margin-top: 0.6em;
+  padding: 0.1em 1ch;
+  background: var(--t-rule);
+  color: var(--t-dim);
+  font-size: 0.8125em;
+}
+
+/* The screen's glass, over the terminal: a faint glow on the type, the screen darkening toward its
+   edges, and scanlines too faint to read through. Nothing moves; where more contrast is asked for, or
+   the system's colours, it all goes. */
+.term {
+  text-shadow: 0 0 0.45em rgb(238 229 213 / 0.14);
+}
+.term :is(.term-ps1, .t-cmd) {
+  text-shadow: 0 0 0.45em rgb(226 169 92 / 0.24);
+}
+.term-glass {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0) 0 2px, rgb(0 0 0 / 0.08) 2px 3px);
+  box-shadow: inset 0 0 5em rgb(0 0 0 / 0.42);
+}
+@media (prefers-contrast: more), (forced-colors: active) {
+  .term-glass {
+    display: none;
+  }
+  .term,
+  .term :is(.term-ps1, .t-cmd) {
+    text-shadow: none;
+  }
+}
 
 /* The startup, once a session (terminal.ts): the first line typed out, fast, behind a cursor; the
-   second line and the prompt after it. About a second, and any key or tap ends it. Before it plays
+   welcome, the second line and the prompt after it. About a second, and any key or tap ends it. Before it plays
    (in flight), the screen shows only that cursor, as the monitor did. */
 /* (Typed out on one line; once typed, it wraps like the rest where the screen is narrow or the type large.) */
 .term-boot-1 {
@@ -516,7 +897,7 @@
 .term:is([data-boot='pending'], [data-boot='play']) .term-boot-cursor {
   display: inline-block;
 }
-.term[data-boot='pending'] :is(.term-boot-2, .term-prompt) {
+.term[data-boot='pending'] :is(.term-hello, .term-boot-2, .term-prompt) {
   opacity: 0;
 }
 .term[data-boot='play'] .term-type {
@@ -525,24 +906,27 @@
 .term[data-boot='play'] .term-boot-cursor {
   animation: term-gone 1ms linear calc(var(--n) * 18ms + 110ms) both;
 }
+.term[data-boot='play'] .term-hello {
+  animation: term-in 240ms var(--ease) 450ms both;
+}
 .term[data-boot='play'] .term-boot-2 {
-  animation: term-in 200ms var(--ease) 500ms both;
+  animation: term-in 200ms var(--ease) 700ms both;
 }
 .term[data-boot='play'] .term-prompt {
-  animation: term-in 180ms var(--ease) 700ms both;
+  animation: term-in 180ms var(--ease) 880ms both;
 }
 
-/* A command's output comes in quickly; help's lines one after another. Only ever the newest: the
-   next command, or leaving, settles it (terminal.ts). */
-.term-entry.is-new > .t-out {
-  animation: term-in 200ms var(--ease) both;
+/* A view asked for comes in quickly; help's lines one after another. Only ever the newest: the next
+   view, or leaving, settles it (terminal.ts). */
+.term-views > .is-new {
+  animation: term-in 160ms var(--ease) both;
 }
-.term-entry.is-new > .t-out.t-stagger {
+.term-views > .is-new.t-stagger {
   animation: none;
 }
-.term-entry.is-new .t-stagger li {
+.term-views > .is-new.t-stagger li {
   animation: term-in 160ms var(--ease) both;
-  animation-delay: calc(var(--i) * 55ms + 30ms);
+  animation-delay: calc(var(--i) * 45ms + 20ms);
 }
 
 @keyframes term-type {

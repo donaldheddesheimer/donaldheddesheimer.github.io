@@ -1,11 +1,14 @@
 ---
 // The terminal's own page: what the lab computer's terminal says, as a transcript, every command run in
-// turn (help, about, work, resume, contact), each where its anchor is (/computer/#work). It's where the
+// turn (help, about, work, resume, contact), each view under the command that shows it, where its anchor
+// is (/computer/#work). (The lab's terminal shows one view at a time; standing alone, one page holds
+// them all, with nothing to type.) It's where the
 // monitor's link goes without JavaScript, and where the lab goes if its script fails (?static, and until
 // the lab next runs, in this session). With JavaScript, it opens the lab at the terminal instead,
 // running the command its anchor names. Kept out of search results, as the computer's pages are.
 import Base from '../../layouts/Base.astro';
 import TermCmd from '../../components/TermCmd.astro';
+import TermHello from '../../components/TermHello.astro';
 import TermOutput from '../../components/TermOutput.astro';
 import { profile } from '../../data/site';
 import { BOOT, PS1 } from '../../lib/terminal';
@@ -34,14 +37,15 @@ const entries = ['help', ...COMMANDS] as const;
     <div class="term-log">
       <div class="term-boot">
         <p>{BOOT.first}</p>
+        <TermHello live={false} />
         <p>
           {BOOT.second[0]}<TermCmd name="help" live={false} />{BOOT.second[1]}
         </p>
       </div>
       {
         entries.map((cmd) => (
-          <section class="term-entry" id={cmd} aria-labelledby={`${cmd}-cmd`}>
-            <h2 class="term-echo" id={`${cmd}-cmd`}><span class="term-ps1" aria-hidden="true">{PS1}</span>{cmd}</h2>
+          <section class="term-entry" id={cmd}>
+            <p class="term-echo" aria-hidden="true"><span class="term-ps1">{PS1}</span>{cmd}</p>
             <TermOutput cmd={cmd} live={false} />
           </section>
         ))

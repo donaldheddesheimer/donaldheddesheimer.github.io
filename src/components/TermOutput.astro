@@ -1,19 +1,25 @@
 ---
 // What one of the terminal's commands prints, as real HTML: `help`, the four it lists, and the answers
 // to a project that isn't there and to anything else. From src/data/site.ts and the projects, nothing
-// added. (A project's own, `work <id>`, is TermProject.astro.) The lab's terminal holds each in a
+// added. (A project's own, `work <id>`, is TermProject.astro.) Help names `clear` under its list, in
+// the lab's terminal (the transcript has nothing to clear). The lab's terminal holds each in a
 // <template> until it's run (Terminal.astro); the /computer/ transcript prints them all (`live` false:
 // commands are links to where they ran, and there's nothing to copy with).
 //
 // Plain text laid out as a terminal lays it out: a heading per part, key and value columns, "- " lists.
-// Under the entry's heading (the command, an h2), parts are h3 and entries h4.
+// Each view opens with where it is and its title, an h2 (TermHead.astro; `about`'s is my name, beside a
+// small pixel robot, PixelBot.astro); parts are h3 and entries h4. Detail a visitor may not want (what I
+// did in each role, my coursework) is folded under a line that opens it.
+// The answers to a mistake aren't views: the lab's terminal says them over its prompt (terminal.ts).
 import { getCollection } from 'astro:content';
 import TermCmd from './TermCmd.astro';
+import PixelBot from './PixelBot.astro';
+import TermHead from './TermHead.astro';
+import WorkRow from './WorkRow.astro';
 import { contact, education, experience, offDuty, orgs, profile, skills, socials } from '../data/site';
 import { fmtMonth } from '../lib/format';
-import { byWork, workMeta } from '../lib/folio';
-import { HELP, NOT_FOUND, NO_PROJECT } from '../lib/terminal';
-import { labHref } from '../scripts/lab/routes';
+import { byWork } from '../lib/folio';
+import { CLEAR, HELP, NOT_FOUND, NO_PROJECT } from '../lib/terminal';
 
 interface Props {
   cmd: 'help' | 'about' | 'work' | 'resume' | 'contact' | 'no-project' | 'not-found';
@@ -24,15 +30,17 @@ const { cmd, live = true } = Astro.props;
 const org = (id: string) => orgs.find((o) => o.id === id)!;
 const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const projects = (await getCollection('projects')).sort(byWork);
-// A project's command: the lab running it, or, in the transcript, its page.
-const projectHref = (id: string) => (live ? labHref(`work/${id}`) : `/computer/work/${id}/`);
+// `work` shows the featured first; the rest wait behind a line that shows them.
+const featured = projects.filter((p) => p.data.featured);
+const rest = projects.filter((p) => !p.data.featured);
 const file = `${profile.name.replace(/\s+/g, '-')}-Resume.pdf`;
 const current = experience.find((e) => !e.end);
 ---
 
 {
   cmd === 'help' && (
-    <div class="t-out t-stagger" data-announce={`Commands: ${HELP.map((h) => h.cmd).join(', ')}.`}>
+    <div class="t-out t-stagger" data-announce={`Commands: ${[...HELP.map((h) => h.cmd), CLEAR].join(', ')}.`}>
+      <TermHead view="help" title="Commands" />
       <ul class="t-help">
         {HELP.map((h, i) => (
           <li style={`--i:${i}`}>
@@ -41,19 +49,27 @@ const current = experience.find((e) => !e.end);
           </li>
         ))}
       </ul>
+      {live && (
+        <p class="t-hint">
+          And <TermCmd name={CLEAR} />, back to the start.
+        </p>
+      )}
     </div>
   )
 }
 
 {
   cmd === 'about' && (
-    <div class="t-out" data-announce="Printed: about me.">
-      <p>
-        <strong class="t-strong">{profile.name}</strong> <span class="t-dim">· {profile.headline}</span>
-      </p>
-      <p class="t-dim">
-        {profile.school} · {profile.location}
-      </p>
+    <div class="t-out t-about" data-announce="About me.">
+      <div class="t-intro">
+        <PixelBot />
+        <TermHead view="about" title={profile.name}>
+          <p class="t-role">{profile.headline}</p>
+          <p class="t-sub">
+            {profile.school} · {profile.location}
+          </p>
+        </TermHead>
+      </div>
       {profile.about.map((para) => (
         <p class="t-prose">{para}</p>
       ))}
@@ -71,8 +87,10 @@ const current = experience.find((e) => !e.end);
           <dd>{offDuty.map((h) => h.name).join(', ')}</dd>
         </div>
       </dl>
-      <p class="t-hint">
-        Run <TermCmd name="work" live={live} /> to see what I've built, or <TermCmd name="contact" live={live} /> to say hello.
+      <p class="t-links t-next">
+        <TermCmd name="work" live={live} />
+        <TermCmd name="resume" live={live} />
+        <TermCmd name="contact" live={live} />
       </p>
     </div>
   )
@@ -80,42 +98,30 @@ const current = experience.find((e) => !e.end);
 
 {
   cmd === 'work' && (
-    <div class="t-out" data-announce={`Printed: ${projects.length} projects.`}>
-      <p class="t-dim">
-        Projects in GPU software, robotics and simulation, and a few from before: {projects.length} in all, featured first. Run{' '}
-        <span class="t-strong">work &lt;id&gt;</span> to read one here.
-      </p>
-      <ol class="t-list t-work" role="list">
-        {projects.map((p, i) => (
-          <li>
-            <span class="t-num" aria-hidden="true">
-              {i + 1}.
-            </span>
-            <div class="t-row">
-              <h3 class="t-strong">{p.data.title}</h3>
-              <span class="t-dim">{workMeta(p.data)}</span>
-            </div>
-            <p class="t-prose">{p.data.brief?.does ?? p.data.summary}</p>
-            <p class="t-links">
-              <TermCmd name={`work ${p.id}`} live={live} href={projectHref(p.id)} />
-              {p.data.demo && (
-                <a href={p.data.demo} target="_blank" rel="noopener" aria-label={`demo: ${p.data.title} (opens in a new tab)`}>
-                  demo<span aria-hidden="true">↗</span>
-                </a>
-              )}
-              {p.data.repo ? (
-                <a href={p.data.repo} target="_blank" rel="noopener" aria-label={`source: ${p.data.title} (opens in a new tab)`}>
-                  source<span aria-hidden="true">↗</span>
-                </a>
-              ) : (
-                <span class="t-dim">{(p.data.repoNote ?? 'Private repository').toLowerCase()}</span>
-              )}
-            </p>
-          </li>
+    <div class="t-out" data-announce={`Selected work: ${featured.length} featured of ${projects.length} projects.`}>
+      <TermHead view="work" title="Selected work">
+        <p class="t-sub">GPU software, simulation and tools, and a few from before.</p>
+      </TermHead>
+      <ol class="t-work" role="list">
+        {featured.map((p, i) => (
+          <WorkRow project={p} n={i + 1} live={live} />
         ))}
       </ol>
+      {rest.length > 0 && (
+        <details class="t-more">
+          <summary>
+            <span class="t-more-show">Show all {projects.length} projects</span>
+            <span class="t-more-hide">Show featured only</span>
+          </summary>
+          <ol class="t-work" role="list">
+            {rest.map((p, i) => (
+              <WorkRow project={p} n={featured.length + i + 1} live={live} />
+            ))}
+          </ol>
+        </details>
+      )}
       <p class="t-hint">
-        Run <TermCmd name="resume" live={live} /> for the full story, or <TermCmd name="contact" live={live} /> to get in touch.
+        Or run <span class="t-strong">work &lt;id&gt;</span>; Tab completes the id.
       </p>
     </div>
   )
@@ -123,16 +129,17 @@ const current = experience.find((e) => !e.end);
 
 {
   cmd === 'resume' && (
-    <div class="t-out" data-announce="Printed: the résumé, with the PDF to download.">
-      <p class="t-links">
-        <a href={profile.resume} download={file}>
+    <div class="t-out t-resume" data-announce="Résumé, with the PDF to download.">
+      <TermHead view="resume" title="Résumé" />
+      <p class="t-links t-actions">
+        <a class="t-action" href={profile.resume} download={file}>
           <span aria-hidden="true">↓ </span>Download the PDF
         </a>
         <span class="t-dim">{file}</span>
       </p>
 
       <h3 class="t-section">Experience</h3>
-      <ul class="t-list">
+      <ul class="t-list t-cv">
         {experience.map((e) => (
           <li>
             <div class="t-row">
@@ -147,26 +154,38 @@ const current = experience.find((e) => !e.end);
               {e.unit && `${e.unit} · `}
               {e.location}
             </p>
-            <ul class="t-points">
-              {e.points.map((pt) => (
-                <li>{pt}</li>
-              ))}
-            </ul>
+            <details class="t-sec">
+              <summary>
+                <span class="t-dim">what I did</span>
+              </summary>
+              <ul class="t-points t-sec-body">
+                {e.points.map((pt) => (
+                  <li>{pt}</li>
+                ))}
+              </ul>
+            </details>
           </li>
         ))}
       </ul>
 
       <h3 class="t-section">Education</h3>
-      <div class="t-row">
-        <h4 class="t-strong">{education.school}</h4>
-        <span class="t-dim">
-          {fmtMonth(education.start)} – {fmtMonth(education.end)} (expected)
-        </span>
+      <div class="t-cv">
+        <div class="t-row">
+          <h4 class="t-strong">{education.school}</h4>
+          <span class="t-dim">
+            {fmtMonth(education.start)} – {fmtMonth(education.end)} (expected)
+          </span>
+        </div>
+        <p>
+          {education.degree} · {education.program} · {education.thread} · GPA {education.gpa}
+        </p>
+        <details class="t-sec">
+          <summary>
+            <span class="t-dim">coursework</span>
+          </summary>
+          <p class="t-prose t-sec-body">{education.coursework.join(', ')}</p>
+        </details>
       </div>
-      <p>
-        {education.degree} · {education.program} · {education.thread} · GPA {education.gpa}
-      </p>
-      <p class="t-dim">Coursework: {education.coursework.join(', ')}</p>
 
       <h3 class="t-section">Skills</h3>
       <dl class="t-kv t-kv-wide">
@@ -186,11 +205,13 @@ const current = experience.find((e) => !e.end);
 
 {
   cmd === 'contact' && (
-    <div class="t-out" data-announce="Printed: email, GitHub and LinkedIn.">
-      <p class="t-prose">
-        {contact.title} {contact.note}
-      </p>
-      <dl class="t-kv">
+    <div class="t-out" data-announce="Contact: email, GitHub and LinkedIn.">
+      <TermHead view="contact" title="Contact">
+        <p class="t-sub">
+          {contact.title} {contact.note}
+        </p>
+      </TermHead>
+      <dl class="t-kv t-contact">
         <div>
           <dt>email</dt>
           <dd>
@@ -242,8 +263,9 @@ const current = experience.find((e) => !e.end);
 
 {
   cmd === 'not-found' && (
-    <div class="t-out" data-announce={NOT_FOUND.join('help')}>
+    <div class="t-out">
       <p>
+        <span class="t-strong" data-term-arg />
         {NOT_FOUND[0]}
         <TermCmd name="help" live={live} />
         {NOT_FOUND[1]}

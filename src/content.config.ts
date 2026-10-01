@@ -20,6 +20,11 @@ const projects = defineCollection({
         shown: z.string().optional(),
       })
       .optional(),
+    // Its row in `work`'s index: what it is in a few words, what it's built with, and at most one
+    // result the write-up supports (none rather than a goal or a guess).
+    line: z.string().optional(),
+    stack: z.string().optional(),
+    result: z.string().optional(),
     status: z.enum(['active', 'shipped', 'archived']),
     start: z.string().regex(/^\d{4}(-\d{2})?$/), // "2026-08" or just "2023"
     // Where it happened: an org id from src/data/site.ts (orgs), or leave out for personal projects.
@@ -34,6 +39,8 @@ const projects = defineCollection({
     featured: z.boolean().default(false),
     cover: z.string().optional(), // path under public/, e.g. "/projects/traffic-ops.jpg"
     coverAlt: z.string().optional(),
+    // The cover's line in the terminal, folded, where its alt text is too long to be one.
+    coverLabel: z.string().optional(),
     // A still frame for places that shouldn't animate (the Work cards: gone with the terminal, so not
     // shown anywhere now). Use it when the cover is a GIF.
     poster: z.string().optional(),

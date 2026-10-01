@@ -1,0 +1,83 @@
+---
+// The terminal's pixel robot: beside my name at the startup (TermHello.astro) and in `about`
+// (TermOutput.astro). Decoration, in the terminal's own colours, drawn from the grid below (a letter to
+// a pixel, a rect to each run of one colour in a row) so it stays crisp at any size: metal lit from the
+// left, a dark visor, and the accent for its eyes, ear, antenna and chest light.
+//
+// In the lab's terminal it's alive (terminal.css, terminal.ts): it blinks, its antenna light pulses, it
+// looks down at the prompt while something's typed there, nods at a command and squints at a mistake.
+// So its head, eyes and antenna light are drawn apart from the rest, and two more pairs of eyes, shut
+// and squinting, wait hidden. Reduced motion, or Motion off: it holds still, eyes open.
+const GRID = [
+  '...............we...............',
+  '..............eeee..............',
+  '...............oo...............',
+  '...............oo...............',
+  '........oooooooooooooooo........',
+  '.......ollllllllllllllllo.......',
+  '......olmmmmmmmmmmmmmmmmmo......',
+  '.....olmmffffffffffffffmmso.....',
+  '...ooolmfffweffffffwefffmso.....',
+  '..oaaolmfffeeffffffeefffmsoo....',
+  '..oeeolmfffeeffffffeefffmsomo...',
+  '..oeeolmfffeeffffffeefffmsomo...',
+  '..oaaolmfffffffaafffffffmsoo....',
+  '...ooolmmffffffffffffffmmso.....',
+  '......ommmmmmmmmmmmmmmmmmo......',
+  '.......osssssssssssssssso.......',
+  '........oooooooooooooooo........',
+  '.............ommmmo.............',
+  '.............oooooo.............',
+  '.........oooooooooooooo.........',
+  '........ollllllllllllllo........',
+  '...oo..olmmmmmmmmmmmmmmmo..oo...',
+  '..olmoolmmmmffffffffmmmmsoomso..',
+  '..olmoolmmmffffffffffmmmsoomso..',
+  '..olmoolmmmffwefsssffmmmsoomso..',
+  '..olmoolmmmffeeffffffmmmsoomso..',
+  '..olmoolmmmfffffsssffmmmsoomso..',
+  '..olmoolmmmmffffffffmmmmsoomso..',
+  '..olmoolmmmmmmmmmmmmmmmmsoomso..',
+  '..olmoolmmmmmmmmmmmmmmmmsoomso..',
+];
+const FILL: Record<string, string> = {
+  o: '#5c534a', // outline
+  s: '#4a433b', // shadow
+  m: '#a39787', // metal
+  l: 'var(--t-fg)', // lit edge
+  f: '#2a2622', // visor and panel
+  e: 'var(--t-accent)',
+  a: '#a8722f', // the accent, darker
+  w: 'var(--t-fg)', // glint
+};
+// The parts drawn apart: the antenna's light (its top two rows), the eyes (each 2 wide, 4 tall), and
+// the head (down to its chin) from the neck and body.
+const LIGHT = 2;
+const EYES = [11, 19];
+const EYE_ROWS = [8, 12];
+const HEAD = 17;
+const isEye = (x: number, y: number) => y >= EYE_ROWS[0] && y < EYE_ROWS[1] && EYES.some((e) => x >= e && x < e + 2);
+const cells = (row: string, y: number) => [...row].map((c, x) => (c !== '.' && isEye(x, y) ? 'f' : c)).join('');
+const runsOf = (rows: string[], y0: number) =>
+  rows.flatMap((row, i) => [...row.matchAll(/([^.])\1*/g)].map((m) => ({ x: m.index!, y: y0 + i, w: m[0].length, c: FILL[m[1]] })));
+const eyes = (rows: [number, string][]) => rows.flatMap(([y, c]) => EYES.map((x) => ({ x, y, w: 2, c: FILL[c] })));
+const light = runsOf(GRID.slice(0, LIGHT), 0);
+const head = runsOf(GRID.slice(LIGHT, HEAD).map((r, i) => cells(r, i + LIGHT)), LIGHT);
+const body = runsOf(GRID.slice(HEAD), HEAD);
+const open = runsOf(GRID.slice(...EYE_ROWS).map((r, i) => [...r].map((c, x) => (isEye(x, i + EYE_ROWS[0]) ? c : '.')).join('')), EYE_ROWS[0]);
+const shut = eyes([[10, 'e']]);
+const squint = eyes([[9, 'e'], [10, 'e']]);
+const parts = { light, eyes: open, shut, squint };
+---
+
+<svg class="t-bot" viewBox={`0 0 ${GRID[0].length} ${GRID.length}`} shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+  <g class="t-bot-body">{body.map((r) => <rect x={r.x} y={r.y} width={r.w} height="1" style={`fill:${r.c}`} />)}</g>
+  <g class="t-bot-head">
+    {head.map((r) => <rect x={r.x} y={r.y} width={r.w} height="1" style={`fill:${r.c}`} />)}
+    {
+      Object.entries(parts).map(([part, rs]) => (
+        <g class={`t-bot-${part}`}>{rs.map((r) => <rect x={r.x} y={r.y} width={r.w} height="1" style={`fill:${r.c}`} />)}</g>
+      ))
+    }
+  </g>
+</svg>

@@ -1,0 +1,45 @@
+## leave, rerun 1 of 3
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  leave: Escape leaves for the opening (the address it was opened from), focus on the monitor's link, ringed  {"at":"/?probe","focus":"monitor","ring":true}
+PASS  leave: back in, the same view where it was read (its address again), nothing made twice, no startup again  {"view":"work/cucadence","top":301,"was":301,"at":"/?computer=work/cucadence"}
+PASS  leave: with a mouse, no power button (Esc leaves)  {"display":"none","shown":false}
+PASS  leave: exit (a hidden alias, any case) leaves too, the view left as it was  {"at":"/?probe","recall":"EXIT","view":"work/cucadence"}
+PASS  leave: a reload opens the terminal at once on the view being read, where it was, the startup still done, only that view made  {"view":"resume","views":["","resume"],"top":150,"was":150,"boot":"done"}
+PASS  leave: a reload with a figure and a section unfolded unfolds them again, the same line where it was  {"pre":{"open":"0,2","line":"Wrap the stages you care about and run t","at":31},"post":{"open":"0,2","line":"Wrap the stages you care about and run t","at":31}}
+PASS  leave: Escape during the flight in leaves once it has landed  /?probe
+PASS  leave: on a touch screen, the power button sits on the bezel under the screen, at its right, in view  {"power":{"x":1026,"y":721,"w":36,"h":36,"r":1062,"b":757,"shown":true},"icon":{"x":1037,"y":732,"w":15,"h":15,"r":1052,"b":747,"shown":true},"screen":{"x":95,"y":101,"w":991,"h":619,"r":1086,"b":720,"shown":true}}
+PASS  leave: the power button, tapped, leaves; focus on the monitor's link without a ring  {"at":"/?probe","focus":"monitor","ring":false}
+# leave: 34 s
+
+9 passed, 0 failed: all passed
+
+## leave, rerun 2 of 3
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  leave: Escape leaves for the opening (the address it was opened from), focus on the monitor's link, ringed  {"at":"/?probe","focus":"monitor","ring":true}
+PASS  leave: back in, the same view where it was read (its address again), nothing made twice, no startup again  {"view":"work/cucadence","top":301,"was":301,"at":"/?computer=work/cucadence"}
+PASS  leave: with a mouse, no power button (Esc leaves)  {"display":"none","shown":false}
+PASS  leave: exit (a hidden alias, any case) leaves too, the view left as it was  {"at":"/?probe","recall":"EXIT","view":"work/cucadence"}
+PASS  leave: a reload opens the terminal at once on the view being read, where it was, the startup still done, only that view made  {"view":"resume","views":["","resume"],"top":150,"was":150,"boot":"done"}
+PASS  leave: a reload with a figure and a section unfolded unfolds them again, the same line where it was  {"pre":{"open":"0,2","line":"Wrap the stages you care about and run t","at":31},"post":{"open":"0,2","line":"Wrap the stages you care about and run t","at":31}}
+PASS  leave: Escape during the flight in leaves once it has landed  /?probe
+PASS  leave: on a touch screen, the power button sits on the bezel under the screen, at its right, in view  {"power":{"x":1026,"y":721,"w":36,"h":36,"r":1062,"b":757,"shown":true},"icon":{"x":1037,"y":732,"w":15,"h":15,"r":1052,"b":747,"shown":true},"screen":{"x":95,"y":101,"w":991,"h":619,"r":1086,"b":720,"shown":true}}
+PASS  leave: the power button, tapped, leaves; focus on the monitor's link without a ring  {"at":"/?probe","focus":"monitor","ring":false}
+# leave: 34 s
+
+9 passed, 0 failed: all passed
+
+## leave, rerun 3 of 3
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  leave: Escape leaves for the opening (the address it was opened from), focus on the monitor's link, ringed  {"at":"/?probe","focus":"monitor","ring":true}
+PASS  leave: back in, the same view where it was read (its address again), nothing made twice, no startup again  {"view":"work/cucadence","top":301,"was":301,"at":"/?computer=work/cucadence"}
+PASS  leave: with a mouse, no power button (Esc leaves)  {"display":"none","shown":false}
+PASS  leave: exit (a hidden alias, any case) leaves too, the view left as it was  {"at":"/?probe","recall":"EXIT","view":"work/cucadence"}
+PASS  leave: a reload opens the terminal at once on the view being read, where it was, the startup still done, only that view made  {"view":"resume","views":["","resume"],"top":150,"was":150,"boot":"done"}
+PASS  leave: a reload with a figure and a section unfolded unfolds them again, the same line where it was  {"pre":{"open":"0,2","line":"Wrap the stages you care about and run t","at":31},"post":{"open":"0,2","line":"Wrap the stages you care about and run t","at":31}}
+PASS  leave: Escape during the flight in leaves once it has landed  /?probe
+PASS  leave: on a touch screen, the power button sits on the bezel under the screen, at its right, in view  {"power":{"x":1026,"y":721,"w":36,"h":36,"r":1062,"b":757,"shown":true},"icon":{"x":1037,"y":732,"w":15,"h":15,"r":1052,"b":747,"shown":true},"screen":{"x":95,"y":101,"w":991,"h":619,"r":1086,"b":720,"shown":true}}
+PASS  leave: the power button, tapped, leaves; focus on the monitor's link without a ring  {"at":"/?probe","focus":"monitor","ring":false}
+# leave: 34 s
+
+9 passed, 0 failed: all passed
+

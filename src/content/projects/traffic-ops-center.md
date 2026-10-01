@@ -3,10 +3,13 @@ code: PRJ-11
 title: Traffic Operations Center
 summary: A city can't A/B test an emergency. This one rehearses every response in simulation and commits only the safe one.
 brief:
-  does: 'Rehearses a traffic incident''s candidate responses in parallel SUMO simulations and commits only a plan that passes deterministic safety checks.'
-  hard: 'Treating model-proposed plans as untrusted data: code, not a prompt, enforces minimum greens, pedestrian timing, clearance intervals and legal phase transitions, before each branch runs and again inside it.'
+  does: 'Rehearses an incident''s responses in parallel SUMO simulations and commits only a plan that passes safety checks.'
+  hard: 'Treating model-proposed plans as untrusted: code, not a prompt, enforces the signal-safety rules.'
   shown: 'In the documented run, 8 candidate plans on 4 parallel workers, 2,778 signal transitions audited and none unsafe; a full mock analysis took about 26 seconds.'
 # TODO: brief: add mine with the TODO below.
+line: 'Rehearsing incident responses in simulation'
+stack: 'Python / SUMO'
+result: '2,778 signal transitions audited, none unsafe'
 status: shipped
 start: '2026-09'
 org: steelhacks

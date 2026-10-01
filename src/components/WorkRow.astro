@@ -1,0 +1,37 @@
+---
+// One project's row in `work`'s index (TermOutput.astro): its number, its name, which opens it (in the
+// lab's terminal, running `work <id>`, a link to the lab showing it, for a new tab; in the transcript,
+// its page), what it is in a few words, and a line of what it's built with, where and when, and the one
+// result it's known by, where the write-up gives one. No id, no source or demo: the project has those.
+import type { CollectionEntry } from 'astro:content';
+import { labHref } from '../scripts/lab/routes';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  n: number;
+  live?: boolean;
+}
+const { project, n, live = true } = Astro.props;
+const d = project.data;
+const year = d.start.slice(0, 4);
+const meta = [d.stack, d.context, d.context?.includes(year) ? null : year].filter(Boolean).join(' · ');
+const href = live ? labHref(`work/${project.id}`) : `/computer/work/${project.id}/`;
+---
+
+<li>
+  <span class="t-num" aria-hidden="true">{String(n).padStart(2, '0')}</span>
+  <h3 class="t-work-name">
+    <a class="t-open" href={href} data-term-run={live ? `work ${project.id}` : undefined}>{d.title}</a>
+  </h3>
+  <p class="t-work-line">{d.line ?? d.brief?.does ?? d.summary}</p>
+  <p class="t-work-meta">
+    {meta}{
+      d.result && (
+        <>
+          {' · '}
+          <span class="t-result">{d.result}</span>
+        </>
+      )
+    }
+  </p>
+</li>

@@ -5,8 +5,10 @@ summary: A wooden box with a switch. Flip it, the lid opens, and a little arm fl
 brief:
   does: 'A wooden box with a switch: flip it, and a little arm comes out of the lid and flips it back.'
   mine: 'My first project ever.'
-  hard: 'One switch that both starts and stops the arm: a DPDT toggle reverses the servo, and an SPDT lever switch cuts the power once the arm is home.'
+  hard: 'One switch that both starts and stops the arm.'
   shown: 'It works; the video is below.'
+line: 'A box that switches itself off'
+stack: 'Circuits / woodworking'
 status: shipped
 start: '2023'
 tags: [Hardware, Circuits, Woodworking]

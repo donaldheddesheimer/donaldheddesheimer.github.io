@@ -1,6 +1,104 @@
 # Robotics lab implementation handoff
 
-## Current checkpoint: an overhead maintenance robot, and terminal quality of life, 2026-09-30 (Claude)
+## Current checkpoint: the terminal overhaul, 2026-09-30 (Claude)
+
+**Status: implementation complete on `terminal-overhaul`, from `main` at `5ff4489` (PR #9 merged).** Pushed for review as PR #10; not merged or deployed. The terminal is now an application rather than an endless transcript. It shows one view at a time over a prompt that keeps to the screen's foot, has a compact Work index, a project reader that folds its detail away, and a small pixel robot on About. The room, camera, robots, welding, screensaver, monitor entrance and the startup that invites `help` are unchanged. Nothing opens by itself, and help still lists About, Work, Resume and Contact.
+
+- **Commits, in order** (each builds on its own):
+  1. `70eb36e` Make terminal commands navigate a current reading view.
+  2. `d627e6b` Redesign work as a compact terminal project index.
+  3. `aa05e36` Give terminal projects concise openings and progressive detail.
+  4. `b95dfdc` Unify terminal typography and section presentation.
+  5. `7b3ca72` Keep a double-clicked command's focus and phone prompt in hand (found by the checks below).
+  6. `4018349` Record the terminal overhaul and focused regression checks.
+  7. The type pass asked for in PR #10's review (below).
+  8. The welcome and `clear` (below).
+  9. The ambience: the robot alive, the screen's glass, a status line and a shell's habits (below).
+- **The state model** (`terminal.ts`, "The views"):
+  - A view is one of `''` (the startup), `help`, `about`, `work`, `resume`, `contact` or `work/<id>`. Each is mounted once, from its `<template data-term-out>`, the first time it's asked for, as a `[data-view]` in `[data-term-views]`. Only the current one is shown.
+  - Asking for another view keeps the old one's scroll position, hides it and shows the new one where it was left (from its start the first time), with its disclosures as they were. Asking for the view already shown leaves it where it is. With motion on, a view fades in over 160 ms; with reduced motion or Motion off, it doesn't.
+  - The prompt shows where the reader is (`donald@lab:~/work/cucadence$`; at the startup and in help, `donald@lab:~$`).
+  - A mistake isn't a view. An unknown command, or a project that isn't there (with its guesses, "Did you mean work fluxion?"), is said on one line over the prompt. The view underneath stays, and the line clears on the next command, even a blank Enter.
+  - Up and Down recall typed commands from their own list (consecutive repeats collapsed), apart from the views.
+  - **The session** is stored under `lab:terminal:2` as `{v: 2, boot, recall, view, views: {view: {y, open}}}`, checked field by field when it's read. An unknown view is dropped, a negative y becomes 0, and `open` keeps only indices.
+  - **Migration:** the first version's transcript (`lab:terminal`, a `log` of what was typed) is read once. Its non-blank lines, trimmed, become recall (the last 60), and the last view it showed becomes the view. The old key is left in place.
+  - **Addresses** (`computer.ts`): a project's view pushes a history entry, `/?computer=work/<id>`, storing its view (`v`) and what opened it (focus goes back there on Back). Other views replace the entry at `/?computer`. Back and Forward show each entry's view where it was left. Coming back from the room finds the view as it was left. A shared project link opens at its `#anchor`, unfolding the section it points into, and the old command addresses still run their command. Titles are `<project> · Terminal · Donald Heddesheimer` on a project.
+  - **Without JavaScript,** `/computer/` prints every view in turn, each under an echo of its command. `/computer/work/<id>/` prints one project the same way.
+- **What a reader sees:**
+  - **Work** opens with a title and a one-line descriptor, then one row per featured project: its name (a link), a one-line purpose, its stack and context, and at most one result, set brighter than the line around it (amber is kept for commands and actions). Only two are featured (Traffic Operations Center, cuCadence). "Show all 11 projects" unfolds the other nine, and stays unfolded with the view. There are no cards, thumbnails or per-row source and demo links. The rows come from three new optional front-matter fields, `line`, `stack` and `result`, falling back to the brief or summary.
+  - **A project** opens on its brief: its name, what it does, its stack, date, context and team, and work's result. My part and the hard part follow, where the brief has them, then source and demo on one line. Below, everything is folded: the cover, each section of the write-up behind its own heading (`+`/`-`), and the stats as "In numbers". Related projects and a way back to work close it.
+  - **About** opens on my name, with a small pixel robot drawn from a character grid (hidden from screen readers). Then come the headline, school and city, the two profile paragraphs, what I'm doing now, and links to work, resume and contact.
+  - **Resume** puts the PDF first, then each role on one line with its dates. What I did in each role, and the coursework, are folded.
+  - **Contact** puts its note in the heading, so the email, copy button and profiles follow the title.
+  - **Type** (after the review's pass): the site's mono (JetBrains Mono) throughout, as a terminal, except each view's title, which is in a pixel face (Pixelify Sans, from Google Fonts with the others, at weights 500 and 600; no package). Titles are 2.125em; work's project names (1.1875em) and the write-up's section headings (1.125em) are larger and bold. Prose is 1.65 line-height on a 70-column measure, and metadata is smaller (0.8125–0.9375em) and dim, so titles and names lead. A dashed line divides the view from the prompt.
+- **The type pass** (PR #10's review: "a small font/hierarchy pass—not a redesign"): `terminal.css`, plus `--font-pixel` in `global.css` and the font in `Base.astro`'s Google Fonts link. A first take set the reading text in Inter; Donald wanted the pixelated feeling kept rather than a clean one, so the reading text went back to the mono, with only the titles in the pixel face. The heading reset in a view (`font: inherit` on h3–h6) now has zero specificity, so a heading's class sets its type; before, it quietly undid work's bold project names. Evidence in `docs/evidence/terminal-type-2026-09-30/`: `before/` (the overhaul's `shots.cjs` at `4018349`) and `after/`, the same 14 stills; `compare/`, six side-by-side sheets from `harness/compare.cjs` (work, work with all shown, a project folded and opened at 1440×900 on the monitor's screen, work and a project at 390×844); `logs/`. The build and tsc are clean. `validate.cjs` groups startup 10, commands 29, scroll 9, links 16, phone 25 and fit 23 pass; fit's one FAIL is the known 360×640 at 200% text, as before. nojs failed its anchor check at 1440 and 390 on the first run after the font link changed (nothing cached, so a late font moved the page under the anchor) and passed in every rerun (`validate-nojs-reruns.log`).
+- **The welcome and `clear`** (asked for after the type pass, from a mockup of a pixel robot beside a name; Donald chose each option): the startup now has a welcome card between its two lines, `TermHello.astro`: a bigger pixel robot (`PixelBot.astro`, redrawn on a 32×30 grid with an outline, shading, a lit edge, a visor and a chest panel) beside my name in the pixel face, the headline, and school and city. No new copy: all of it is `profile` from `site.ts`. About opens on the same robot. `/computer/` prints the welcome too, its name a line rather than a heading. `clear` (`CLEAR` in `lib/terminal.ts`) goes back to the startup, from its top, without playing it again; what was typed is kept for Up, and `clear` itself is recalled. Ctrl+L does the same, keeping what's being typed and adding nothing to recall. Tab completes it, and help names it under its list ("And clear, back to the start."). The boot fades the welcome in between its lines, so `BOOT_MS` is 1080. `validate.cjs`: startup's text and help's status include them; keyboard's Shift+Tab meets `clear` first; commands adds three checks (clear from a scrolled project, Ctrl+L, Tab). nojs's anchor check was 1 px strict about "as near as the page scrolls": a late web font, with Chrome's scroll anchoring, leaves the line where it was and the page 2 px short of its foot, so it failed about one run in three. It now asks whether what's left to scroll would bring the line to the top. Six reruns of nojs pass. Evidence in `docs/evidence/terminal-welcome-2026-09-30/`: `screens/` (the startup, help and about at 1440×900; the startup and about at 390×844) and `logs/`. The build and tsc are clean. The full run gives 246 passed, 2 failed: `fit` at 360×640 with 200% text, and the `leave` reload flake, both known (above and below).
+- **The ambience** (Donald chose from options: today's robot, alive, over a monitor-headed one, a welder or one asleep; and all four extras, with the wording of the hidden commands approved before they were built):
+  - **The robot** (`PixelBot.astro`) is drawn in parts now: the head apart from the body, and the antenna light, the eyes, and eyes shut and squinting (hidden) apart from the head. In the lab's terminal it blinks every 5.2 s and its antenna light pulses, both in whole steps. While something's typed at the prompt its eyes drop a pixel to it (`data-bot-look` on the terminal). A command that ran gets a nod, the head bobbing a pixel twice; a mistake, or `sudo`, a squint for 1.4 s (`data-bot`). Reduced motion, or Motion off: still, eyes open, and the script sets no moods. The transcript's robot is still.
+  - **The screen's glass** (`terminal.css`, `.term-glass` in `Terminal.astro`): a faint glow on the type (amber on the prompt and commands), the screen darkening toward its edges, and scanlines at 8% black every third pixel, over everything and taking no pointer. It doesn't move, so it stays with reduced motion; with `prefers-contrast: more` or forced colours it all goes.
+  - **A status line** under the prompt, on a band of its own: `robots: on break`, and the time in Atlanta (`America/New_York`) to the minute, kept every 10 s while the terminal's on screen. Hidden from screen readers.
+  - **A shell's habits**, unlisted by help and not completed by Tab, each answered on the line over the prompt (and told) as a mistake is, the view staying, recalled like any command: `whoami` (donald), `ls` (help's commands as `about/  work/  resume/  contact/`, each a command to run), `pwd` (`/home/donald` and where the reader is), `sudo …` ("donald is not in the sudoers file. This incident will be reported to the robots.") and `coffee` ("Out of coffee. The robots got to it first."). `exit` was already there. The words are `SAID`, `HOME`, `BAR` and `ZONE` in `lib/terminal.ts`.
+  - **Found on the way, fixed:** the line over the prompt (a mistake's, and now a habit's) was capped at 76 columns, so on a wide screen the prompt's name rode up beside it. The line is the whole width now, its text still 76 columns at most.
+  - `validate.cjs`: startup checks the status line and its clock against Atlanta's time; the unknown command is `rm -rf /` now (`sudo` has an answer); commands adds a check per habit (said, told, the view staying, recalled, the robot's mood), `ls`'s commands, that they're unlisted, and the robot's look and squint; motion checks the robot's animations, and that it holds still and has no moods with reduced motion and with Motion off. Evidence in `docs/evidence/terminal-ambience-2026-10-01/`: `screens/` (the startup, a mistake, `ls` and about at 1440×900; the startup and `ls` at 390×844; `bot-states.png`, the robot open, mid-blink, looking and squinting, at 2×), `harness/stills.cjs`, and `logs/` (build, tsc, validate, stills). The build and tsc are clean. The full run gives 258 passed, 2 failed: the same two known, `fit` at 360×640 with 200% text and the `leave` reload flake.
+- **What to judge:** `docs/evidence/terminal-overhaul-2026-09-30/`:
+  - `screens/`, at 1440×900 on the monitor with a mouse:
+    - the startup, help, and work, compact and with all eleven shown;
+    - `work cucadence` folded and with "How it works" opened;
+    - about, resume and contact.
+
+    Also help, work, a project, about and contact at 390×844, each tapped on a touch screen.
+  - `video/terminal-overhaul-1280x800.webm` (35.4 s, 2.2 MB; `screens/recording-sheet.jpg` samples it every 3 s) covers:
+    - the monitor clicked and the startup;
+    - help typed, work clicked in it, all eleven shown;
+    - Fluxion clicked, a section opened and read;
+    - `about` typed, `work cu` completed by Tab and run;
+    - Escape and the room;
+    - the monitor again: back on cuCadence where it was, with no startup.
+  - `logs/`: build, tsc, validate (the full run), validate-leave-reruns, shots and rec.
+  - `harness/`: `shots.cjs` and `rec.cjs`, which use the lab-terminal pass's `serve.cjs`.
+- **Checks** (headless Chrome 154.0.8037.58, ANGLE Metal, Apple M5 Pro):
+  - The build and tsc are clean.
+  - **`validate.cjs`** (`lab-terminal-2026-09-29/harness/`) was rewritten for the view model rather than loosened. Checks that read the transcript's entries now read the view shown, the views mounted (each once), the line over the prompt, recall and the stored session. A group that throws (a wait timed out) is a FAIL with its error, and the run goes on to the next group.
+    - The full run gives **243 passed, 2 failed**. It is not a full pass. By group: startup 10, commands 29, complete 10, tap 4, scroll 9, links 16, leave 9 (1 FAIL), history 52, migrate 8, phone 25, motion 7, keyboard 9, nowebgl 15, nojs 11, failed 7, fit 24 (1 FAIL).
+    - What the groups cover:
+      - the startup alone, and each command's view (shown once, never twice);
+      - mistakes over the prompt, and project guesses;
+      - Tab completion, and Tab moving on;
+      - recall, with repeats collapsed;
+      - each view's own scroll, and its disclosures kept;
+      - migration from `lab:terminal`, and a malformed store sanitized;
+      - deep links with anchors, Back and Forward, and focus returned;
+      - the résumé PDF (served, `download`), copy, and the contact links;
+      - reduced motion and Motion off, and Esc and reentry;
+      - the phone and the keyboard;
+      - no WebGL, no JavaScript and a failed script;
+      - sizes.
+    - **Failure 1, `fit` at 360×640 with 200% text:** the known case, below.
+    - **Failure 2, `leave`:** "a reload with a figure and a section unfolded unfolds them again, the same line where it was". Both came back unfolded, but the line in view was 32 px off. It passed in the group runs before and after, and in three reruns of `leave` alone (`validate-leave-reruns.log`), so it fails about one run in four. The likely cause is the write-up's images, which have no width or height: a lazy image that loads after the position is restored moves the text under it. Not fixed here.
+    - The checks found two real problems, fixed in `7b3ca72`:
+      - A double-clicked command's second press landed on the view it had just shown, selected a word there, and left the focus off the prompt.
+      - At 390×844 with 200% text, the `~/contact` prompt ran 45 px off the side, and "Show all 11 projects" was 26 px tall to a finger.
+    - Beyond that, the fixes were to the checks' own assumptions. A view element is itself the `.t-project`. Fluxion fits the screen folded, so a section is unfolded before scrolling. A folded static page may not scroll its anchor to the top. Contact has no `help` to tap, so it's typed.
+  - The earlier passes' own harnesses are records of those passes and weren't changed. Their terminal checks assume the transcript, so they no longer run against this build: `maintenance-robot-2026-09-30/harness/complete.cjs`, the `rec.cjs` of the terminal-workshop and lab-terminal passes, and `lab-terminal-2026-09-29/harness/shots.cjs`. What they checked is covered by `validate.cjs`.
+  - The room stills and social preview weren't regenerated: nothing in the room changed.
+- **Limitations:**
+  - **360×640 at 200% text:** the monitor tap still never reaches reading, as on main, and that size is the one `fit` FAIL. `fit` now catches it and goes on to the last three sizes, which pass.
+  - **Anchors without JavaScript:** a deep link to a folded section lands on its heading line, still folded. The browser opens a `<details>` for an anchor inside it, not for one on its summary. With the lab running, the section unfolds.
+  - **The `leave` reload check is flaky** (above): an image without dimensions can load after the reading position is restored.
+  - **Narrow prompts:** at 390 px with text enlarged, a deep prompt (`donald@lab:~/contact$`) breaks mid-word onto a second line rather than scroll sideways.
+- **Editorial questions** (nothing was invented; each is left out rather than filled in):
+  - My part is missing for eight projects: Traffic Operations Center, Skyblock Bazaar, claude-status, Fluxion, nn, Smart Bin, Swerve Drive and TravelMate.
+  - Results to confirm or supply:
+    - Bytefight's tournament placement;
+    - how Swerve Drive ran on the robot;
+    - nn's GEMM vs cuBLAS numbers, once measured;
+    - Skyblock's numbers, still unconfirmed and so kept out of work's row.
+  - TravelMate has no hard part.
+  - Useless Machine's "My part" reads "My first project ever.", and its "video is below" now points into a folded section.
+  - Is two featured projects the right number?
+  - The new `line`, `stack` and `result` wording across the eleven wants a read.
+
+## Earlier checkpoint: an overhead maintenance robot, and terminal quality of life, 2026-09-30 (Claude)
 
 **Status: implementation complete on `workshop-upkeep`, from `main` at `fe9623b` (PR #8 merged).** Pushed for review as a pull request; not merged or deployed. A small maintenance robot now hangs in a harness above the room, repairing a broken rail bracket. The terminal completes commands with Tab, and each project opens with what it does, the hard part and the result. The opening's identity, the monitor interaction, the camera fit and the motion setting behave as before.
 

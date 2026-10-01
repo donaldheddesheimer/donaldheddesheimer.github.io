@@ -3,10 +3,13 @@ code: PRJ-09
 title: cuCadence
 summary: A header-only C++17/CUDA profiler that lives inside your binary and reports per-stage latency, tail spikes, and deadline misses in real-time GPU loops.
 brief:
-  does: 'A header-only C++17/CUDA profiler that runs inside the binary and reports per-stage latency, tail spikes and deadline misses in real-time GPU loops.'
-  mine: 'Built it after profiling a real-time GPU pipeline at Solopulse; tested it on llama.cpp''s CUDA backend, added CUDA Graph capture safeguards and fixed three reporting defects.'
-  hard: 'Measuring GPU stages without adding a sync: events resolve later at sync points the application already has, with thread-local event pools and statistics in bounded memory.'
+  does: 'A header-only C++17/CUDA profiler for per-stage latency and deadline misses in real-time GPU loops.'
+  mine: 'Built it after profiling a real-time GPU pipeline at Solopulse, and tested it on llama.cpp''s CUDA backend.'
+  hard: 'Measuring GPU stages without adding a sync.'
   shown: '3.4 μs per GPU scope, about 48% less than blocking CUDA-event timing, and no measurable throughput cost on llama.cpp when instrumented at the graph level.'
+line: 'Real-time GPU profiling from inside the process'
+stack: 'C++ / CUDA'
+result: '3.4 μs per GPU scope'
 status: active
 start: '2026-08'
 related: [solopulse]
@@ -14,6 +17,7 @@ tags: [C++, CUDA, Performance, Developer tools, Nsight]
 repo: https://github.com/donald-heddesheimer/cadence
 featured: true
 cover: /projects/cadence-report.svg
+coverLabel: Report preview
 coverAlt: cuCadence report showing per-stage latency distributions, a deadline verdict, and the three slowest iterations broken down by stage
 cardFit: contain
 evidence:

@@ -1,0 +1,22 @@
+---
+// The startup's welcome, between its two lines: the pixel robot beside my name, what I do, and where,
+// as `about` opens (TermOutput.astro), from src/data/site.ts. In the lab's terminal the name is the
+// startup's heading, focused when `clear` is tapped; in the /computer/ transcript, which has `about`'s
+// own heading for it further down, it's a line.
+import PixelBot from './PixelBot.astro';
+import { profile } from '../data/site';
+
+interface Props {
+  live?: boolean;
+}
+const { live = true } = Astro.props;
+---
+
+<div class="t-intro term-hello">
+  <PixelBot />
+  <div class="t-head">
+    {live ? <h2 class="t-title" tabindex="-1">{profile.name}</h2> : <p class="t-title">{profile.name}</p>}
+    <p class="t-role">{profile.headline}</p>
+    <p class="t-sub">{profile.school} · {profile.location}</p>
+  </div>
+</div>
