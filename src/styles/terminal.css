@@ -2,7 +2,7 @@
    views, standing alone, one after another). Charcoal, warm off-white type in the site's mono, and one
    accent, amber, for the prompt and for what can be run; a view's title alone is in a pixel face. Sizes
    follow the screen: the terminal is the container (the lab's .pc-screen), so a larger monitor reads
-   larger; on a touch screen the type never drops under 16px (the prompt's field would zoom the page on
+   larger, and like a terminal its lines run the screen's width, to the edge, however wide; on a touch screen the type never drops under 16px (the prompt's field would zoom the page on
    focus). */
 .term,
 .t-static {
@@ -12,7 +12,7 @@
   --t-accent: #e2a95c;
   --t-rule: #2e2a26;
   --t-line: #554c42;
-  --t-fs: clamp(0.8125rem, 1.4cqi, 1.0625rem);
+  --t-fs: clamp(0.8125rem, 1.4cqi, 1.375rem);
   --t-pad-y: max(1rem, 2.6cqi);
   --t-pad-x: max(1rem, 3cqi);
   --t-gap: 1.1em;
@@ -66,11 +66,6 @@
 .term-views :is(a, button, summary, pre, video) {
   scroll-margin-bottom: calc(var(--t-prompt, 4.5em) + 1.25em);
 }
-.term-views,
-.term-log,
-.term-prompt {
-  max-width: 92ch;
-}
 
 /* The transcript (/computer/): the startup's lines, then each command as typed, and what it shows. */
 .term-entry {
@@ -122,15 +117,13 @@
   margin-top: 0.55em;
 }
 .t-sub {
-  max-width: 70ch;
   color: var(--t-dim);
   font-size: 0.9375em;
 }
 
-/* What's read: a looser line, at most 70 columns. */
+/* What's read: a looser line. */
 :is(.t-prose, .t-purpose, .t-points),
 .t-md :is(p, li, blockquote) {
-  max-width: 70ch;
   line-height: 1.65;
 }
 
@@ -197,7 +190,6 @@
    across from the name (under it, where the screen is narrow), what it is, over a quieter line of what
    it's built with and its one result. The featured first; the rest behind a line that shows them. */
 .t-work {
-  max-width: 88ch;
   padding: 0;
   list-style: none;
 }
@@ -305,9 +297,6 @@
 .t-md > :first-child {
   margin-top: 0;
 }
-.t-md .t-fig > summary {
-  max-width: 70ch;
-}
 .t-md strong {
   font-weight: 600;
 }
@@ -369,14 +358,12 @@
    when, quieter; what it showed, in the accent; then my part and the hard part, each under its label, and
    where to find it. Its detail follows, folded (below). */
 .t-purpose {
-  max-width: 64ch;
   font-size: 1.125em;
 }
 .t-project > .t-head .t-sub {
   font-size: 0.875em;
 }
 .t-outcome {
-  max-width: 76ch;
   color: var(--t-accent);
 }
 .t-out > * + :is(.t-part, .t-actions, .t-detail),
@@ -580,7 +567,6 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0 3ch;
-  max-width: 80ch;
 }
 .t-points {
   padding-left: 2ch;
@@ -744,10 +730,9 @@
 /* (The whole line its own, however short what's said: the prompt's name never rides up beside it.) */
 .term-note {
   flex: 1 0 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
   margin: 0 0 0.35em;
-}
-.term-note > * {
-  max-width: 76ch;
 }
 .term-note[hidden] {
   display: none;
