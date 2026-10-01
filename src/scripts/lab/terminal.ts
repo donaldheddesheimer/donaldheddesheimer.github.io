@@ -9,7 +9,8 @@
 // another puts it in the first's place; asking for the same again leaves it be. Each view keeps its own
 // place and what was unfolded in it, for coming back to. A mistake (a command there isn't, a project
 // that isn't there) is said on a line over the prompt, leaving the view as it was, until the next
-// command. Nothing pulls the view after it's shown.
+// command. Nothing pulls the view after it's shown. A shell's habits (`whoami`, `ls`, `pwd`, `sudo`,
+// `coffee`) are answered there too, unlisted.
 //
 // Up and Down bring back what was typed before, as a shell's history does: that list is its own, apart
 // from the views. Tab completes what's typed, as a shell's does: a command's name, or a project's id
@@ -26,8 +27,12 @@
 // the text is all there from the start (a screen reader reads it whole), a key or a tap ends the
 // startup, and the next view settles the one before. Reduced motion, or Motion off in Settings: all at
 // once, with a steady cursor.
+//
+// The robot (PixelBot.astro) blinks and pulses on its own (terminal.css); from here, it looks down at the
+// prompt while something's typed there, nods at a command and squints at a mistake (and at `sudo`). The
+// status line's clock is the time in Atlanta, kept while the terminal is on screen.
 import { COMMANDS, isCommand, labHref } from './routes';
-import { CLEAR, EXIT, NOT_FOUND, NO_PROJECT, ps1 } from '../../lib/terminal';
+import { CLEAR, EXIT, HOME, NOT_FOUND, NO_PROJECT, SAID, ps1, where } from '../../lib/terminal';
 
 const STORE = 'lab:terminal:2';
 const OLD = 'lab:terminal'; // the first version's, the transcript
@@ -90,6 +95,7 @@ export function initTerminal(
   const status = root.querySelector<HTMLElement>('[data-term-status]')!;
   const matches = root.querySelector<HTMLElement>('[data-term-matches]')!;
   const note = root.querySelector<HTMLElement>('[data-term-note]')!;
+  const clock = root.querySelector<HTMLElement>('[data-term-clock]');
   const inner = area.parentElement!;
   // What the prompt covers at the screen's foot, so a link reached with Tab scrolls clear of it
   // (terminal.css, scroll-margin).
@@ -292,6 +298,48 @@ export function initTerminal(
     announce(told);
   }
 
+  // A shell's habit, answered over the prompt as a mistake is (and cleared as one is): what it says, or
+  // null for none. `ls` lists the commands help does, as directories, each to be run.
+  function habit(cmd: string): Node[] | null {
+    if (cmd === 'whoami') return [new Text(SAID.whoami)];
+    if (cmd === 'pwd') return [new Text(HOME + where(cur).slice(1))];
+    if (cmd === 'coffee') return [new Text(SAID.coffee)];
+    if (cmd === 'sudo' || cmd.startsWith('sudo ')) return [new Text(SAID.sudo)];
+    if (cmd !== 'ls') return null;
+    return COMMANDS.flatMap((c, i) => {
+      const a = document.createElement('a');
+      a.className = 't-cmd';
+      a.href = labHref(c);
+      a.dataset.termRun = c;
+      a.textContent = `${c}/`;
+      return i ? [new Text('  '), a] : [a];
+    });
+  }
+  function tell(said: Node[]) {
+    unsay();
+    const p = document.createElement('p');
+    p.className = 'term-said';
+    p.append(...said);
+    note.append(p);
+    note.hidden = false;
+    announce(p.textContent ?? '');
+  }
+
+  // The robot, as it's spoken to (none of it with motion off, when it holds still): a nod at a command
+  // that ran, a squint at a mistake, for a moment; and while something's typed at the prompt, its eyes
+  // on it.
+  let moodTimer = 0;
+  function mood(m: 'nod' | 'squint') {
+    clearTimeout(moodTimer);
+    delete root.dataset.bot;
+    if (!hooks.motion()) return;
+    void root.offsetWidth; // (the same mood again starts over)
+    root.dataset.bot = m;
+    moodTimer = window.setTimeout(() => delete root.dataset.bot, m === 'nod' ? 520 : 1400);
+  }
+  const look = () => root.toggleAttribute('data-bot-look', hooks.motion() && document.activeElement === input && !!input.value.trim());
+  for (const type of ['input', 'focus', 'blur']) input.addEventListener(type, look);
+
   // Run what was typed or tapped. `by`: how, which decides where the focus goes after (the prompt, or,
   // from a touch screen, the view's title, without raising a keyboard over it); `from`, the command
   // tapped or clicked.
@@ -308,10 +356,20 @@ export function initTerminal(
     unlist();
     caret();
     unsay();
+    look();
     if (!cmd) return;
     if (cmd === EXIT) return hooks.exit();
+    const answer = habit(cmd);
+    if (answer) {
+      tell(answer);
+      return mood(cmd.startsWith('sudo') ? 'squint' : 'nod');
+    }
     const view = cmd === CLEAR ? START : viewOf(cmd);
-    if (view == null) return mistake(raw, cmd);
+    if (view == null) {
+      mood('squint');
+      return mistake(raw, cmd);
+    }
+    mood('nod');
     const el = view === START ? clear() : show(view, '', true)!;
     // (Told before the focus moves: the place it was run from is still in view.)
     hooks.went(view, from);
@@ -447,6 +505,7 @@ export function initTerminal(
       unsay();
       announce(clear().dataset.announce ?? '');
       hooks.went(START, null);
+      mood('nod');
     } else requestAnimationFrame(caret);
   });
 
@@ -545,6 +604,18 @@ export function initTerminal(
     true,
   );
 
+  // --- The status line's clock -------------------------------------------------------------------
+
+  // The time in Atlanta, to the minute, kept while the terminal's on screen. (Where the zone isn't
+  // known, the city alone.)
+  let time: Intl.DateTimeFormat | null = null;
+  try {
+    time = new Intl.DateTimeFormat('en-US', { timeZone: clock?.dataset.zone, hour: 'numeric', minute: '2-digit' });
+  } catch {}
+  let clockTimer = 0;
+  const tick = () => clock && (clock.textContent = [clock.dataset.city, time?.format(new Date())].filter(Boolean).join(' '));
+  tick();
+
   // --- The startup -------------------------------------------------------------------------------
 
   function boot() {
@@ -571,6 +642,9 @@ export function initTerminal(
   return {
     enter(focus) {
       boot();
+      tick();
+      clearInterval(clockTimer);
+      clockTimer = window.setInterval(tick, 10_000);
       if (focus === 'input') input.focus({ preventScroll: true });
       else if (focus === 'log') root.focus({ preventScroll: true });
       caret();
@@ -581,6 +655,10 @@ export function initTerminal(
       settle();
       unlist();
       keep();
+      clearInterval(clockTimer);
+      clearTimeout(moodTimer);
+      delete root.dataset.bot;
+      root.removeAttribute('data-bot-look');
       save();
     },
     restore() {

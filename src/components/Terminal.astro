@@ -5,7 +5,9 @@
 // help, a section, a project. Each view waits in a <template> below, rendered here from the site's data
 // (TermOutput.astro; each project's, `work <id>`, TermProject.astro), until it's first asked for.
 // (A template's pictures load only once it's shown.) Over the prompt, a line for Tab's matches and one
-// for a mistake (a command there isn't), neither of them a view.
+// for a mistake (a command there isn't) or a shell's habit (`whoami`, `ls`), neither of them a view.
+// Under it, a status line: the robots, and the time in Atlanta. Over it all, the screen's glass: a
+// glow at its edges and faint scanlines, decoration only.
 //
 // A view is real text for reading, selecting and copying, headed by its title (an h2). A new view is
 // announced once, briefly, in the status line; the views themselves aren't live.
@@ -14,7 +16,8 @@ import TermCmd from './TermCmd.astro';
 import TermHello from './TermHello.astro';
 import TermOutput from './TermOutput.astro';
 import TermProject from './TermProject.astro';
-import { BOOT, PS1 } from '../lib/terminal';
+import { BAR, BOOT, PS1, ZONE } from '../lib/terminal';
+import { profile } from '../data/site';
 import '../styles/terminal.css';
 
 const outputs = ['help', 'about', 'work', 'resume', 'contact', 'no-project', 'not-found'] as const;
@@ -55,10 +58,15 @@ const projects = await getCollection('projects');
         <span class="term-cursor" data-term-cursor aria-hidden="true"></span>
         <span class="term-measure" data-term-measure aria-hidden="true"></span>
       </span>
+      <p class="term-bar" aria-hidden="true">
+        <span>{BAR}</span>
+        <span data-term-clock data-city={profile.location.split(',')[0]} data-zone={ZONE}></span>
+      </p>
     </form>
     <p class="sr-only" role="status" data-term-status></p>
   </div>
 </div>
+<div class="term-glass" aria-hidden="true"></div>
 {
   outputs.map((cmd) => (
     <template data-term-out={cmd}>

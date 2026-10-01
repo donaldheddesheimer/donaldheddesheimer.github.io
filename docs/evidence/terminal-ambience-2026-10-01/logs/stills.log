@@ -1,0 +1,14 @@
+typing {"bot":null,"look":true,"note":null,"status":"","clock":"Atlanta 11:18 AM","ps1":"donald@lab:~$"}
+mistake {"bot":"squint","look":false,"note":"nope: command not found. Run help for available commands.","status":"nope: command not found. Run help for available commands.","clock":"Atlanta 11:18 AM","ps1":"donald@lab:~$"}
+whoami {"bot":"nod","look":false,"note":"donald","status":"donald","clock":"Atlanta 11:18 AM","ps1":"donald@lab:~$"}
+ls {"bot":"nod","look":false,"note":"about/  work/  resume/  contact/","status":"about/  work/  resume/  contact/","clock":"Atlanta 11:18 AM","ps1":"donald@lab:~$"}
+pwd {"bot":"nod","look":false,"note":"/home/donald","status":"/home/donald","clock":"Atlanta 11:18 AM","ps1":"donald@lab:~$"}
+sudo rm -rf / {"bot":"squint","look":false,"note":"donald is not in the sudoers file. This incident will be reported to the robots.","status":"donald is not in the sudoers file. This incident will be reported to the robots.","clock":"Atlanta 11:18 AM","ps1":"donald@lab:~$"}
+coffee {"bot":"nod","look":false,"note":"Out of coffee. The robots got to it first.","status":"Out of coffee. The robots got to it first.","clock":"Atlanta 11:18 AM","ps1":"donald@lab:~$"}
+ls->work {"bot":"nod","look":false,"note":null,"status":"Selected work: 2 featured of 11 projects.","clock":"Atlanta 11:18 AM","ps1":"donald@lab:~/work$"}
+pwd in project {"bot":"nod","look":false,"note":"/home/donald/work/cucadence","status":"/home/donald/work/cucadence","clock":"Atlanta 11:18 AM","ps1":"donald@lab:~/work/cucadence$"}
+about {"bot":"nod","look":false,"note":null,"status":"About me.","clock":"Atlanta 11:18 AM","ps1":"donald@lab:~/about$"}
+tab who -> who
+exit -> pc return
+reduced: typing {"bot":null,"look":false,"note":null,"status":"","clock":"Atlanta 11:18 AM","ps1":"donald@lab:~$"} mistake {"bot":null,"look":false,"note":"abx: command not found. Run help for available commands.","status":"abx: command not found. Run help for available commands.","clock":"Atlanta 11:18 AM","ps1":"donald@lab:~$"} bot animations 0 glass block
+# Chrome 154.0.8037.58

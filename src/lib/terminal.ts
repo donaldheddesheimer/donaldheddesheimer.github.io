@@ -39,3 +39,17 @@ export const EXIT = 'exit';
 /** Back to the startup, as a terminal's own `clear` (or Ctrl+L) would: its welcome, from the top,
  *  without playing it again. What was typed is kept for Up. Named under `help`'s list. */
 export const CLEAR = 'clear';
+
+/** A shell's habits, not listed by `help` nor completed by Tab, each answered on a line over the prompt
+ *  (and `ls` with the commands help lists, as directories). */
+export const HOME = '/home/donald'; // `pwd`: where `~` is
+export const SAID = {
+  whoami: 'donald',
+  sudo: 'donald is not in the sudoers file. This incident will be reported to the robots.',
+  coffee: 'Out of coffee. The robots got to it first.',
+};
+
+/** The status line under the prompt, as a terminal multiplexer's: what the robots are up to, and the
+ *  time where I am. */
+export const BAR = 'robots: on break';
+export const ZONE = 'America/New_York';

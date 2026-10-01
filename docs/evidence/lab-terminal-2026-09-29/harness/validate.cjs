@@ -226,7 +226,11 @@ const NOT_FOUND = (s) => `${s}: command not found. Run help for available comman
     const sn = await seen(p);
     const text = await onScreen(p);
     ok('startup: in by the flight (fade, fly, read), the startup plays once, then done', sn.pc.join(',') === 'fade,fly,read' && sn.boot.join(',') === 'pending,play,done', { ...sn, playedMs: ms });
-    ok('startup: the screen shows the two lines, the welcome between them, and the prompt, nothing else shown (the startup the only view, nothing recalled)', text === `New terminal started. Donald Heddesheimer Systems and GPU software engineer Georgia Tech · B.S. CS '28 · Atlanta, GA Type help to look around. The robots are on break. ${PS1}` && s.view === '' && s.views.join(',') === '' && s.recall?.length === 0 && s.note === null, { text, views: s.views, recall: s.recall });
+    ok('startup: the screen shows the two lines, the welcome between them, and the prompt, nothing else shown (the startup the only view, nothing recalled)', text.replace(/ \d{1,2}:\d{2} [AP]M$/, '') === `New terminal started. Donald Heddesheimer Systems and GPU software engineer Georgia Tech · B.S. CS '28 · Atlanta, GA Type help to look around. The robots are on break. ${PS1} robots: on break Atlanta` && s.view === '' && s.views.join(',') === '' && s.recall?.length === 0 && s.note === null, { text, views: s.views, recall: s.recall });
+    // The status line's clock: the time in Atlanta, to the minute (either side of a minute turning).
+    const atl = (d) => new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' }).format(d);
+    const clock = text.match(/Atlanta (\d{1,2}:\d{2} [AP]M)$/)?.[1];
+    ok('startup: the status line under the prompt says the robots are on break, and the time in Atlanta', [atl(new Date(Date.now() - 60000)), atl(new Date()), atl(new Date(Date.now() + 60000))].includes(clock), { clock, atlanta: atl(new Date()) });
     ok('startup: focus in the prompt (a mouse was used), the title is the terminal\'s, address /?computer', s.focus === 'input' && s.title === TERM_TITLE && s.at === '/?computer', s);
     const scr = await p.evaluate(() => {
       const d = document.querySelector('[data-pc-dialog]');
@@ -382,9 +386,41 @@ const NOT_FOUND = (s) => `${s}: command not found. Run help for available comman
     await type(p, '  WoRk  ');
     s = await snap(p);
     ok('input: "  WoRk  " (mixed case, spaces) shows work; the address the terminal\'s again', s.view === 'work' && s.at === '/?computer' && s.title === TERM_TITLE, { view: s.view, at: s.at, title: s.title });
-    await type(p, 'sudo rm -rf /');
+    await type(p, 'rm -rf /');
     s = await snap(p);
-    ok('input: an unknown command says exactly the not-found line over the prompt, help to run; the view stays', s.note === NOT_FOUND('sudo rm -rf /') && s.status === s.note && s.view === 'work' && (await p.locator('[data-term-note] [data-term-run="help"]').count()) === 1, { note: s.note, status: s.status, view: s.view });
+    ok('input: an unknown command says exactly the not-found line over the prompt, help to run; the view stays', s.note === NOT_FOUND('rm -rf /') && s.status === s.note && s.view === 'work' && (await p.locator('[data-term-note] [data-term-run="help"]').count()) === 1, { note: s.note, status: s.status, view: s.view });
+    // A shell's habits, unlisted: each answered on the line over the prompt (and told), the view staying,
+    // recalled like any command; the robot nods (squints at sudo). `ls` lists help's commands, to run.
+    const bot = () => p.evaluate(() => document.querySelector('[data-term]').dataset.bot ?? null);
+    for (const [cmd, said, mood] of [
+      ['whoami', 'donald', 'nod'],
+      ['ls', 'about/  work/  resume/  contact/', 'nod'],
+      ['pwd', '/home/donald/work', 'nod'],
+      ['sudo make me a sandwich', 'donald is not in the sudoers file. This incident will be reported to the robots.', 'squint'],
+      ['coffee', 'Out of coffee. The robots got to it first.', 'nod'],
+    ]) {
+      await type(p, cmd, 60);
+      const m = await bot();
+      s = await snap(p);
+      ok(`habits: ${cmd} says "${said}" over the prompt, and it's told; the view stays; recalled; the robot ${mood}s`, s.note === said.replace(/\s+/g, ' ') && s.status === said && s.view === 'work' && s.recall.at(-1) === cmd && m === mood, { note: s.note, status: s.status, view: s.view, last: s.recall.at(-1), mood: m });
+    }
+    await type(p, 'ls', 60);
+    const ls = await p.evaluate(() => [...document.querySelectorAll('[data-term-note] a.t-cmd[data-term-run]')].map((a) => `${a.dataset.termRun}:${a.getAttribute('href')}`).join(' '));
+    ok("habits: ls's entries run their commands (and are links to them)", ls === 'about:/?computer=about work:/?computer=work resume:/?computer=resume contact:/?computer=contact', ls);
+    await p.keyboard.type('who');
+    await p.keyboard.press('Tab');
+    const unlisted = { tab: await p.inputValue('[data-term-input]'), help: await p.evaluate(() => document.querySelector('template[data-term-out="help"]').content.textContent) };
+    ok('habits: unlisted (Tab leaves who as typed; help names none of them)', unlisted.tab === 'who' && !/whoami|coffee|sudo|\bls\b|\bpwd\b/.test(unlisted.help), { tab: unlisted.tab });
+    await p.fill('[data-term-input]', '');
+    await p.keyboard.type('abo');
+    const look = await p.evaluate(() => document.querySelector('[data-term]').hasAttribute('data-bot-look'));
+    await p.fill('[data-term-input]', '');
+    await type(p, 'nope', 60);
+    const squint = await bot();
+    await sleep(1500);
+    ok("robot: its eyes on the prompt while something's typed; a squint at a mistake, gone after a moment", look && squint === 'squint' && (await bot()) === null && !(await p.evaluate(() => document.querySelector('[data-term]').hasAttribute('data-bot-look'))), { look, squint });
+    await type(p, 'rm -rf /');
+    s = await snap(p);
     const n0 = s.recall.length;
     await type(p, '');
     await type(p, '    ');
@@ -1066,6 +1102,8 @@ const NOT_FOUND = (s) => `${s}: command not found. Run help for available comman
     {
       const p = await fresh();
       await booted(p);
+      const bot = await p.evaluate(() => document.getAnimations().filter((a) => a.effect?.target?.closest?.('.t-bot')).map((a) => a.animationName).sort().join(','));
+      ok('motion on: the robot blinks and its antenna light pulses', bot === 't-bot-open,t-bot-pulse,t-bot-shut', bot);
       await p.keyboard.type('help');
       await p.keyboard.press('Enter');
       const n = await anims(p);
@@ -1076,6 +1114,13 @@ const NOT_FOUND = (s) => `${s}: command not found. Run help for available comman
       const p = await fresh(opts);
       await sleep(300);
       const sn = await seen(p);
+      const still = await anims(p);
+      await p.keyboard.type('ab');
+      const look = await p.evaluate(() => document.querySelector('[data-term]').hasAttribute('data-bot-look'));
+      await p.fill('[data-term-input]', '');
+      await type(p, 'nope', 60);
+      const mood = await p.evaluate(() => document.querySelector('[data-term]').dataset.bot ?? null);
+      ok(`${how}: the robot holds still (no blink, no pulse), and neither looks nor squints`, still === 0 && !look && mood === null, { animations: still, look, mood });
       await p.keyboard.type('help');
       await p.keyboard.press('Enter');
       const n = await anims(p);
