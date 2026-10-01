@@ -3,9 +3,9 @@ code: PRJ-06
 title: Skyblock Bazaar Model
 summary: Forecasting whether in-game commodity prices will rise, fall, or hold over the next six hours, using millions of market snapshots plus event and election data.
 brief:
-  does: 'Forecasts whether a Hypixel Skyblock Bazaar item''s price will rise, fall or hold over the next six hours.'
-  hard: 'Most six-hour windows are flat, so the classes are heavily imbalanced, across 3.57 million snapshots merged with event and mayor-perk flags.'
-  shown: 'Tuning raised the XGBoost classifier''s test accuracy from 55.5% to 60.6% on about 698K held-out rows.'
+  does: 'Forecasts whether a Skyblock Bazaar price will rise, fall or hold over six hours.'
+  hard: 'Most six-hour windows are flat, so the classes are heavily imbalanced.'
+  shown: 'Tuning raised XGBoost''s test accuracy from 55.5% to 60.6%.'
 # TODO: brief: add mine with the TODO below.
 line: 'Forecasting an in-game market''s prices'
 stack: 'Python / XGBoost'

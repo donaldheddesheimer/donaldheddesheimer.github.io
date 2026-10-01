@@ -39,6 +39,8 @@ const projects = defineCollection({
     featured: z.boolean().default(false),
     cover: z.string().optional(), // path under public/, e.g. "/projects/traffic-ops.jpg"
     coverAlt: z.string().optional(),
+    // The cover's line in the terminal, folded, where its alt text is too long to be one.
+    coverLabel: z.string().optional(),
     // A still frame for places that shouldn't animate (the Work cards: gone with the terminal, so not
     // shown anywhere now). Use it when the cover is a GIF.
     poster: z.string().optional(),

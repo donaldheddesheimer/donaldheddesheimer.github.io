@@ -84,7 +84,11 @@ const parts = [
       d.cover && (
         <details class="t-fig">
           <summary>
-            <span class="t-dim">cover{coverKind && ` · ${mediaKindLabel[coverKind].toLowerCase()}`}</span> {d.coverAlt}
+            {d.coverLabel ?? (
+              <>
+                <span class="t-dim">cover{coverKind && ` · ${mediaKindLabel[coverKind].toLowerCase()}`}</span> {d.coverAlt}
+              </>
+            )}
           </summary>
           <figure class="t-fig-body">
             <img src={d.cover} alt={d.coverAlt ?? ''} loading="lazy" decoding="async" />
