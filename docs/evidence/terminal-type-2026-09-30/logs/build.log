@@ -2,70 +2,70 @@
 > donaldheddesheimer.github.io@0.1.0 build
 > astro build
 
-20:10:06 [content] Syncing content
-20:10:06 [content] Synced content
-20:10:06 [types] Generated 197ms
-20:10:06 [build] output: "static"
-20:10:06 [build] mode: "static"
-20:10:06 [build] directory: <repo>/dist/
-20:10:06 [build] Collecting build info...
-20:10:06 [build] ✓ Completed in 215ms.
-20:10:06 [build] Building static entrypoints...
-20:10:06 [vite] ✓ built in 201ms
-20:10:06 [WARN] [vite] [plugin builtin:vite-reporter] 
+20:29:30 [content] Syncing content
+20:29:30 [content] Synced content
+20:29:30 [types] Generated 199ms
+20:29:30 [build] output: "static"
+20:29:30 [build] mode: "static"
+20:29:30 [build] directory: <repo>/dist/
+20:29:30 [build] Collecting build info...
+20:29:30 [build] ✓ Completed in 214ms.
+20:29:30 [build] Building static entrypoints...
+20:29:30 [vite] ✓ built in 288ms
+20:29:30 [WARN] [vite] [plugin builtin:vite-reporter] 
 (!) Some chunks are larger than 500 kB after minification. Consider:
 - Using dynamic import() to code-split the application
 - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
-20:10:06 [vite] ✓ built in 118ms
-20:10:06 [build] Rearranging server assets...
+20:29:30 [vite] ✓ built in 141ms
+20:29:30 [build] Rearranging server assets...
 
  generating static routes 
-20:10:06   ├─ /404.html (+5ms) 
-20:10:06   ├─ /computer/about/index.html (+2ms) 
-20:10:06   ├─ /computer/contact/index.html (+1ms) 
-20:10:06   ├─ /computer/resume/index.html (+1ms) 
-20:10:06   ├─ /computer/work/bytefight/index.html (+2ms) 
-20:10:06   ├─ /computer/work/claude-status/index.html (+1ms) 
-20:10:06   ├─ /computer/work/cucadence/index.html (+1ms) 
-20:10:06   ├─ /computer/work/fluxion/index.html (+1ms) 
-20:10:06   ├─ /computer/work/nn-mnist/index.html (+1ms) 
-20:10:06   ├─ /computer/work/skyblock-bazaar/index.html (+1ms) 
-20:10:06   ├─ /computer/work/smart-bin/index.html (+1ms) 
-20:10:06   ├─ /computer/work/swerve-drive/index.html (+1ms) 
-20:10:06   ├─ /computer/work/traffic-ops-center/index.html (+1ms) 
-20:10:06   ├─ /computer/work/travelmate/index.html (+1ms) 
-20:10:06   ├─ /computer/work/useless-machine/index.html (+1ms) 
-20:10:06   ├─ /computer/work/index.html (+1ms) 
-20:10:06   ├─ /computer/index.html (+3ms) 
-20:10:06   ├─ /projects/useless-machine/index.html (+1ms) 
-20:10:06   ├─ /projects/swerve-drive/index.html (+1ms) 
-20:10:06   ├─ /projects/smart-bin/index.html (+1ms) 
-20:10:06   ├─ /projects/travelmate/index.html (+1ms) 
-20:10:06   ├─ /projects/bytefight/index.html (+1ms) 
-20:10:06   ├─ /projects/skyblock-bazaar/index.html (+2ms) 
-20:10:06   ├─ /projects/nn-mnist/index.html (+2ms) 
-20:10:06   ├─ /projects/claude-status/index.html (+1ms) 
-20:10:06   ├─ /projects/cucadence/index.html (+1ms) 
-20:10:06   ├─ /projects/fluxion/index.html (+1ms) 
-20:10:06   ├─ /projects/traffic-ops-center/index.html (+1ms) 
-20:10:06   ├─ /prototype/work/bytefight/index.html (+1ms) 
-20:10:06   ├─ /prototype/work/claude-status/index.html (+1ms) 
-20:10:06   ├─ /prototype/work/cucadence/index.html (+1ms) 
-20:10:06   ├─ /prototype/work/fluxion/index.html (+1ms) 
-20:10:06   ├─ /prototype/work/nn-mnist/index.html (+1ms) 
-20:10:06   ├─ /prototype/work/skyblock-bazaar/index.html (+1ms) 
-20:10:06   ├─ /prototype/work/smart-bin/index.html (+3ms) 
-20:10:06   ├─ /prototype/work/swerve-drive/index.html (+1ms) 
-20:10:06   ├─ /prototype/work/traffic-ops-center/index.html (+1ms) 
-20:10:06   ├─ /prototype/work/travelmate/index.html (+1ms) 
-20:10:06   ├─ /prototype/work/useless-machine/index.html (+1ms) 
-20:10:06   ├─ /prototype/index.html (+2ms) 
-20:10:06   ├─ /systems/screen/index.html (+5ms) 
-20:10:06   ├─ /systems/index.html (+2ms) 
-20:10:06   ├─ /index.html (+4ms) 
-20:10:06 ✓ Completed in 124ms.
+20:29:30   ├─ /404.html (+5ms) 
+20:29:30   ├─ /computer/about/index.html (+2ms) 
+20:29:30   ├─ /computer/contact/index.html (+2ms) 
+20:29:30   ├─ /computer/resume/index.html (+2ms) 
+20:29:30   ├─ /computer/work/bytefight/index.html (+3ms) 
+20:29:30   ├─ /computer/work/claude-status/index.html (+1ms) 
+20:29:30   ├─ /computer/work/cucadence/index.html (+2ms) 
+20:29:30   ├─ /computer/work/fluxion/index.html (+2ms) 
+20:29:30   ├─ /computer/work/nn-mnist/index.html (+1ms) 
+20:29:30   ├─ /computer/work/skyblock-bazaar/index.html (+1ms) 
+20:29:30   ├─ /computer/work/smart-bin/index.html (+1ms) 
+20:29:30   ├─ /computer/work/swerve-drive/index.html (+1ms) 
+20:29:30   ├─ /computer/work/traffic-ops-center/index.html (+1ms) 
+20:29:30   ├─ /computer/work/travelmate/index.html (+1ms) 
+20:29:30   ├─ /computer/work/useless-machine/index.html (+1ms) 
+20:29:30   ├─ /computer/work/index.html (+2ms) 
+20:29:30   ├─ /computer/index.html (+3ms) 
+20:29:30   ├─ /projects/useless-machine/index.html (+1ms) 
+20:29:30   ├─ /projects/swerve-drive/index.html (+1ms) 
+20:29:30   ├─ /projects/smart-bin/index.html (+1ms) 
+20:29:30   ├─ /projects/travelmate/index.html (+1ms) 
+20:29:30   ├─ /projects/bytefight/index.html (+1ms) 
+20:29:30   ├─ /projects/skyblock-bazaar/index.html (+1ms) 
+20:29:30   ├─ /projects/nn-mnist/index.html (+1ms) 
+20:29:30   ├─ /projects/claude-status/index.html (+1ms) 
+20:29:30   ├─ /projects/cucadence/index.html (+1ms) 
+20:29:30   ├─ /projects/fluxion/index.html (+1ms) 
+20:29:30   ├─ /projects/traffic-ops-center/index.html (+1ms) 
+20:29:30   ├─ /prototype/work/bytefight/index.html (+1ms) 
+20:29:30   ├─ /prototype/work/claude-status/index.html (+1ms) 
+20:29:30   ├─ /prototype/work/cucadence/index.html (+1ms) 
+20:29:30   ├─ /prototype/work/fluxion/index.html (+1ms) 
+20:29:30   ├─ /prototype/work/nn-mnist/index.html (+1ms) 
+20:29:30   ├─ /prototype/work/skyblock-bazaar/index.html (+1ms) 
+20:29:30   ├─ /prototype/work/smart-bin/index.html (+0ms) 
+20:29:30   ├─ /prototype/work/swerve-drive/index.html (+1ms) 
+20:29:30   ├─ /prototype/work/traffic-ops-center/index.html (+0ms) 
+20:29:30   ├─ /prototype/work/travelmate/index.html (+1ms) 
+20:29:30   ├─ /prototype/work/useless-machine/index.html (+0ms) 
+20:29:30   ├─ /prototype/index.html (+1ms) 
+20:29:30   ├─ /systems/screen/index.html (+2ms) 
+20:29:30   ├─ /systems/index.html (+1ms) 
+20:29:30   ├─ /index.html (+3ms) 
+20:29:30 ✓ Completed in 104ms.
 
-20:10:06 [build] ✓ Completed in 461ms.
-20:10:06 [build] 43 page(s) built in 705ms
-20:10:06 [build] Complete!
+20:29:30 [build] ✓ Completed in 549ms.
+20:29:30 [build] 43 page(s) built in 791ms
+20:29:30 [build] Complete!

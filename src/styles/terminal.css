@@ -1,10 +1,9 @@
 /* The lab computer's terminal (src/components/Terminal.astro) and its transcript, /computer/ (the same
-   views, standing alone, one after another). Charcoal, warm off-white type, and one accent, amber, for
-   the prompt and for what can be run. Two faces: the site's mono for the terminal itself (the prompt,
-   where a view is, commands, numbers and metadata), and its sans (--t-read) for what's read in a view:
-   titles, names and prose. Sizes follow the screen: the terminal is the container (the lab's
-   .pc-screen), so a larger monitor reads larger; on a touch screen the type never drops under 16px
-   (the prompt's field would zoom the page on focus). */
+   views, standing alone, one after another). Charcoal, warm off-white type in the site's mono, and one
+   accent, amber, for the prompt and for what can be run; a view's title alone is in a pixel face. Sizes
+   follow the screen: the terminal is the container (the lab's .pc-screen), so a larger monitor reads
+   larger; on a touch screen the type never drops under 16px (the prompt's field would zoom the page on
+   focus). */
 .term,
 .t-static {
   --t-bg: #171513;
@@ -14,8 +13,6 @@
   --t-rule: #2e2a26;
   --t-line: #554c42;
   --t-fs: clamp(0.8125rem, 1.4cqi, 1.0625rem);
-  --t-read: var(--font-sans);
-  --t-measure: 38em; /* prose, in the sans: about 75 characters a line */
   --t-pad-y: max(1rem, 2.6cqi);
   --t-pad-x: max(1rem, 3cqi);
   --t-gap: 1.1em;
@@ -110,11 +107,10 @@
   font-size: 0.8125em;
 }
 .t-title {
-  font-family: var(--t-read);
-  font-weight: 650;
+  font-family: var(--font-pixel);
+  font-weight: 600;
   font-size: 2.125em;
   line-height: 1.12;
-  letter-spacing: -0.02em;
 }
 .t-head > * + * {
   margin-top: 0.3em;
@@ -131,20 +127,11 @@
   font-size: 0.9375em;
 }
 
-/* What's read: in the sans, a calmer line and a shorter measure. Code, tables and anything inline that
-   the terminal would print (a command, a code span) keep the mono. */
-:is(.t-prose, .t-purpose, .t-role, .t-work-name, .t-work-line, .t-points, .t-cv h4),
-.t-md :is(p, li, blockquote),
-.t-out .t-sec > summary > .t-section {
-  font-family: var(--t-read);
-}
+/* What's read: a looser line, at most 70 columns. */
 :is(.t-prose, .t-purpose, .t-points),
 .t-md :is(p, li, blockquote) {
-  max-width: var(--t-measure);
+  max-width: 70ch;
   line-height: 1.65;
-}
-:is(.t-prose, .t-purpose, .t-role, .t-points, .t-md) :is(code, .t-cmd, .t-strong) {
-  font-family: var(--font-mono);
 }
 
 /* Output: lines of text, a half line between blocks, a blank line before each part. */
@@ -342,7 +329,6 @@
 }
 .t-md :not(pre) > code {
   padding: 0.05em 0.3em;
-  font-size: 0.9em;
   border-radius: 2px;
   background: rgb(235 229 218 / 0.08);
 }
@@ -383,6 +369,7 @@
    when, quieter; what it showed, in the accent; then my part and the hard part, each under its label, and
    where to find it. Its detail follows, folded (below). */
 .t-purpose {
+  max-width: 64ch;
   font-size: 1.125em;
 }
 .t-project > .t-head .t-sub {

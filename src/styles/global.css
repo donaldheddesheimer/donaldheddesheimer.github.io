@@ -113,6 +113,7 @@
   --color-well: var(--well);
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+  --font-pixel: 'Pixelify Sans', 'JetBrains Mono', ui-monospace, monospace;
 }
 
 html {
