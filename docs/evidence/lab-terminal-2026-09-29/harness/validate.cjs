@@ -213,8 +213,9 @@ const NOT_FOUND = (s) => `${s}: command not found. Run help for available comman
     return p;
   };
 
-  // 1. Opening the computer, and the startup: once a session, then the two lines and the prompt, nothing
-  //    shown on its own; help lists exactly the four commands.
+  // 1. Opening the computer, and the startup: once a session, then the two lines (the welcome between
+  //    them) and the prompt, nothing shown on its own; help lists exactly the four commands (and `clear`
+  //    under them).
   await group('startup', async () => {
     const p = await fresh();
     const t0 = Date.now();
@@ -225,7 +226,7 @@ const NOT_FOUND = (s) => `${s}: command not found. Run help for available comman
     const sn = await seen(p);
     const text = await onScreen(p);
     ok('startup: in by the flight (fade, fly, read), the startup plays once, then done', sn.pc.join(',') === 'fade,fly,read' && sn.boot.join(',') === 'pending,play,done', { ...sn, playedMs: ms });
-    ok('startup: the screen shows the two lines and the prompt, nothing else shown (the startup the only view, nothing recalled)', text === `New terminal started. Type help to look around. The robots are on break. ${PS1}` && s.view === '' && s.views.join(',') === '' && s.recall?.length === 0 && s.note === null, { text, views: s.views, recall: s.recall });
+    ok('startup: the screen shows the two lines, the welcome between them, and the prompt, nothing else shown (the startup the only view, nothing recalled)', text === `New terminal started. Donald Heddesheimer Systems and GPU software engineer Georgia Tech · B.S. CS '28 · Atlanta, GA Type help to look around. The robots are on break. ${PS1}` && s.view === '' && s.views.join(',') === '' && s.recall?.length === 0 && s.note === null, { text, views: s.views, recall: s.recall });
     ok('startup: focus in the prompt (a mouse was used), the title is the terminal\'s, address /?computer', s.focus === 'input' && s.title === TERM_TITLE && s.at === '/?computer', s);
     const scr = await p.evaluate(() => {
       const d = document.querySelector('[data-pc-dialog]');
@@ -239,7 +240,7 @@ const NOT_FOUND = (s) => `${s}: command not found. Run help for available comman
     const h = await snap(p);
     const help = await p.evaluate(() => [...document.querySelectorAll('[data-term] [data-view="help"] .t-help li')].map((li) => ({ cmd: li.querySelector('[data-term-run]')?.dataset.termRun, tag: li.querySelector('[data-term-run]')?.tagName, label: li.querySelector('span')?.textContent })));
     ok('help: in the startup\'s place (the one view shown), exactly four commands, about, work, resume, contact, each a button', h.view === 'help' && h.views.join(',') === ',help' && help.map((x) => x.cmd).join(',') === 'about,work,resume,contact' && help.every((x) => x.tag === 'BUTTON' && x.label), { view: h.view, views: h.views, help });
-    ok('help: announced once in the status line, focus stays in the prompt, the prompt home (~)', h.status === 'Commands: about, work, resume, contact.' && h.focus === 'input' && h.ps1 === PS1, { status: h.status, focus: h.focus, ps1: h.ps1 });
+    ok('help: announced once in the status line, focus stays in the prompt, the prompt home (~)', h.status === 'Commands: about, work, resume, contact, clear.' && h.focus === 'input' && h.ps1 === PS1, { status: h.status, focus: h.focus, ps1: h.ps1 });
     await shot(p, 'help-1440x900');
     await p.context().close();
 
@@ -417,6 +418,24 @@ const NOT_FOUND = (s) => `${s}: command not found. Run help for available comman
     await p.keyboard.press('Backspace');
     const sv = s.saved;
     ok(`input: the session keeps (${STORE}) what was typed (no blank lines), the view being read, each view's place, and that the startup has played`, sv?.v === 2 && sv.boot === true && sv.view === 'contact' && sv.recall.at(-1) === 'contact' && sv.recall.every((x) => x.trim()) && typeof sv.views === 'object' && 'about' in sv.views, { v: sv?.v, boot: sv?.boot, view: sv?.view, n: sv?.recall.length, views: Object.keys(sv?.views ?? {}) });
+    // `clear`: the startup again, from its top, not played again; and Ctrl+L, keeping the line typed.
+    await p.fill('[data-term-input]', '');
+    await type(p, 'work cucadence');
+    await p.evaluate(() => document.querySelector('[data-term]').scrollTo({ top: 300, behavior: 'instant' }));
+    await type(p, 'clear');
+    s = await snap(p);
+    ok('clear: shows the startup (made once) from its top, not played again, the prompt home (~), address /?computer, told; kept for Up', s.view === '' && s.top === 0 && s.boot === 'done' && s.ps1 === PS1 && s.at === '/?computer' && s.status === 'Cleared.' && s.recall.at(-1) === 'clear' && s.focus === 'input' && unique(s), { view: s.view, top: s.top, boot: s.boot, ps1: s.ps1, at: s.at, status: s.status, last: s.recall.at(-1) });
+    await type(p, 'about');
+    await p.keyboard.type('wor');
+    await p.keyboard.press('Control+l');
+    await sleep(400);
+    s = await snap(p);
+    ok('clear: Ctrl+L does the same, keeping what\'s being typed and adding nothing to recall', s.view === '' && s.top === 0 && s.value === 'wor' && s.recall.at(-1) === 'about' && s.at === '/?computer' && s.focus === 'input', { view: s.view, value: s.value, last: s.recall.at(-1), at: s.at });
+    await p.fill('[data-term-input]', 'cl');
+    await p.keyboard.press('Tab');
+    const done = await p.evaluate(() => document.querySelector('[data-term-input]').value);
+    ok('clear: Tab completes it', done.trim() === 'clear', done);
+    await p.fill('[data-term-input]', '');
     const ids = await p.evaluate(() => { const all = [...document.querySelectorAll('[id]')].map((e) => e.id); return all.filter((x, i) => all.indexOf(x) !== i); });
     ok('input: no id repeats in the page, however many commands have run', ids.length === 0, ids);
   });
@@ -1105,9 +1124,12 @@ const NOT_FOUND = (s) => `${s}: command not found. Run help for available comman
     let s = await snap(p);
     ok('keyboard: Tab to the monitor\'s link (ringed), Enter goes in, focus in the prompt', first.focus === 'monitor' && first.ring && s.focus === 'input', { first: first.focus, ring: first.ring, now: s.focus });
     await type(p, 'help');
+    const ringed = () => p.evaluate(() => { const a = document.activeElement; const cs = getComputedStyle(a); return { run: a.dataset.termRun, ring: a.matches(':focus-visible'), outline: `${cs.outlineStyle} ${cs.outlineWidth}` }; });
     await p.keyboard.press('Shift+Tab');
-    const back = await p.evaluate(() => { const a = document.activeElement; const cs = getComputedStyle(a); return { run: a.dataset.termRun, ring: a.matches(':focus-visible'), outline: `${cs.outlineStyle} ${cs.outlineWidth}` }; });
-    ok('keyboard: Shift+Tab from the prompt reaches help\'s last command button (nothing in the views hidden), ringed', back.run === 'contact' && back.ring && back.outline.startsWith('solid'), back);
+    const cl = await ringed();
+    await p.keyboard.press('Shift+Tab');
+    const back = await ringed();
+    ok('keyboard: Shift+Tab from the prompt reaches help\'s `clear`, then its last listed command button (nothing in the views hidden), ringed', cl.run === 'clear' && cl.ring && back.run === 'contact' && back.ring && back.outline.startsWith('solid'), { clear: cl, back });
     await p.keyboard.press('Enter');
     await sleep(700);
     s = await snap(p);
@@ -1250,8 +1272,10 @@ const NOT_FOUND = (s) => `${s}: command not found. Run help for available comman
           title: document.title,
           echo: document.querySelector('main .term-echo')?.textContent.replace(ps, '').trim(),
           name: document.querySelector('main .t-project h2.t-title')?.textContent.trim(),
-          // In view: at the top, or as near as the page scrolls (folded, it may fit the window).
-          atHeading: !!hr && hr.top >= -1 && hr.bottom <= innerHeight && (hr.top < 120 || scrollY >= document.scrollingElement.scrollHeight - innerHeight - 1),
+          // In view: at the top, or as near as the page scrolls (folded, it may fit the window): what's left
+          // to scroll wouldn't bring it there. (A late web font can leave the anchored line a px or two short
+          // of the page's foot, the line itself where it was.)
+          atHeading: !!hr && hr.top >= -1 && hr.bottom <= innerHeight && (hr.top < 120 || hr.top - (document.scrollingElement.scrollHeight - innerHeight - scrollY) >= 120),
           sectionOpen: !!hd?.closest('details')?.open,
           sections: document.querySelectorAll('main details.t-sec').length,
           figs: document.querySelectorAll('main details.t-fig').length,

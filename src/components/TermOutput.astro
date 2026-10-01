@@ -1,7 +1,8 @@
 ---
 // What one of the terminal's commands prints, as real HTML: `help`, the four it lists, and the answers
 // to a project that isn't there and to anything else. From src/data/site.ts and the projects, nothing
-// added. (A project's own, `work <id>`, is TermProject.astro.) The lab's terminal holds each in a
+// added. (A project's own, `work <id>`, is TermProject.astro.) Help names `clear` under its list, in
+// the lab's terminal (the transcript has nothing to clear). The lab's terminal holds each in a
 // <template> until it's run (Terminal.astro); the /computer/ transcript prints them all (`live` false:
 // commands are links to where they ran, and there's nothing to copy with).
 //
@@ -18,7 +19,7 @@ import WorkRow from './WorkRow.astro';
 import { contact, education, experience, offDuty, orgs, profile, skills, socials } from '../data/site';
 import { fmtMonth } from '../lib/format';
 import { byWork } from '../lib/folio';
-import { HELP, NOT_FOUND, NO_PROJECT } from '../lib/terminal';
+import { CLEAR, HELP, NOT_FOUND, NO_PROJECT } from '../lib/terminal';
 
 interface Props {
   cmd: 'help' | 'about' | 'work' | 'resume' | 'contact' | 'no-project' | 'not-found';
@@ -38,7 +39,7 @@ const current = experience.find((e) => !e.end);
 
 {
   cmd === 'help' && (
-    <div class="t-out t-stagger" data-announce={`Commands: ${HELP.map((h) => h.cmd).join(', ')}.`}>
+    <div class="t-out t-stagger" data-announce={`Commands: ${[...HELP.map((h) => h.cmd), CLEAR].join(', ')}.`}>
       <TermHead view="help" title="Commands" />
       <ul class="t-help">
         {HELP.map((h, i) => (
@@ -48,6 +49,11 @@ const current = experience.find((e) => !e.end);
           </li>
         ))}
       </ul>
+      {live && (
+        <p class="t-hint">
+          And <TermCmd name={CLEAR} />, back to the start.
+        </p>
+      )}
     </div>
   )
 }

@@ -402,8 +402,12 @@
 }
 .t-bot {
   flex: none;
-  width: 5.5em;
+  width: 8em;
   height: auto;
+}
+/* The startup's welcome (TermHello.astro): `about`'s opening, between the startup's two lines. */
+.term-hello {
+  margin-block: var(--t-gap);
 }
 .t-role {
   color: var(--t-fg);
@@ -420,7 +424,7 @@
 }
 @container (width < 30rem) {
   .t-bot {
-    width: 3.5em;
+    width: 5em;
   }
 }
 
@@ -758,7 +762,7 @@
 }
 
 /* The startup, once a session (terminal.ts): the first line typed out, fast, behind a cursor; the
-   second line and the prompt after it. About a second, and any key or tap ends it. Before it plays
+   welcome, the second line and the prompt after it. About a second, and any key or tap ends it. Before it plays
    (in flight), the screen shows only that cursor, as the monitor did. */
 /* (Typed out on one line; once typed, it wraps like the rest where the screen is narrow or the type large.) */
 .term-boot-1 {
@@ -784,7 +788,7 @@
 .term:is([data-boot='pending'], [data-boot='play']) .term-boot-cursor {
   display: inline-block;
 }
-.term[data-boot='pending'] :is(.term-boot-2, .term-prompt) {
+.term[data-boot='pending'] :is(.term-hello, .term-boot-2, .term-prompt) {
   opacity: 0;
 }
 .term[data-boot='play'] .term-type {
@@ -793,11 +797,14 @@
 .term[data-boot='play'] .term-boot-cursor {
   animation: term-gone 1ms linear calc(var(--n) * 18ms + 110ms) both;
 }
+.term[data-boot='play'] .term-hello {
+  animation: term-in 240ms var(--ease) 450ms both;
+}
 .term[data-boot='play'] .term-boot-2 {
-  animation: term-in 200ms var(--ease) 500ms both;
+  animation: term-in 200ms var(--ease) 700ms both;
 }
 .term[data-boot='play'] .term-prompt {
-  animation: term-in 180ms var(--ease) 700ms both;
+  animation: term-in 180ms var(--ease) 880ms both;
 }
 
 /* A view asked for comes in quickly; help's lines one after another. Only ever the newest: the next

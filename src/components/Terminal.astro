@@ -1,6 +1,7 @@
 ---
 // The lab computer's terminal (src/scripts/lab/terminal.ts), inside the lab's dialog (LabStage.astro):
-// one view at a time over the prompt. First the startup's two lines; then whatever was last asked for:
+// one view at a time over the prompt. First the startup (its two lines, my name between them, as
+// TermHello.astro has it; `clear` comes back to it); then whatever was last asked for:
 // help, a section, a project. Each view waits in a <template> below, rendered here from the site's data
 // (TermOutput.astro; each project's, `work <id>`, TermProject.astro), until it's first asked for.
 // (A template's pictures load only once it's shown.) Over the prompt, a line for Tab's matches and one
@@ -10,6 +11,7 @@
 // announced once, briefly, in the status line; the views themselves aren't live.
 import { getCollection } from 'astro:content';
 import TermCmd from './TermCmd.astro';
+import TermHello from './TermHello.astro';
 import TermOutput from './TermOutput.astro';
 import TermProject from './TermProject.astro';
 import { BOOT, PS1 } from '../lib/terminal';
@@ -22,10 +24,11 @@ const projects = await getCollection('projects');
 <div class="term" data-term data-boot="pending" tabindex="-1">
   <div class="term-inner">
     <div class="term-views" data-term-views>
-      <div class="term-boot" data-view="">
+      <div class="term-boot" data-view="" data-announce="Cleared.">
         <p class="term-boot-1" style={`--n:${BOOT.first.length}`}>
           <span class="term-type">{BOOT.first}</span><span class="term-boot-cursor" aria-hidden="true"></span>
         </p>
+        <TermHello />
         <p class="term-boot-2" id="term-hint">
           {BOOT.second[0]}<TermCmd name="help" />{BOOT.second[1]}
         </p>

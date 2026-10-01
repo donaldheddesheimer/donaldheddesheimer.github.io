@@ -8,6 +8,7 @@
 // running the command its anchor names. Kept out of search results, as the computer's pages are.
 import Base from '../../layouts/Base.astro';
 import TermCmd from '../../components/TermCmd.astro';
+import TermHello from '../../components/TermHello.astro';
 import TermOutput from '../../components/TermOutput.astro';
 import { profile } from '../../data/site';
 import { BOOT, PS1 } from '../../lib/terminal';
@@ -36,6 +37,7 @@ const entries = ['help', ...COMMANDS] as const;
     <div class="term-log">
       <div class="term-boot">
         <p>{BOOT.first}</p>
+        <TermHello live={false} />
         <p>
           {BOOT.second[0]}<TermCmd name="help" live={false} />{BOOT.second[1]}
         </p>

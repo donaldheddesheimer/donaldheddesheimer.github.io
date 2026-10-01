@@ -35,3 +35,7 @@ export const NOT_FOUND = [': command not found. Run ', ' for available commands.
 
 /** Leaves the computer, as a terminal's own `exit` would. Not listed by `help`. */
 export const EXIT = 'exit';
+
+/** Back to the startup, as a terminal's own `clear` (or Ctrl+L) would: its welcome, from the top,
+ *  without playing it again. What was typed is kept for Up. Named under `help`'s list. */
+export const CLEAR = 'clear';

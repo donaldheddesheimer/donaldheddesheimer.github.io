@@ -27,12 +27,12 @@
 // startup, and the next view settles the one before. Reduced motion, or Motion off in Settings: all at
 // once, with a steady cursor.
 import { COMMANDS, isCommand, labHref } from './routes';
-import { EXIT, NOT_FOUND, NO_PROJECT, ps1 } from '../../lib/terminal';
+import { CLEAR, EXIT, NOT_FOUND, NO_PROJECT, ps1 } from '../../lib/terminal';
 
 const STORE = 'lab:terminal:2';
 const OLD = 'lab:terminal'; // the first version's, the transcript
 const KEEP = 60; // commands kept for Up and Down
-const BOOT_MS = 900; // the startup's length (terminal.css)
+const BOOT_MS = 1080; // the startup's length (terminal.css)
 const START = ''; // the startup's view
 
 interface Place {
@@ -310,14 +310,22 @@ export function initTerminal(
     unsay();
     if (!cmd) return;
     if (cmd === EXIT) return hooks.exit();
-    const view = viewOf(cmd);
+    const view = cmd === CLEAR ? START : viewOf(cmd);
     if (view == null) return mistake(raw, cmd);
-    const el = show(view, '', true)!;
+    const el = view === START ? clear() : show(view, '', true)!;
     // (Told before the focus moves: the place it was run from is still in view.)
     hooks.went(view, from);
     if (by === 'tap') el.querySelector<HTMLElement>('.t-title')?.focus({ preventScroll: true });
     else if (by === 'click') input.focus({ preventScroll: true });
     announce(el.dataset.announce ?? '');
+  }
+
+  // `clear`: the startup again, from its top (played once, it isn't played again).
+  function clear() {
+    place(START).y = 0;
+    const el = show(START, '', true)!;
+    jump(0);
+    return el;
   }
 
   // Earlier commands again, Up and Down, as a shell's history does: the line being typed is kept.
@@ -347,7 +355,7 @@ export function initTerminal(
   // with a space after it, for an id); several fill in as much as they share, or, sharing no more, are
   // listed over the prompt, and told, until the next key. Nothing to complete, or the same Tab again
   // with the list already up, and Tab isn't taken: it moves on.
-  const names = ['help', ...COMMANDS];
+  const names = ['help', ...COMMANDS, CLEAR];
   let listed = '';
   function complete() {
     const v = input.value;
@@ -432,6 +440,13 @@ export function initTerminal(
       step(e.key === 'ArrowUp' ? -1 : 1);
     } else if (e.key === 'Tab') {
       if (!e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey && complete()) e.preventDefault();
+    } else if (e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'l') {
+      // Ctrl+L, as a shell has it: `clear`, keeping what's being typed (and not adding to what was).
+      e.preventDefault();
+      unlist();
+      unsay();
+      announce(clear().dataset.announce ?? '');
+      hooks.went(START, null);
     } else requestAnimationFrame(caret);
   });
 
