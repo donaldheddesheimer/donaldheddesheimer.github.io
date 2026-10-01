@@ -2,8 +2,8 @@
    views, standing alone, one after another). Charcoal, warm off-white type in the site's mono, and one
    accent, amber, for the prompt and for what can be run; a view's title alone is in a pixel face. Sizes
    follow the screen: the terminal is the container (the lab's .pc-screen), so a larger monitor reads
-   larger, and like a terminal its lines run the screen's width, to the edge, however wide; on a touch screen the type never drops under 16px (the prompt's field would zoom the page on
-   focus). */
+   larger, and like a terminal its lines run the screen's width, to its edge. On a touch screen the type
+   never drops under 16px (the prompt's field would zoom the page on focus). */
 .term,
 .t-static {
   --t-bg: #171513;
