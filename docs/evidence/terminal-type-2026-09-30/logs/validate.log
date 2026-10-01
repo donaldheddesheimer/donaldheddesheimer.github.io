@@ -1,0 +1,168 @@
+## validate.cjs dist startup
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  startup: in by the flight (fade, fly, read), the startup plays once, then done  {"pc":["fade","fly","read"],"boot":["pending","play","done"],"playedMs":912}
+PASS  startup: the screen shows the two lines and the prompt, nothing else shown (the startup the only view, nothing recalled)  {"text":"New terminal started. Type help to look around. The robots are on break. donald@lab:~$","views":[""],"recall":[]}
+PASS  startup: focus in the prompt (a mouse was used), the title is the terminal's, address /?computer  {"at":"/?computer","pc":"read","full":false,"boot":"done","view":"","views":[""],"note":null,"ps1":"donald@lab:~$","focus":"input","ring":true,"status":"","top":0,"max":0,"winY":0,"title":"Terminal · Donald Heddesheimer","value":"","recall":[],"saved":{"v":2,"boot":true,"recall":[],"view":"","views":{"":{}}}}
+PASS  startup: a modal dialog labelled, the prompt labelled "Command" and described by the startup's hint, a status line  {"modal":true,"label":"Portfolio terminal, on the lab's computer","input":"Command","hint":"Type help to look around. The robots are on break.","status":"status","ps1":"donald@lab:~$","cursor":"term-blink"}
+PASS  startup: the block cursor blinks while the prompt waits  term-blink
+PASS  help: in the startup's place (the one view shown), exactly four commands, about, work, resume, contact, each a button  {"view":"help","views":["","help"],"help":[{"cmd":"about","tag":"BUTTON","label":"A little about me"},{"cmd":"work","tag":"BUTTON","label":"Selected projects"},{"cmd":"resume","tag":"BUTTON","label":"Experience, education, and résumé download"},{"cmd":"contact","tag":"BUTTON","label":"Get in touch"}]}
+PASS  help: announced once in the status line, focus stays in the prompt, the prompt home (~)  {"status":"Commands: about, work, resume, contact.","focus":"input","ps1":"donald@lab:~$"}
+PASS  startup: once a session (coming back, it doesn't play again)  {"pc":["fade","fade","fly","fly","read","read"],"boot":["done"]}
+PASS  startup: the cursor after the first line goes once it's typed (term-gone, at n x 18ms + 110ms), before the startup ends  {"name":"term-gone","delay":"0.488s","n":21,"typed":"term-type","opacityAfter":"0","bootThen":"play"}
+PASS  startup: a key during it ends it at once; the command typed then runs  {"bootAfterKey":"done","view":"help","recall":["help"]}
+# startup: 24 s
+
+10 passed, 0 failed: all passed
+
+## validate.cjs dist commands
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  commands: about shows its view, the one shown, announced ("About me."), the prompt ~/about and ready again  {"view":"about","views":["","about"],"status":"About me.","ps1":"donald@lab:~/about$","focus":"input"}
+PASS  commands: about shown from its start, the prompt at the screen's foot  {"fromTop":true,"prompt":true,"foot":0,"top":0,"max":0}
+PASS  commands: work shows its view, the one shown, announced ("Selected work: 2 featured of 11 projects."), the prompt ~/work and ready again  {"view":"work","views":["","about","work"],"status":"Selected work: 2 featured of 11 projects.","ps1":"donald@lab:~/work$","focus":"input"}
+PASS  commands: work shown from its start, the prompt at the screen's foot  {"fromTop":true,"prompt":true,"foot":0,"top":0,"max":0}
+PASS  commands: resume shows its view, the one shown, announced ("Résumé, with the PDF to download."), the prompt ~/resume and ready again  {"view":"resume","views":["","about","work","resume"],"status":"Résumé, with the PDF to download.","ps1":"donald@lab:~/resume$","focus":"input"}
+PASS  commands: resume shown from its start, the prompt at the screen's foot  {"fromTop":true,"prompt":true,"foot":0,"top":0,"max":472}
+PASS  commands: contact shows its view, the one shown, announced ("Contact: email, GitHub and LinkedIn."), the prompt ~/contact and ready again  {"view":"contact","views":["","about","work","resume","contact"],"status":"Contact: email, GitHub and LinkedIn.","ps1":"donald@lab:~/contact$","focus":"input"}
+PASS  commands: contact shown from its start, the prompt at the screen's foot  {"fromTop":true,"prompt":true,"foot":0,"top":0,"max":0}
+PASS  commands: a view asked for again is the one made before (no second copy of any view), shown as it was left  {"views":["","about","work","resume","contact"],"contactTop":0}
+PASS  commands: about is my name beside the pixel robot (decoration), with work, resume and contact to run next  {"name":"Donald Heddesheimer","bot":true,"next":["work","resume","contact"]}
+PASS  commands: work lists the 2 featured projects, the other 9 folded behind "Show all 11 projects"; each row its name (work <id>, linking to /?computer=work/<id>), a line and its facts  {"featured":["work traffic-ops-center","work cucadence"],"more":9,"label":"Show all 11 projectsShow featured only"}
+PASS  commands: resume the PDF, then Experience, Education, Skills, each role's points and the coursework folded; contact email, GitHub, LinkedIn  {"resume":[["/resume.pdf","Donald-Heddesheimer-Resume.pdf"]],"sections":["Experience","Education","Skills"],"folded":[false,false,false,false,false],"contact":["mailto:donaldheddes@gmail.com","https://github.com/donaldheddesheimer","https://www.linkedin.com/in/donaldheddesheimer/"]}
+PASS  commands: work cucadence shows the project, announced, the prompt ready again; the address /?computer=work/cucadence, the prompt ~/work/cucadence, the title its own  {"view":"work/cucadence","status":"cuCadence.","focus":"input","at":"/?computer=work/cucadence","ps1":"donald@lab:~/work/cucadence$","title":"cuCadence · Terminal · Donald Heddesheimer"}
+PASS  commands: work cucadence shown from its start, the prompt at the foot  {"fromTop":true,"prompt":true,"foot":0,"top":0,"max":314}
+PASS  commands: the project opens on its brief (name, what it does, its facts, its result, my part and the hard part, source), the write-up's sections, figures and numbers folded; related commands; no frame, nothing sideways  {"id":"cucadence","name":"cuCadence","purpose":true,"meta":"C++ / CUDA · Aug 2026 · active","outcome":"3.4 μs per GPU scope","parts":["My part","The hard part"],"actions":[["_blank","noopener"]],"sections":["objective","how-it-works","staying-out-of-the-way","timelines","validation"],"open":0,"folds":8,"ids":0,"code":1,"numbers":true,"related":["work nn-mnist","work fluxion","work claude-status"],"frames":0,"sideways":0}
+PASS  commands: "WORK  CuCadence" (case, spaces) is the view already shown: left be, not made again, the address the same  {"view":"work/cucadence","views":["","about","work","resume","contact","work/cucadence"],"at":"/?computer=work/cucadence"}
+PASS  commands: work nope, said over the prompt: no such project, run work (a command), announced; no guess; the view and the address as they were  {"note":"No project called nope. Run work to list them.","miss":{"run":"work","guess":false},"status":"No project called nope. Run work to list them.","view":"work/cucadence","at":"/?computer=work/cucadence"}
+PASS  commands: work flux guesses work fluxion (a command to run), over the prompt  {"note":"No project called flux. Run work to list them. Did you mean work fluxion?","guess":[["work fluxion","/?computer=work/fluxion"]]}
+PASS  commands: the guess clicked shows fluxion; the line over the prompt gone; focus in the prompt  {"view":"work/fluxion","note":null,"focus":"input"}
+PASS  input: "  WoRk  " (mixed case, spaces) shows work; the address the terminal's again  {"view":"work","at":"/?computer","title":"Terminal · Donald Heddesheimer"}
+PASS  input: an unknown command says exactly the not-found line over the prompt, help to run; the view stays  {"note":"sudo rm -rf /: command not found. Run help for available commands.","status":"sudo rm -rf /: command not found. Run help for available commands.","view":"work"}
+PASS  input: an empty line, and one of spaces, change nothing (no view, nothing recalled), only clearing the line over the prompt  {"view":"work","views":["","about","work","resume","contact","work/cucadence","work/fluxion"],"recall":14,"was":14,"note":null}
+PASS  input: markup typed is said back as text, never parsed or run  {"owned":null,"els":0,"note":"<img src=x onerror=\"window.__owned=1\"><b>bold</b>: command not found. Run help for available commands."}
+PASS  input: a very long line stops at 200 characters, the terminal never scrolls sideways, the cursor stays in the field  {"len":200,"sideways":0,"cursorIn":true}
+PASS  input: run, the long line wraps in the line over the prompt (no sideways scroll)  {"sideways":0,"noteH":108}
+PASS  input: repeated and rapid commands each run once, in order, ending on contact, each view made once  {"recall":["help","help","help","about","contact"],"view":"contact","views":["","about","work","resume","contact","work/cucadence","work/fluxion","help"]}
+PASS  input: Up and Down recall earlier commands (repeats once), and Down again gives back the line being typed  ["contact","about","help","about","contact","draft"]
+PASS  input: the session keeps (lab:terminal:2) what was typed (no blank lines), the view being read, each view's place, and that the startup has played  {"v":2,"boot":true,"view":"contact","n":21,"views":["","about","work","resume","contact","work/cucadence","work/fluxion","help"]}
+PASS  input: no id repeats in the page, however many commands have run  []
+# commands: 19 s
+
+29 passed, 0 failed: all passed
+
+## validate.cjs dist scroll
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  scroll: a project, longer than the screen, is shown from its start, the prompt at the screen's foot  {"fromTop":true,"prompt":true,"foot":0,"top":0,"max":314,"winY":0}
+PASS  scroll: the wheel scrolls the terminal, not the window or the room  {"before":0,"after":314,"winY":0,"lookAz":[0,0]}
+PASS  scroll: left where it's being read, it stays (and typing at the prompt doesn't move it)  {"reading":314,"after":314}
+PASS  scroll: resume, new, from its start  {"fromTop":true,"prompt":true,"foot":0,"top":0,"max":472}
+PASS  scroll: about, which fits, whole, the prompt at the foot under it  {"fromTop":true,"prompt":true,"foot":0,"top":0,"max":0}
+PASS  scroll: the project again: where it was left (not its start), the address its own  {"top":314,"was":314}
+PASS  scroll: resume again: where it was left  {"top":200,"was":200}
+PASS  scroll: what was unfolded in a view (work's full list, a role's points) is as it was, coming back to it  {"work":true,"resume":[true,false,false,false,false]}
+PASS  scroll: each view's place and unfolded disclosures kept in the session  {"":{"y":0},"work/cucadence":{"y":314},"resume":{"y":200,"open":[0]},"about":{"y":0},"work":{"y":0,"open":[0]}}
+# scroll: 17 s
+
+9 passed, 0 failed: all passed
+
+## validate.cjs dist links
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  links: each project's name links to the lab showing it (/?computer=work/<id>), in this tab  11
+PASS  links: a project's name with a modifier opens /?computer=work/<id> in a new tab (the lab, showing it); nothing runs here  {"asked":"http://lab.test/?computer=work/cucadence","opened":true,"view":"work","at":"/?computer"}
+PASS  links: a project's name clicked shows it in the terminal (from its start), address /?computer=work/<id>, the title its own, focus in the prompt, no frame  {"view":"work/cucadence","at":"/?computer=work/cucadence","title":"cuCadence · Terminal · Donald Heddesheimer","focus":"input","v":{"fromTop":true,"prompt":true,"foot":0,"top":0,"max":314},"frames":0}
+PASS  links: source (and demo, where there is one) open in a new tab (noopener), to https addresses  [{"href":"https://github.com/donald-heddesheimer/cadence","target":"_blank","rel":"noopener"}]
+PASS  links: a source link opens its address in a new tab, the computer stays open on the project  https://github.com/donald-heddesheimer/cadence
+PASS  links: a related project's command shows that one in its place (its address, from its start)  {"view":"work/nn-mnist","at":"/?computer=work/nn-mnist","top":0}
+PASS  links: Back goes to the first project, where it was, nothing made again, focus on the related command (no ring)  {"view":"work/cucadence","top":314,"was":314,"focus":"a:work nn-mnist","ring":false,"title":"cuCadence · Terminal · Donald Heddesheimer"}
+PASS  links: a cover folded behind its line unfolds on a click, the picture loaded, described, in the terminal's width  {"open":true,"loaded":true,"alt":"cuCadence report showing per-stage latency distributions, a deadline verdict, and the three slowest iterations broken down by stage","w":732,"sideways":0}
+PASS  links: a write-up section unfolds on its line; its code block scrolls sideways within itself (focusable, for the keyboard), the terminal never does  {"open":true,"heading":"How it works","overflow":"auto","focusable":true,"wide":false,"moved":0,"sideways":0}
+PASS  links: Enter on an empty prompt while reading a project leaves its address and title be  {"was":{"at":"?computer=work/cucadence","title":"cuCadence · Terminal · Donald Heddesheimer"},"now":{"at":"?computer=work/cucadence","title":"cuCadence · Terminal · Donald Heddesheimer"}}
+PASS  links: a folded video's poster loads only once its own figure is opened (not as its section unfolds)  {"early":[],"poster":"/projects/useless-machine.jpg","fetched":["/projects/useless-machine.jpg"]}
+PASS  links: the résumé's PDF, its own action, downloads as Donald-Heddesheimer-Resume.pdf (a real PDF in the build)  {"href":"/resume.pdf","name":"Donald-Heddesheimer-Resume.pdf","text":"↓ Download the PDF","status":200,"bytes":146254,"magic":"%PDF-"}
+PASS  links: email is a mailto: link; GitHub and LinkedIn open in a new tab (noopener), labelled  [{"href":"mailto:donaldheddes@gmail.com","target":"","rel":"","label":null},{"href":"https://github.com/donaldheddesheimer","target":"_blank","rel":"noopener","label":"GitHub: github.com/donaldheddesheimer (opens in a new tab)"},{"href":"https://www.linkedin.com/in/donaldheddesheimer/","target":"_blank","rel":"noopener","label":"LinkedIn: linkedin.com/in/donaldheddesheimer (opens in a new tab)"}]
+PASS  links: LinkedIn opens in a new tab  https://www.linkedin.com/in/donaldheddesheimer/
+PASS  links: copy puts the address on the clipboard, says so  {"clip":"donaldheddes@gmail.com","label":"copied","status":"Copied."}
+PASS  links: copy refused, the address is selected for copying by hand  {"selected":"donaldheddes@gmail.com","label":"selected","status":"Selected, to copy."}
+# links: 17 s
+
+16 passed, 0 failed: all passed
+
+## validate.cjs dist phone
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  phone 390x844: across the window, focus on the terminal (no keyboard raised), type at least 16px  {"full":true,"focus":"terminal","screen":{"x":0,"y":0,"w":390,"h":800,"r":390,"b":800,"shown":true},"fs":16,"touch":"auto"}
+PASS  phone 390x844: the power button in the strip under the screen, in view, clear of the screen  {"power":{"x":340,"y":800,"w":44,"h":44,"r":384,"b":844,"shown":true},"screenBottom":800}
+PASS  phone 390x844: help tapped runs once; focus to its title, not the prompt (no keyboard)  {"view":"help","recall":["help"],"focus":"title:help"}
+PASS  phone 390x844: work tapped runs once, shown from its start, focus on its title  {"view":"work","focus":"title:work","v":{"fromTop":true,"prompt":true,"foot":0,"top":0,"max":0}}
+PASS  phone 390x844: cuCadence tapped shows it, from its start, focus on its title, the address its own  {"view":"work/cucadence","focus":"title:work/cucadence","at":"/?computer=work/cucadence"}
+PASS  phone 390x844: a swipe scrolls the terminal, not the window  {"before":0,"after":303,"winY":0}
+PASS  phone 390x844: a section tapped open; its code block, wider than the phone, scrolls sideways under a finger; the terminal and the window don't  {"wide":true,"left":161,"sideways":0,"tLeft":0,"winX":0}
+PASS  phone 390x844: Back goes to work's list where it was read, nothing made again  {"view":"work","top":0}
+PASS  phone 390x844: with a keyboard up, the terminal fits above it, the prompt in view, the power button gone  {"up":{"kb":true,"focus":true},"screen":{"x":0,"y":0,"w":390,"h":506,"r":390,"b":506,"shown":true},"prompt":{"x":16,"y":454,"w":358,"h":52,"r":374,"b":506,"shown":true},"keyboardTop":506}
+PASS  phone 390x844: typed with the keyboard up, about runs, the prompt still above the keyboard  {"view":"about","prompt":{"x":16,"y":454,"w":358,"h":52,"r":374,"b":506,"shown":true}}
+PASS  phone 390x844: the keyboard down, the power button back  {"x":340,"y":800,"w":44,"h":44,"r":384,"b":844,"shown":true}
+PASS  phone 390x844: the power button tapped leaves for the opening, no ring  {"at":"/?probe","focus":"monitor","ring":false}
+PASS  phone 360x640: across the window, focus on the terminal (no keyboard raised), type at least 16px  {"full":true,"focus":"terminal","screen":{"x":0,"y":0,"w":360,"h":596,"r":360,"b":596,"shown":true},"fs":16,"touch":"auto"}
+PASS  phone 360x640: the power button in the strip under the screen, in view, clear of the screen  {"power":{"x":310,"y":596,"w":44,"h":44,"r":354,"b":640,"shown":true},"screenBottom":596}
+PASS  phone 360x640: help tapped runs once; focus to its title, not the prompt (no keyboard)  {"view":"help","recall":["help"],"focus":"title:help"}
+PASS  phone 360x640: work tapped runs once, shown from its start, focus on its title  {"view":"work","focus":"title:work","v":{"fromTop":true,"prompt":true,"foot":0,"top":0,"max":95}}
+PASS  phone 360x640: cuCadence tapped shows it, from its start, focus on its title, the address its own  {"view":"work/cucadence","focus":"title:work/cucadence","at":"/?computer=work/cucadence"}
+PASS  phone 360x640: a swipe scrolls the terminal, not the window  {"before":0,"after":302,"winY":0}
+PASS  phone 360x640: a section tapped open; its code block, wider than the phone, scrolls sideways under a finger; the terminal and the window don't  {"wide":true,"left":161,"sideways":0,"tLeft":0,"winX":0}
+PASS  phone 360x640: Back goes to work's list where it was read, nothing made again  {"view":"work","top":0}
+PASS  phone 360x640: with a keyboard up, the terminal fits above it, the prompt in view, the power button gone  {"up":{"kb":true,"focus":true},"screen":{"x":0,"y":0,"w":360,"h":384,"r":360,"b":384,"shown":true},"prompt":{"x":16,"y":332,"w":328,"h":52,"r":344,"b":384,"shown":true},"keyboardTop":384}
+PASS  phone 360x640: typed with the keyboard up, about runs, the prompt still above the keyboard  {"view":"about","prompt":{"x":16,"y":332,"w":328,"h":52,"r":344,"b":384,"shown":true}}
+PASS  phone 360x640: the keyboard down, the power button back  {"x":310,"y":596,"w":44,"h":44,"r":354,"b":640,"shown":true}
+PASS  phone 360x640: the power button tapped leaves for the opening, no ring  {"at":"/?probe","focus":"monitor","ring":false}
+PASS  phone 820x1180 (tablet): across the window, focus on the terminal  {"full":true,"focus":"terminal"}
+# phone: 23 s
+
+25 passed, 0 failed: all passed
+
+## validate.cjs dist nojs
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  no JS 1440x900: the monitor links to /computer/, the transcript: help and the four commands, each a section under the command, headed by its view's title  {"at":"/computer/","h1":"Donald Heddesheimer: the portfolio's terminal","sections":["help:help","about:about","work:work","resume:resume","contact:contact"],"titles":["help:Commands","about:Donald Heddesheimer","work:Selected work","resume:Résumé","contact:Contact"],"cmds":["#about","#contact","#help","#resume","#work"],"buttons":0,"projects":["/computer/work/traffic-ops-center/","/computer/work/cucadence/","/computer/work/fluxion/","/computer/work/claude-status/","/computer/work/nn-mnist/","/computer/work/skyblock-bazaar/","/computer/work/bytefight/","/computer/work/travelmate/","/computer/work/smart-bin/","/computer/work/swerve-drive/","/computer/work/useless-machine/"],"more":false,"back":"/","robots":"noindex","canonical":"https://donaldheddesheimer.github.io/computer/","sideways":0}
+PASS  no JS 1440x900: commands link to their place, projects' names to their transcripts (/computer/work/<id>/, the rest folded, opening without script), no buttons, a way back, out of search, no sideways scroll  {"at":"/computer/","h1":"Donald Heddesheimer: the portfolio's terminal","sections":["help:help","about:about","work:work","resume:resume","contact:contact"],"titles":["help:Commands","about:Donald Heddesheimer","work:Selected work","resume:Résumé","contact:Contact"],"cmds":["#about","#contact","#help","#resume","#work"],"buttons":0,"projects":11,"more":false,"back":"/","robots":"noindex","canonical":"https://donaldheddesheimer.github.io/computer/","sideways":0}
+PASS  no JS 1440x900: "Show all 11 projects" opens without script  true
+PASS  no JS 390x844: the monitor links to /computer/, the transcript: help and the four commands, each a section under the command, headed by its view's title  {"at":"/computer/","h1":"Donald Heddesheimer: the portfolio's terminal","sections":["help:help","about:about","work:work","resume:resume","contact:contact"],"titles":["help:Commands","about:Donald Heddesheimer","work:Selected work","resume:Résumé","contact:Contact"],"cmds":["#about","#contact","#help","#resume","#work"],"buttons":0,"projects":["/computer/work/traffic-ops-center/","/computer/work/cucadence/","/computer/work/fluxion/","/computer/work/claude-status/","/computer/work/nn-mnist/","/computer/work/skyblock-bazaar/","/computer/work/bytefight/","/computer/work/travelmate/","/computer/work/smart-bin/","/computer/work/swerve-drive/","/computer/work/useless-machine/"],"more":false,"back":"/","robots":"noindex","canonical":"https://donaldheddesheimer.github.io/computer/","sideways":0}
+PASS  no JS 390x844: commands link to their place, projects' names to their transcripts (/computer/work/<id>/, the rest folded, opening without script), no buttons, a way back, out of search, no sideways scroll  {"at":"/computer/","h1":"Donald Heddesheimer: the portfolio's terminal","sections":["help:help","about:about","work:work","resume:resume","contact:contact"],"titles":["help:Commands","about:Donald Heddesheimer","work:Selected work","resume:Résumé","contact:Contact"],"cmds":["#about","#contact","#help","#resume","#work"],"buttons":0,"projects":11,"more":false,"back":"/","robots":"noindex","canonical":"https://donaldheddesheimer.github.io/computer/","sideways":0}
+PASS  no JS 390x844: "Show all 11 projects" opens without script  true
+PASS  no JS: /computer/about/ forwards to /computer/#about  /computer/#about
+PASS  no JS 1440x900: /computer/work/cucadence/ shows work cucadence as a page, at its anchor's section line; related work and work link to pages; no buttons or frames; canonical its case study; no sideways scroll  {"at":"/computer/work/cucadence/#how-it-works","title":"cuCadence · Terminal · Donald Heddesheimer","echo":"work cucadence","name":"cuCadence","atHeading":true,"sectionOpen":false,"sections":6,"figs":2,"code":"auto","related":[["work nn-mnist","/computer/work/nn-mnist/"],["work fluxion","/computer/work/fluxion/"],["work claude-status","/computer/work/claude-status/"]],"list":"/computer/#work","source":"https://github.com/donald-heddesheimer/cadence","buttons":0,"frames":0,"back":"/","robots":"noindex","canonical":"https://donaldheddesheimer.github.io/projects/cucadence/","sideways":0}
+NOTE  no JS 1440x900: #how-it-works lands on its section's line, folded (a click opens it)
+PASS  no JS 1440x900: /projects/cucadence/, the case study, still stands on its own  {"h1":"cuCadence","sideways":0}
+PASS  no JS 390x844: /computer/work/cucadence/ shows work cucadence as a page, at its anchor's section line; related work and work link to pages; no buttons or frames; canonical its case study; no sideways scroll  {"at":"/computer/work/cucadence/#how-it-works","title":"cuCadence · Terminal · Donald Heddesheimer","echo":"work cucadence","name":"cuCadence","atHeading":true,"sectionOpen":false,"sections":6,"figs":2,"code":"auto","related":[["work nn-mnist","/computer/work/nn-mnist/"],["work fluxion","/computer/work/fluxion/"],["work claude-status","/computer/work/claude-status/"]],"list":"/computer/#work","source":"https://github.com/donald-heddesheimer/cadence","buttons":0,"frames":0,"back":"/","robots":"noindex","canonical":"https://donaldheddesheimer.github.io/projects/cucadence/","sideways":0}
+NOTE  no JS 390x844: #how-it-works lands on its section's line, folded (a click opens it)
+PASS  no JS 390x844: /projects/cucadence/, the case study, still stands on its own  {"h1":"cuCadence","sideways":0}
+# nojs: 9 s
+
+11 passed, 0 failed: all passed
+
+## validate.cjs dist fit
+# Chrome 154.0.8037.58, darwin 25.5.0, Apple M5 Pro; WebGL: ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)
+PASS  fit 1440x900: on the monitor, help shown, the screen in view, no power button, the prompt in the screen, nothing sideways  {"fs":16.94,"screen":[115,72,1210,756],"inView":true,"prompt":true,"power":false,"noPower":true,"sideways":0,"outer":0,"full":false,"view":"help"}
+PASS  fit 1440x900: contact and work typed, each shown with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width)  {"contact":{"view":"contact","sideways":0,"fieldCh":70,"mailLines":1,"across":0.88,"linkH":[22,36,22,22],"fs":16.94},"work":{"view":"work","sideways":0,"linkH":[24,24,27,24,24,24,24,24,24,24,24,24]}}
+PASS  fit 1920x1080: on the monitor, help shown, the screen in view, no power button, the prompt in the screen, nothing sideways  {"fs":17,"screen":[157,38,1607,1004],"inView":true,"prompt":true,"power":false,"noPower":true,"sideways":0,"outer":0,"full":false,"view":"help"}
+PASS  fit 1920x1080: contact and work typed, each shown with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width)  {"contact":{"view":"contact","sideways":0,"fieldCh":70,"mailLines":1,"across":0.88,"linkH":[22,36,22,22],"fs":17},"work":{"view":"work","sideways":0,"linkH":[25,25,27,25,25,25,25,25,25,25,25,25]}}
+PASS  fit 1280x800: on the monitor, help shown, the screen in view, no power button, the prompt in the screen, nothing sideways  {"fs":15.05,"screen":[103,64,1075,672],"inView":true,"prompt":true,"power":false,"noPower":true,"sideways":0,"outer":0,"full":false,"view":"help"}
+PASS  fit 1280x800: contact and work typed, each shown with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width)  {"contact":{"view":"contact","sideways":0,"fieldCh":70,"mailLines":1,"across":0.88,"linkH":[20,32,20,20],"fs":15.05},"work":{"view":"work","sideways":0,"linkH":[21,21,24,21,21,21,21,21,21,21,21,21]}}
+PASS  fit 1024x768: on the monitor, help shown, the screen in view, no power button, the prompt in the screen, nothing sideways  {"fs":13,"screen":[82,115,860,538],"inView":true,"prompt":true,"power":false,"noPower":true,"sideways":0,"outer":0,"full":false,"view":"help"}
+PASS  fit 1024x768: contact and work typed, each shown with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width)  {"contact":{"view":"contact","sideways":0,"fieldCh":70,"mailLines":1,"across":0.88,"linkH":[17,27,17,17],"fs":13},"work":{"view":"work","sideways":0,"linkH":[19,19,21,19,19,19,19,19,19,19,19,19]}}
+PASS  fit 1180x820: on the monitor, help shown, the screen in view and the power button, the prompt in the screen, nothing sideways  {"fs":16,"screen":[95,101,991,619],"inView":true,"prompt":true,"power":true,"noPower":false,"sideways":0,"outer":0,"full":false,"view":"help"}
+PASS  fit 1180x820: the power button's box under the screen (not over it), its icon on the bezel, a finger's reach of 44px  {"screenBottom":720,"box":[1026,721,36,36],"icon":[12,27],"bezel":26,"reach":44,"off":true,"onBezel":true,"hit":true}
+PASS  fit 1180x820: contact and work tapped and typed, each shown with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width), links 30px or more tall  {"contact":{"view":"contact","sideways":0,"fieldCh":70,"mailLines":1,"across":0.88,"linkH":[32,34,32,32],"fs":16},"work":{"view":"work","sideways":0,"linkH":[36,36,37,36,36,36,36,36,36,36,36,36]}}
+PASS  fit 1280x800-text200: on the monitor, help shown, the screen in view, no power button, the prompt in the screen, nothing sideways  {"fs":26,"screen":[103,64,1075,672],"inView":true,"prompt":true,"power":false,"noPower":true,"sideways":0,"outer":0,"full":false,"view":"help"}
+PASS  fit 1280x800-text200: contact and work typed, each shown with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width)  {"contact":{"view":"contact","sideways":0,"fieldCh":42.8,"mailLines":1,"across":0.83,"linkH":[35,55,35,35],"fs":26},"work":{"view":"work","sideways":0,"linkH":[37,37,42,37,37,37,37,37,37,37,37,37]}}
+PASS  fit 390x844: across the window, help shown, the screen in view and the power button, the prompt in the screen, nothing sideways  {"fs":16,"screen":[0,0,390,800],"inView":true,"prompt":true,"power":true,"noPower":false,"sideways":0,"outer":0,"full":true,"view":"help"}
+PASS  fit 390x844: contact and work tapped and typed, each shown with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width), links 30px or more tall  {"contact":{"view":"contact","sideways":0,"fieldCh":15.3,"mailLines":1,"across":0.71,"linkH":[32,34,58,58],"fs":16},"work":{"view":"work","sideways":0,"linkH":[36,36,37,36,36,36,36,36,36,36,36,36]}}
+PASS  fit 390x844-text200: across the window, help shown, the screen in view and the power button, the prompt in the screen, nothing sideways  {"fs":32,"screen":[0,0,390,756],"inView":true,"prompt":true,"power":true,"noPower":false,"sideways":0,"outer":0,"full":true,"view":"help"}
+PASS  fit 390x844-text200: contact and work tapped and typed, each shown with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width), links 30px or more tall  {"contact":{"view":"contact","sideways":0,"fieldCh":17,"mailLines":2,"across":1,"linkH":[117,67,117,168],"fs":32},"work":{"view":"work","sideways":0,"linkH":[171,122,125,73,122,221,171,73,122,73,122,122]}}
+FAIL  fit 360x640-text200: entered and checked  page.waitForFunction: Timeout 20000ms exceeded.
+PASS  fit 1024x400: across the window, help shown, the screen in view, no power button, the prompt in the screen, nothing sideways  {"fs":14.336,"screen":[0,0,1024,400],"inView":true,"prompt":true,"power":false,"noPower":true,"sideways":0,"outer":0,"full":true,"view":"help"}
+PASS  fit 1024x400: contact and work typed, each shown with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width)  {"contact":{"view":"contact","sideways":0,"fieldCh":70,"mailLines":1,"across":0.88,"linkH":[19,30,19,19],"fs":14.336},"work":{"view":"work","sideways":0,"linkH":[20,20,23,20,20,20,20,20,20,20,20,20]}}
+PASS  fit 740x360: across the window, help shown, the screen in view and the power button, the prompt in the screen, nothing sideways  {"fs":16,"screen":[0,0,740,316],"inView":true,"prompt":true,"power":true,"noPower":false,"sideways":0,"outer":0,"full":true,"view":"help"}
+PASS  fit 740x360: contact and work tapped and typed, each shown with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width), links 30px or more tall  {"contact":{"view":"contact","sideways":0,"fieldCh":50.5,"mailLines":1,"across":0.85,"linkH":[32,34,32,32],"fs":16},"work":{"view":"work","sideways":0,"linkH":[36,36,37,36,36,36,36,36,36,36,36,36]}}
+PASS  fit 568x320-text150: across the window, help shown, the screen in view and the power button, the prompt in the screen, nothing sideways  {"fs":24,"screen":[0,0,568,254],"inView":true,"prompt":true,"power":true,"noPower":false,"sideways":0,"outer":0,"full":true,"view":"help"}
+PASS  fit 568x320-text150: contact and work tapped and typed, each shown with nothing sideways, the prompt's field at least 7 characters, the email on one line (or across the width), links 30px or more tall  {"contact":{"view":"contact","sideways":0,"fieldCh":14.1,"mailLines":1,"across":0.7,"linkH":[48,50,86,86],"fs":24},"work":{"view":"work","sideways":0,"linkH":[55,55,55,55,55,55,55,55,55,55,55,55]}}
+# fit: 60 s
+
+23 passed, 1 failed
+

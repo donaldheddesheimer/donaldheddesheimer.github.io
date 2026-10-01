@@ -2,7 +2,7 @@
 
 ## Current checkpoint: the terminal overhaul, 2026-09-30 (Claude)
 
-**Status: implementation complete on `terminal-overhaul`, from `main` at `5ff4489` (PR #9 merged).** Committed locally for review; not pushed, merged or deployed. The terminal is now an application rather than an endless transcript. It shows one view at a time over a prompt that keeps to the screen's foot, has a compact Work index, a project reader that folds its detail away, and a small pixel robot on About. The room, camera, robots, welding, screensaver, monitor entrance and the startup that invites `help` are unchanged. Nothing opens by itself, and help still lists About, Work, Resume and Contact.
+**Status: implementation complete on `terminal-overhaul`, from `main` at `5ff4489` (PR #9 merged).** Pushed for review as PR #10; not merged or deployed. The terminal is now an application rather than an endless transcript. It shows one view at a time over a prompt that keeps to the screen's foot, has a compact Work index, a project reader that folds its detail away, and a small pixel robot on About. The room, camera, robots, welding, screensaver, monitor entrance and the startup that invites `help` are unchanged. Nothing opens by itself, and help still lists About, Work, Resume and Contact.
 
 - **Commits, in order** (each builds on its own):
   1. `70eb36e` Make terminal commands navigate a current reading view.
@@ -10,7 +10,8 @@
   3. `aa05e36` Give terminal projects concise openings and progressive detail.
   4. `b95dfdc` Unify terminal typography and section presentation.
   5. `7b3ca72` Keep a double-clicked command's focus and phone prompt in hand (found by the checks below).
-  6. The one that records the overhaul: the rewritten checks, the evidence and this section.
+  6. `4018349` Record the terminal overhaul and focused regression checks.
+  7. The type pass asked for in PR #10's review (below).
 - **The state model** (`terminal.ts`, "The views"):
   - A view is one of `''` (the startup), `help`, `about`, `work`, `resume`, `contact` or `work/<id>`. Each is mounted once, from its `<template data-term-out>`, the first time it's asked for, as a `[data-view]` in `[data-term-views]`. Only the current one is shown.
   - Asking for another view keeps the old one's scroll position, hides it and shows the new one where it was left (from its start the first time), with its disclosures as they were. Asking for the view already shown leaves it where it is. With motion on, a view fades in over 160 ms; with reduced motion or Motion off, it doesn't.
@@ -27,7 +28,8 @@
   - **About** opens on my name, with a small pixel robot drawn from a character grid (hidden from screen readers). Then come the headline, school and city, the two profile paragraphs, what I'm doing now, and links to work, resume and contact.
   - **Resume** puts the PDF first, then each role on one line with its dates. What I did in each role, and the coursework, are folded.
   - **Contact** puts its note in the heading, so the email, copy button and profiles follow the title.
-  - **Type:** larger titles, a 70-column measure for prose, and small capitals for section labels. A dashed line divides the view from the prompt.
+  - **Type** (after the review's pass): two faces. The site's mono (JetBrains Mono) stays for the terminal itself: the prompt, where a view is, commands, row numbers, metadata, results, section labels, code and tables. What's read is in its sans (Inter, as `--t-read`): view and project titles (2.125em, weight 650), project names in work, purposes, prose, My part and The hard part's text, About's role, Resume's role lines and points, and the write-up's section headings (1.125em, weight 600, beside the mono `+`/`-`). Prose is 1.65 line-height on a 38em measure. Metadata is smaller (0.8125–0.9375em) and dim, so titles and names lead. Labels ("My part") stay mono, as in the mockup. Inline code in prose is mono at 0.9em. A dashed line divides the view from the prompt.
+- **The type pass** (PR #10's review: "a small font/hierarchy pass—not a redesign"): only `terminal.css`. Besides the type above, the heading reset in a view (`font: inherit` on h3–h6) now has zero specificity, so a heading's class sets its type; before, it quietly undid work's bold project names. Evidence in `docs/evidence/terminal-type-2026-09-30/`: `before/` (the overhaul's `shots.cjs` at `4018349`) and `after/`, the same 14 stills; `compare/`, six side-by-side sheets from `harness/compare.cjs` (work, work with all shown, a project folded and opened at 1440×900 on the monitor's screen, work and a project at 390×844); `logs/`. The build and tsc are clean. `validate.cjs` groups startup 10, commands 29, scroll 9, links 16, phone 25, nojs 11 and fit 23 pass; fit's one FAIL is the known 360×640 at 200% text, as before.
 - **What to judge:** `docs/evidence/terminal-overhaul-2026-09-30/`:
   - `screens/`, at 1440×900 on the monitor with a mouse:
     - the startup, help, and work, compact and with all eleven shown;
